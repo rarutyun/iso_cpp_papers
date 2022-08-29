@@ -1,0 +1,152 @@
+<pre class='metadata'>
+Title: C++17 parallel algorithms and P2300
+Shortname: P2500
+Level: 0
+Status: P
+Group: wg21
+URL: 
+Editor: Ruslan Arutyunyan, sfdevilnn@gmail.com
+Markup Shorthands: markdown yes
+Abstract: This paper provides the facilities to integrate [[P2300R5]] with C++17 parallel algorithms
+</pre>
+
+# Motivation # {#motivation}
+
+C++17 parallel algorithms, together with executions policies, were a good initial start for parallel computation in C++ standard.
+However they don't have explicit way to specify what hardware the algorithm should use to be executed on.
+
+In C++ standard we have execution policies that represent "how" the particular algorithm should be executed, in other words,
+they provide the semantical guarantees for the user callable objects passed to parallel algorithms. Without having other facilities in the
+C++ standard library execution policies tend to be used to combine both semantics of "how" and "where" the code should be executed.
+
+[[P2300R5]] introduces ``scheduler`` concept that represents the execution context it is tied to.
+It's more flexible abstraction comparing with using the execution policies for answering "where" the code
+should be executed because ``scheduler`` is tightly connected to the hardware it sends work to.
+
+Since [[P2300R5]] is targeted to C++26 we also should answer the question how the rest of C++ standard library
+would interoperate with the schedulers/senders/receiver mechanism.
+
+P2500 is targeted to C++26 and is intended to answer the question how C++17 parallel algorithms support [[P2300R5]] facilities.
+
+# Proposed API # {#proposed_api}
+
+## ``execution_policy`` concept ## {#exec_concept}
+
+The execution policy is optional if we want to constraint ``s.get_policy()`` method.
+
+```cpp
+// optional if we want to constraint get_policy() method for policy_aware_scheduler
+template <typename ExecutionPolicy>
+concept execution_policy = std::is_execution_policy_v<std::remove_cvref_t<ExecutionPolicy>>;
+```
+
+For the constraints on parallel algorithms ``requires``-clause can be used.
+
+## ``policy_aware_scheduler`` concept ## {#policy_aware_scheduler_concept}
+
+``policy_aware_scheduler`` is a special entity for parallel algorithms that represents ``scheduler`` and
+``execution_policy``. It allows to get execution policy type and object parallel algorithm was called with.
+
+```cpp
+template <typename S>
+concept policy_aware_scheduler = scheduler<S> && requires (S s) {
+    typename S::policy_type;
+    { s.get_policy() } -> execution_policy; // requires to allow specialization 
+                                            // of execution_policy on the user side
+                                            // Also might require to make policy copy constructible
+};
+```
+
+With determining "known" scheduler type the existing implementations of parallel algorithms may be redirected
+to the corresponding overload with ``ExecutionPolicy`` template parameter by getting all necessary information from
+``policy_aware_scheduler``.
+
+## ``execute_on`` CPO ## {#execute_on_cpo}
+
+``execute_on`` is the customization point that is required to tie ``scheduler`` and ``execution_policy``.
+It doesn't have the default implementation and should be customized for the particular scheduler.
+
+The guidance for the customization is the following:
+
+If ``scheduler`` can work with the passed execution policy it returns ``policy_aware_scheduler``. Otherwise,
+the program is ill-formed.
+
+It's up to ``scheduler`` customization to check if it can work with the passed execution policy.
+
+```cpp
+struct __execute_on {
+    policy_aware_scheduler auto operator()(scheduler auto sched,
+                                           execution_policy auto policy) const
+    {
+        return std::tag_invoke(*this, sched, policy);
+    }
+};
+
+inline constexpr __execute_on execute_on;
+```
+
+It’s supposed to use the same customization point mechanism as [[P2300R5]] does (currently ``std::tag_invoke``).
+
+### Open question ### {#execute_on_open_question}
+
+What if the ``scheduler`` is used in entry point to the binary as a polymorphic (or type erased) ``scheduler``?
+
+## Parallel algorithms CPO ## {#parallel_algorithms_cpo}
+
+Using ``std::for_each`` as a reference the proposed API for parallel algorithms is the following:
+
+```cpp
+struct __for_each
+{
+    template <std::policy_aware_scheduler Scheduler, typename It, typename Callable>
+    void operator()(Scheduler s, It b, It e, Callable c) const
+    {
+        if constexpr (std::tag_invocable<__for_each, Scheduler, It, It, Callable>)
+        {
+            std::tag_invoke(*this, s, b, e, c);
+        }
+        else
+        {
+            // default implementation
+        }
+    }
+};
+
+inline constexpr __for_each for_each;
+```
+
+It's supposed to use the same customization point mechanism as [[P2300R5]] does (currently ``std::tag_invoke``).
+
+The implementation should check if the algorithm is customized and prefer the customization to call, otherwise
+the default generic implementation is called.
+
+### Why ``scheduler``? ### {#sched_for_parallel_algorithms}
+
+The algorithms should accept the ``scheduler`` to be able to get as many senders as they need to be able to build
+a dependency chain and sync wait on it.
+
+For example for numeric algorithms like scan family we anticipate several dependent parallel stages within the implementation.
+
+### Alternative API ### {#alternative_parallel_algorithms}
+
+Alternative API might look like having both ``scheduler`` and ``execution_policy`` as a function parameters.
+
+```cpp
+struct __for_each
+{
+    template <std::policy_aware_scheduler Scheduler, std::execution_policy ExecutionPolicy,
+              typename It, typename Callable>
+    void operator()(Scheduler s, ExecutionPolicy policy, It b, It e, Callable c) const
+};
+
+inline constexpr __for_each for_each;
+```
+
+However (IMHO), it complicates the API and still requires ``scheduler`` to check if it can work with passed execution policy object
+but on later stage (after resolving the algorithm call) and requires either something like ``execute_on`` underneath or direct API
+from scheduler (or execution policy) for that kind of checking.
+
+# Further exploration # {#further_work}
+
+The author is planning to explore how to specify the set of basic functions (named "parallel backend") the rest of parallel algorithms can be expressed with.
+It might be a separate paper based on the analysis.
