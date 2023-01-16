@@ -1,0 +1,363 @@
+<pre class='metadata'>
+Title: get_element customization point object
+Shortname: P2769
+Date: 2022-01-13
+Level: 0
+Status: P
+Group: wg21
+URL: 
+Editor: Ruslan Arutyunyan, Intel, ruslan.arutyunyan@intel.com
+        Alexey Kukanov, Intel, alexey.kukanov@intel.com
+Markup Shorthands: markdown yes
+Abstract: This paper introduces a CPO to read from tuple like objects, which can be used as projection for <code>std::ranges</code> algorithms.
+</pre>
+
+# Motivation # {#motivation}
+
+## Motivating use-case ## {#motivating_use_case}
+
+Having `std::pair`, `std::tuple` and other *Tuple-Like* objects as the value types for the algorithms
+creates a plenty of opportunities. With special views (like `std::ranges::elements_view`) we can even
+iterate over such collections with specifying necessary elements (e.g., keys or values). However,
+we cannot (easily) use a predicate to make a decision based on (for example) keys.
+
+Let's consider the following example:
+
+```cpp
+std::vector<std::tuple<int, int>> v{{3,1},{2,4},{1,7}};
+std::ranges::sort(v, [](auto x, auto y)
+{
+    return std::get<0>(x) < std::get<0>(y); // key-based sorting
+});
+```
+As we can see users should do some extra syntax to spell (comparing with what is described
+in [[#desired_approach]]) to achieve the necessary goal. The example above can be considered
+as simplified because in real world example users might need to think about adding references
+to lambda signature to avoid copying.
+
+The code above can be rewritten with *structured binding*:
+
+```cpp
+std::vector<std::tuple<int, int>> v{{3,1},{2,4},{1,7}};
+std::ranges::sort(v, [](auto x, auto y)
+{
+    auto [key1, value1] = x;
+    auto [key2, value2] = y;
+    return key1 < key2; // key-based sorting
+});
+```
+
+Though one could say that it makes code simpler or at least more readable, on the other hand,
+its syntax forces the programmer to give names to otherwise unneeded variables, which is often
+considered a bad practice.
+
+## Projections-based alternative ## {#projection_alternative}
+
+Projections provide another option to achieve the same behavior:
+
+```cpp
+std::ranges::sort(v, std::less{}, [](auto x)
+{
+    return std::get<0>(x); // key-based sorting
+});
+```
+
+A variant that properly handles references would use a generic lambda:
+
+```
+[](auto&& x) -> auto&&
+{
+    return std::get<0>(std::forward<decltype(x)>(x)); // key-based sorting
+}
+```
+
+While this code achieves the desired result, it requires more syntactic boilerplate
+(lambda, forwarding etc.) than the useful code.
+
+## The desired approach ## {#desired_approach}
+
+The nicest way to get what we want would be:
+```cpp
+// The code that does not work because std::get is not fully instantiated
+std::ranges::sort(v, std::less{}, std::get<0>);
+```
+
+But it doesn't work because `std::get` is a function template, and one cannot pass function
+templates as arguments without instantiating them.
+
+## Why not `std::ranges::views::elements` ## {#not_views_elements}
+
+The necessary result cannot be achieved with `std::ranges::views::elements`, which
+would apply the filter for all operations on the input data, including element swap
+(for sort algorithm), while we need it to be only be applied for the comparator.
+
+<table>
+    <tr>
+        <th>std::ranges::views::elements</th>
+        <th>Desired behavior</th>
+    </tr>
+
+    <tr>
+        <td>
+            <pre>
+                std::vector&lt;std::tuple&lt;int, int&gt;&gt; v{{3,1},{2,4},{1,7}};
+                // views::keys is an alias to views::elements
+                std::ranges::sort(v | std::ranges::views::keys, [](auto x, auto y)
+                {
+                    return x < y;
+                });
+
+                for (auto& x : v)
+                {
+                    auto [key, val] = x;
+                    std::cout << "Key = " << key << ", Value = " << val << std::endl;
+                }
+                
+                // Output (only keys are sorted):
+                // Key = 1, Value = 1
+                // Key = 2, Value = 4
+                // Key = 3, Value = 7
+            </pre>
+        </td>
+        <td>
+            <pre>
+                std::vector&lt;std::tuple&lt;int, int&gt;&gt; v{{3,1},{2,4},{1,7}};
+                std::ranges::sort(v, [](auto x, auto y)
+                {
+                    return std::get<0>(x) &lt; std::get<0>(y); // key-based sorting
+                });
+
+                for (auto& x : v)
+                {
+                    auto [key, val] = x;
+                    std::cout << "Key = " << key << ", Value = " << val << std::endl;
+                }
+
+                // Output (values are sorted based on keys):
+                // Key = 1, Value = 7
+                // Key = 2, Value = 4
+                // Key = 3, Value = 1
+            </pre>
+        </td>
+    </tr>
+</table>
+
+With `std::ranges::zip_view` appearance in the standard the easy use of projection for *TupleLike*
+objects might become even more important because its dereferenceable type
+is exactly *TupleLike*.
+
+## Radix sort use-case ## {#radix_sort}
+
+Counting-based sorts, and Radix Sort in particular, provide another motivating use case.
+Today it is not possible to have a C++ standard conformant implementation that uses
+Radix Sort algorithm underneath because the complexity of `std::sort` is defined as
+the number of comparator calls, while counting-based sorts do not use a comparator at all.
+
+However, the industry needs Radix Sort for performance reasons. Implementations of C++ standard
+parallel algorithms, such as oneAPI Data Parallel C++ Library (oneDPL) and CUDA Thrust, use Radix Sort
+conditionally under the hood of `std::sort`, checking data types of the input and the comparator.
+In this case, a special comparator is of no help to sort values by keys, and projections seem the only viable option.
+
+In that case the proposed API becomes wider applicable than just with C++ standard library
+use-cases.
+
+# Proposed API # {#proposed_api}
+
+We propose the following API:
+
+```cpp
+namespace ranges {
+    inline namespace /* unspecified */ {
+        template <size_t I>
+        inline constexpr /* unspecified */ get_element = /* unspecified */;
+    }
+    inline constexpr auto get_key = get_element<0>;
+    inline constexpr auto get_value = get_element<1>;
+}
+```
+
+With that API the motivating use-case code with the desired behavior would be:
+
+```cpp
+std::vector<std::tuple<int, int>> v{{3,1},{2,4},{1,7}};
+std::ranges::sort(v, std::less{}, std::ranges::get_element<0>);
+```
+
+or even
+
+```cpp
+std::vector<std::tuple<int, int>> v{{3,1},{2,4},{1,7}};
+std::ranges::sort(v, std::less{}, std::ranges::get_key);
+```
+
+Let's look at Tony Tables:
+
+Comparison of proposed API with comparator-based version
+
+<table>
+    <tr>
+        <th>Before</th>
+        <th>After</th>
+    </tr>
+
+    <tr>
+        <td>
+            <pre>
+                std::vector&lt;std::tuple&lt;int, int&gt;&gt; v{{3,1},{2,4},{1,7}};
+                std::ranges::sort(v, [](auto x, auto y)
+                {
+                    return std::get<0>(x) &lt; std::get<0>(y); // key-based sorting
+                });
+            </pre>
+        </td>
+        <td>
+            <pre>
+                std::vector&lt;std::tuple&lt;int, int&gt;&gt; v{{3,1},{2,4},{1,7}};
+                std::ranges::sort(v, std::less{}, std::ranges::get_key);
+            </pre>
+        </td>
+    </tr>
+</table>
+
+Comparison of proposed API with projections-based version
+
+<table>
+    <tr>
+        <th>Before</th>
+        <th>After</th>
+    </tr>
+    <tr>
+        <td>
+            <pre>
+                std::vector&lt;std::tuple&lt;int, int&gt;&gt; v{{3,1},{2,4},{1,7}};
+                std::ranges::sort(v, std::less{}, [](auto x)
+                {
+                    return std::get<0>(x); // key-based sorting
+                });
+            </pre>
+        </td>
+        <td>
+            <pre>
+                std::vector&lt;std::tuple&lt;int, int&gt;&gt; v{{3,1},{2,4},{1,7}};
+                std::ranges::sort(v, std::less{}, std::ranges::get_key);
+            </pre>
+        </td>
+    </tr>
+</table>
+
+## Possible implementation ## {#possible_implementation}
+
+```cpp
+namespace std
+{
+namespace ranges
+{
+namespace __detail
+{
+template <std::size_t _Ip>
+struct __get_element_fn
+{
+    template <typename _TupleLike>
+    decltype(auto) operator()(_TupleLike&& __tuple_like) const
+    {
+        return get<_Ip>(std::forward<_TupleLike>(__tuple_like));
+    }
+};
+} // namespace __detail
+
+inline namespace __get_element_namespace
+{
+template <std::size_t _Ip>
+inline constexpr __detail::__get_element_fn<_Ip> get_element;
+} // inline namespace __get_element_namespace
+
+inline constexpr auto get_key = get_element<0>;
+inline constexpr auto get_value = get_element<1>;
+} // namespace ranges
+} // namespace std
+```
+
+# Design considerations # {#design_decisions}
+
+We would actually prefer to use the `std::ranges::get` name instead of the proposed one. Unfortunately,
+this name is already taken for overloads for `std::ranges::subrange`.
+
+Potentially `std::ranges::get` could be repurposed for the proposed CPO with minimal API break
+for tricky scenarios only while still working as expected in existing reasonable use cases, as explained below.
+But we (likely) could not avoid an ABI break.
+
+## What could be done to use `std::ranges::get` name ## {#potential_change}
+
+In all major standard library implementations (GCC, LLVM, Microsoft) the `get` overload for
+`std::ranges::subrange` is defined in `std::ranges`. Adding another definition of `get` to
+the same namespace would obviously create name ambiguity.
+
+However, library implementors could move both `std::ranges::get` and `std::ranges::subrange` to some implementation specific
+namespace (e.g., `detail`). That way `std::ranges::get` can still be found by ADL for
+`std::ranges::subrange`. At the same time, one could then use `std::ranges::get` name for a CPO that could
+successfully find the necessary overload for `std::ranges::get`, including the case when the argument
+is a `std::ranges::subrange`.
+
+Please see the example that explains the idea and shows how it might look like:
+
+```cpp
+namespace std::ranges
+{
+// Moving std::ranges::subrange and std::ranges::get to __detail namespace
+namespace __detail
+{
+    // Pseudo subrange
+    template <typename T>
+    struct subrange {};
+
+    template <std::size_t _Ip, typename T> 
+    auto get(subrange<T>);
+}
+// Make the std::ranges::subrange name accessible from std::ranges namespace
+using __detail::subrange;
+}
+
+// Possible implementation of std::ranges::get CPO
+namespace std
+{
+namespace ranges
+{
+namespace __detail
+{
+template <std::size_t _Ip>
+struct __get_fn
+{
+    template <typename _TupleLike>
+    decltype(auto) operator()(_TupleLike&& __tuple_like) const
+    {
+        return get<_Ip>(std::forward<_TupleLike>(__tuple_like));
+    }
+};
+} // namespace __detail
+
+inline namespace __get_fn_namespace
+{
+template <std::size_t _Ip>
+inline constexpr __detail::__get_fn<_Ip> get;
+} // inline namespace __get_fn_namespace
+} // namespace ranges
+using ranges::__detail::get;
+} // namespace std
+```
+
+With such an implementation, three major use-cases continue working: `std::ranges::get<0>(sub_r)`,
+`std::get<0>(sub_r)` and `get<0>(sub_r)` - where `sub_r` is `std::ranges::subrange` object.
+
+Definitely that would break the ABI because the fully qualified names become
+different comparing with what we have right now. For more tricky scenarios
+(e.g., explicit template instantiation of `std::ranges::get`) the API is also broken.
+Since the `std::ranges::subrange` API is relatively new, perhaps only a small amount
+of users would be affected but it can not be predicted accurately.
+
+We would like to hear the opinion of the audience whether going with the `std::ranges::get` name
+is worth introducing potential inconvenience for some C++ users.
+
+# Further steps # {#further_steps}
+
+- Add wording
+- Add a feature test macro if necessary
