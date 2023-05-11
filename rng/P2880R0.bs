@@ -1,19 +1,23 @@
 <pre class='metadata'>
 Title: Algorithm-like vs std::simd based vectorized RNG API
-Shortname: DXXXX
+Shortname: P2880
 Level: 0
-Status: D
+Status: P
 Group: wg21
-Editor: somebody
+Editor: Ilya Burylov, <burylov@gmail.com>
+        Ruslan Arutyunyan, Intel, <ruslan.arutyunyan@intel.com>
+        Andrey Nikolaev, <af.nikolaev@gmail.com>
+        Alina Elizarova, Intel, <alina.elizarova@intel.com>
+        Pavel Dyakov, Intel, <pavel.dyakov@intel.com>
 Audience: LEWG
-URL: http://wg21.link/whatever
+URL: http://wg21.link/P2880R0
 Abstract: The paper compares the approaches of high-level (algorithm-like) vector API for random
           number generation (RNG) vs low-level (<code>std::simd</code> based) one.
 Markup Shorthands: markdown yes
 </pre>
 
 # Introduction # {#intro}
-There is a [[P1068R6]] paper on the flight, which discusses a higher level API to enable
+There is a [[P1068R7]] paper on the flight, which discusses a higher level API to enable
 (RNG) in batches. The main purpose of the new API is to enable vectorization under the hood
 in the implementation. Given some of us live in anticipation of final ``std::simd`` [[P1928R3]]
 standardization, a natural questions arise:
@@ -51,14 +55,14 @@ Production code is tending to be more complicated: there can be more than one ra
 per computational block with potentially different distributions, random number paths may need to be
 correlated, etc. but the "European option pricing" benchmark is good enough show different approaches.
 
-## High-level API with [[P1068R6]] ## {#high_level_api}
+## High-level API with [[P1068R7]] ## {#high_level_api}
 
 Let's consider the straightforward example 
 
 ```cpp
 std::mt19937 engine(777);
 std::normal_distribution distribution(0., 1.);
-std::array<double, npath> rand; //e.g., npath=100,000
+std::array<double, npath> rand; //e.g., npath=1,000,000
 
 std::ranges::generate_random(rand, engine, distribution);
 
@@ -354,6 +358,23 @@ With the analysis of RNG API for support of vectorization, we conclude that:
 Based on those observations having both high- and low-level vectorized API for RNG in the C++ standard
 library looks reasonable. 
 
-
-
-
+<pre class=biblio>
+{
+    "P1068R7": {
+        "authors": [
+            "Ilya Burylov",
+            "Ruslan Arutyunyan",
+            "Andrey Nikolaev",
+            "Alina Elizarova",
+            "Pavel Dyakov"
+        ],
+        "href": "http://wg21.link/P1068R7",
+        "title": "Vector API for random number generation",
+        "Date": "May 2023",
+        "publisher": "Ilya Burylov",
+        "deliveredBy": [
+            "http://wg21.link/P1068R7"
+        ]
+    }
+}
+</pre>

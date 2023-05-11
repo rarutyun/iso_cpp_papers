@@ -2,7 +2,7 @@
  <head>
   <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
   <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
-  <title>DXXXXR0: Algorithm-like vs std::simd based vectorized RNG API</title>
+  <title>P2880R0: Algorithm-like vs std::simd based vectorized RNG API</title>
 <style data-fill-with="stylesheet">/******************************************************************************
  *                   Style sheet for the W3C specifications                   *
  *
@@ -1560,10 +1560,10 @@ Possible extra rowspan handling
     blockquote c-[vi] { color: inherit; } /* Name.Variable.Instance */
     blockquote c-[il] { color: inherit; } /* Literal.Number.Integer.Long */
   </style>
-  <meta content="Bikeshed version bf22245b8, updated Tue Apr 18 15:53:37 2023 -0700" name="generator">
-  <link href="http://wg21.link/whatever" rel="canonical">
+  <meta content="Bikeshed version 3383f409d, updated Fri Apr 28 15:49:22 2023 -0700" name="generator">
+  <link href="http://wg21.link/P2880R0" rel="canonical">
   <link href="https://isocpp.org/favicon.ico" rel="icon">
-  <meta content="a0c7f8c09565d902a9f01026f4cefc26e34f6f22" name="document-revision">
+  <meta content="a81be74c71a951d9a895beb0f7da73b0292cc137" name="document-revision">
 <style>/* style-autolinks */
 .css.css, .property.property, .descriptor.descriptor {
     color: var(--a-normal-text);
@@ -2091,14 +2091,18 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
  <body class="h-entry">
   <div class="head">
    <p data-fill-with="logo"></p>
-   <h1 class="p-name no-ref" id="title">DXXXXR0<br>Algorithm-like vs std::simd based vectorized RNG API</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">Draft Proposal, <time class="dt-updated" datetime="2023-05-08">2023-05-08</time></span></h2>
+   <h1 class="p-name no-ref" id="title">P2880R0<br>Algorithm-like vs std::simd based vectorized RNG API</h1>
+   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">Published Proposal, <time class="dt-updated" datetime="2023-05-11">2023-05-11</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
-     <dd><a class="u-url" href="http://wg21.link/whatever">http://wg21.link/whatever</a>
-     <dt class="editor">Author:
-     <dd class="editor p-author h-card vcard"><span class="p-name fn">somebody</span>
+     <dd><a class="u-url" href="http://wg21.link/P2880R0">http://wg21.link/P2880R0</a>
+     <dt class="editor">Authors:
+     <dd class="editor p-author h-card vcard"><a class="p-name fn u-email email" href="mailto:<burylov@gmail.com>">Ilya Burylov</a>
+     <dd class="editor p-author h-card vcard"><a class="p-name fn u-email email" href="mailto:<ruslan.arutyunyan@intel.com>">Ruslan Arutyunyan</a> (<span class="p-org org">Intel</span>)
+     <dd class="editor p-author h-card vcard"><a class="p-name fn u-email email" href="mailto:<af.nikolaev@gmail.com>">Andrey Nikolaev</a>
+     <dd class="editor p-author h-card vcard"><a class="p-name fn u-email email" href="mailto:<alina.elizarova@intel.com>">Alina Elizarova</a> (<span class="p-org org">Intel</span>)
+     <dd class="editor p-author h-card vcard"><a class="p-name fn u-email email" href="mailto:<pavel.dyakov@intel.com>">Pavel Dyakov</a> (<span class="p-org org">Intel</span>)
      <dt>Audience:
      <dd>LEWG
      <dt>Project:
@@ -2121,7 +2125,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
     <li>
      <a href="#example"><span class="secno">2</span> <span class="content">Example</span></a>
      <ol class="toc">
-      <li><a href="#high_level_api"><span class="secno">2.1</span> <span class="content">High-level API with <span title="Vector API for random number generation">[P1068R6]</span></span></a>
+      <li><a href="#high_level_api"><span class="secno">2.1</span> <span class="content">High-level API with <span title="Vector API for random number generation">[P1068R7]</span></span></a>
       <li>
        <a href="#simd_level_api"><span class="secno">2.2</span> <span class="content">Low-level API with <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>simd</c-></code></span></a>
        <ol class="toc">
@@ -2141,7 +2145,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   </nav>
   <main>
    <h2 class="heading settled" data-level="1" id="intro"><span class="secno">1. </span><span class="content">Introduction</span><a class="self-link" href="#intro"></a></h2>
-    There is a <a data-link-type="biblio" href="#biblio-p1068r6" title="Vector API for random number generation">[P1068R6]</a> paper on the flight, which discusses a higher level API to enable
+    There is a <a data-link-type="biblio" href="#biblio-p1068r7" title="Vector API for random number generation">[P1068R7]</a> paper on the flight, which discusses a higher level API to enable
 (RNG) in batches. The main purpose of the new API is to enable vectorization under the hood
 in the implementation. Given some of us live in anticipation of final <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>simd</c-></code> <a data-link-type="biblio" href="#biblio-p1928r3" title="Merge data-parallel types from the Parallelism TS 2">[P1928R3]</a> standardization, a natural questions arise: 
    <ul>
@@ -2174,11 +2178,11 @@ estimation of the price: many random numbers will be consumed with a handful of 
 Production code is tending to be more complicated: there can be more than one random number
 per computational block with potentially different distributions, random number paths may need to be
 correlated, etc. but the "European option pricing" benchmark is good enough show different approaches.</p>
-   <h3 class="heading settled" data-level="2.1" id="high_level_api"><span class="secno">2.1. </span><span class="content">High-level API with <a data-link-type="biblio" href="#biblio-p1068r6" title="Vector API for random number generation">[P1068R6]</a></span><a class="self-link" href="#high_level_api"></a></h3>
+   <h3 class="heading settled" data-level="2.1" id="high_level_api"><span class="secno">2.1. </span><span class="content">High-level API with <a data-link-type="biblio" href="#biblio-p1068r7" title="Vector API for random number generation">[P1068R7]</a></span><a class="self-link" href="#high_level_api"></a></h3>
    <p>Let’s consider the straightforward example</p>
 <pre class="language-cpp highlight"><c- n>std</c-><c- o>::</c-><c- n>mt19937</c-> <c- nf>engine</c-><c- p>(</c-><c- mi>777</c-><c- p>);</c->
 <c- n>std</c-><c- o>::</c-><c- n>normal_distribution</c-> <c- nf>distribution</c-><c- p>(</c-><c- mf>0.</c-><c- p>,</c-> <c- mf>1.</c-><c- p>);</c->
-<c- n>std</c-><c- o>::</c-><c- n>array</c-><c- o>&lt;</c-><c- b>double</c-><c- p>,</c-> <c- n>npath</c-><c- o>></c-> <c- n>rand</c-><c- p>;</c-> <c- c1>//e.g., npath=100,000</c->
+<c- n>std</c-><c- o>::</c-><c- n>array</c-><c- o>&lt;</c-><c- b>double</c-><c- p>,</c-> <c- n>npath</c-><c- o>></c-> <c- n>rand</c-><c- p>;</c-> <c- c1>//e.g., npath=1,000,000</c->
 
 <c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>generate_random</c-><c- p>(</c-><c- n>rand</c-><c- p>,</c-> <c- n>engine</c-><c- p>,</c-> <c- n>distribution</c-><c- p>);</c->
 
@@ -2565,8 +2569,8 @@ library looks reasonable.</p>
   <h2 class="no-num no-ref heading settled" id="references"><span class="content">References</span><a class="self-link" href="#references"></a></h2>
   <h3 class="no-num no-ref heading settled" id="informative"><span class="content">Informative References</span><a class="self-link" href="#informative"></a></h3>
   <dl>
-   <dt id="biblio-p1068r6">[P1068R6]
-   <dd>Ilya Burylov, Pavel Dyakov, Ruslan Arutyunyan, Andrey Nikolaev, Alina Elizarova. <a href="https://wg21.link/p1068r6"><cite>Vector API for random number generation</cite></a>. 14 October 2022. URL: <a href="https://wg21.link/p1068r6">https://wg21.link/p1068r6</a>
+   <dt id="biblio-p1068r7">[P1068R7]
+   <dd>Ilya Burylov; et al. <a href="http://wg21.link/P1068R7"><cite>Vector API for random number generation</cite></a>. URL: <a href="http://wg21.link/P1068R7">http://wg21.link/P1068R7</a>
    <dt id="biblio-p1928r3">[P1928R3]
    <dd>Matthias Kretz. <a href="https://wg21.link/p1928r3"><cite>Merge data-parallel types from the Parallelism TS 2</cite></a>. 3 February 2023. URL: <a href="https://wg21.link/p1928r3">https://wg21.link/p1928r3</a>
   </dl>
