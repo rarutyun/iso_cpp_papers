@@ -2,7 +2,7 @@
  <head>
   <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
   <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
-  <title>P2769R0: get_element customization point object</title>
+  <title>P2769R1: get_element customization point object</title>
 <style data-fill-with="stylesheet">/******************************************************************************
  *                   Style sheet for the W3C specifications                   *
  *
@@ -1560,11 +1560,22 @@ Possible extra rowspan handling
     blockquote c-[vi] { color: inherit; } /* Name.Variable.Instance */
     blockquote c-[il] { color: inherit; } /* Literal.Number.Integer.Long */
   </style>
-  <meta content="Bikeshed version 26e85e599, updated Thu Dec 8 15:29:31 2022 -0800" name="generator">
+  <meta content="Bikeshed version 3383f409d, updated Fri Apr 28 15:49:22 2023 -0700" name="generator">
+  <link href="https://wg21.link/P2769R1" rel="canonical">
   <link href="https://isocpp.org/favicon.ico" rel="icon">
-  <meta content="f002bebf97b0aae053866ad1de953c724ffa79ca" name="document-revision">
-<style>/* style-autolinks */
+  <meta content="186a1cd59d2bdf95a2fec594e5330fe8937a3f0d" name="document-revision">
+<style>
+ins, ins * {
+    background-color: rgb(200, 250, 200);
+    color: rgb(0, 136, 0);
+    text-decoration: none;
+}
 
+span, span * {
+    white-space: pre;
+}
+</style>
+<style>/* style-autolinks */
 .css.css, .property.property, .descriptor.descriptor {
     color: var(--a-normal-text);
     font-size: inherit;
@@ -1624,7 +1635,8 @@ pre .property::before, pre .property::after {
 
 [data-link-type=biblio] {
     white-space: pre;
-}</style>
+}
+</style>
 <style>/* style-colors */
 
 /* Any --*-text not paired with a --*-bg is assumed to have a transparent bg */
@@ -1733,9 +1745,9 @@ pre .property::before, pre .property::after {
     --outdated-shadow: red;
 
     --editedrec-bg: darkorange;
-}</style>
+}
+</style>
 <style>/* style-counters */
-
 body {
     counter-reset: example figure issue;
 }
@@ -1762,9 +1774,9 @@ figcaption {
 }
 figcaption:not(.no-marker)::before {
     content: "Figure " counter(figure) " ";
-}</style>
+}
+</style>
 <style>/* style-issues */
-
 a[href].issue-return {
     float: right;
     float: inline-end;
@@ -1774,7 +1786,6 @@ a[href].issue-return {
 }
 </style>
 <style>/* style-md-lists */
-
 /* This is a weird hack for me not yet following the commonmark spec
    regarding paragraph and lists. */
 [data-md] > :first-child {
@@ -1782,7 +1793,8 @@ a[href].issue-return {
 }
 [data-md] > :last-child {
     margin-bottom: 0;
-}</style>
+}
+</style>
 <style>/* style-selflinks */
 
 :root {
@@ -2015,6 +2027,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
        which is quite common in practice... */
     img { background: white; }
 }
+
 @media (prefers-color-scheme: dark) {
     :root {
         --selflink-text: black;
@@ -2089,13 +2102,17 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
  <body class="h-entry">
   <div class="head">
    <p data-fill-with="logo"></p>
-   <h1 class="p-name no-ref" id="title">P2769R0<br>get_element customization point object</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">Published Proposal, <time class="dt-updated" datetime="2022-01-13">2022-01-13</time></span></h2>
+   <h1 class="p-name no-ref" id="title">P2769R1<br>get_element customization point object</h1>
+   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">Published Proposal, <time class="dt-updated" datetime="2023-05-18">2023-05-18</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
+     <dt>This version:
+     <dd><a class="u-url" href="https://wg21.link/P2769R1">https://wg21.link/P2769R1</a>
      <dt class="editor">Authors:
      <dd class="editor p-author h-card vcard"><a class="p-name fn u-email email" href="mailto:ruslan.arutyunyan@intel.com">Ruslan Arutyunyan</a> (<span class="p-org org">Intel</span>)
      <dd class="editor p-author h-card vcard"><a class="p-name fn u-email email" href="mailto:alexey.kukanov@intel.com">Alexey Kukanov</a> (<span class="p-org org">Intel</span>)
+     <dt>Audience:
+     <dd>SG9, LEWG
      <dt>Project:
      <dd>ISO/IEC JTC1/SC22/WG21 14882: Programming Language — C++
     </dl>
@@ -2113,11 +2130,12 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
     <li>
      <a href="#motivation"><span class="secno">1</span> <span class="content">Motivation</span></a>
      <ol class="toc">
-      <li><a href="#motivating_use_case"><span class="secno">1.1</span> <span class="content">Motivating use-case</span></a>
+      <li><a href="#motivating_use_case"><span class="secno">1.1</span> <span class="content">Motivating use case</span></a>
       <li><a href="#projection_alternative"><span class="secno">1.2</span> <span class="content">Projections-based alternative</span></a>
       <li><a href="#desired_approach"><span class="secno">1.3</span> <span class="content">The desired approach</span></a>
       <li><a href="#not_views_elements"><span class="secno">1.4</span> <span class="content">Why not <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>views</c-><c- o>::</c-><c- n>elements</c-></code></span></a>
-      <li><a href="#radix_sort"><span class="secno">1.5</span> <span class="content">Radix sort use-case</span></a>
+      <li><a href="#usefulness_with_zip_view"><span class="secno">1.5</span> <span class="content">Usefulness with <code class="highlight"><c- n>zip_view</c-></code></span></a>
+      <li><a href="#radix_sort"><span class="secno">1.6</span> <span class="content">Radix sort use case</span></a>
      </ol>
     <li>
      <a href="#proposed_api"><span class="secno">2</span> <span class="content">Proposed API</span></a>
@@ -2127,52 +2145,102 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
     <li>
      <a href="#design_decisions"><span class="secno">3</span> <span class="content">Design considerations</span></a>
      <ol class="toc">
-      <li><a href="#potential_change"><span class="secno">3.1</span> <span class="content">What could be done to use <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>get</c-></code> name</span></a>
+      <li><a href="#std_ranges_get_name"><span class="secno">3.1</span> <span class="content">What could be done to use <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>get</c-></code> name</span></a>
      </ol>
-    <li><a href="#further_steps"><span class="secno">4</span> <span class="content">Further steps</span></a>
+    <li>
+     <a href="#tuple_like_concept"><span class="secno">4</span> <span class="content"><em>tuple-like</em> concept</span></a>
+     <ol class="toc">
+      <li><a href="#tuple_like_with_get_element"><span class="secno">4.1</span> <span class="content"><em>tuple-like</em> concept generalization with <code class="highlight"><c- n>get_element</c-></code></span></a>
+      <li><a href="#tuple_like_with_structured_binding"><span class="secno">4.2</span> <span class="content"><em>tuple-like</em> concept generalization with structured binding</span></a>
+     </ol>
+    <li>
+     <a href="#other_papers_connections"><span class="secno">5</span> <span class="content">Connections with other papers</span></a>
+     <ol class="toc">
+      <li><a href="#p2547_connection"><span class="secno">5.1</span> <span class="content">Connection with <span title="Language support for customisable functions">[P2547R1]</span></span></a>
+      <li><a href="#p2141_connection"><span class="secno">5.2</span> <span class="content">Connection with <span title="Aggregates are named tuples">[P2141R1]</span></span></a>
+     </ol>
+    <li>
+     <a href="#wording"><span class="secno">6</span> <span class="content">Formal wording</span></a>
+     <ol class="toc">
+      <li><a href="#wording_tuple_syn"><span class="secno">6.1</span> <span class="content">Modify Header <code class="highlight"><c- o>&lt;</c-><c- n>tuple</c-><c- o>></c-></code> synopsis <span>[<strong>tuple.syn</strong>] </span></span></a>
+      <li><a href="#wording_tuple_sections"><span class="secno">6.2</span> <span class="content">Add the following sections into <span>[<strong>tuple</strong>]</span></span></a>
+      <li><a href="#wording_tuple_get_elem"><span class="secno">6.3</span> <span class="content">Add the following wording into [<strong>tuple.cust.get_elem</strong>]</span></a>
+      <li><a href="#wording_feature_macro"><span class="secno">6.4</span> <span class="content">Add feature test macro to the end of <span>[<strong>version.syn</strong>]</span></span></a>
+     </ol>
+    <li>
+     <a href="#revision_history"><span class="secno">7</span> <span class="content">Revision history</span></a>
+     <ol class="toc">
+      <li><a href="#r0_r1"><span class="secno">7.1</span> <span class="content">R0 => R1</span></a>
+     </ol>
+    <li>
+     <a href="#polls"><span class="secno">8</span> <span class="content">Polls</span></a>
+     <ol class="toc">
+      <li><a href="#sg9_issaquah_2023"><span class="secno">8.1</span> <span class="content">SG9 polls, Issaquah 2023</span></a>
+     </ol>
+    <li><a href="#acknowledgements"><span class="secno">9</span> <span class="content">Acknowledgements</span></a>
+    <li>
+     <a href="#references"><span class="secno"></span> <span class="content">References</span></a>
+     <ol class="toc">
+      <li><a href="#informative"><span class="secno"></span> <span class="content">Informative References</span></a>
+     </ol>
    </ol>
   </nav>
   <main>
    <h2 class="heading settled" data-level="1" id="motivation"><span class="secno">1. </span><span class="content">Motivation</span><a class="self-link" href="#motivation"></a></h2>
-   <h3 class="heading settled" data-level="1.1" id="motivating_use_case"><span class="secno">1.1. </span><span class="content">Motivating use-case</span><a class="self-link" href="#motivating_use_case"></a></h3>
+   <h3 class="heading settled" data-level="1.1" id="motivating_use_case"><span class="secno">1.1. </span><span class="content">Motivating use case</span><a class="self-link" href="#motivating_use_case"></a></h3>
    <p>Having <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>pair</c-></code>, <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>tuple</c-></code> and other <em>Tuple-Like</em> objects as the value types for the algorithms
-creates a plenty of opportunities. With special views (like <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>elements_view</c-></code>) we can even
-iterate over such collections with specifying necessary elements (e.g., keys or values). However,
-we cannot (easily) use a predicate to make a decision based on (for example) keys.</p>
+creates a plenty of opportunities. With special views, such as <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>elements_view</c-></code>, we can
+specify which tuple elements to access when iterating over collections of such objects. However,
+we cannot easily use a predicate to make a decision based on only some of tuple elements, for example keys or values.</p>
    <p>Let’s consider the following example:</p>
 <pre class="language-cpp highlight"><c- n>std</c-><c- o>::</c-><c- n>vector</c-><c- o>&lt;</c-><c- n>std</c-><c- o>::</c-><c- n>tuple</c-><c- o>&lt;</c-><c- b>int</c-><c- p>,</c-> <c- b>int</c-><c- o>>></c-> <c- n>v</c-><c- p>{{</c-><c- mi>3</c-><c- p>,</c-><c- mi>1</c-><c- p>},{</c-><c- mi>2</c-><c- p>,</c-><c- mi>4</c-><c- p>},{</c-><c- mi>1</c-><c- p>,</c-><c- mi>7</c-><c- p>}};</c->
 <c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>sort</c-><c- p>(</c-><c- n>v</c-><c- p>,</c-> <c- p>[](</c-><c- k>auto</c-> <c- n>x</c-><c- p>,</c-> <c- k>auto</c-> <c- n>y</c-><c- p>)</c->
 <c- p>{</c->
-    <c- k>return</c-> <c- n>std</c-><c- o>::</c-><c- n>get</c-><c- o>&lt;</c-><c- mi>0</c-><c- o>></c-><c- p>(</c-><c- n>x</c-><c- p>)</c-> <c- o>&lt;</c-> <c- n>std</c-><c- o>::</c-><c- n>get</c-><c- o>&lt;</c-><c- mi>0</c-><c- o>></c-><c- p>(</c-><c- n>y</c-><c- p>);</c-> <c- c1>// key-based sorting</c->
+    <c- c1>// key-based sorting</c->
+    <c- k>return</c-> <c- n>std</c-><c- o>::</c-><c- n>get</c-><c- o>&lt;</c-><c- mi>0</c-><c- o>></c-><c- p>(</c-><c- n>x</c-><c- p>)</c-> <c- o>&lt;</c-> <c- n>std</c-><c- o>::</c-><c- n>get</c-><c- o>&lt;</c-><c- mi>0</c-><c- o>></c-><c- p>(</c-><c- n>y</c-><c- p>);</c->
 <c- p>});</c->
 </pre>
-   As we can see users should do some extra syntax to spell (comparing with what is described
-in <a href="#desired_approach">§ 1.3 The desired approach</a>) to achieve the necessary goal. The example above can be considered
-as simplified because in real world example users might need to think about adding references
-to lambda signature to avoid copying. 
+   <p>As we can see, users should spell some extra syntax out to achieve the necessary goal,
+comparing to what is described in <a href="#desired_approach">§ 1.3 The desired approach</a>. The example above can be considered
+simplified; in real practice users might also need to think of e.g. adding references
+to lambda parameters to avoid copying.</p>
    <p>The code above can be rewritten with <em>structured binding</em>:</p>
 <pre class="language-cpp highlight"><c- n>std</c-><c- o>::</c-><c- n>vector</c-><c- o>&lt;</c-><c- n>std</c-><c- o>::</c-><c- n>tuple</c-><c- o>&lt;</c-><c- b>int</c-><c- p>,</c-> <c- b>int</c-><c- o>>></c-> <c- n>v</c-><c- p>{{</c-><c- mi>3</c-><c- p>,</c-><c- mi>1</c-><c- p>},{</c-><c- mi>2</c-><c- p>,</c-><c- mi>4</c-><c- p>},{</c-><c- mi>1</c-><c- p>,</c-><c- mi>7</c-><c- p>}};</c->
 <c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>sort</c-><c- p>(</c-><c- n>v</c-><c- p>,</c-> <c- p>[](</c-><c- k>auto</c-> <c- n>x</c-><c- p>,</c-> <c- k>auto</c-> <c- n>y</c-><c- p>)</c->
 <c- p>{</c->
+    <c- c1>// key-based sorting</c->
     <c- k>auto</c-> <c- p>[</c-><c- n>key1</c-><c- p>,</c-> <c- n>value1</c-><c- p>]</c-> <c- o>=</c-> <c- n>x</c-><c- p>;</c->
     <c- k>auto</c-> <c- p>[</c-><c- n>key2</c-><c- p>,</c-> <c- n>value2</c-><c- p>]</c-> <c- o>=</c-> <c- n>y</c-><c- p>;</c->
-    <c- k>return</c-> <c- n>key1</c-> <c- o>&lt;</c-> <c- n>key2</c-><c- p>;</c-> <c- c1>// key-based sorting</c->
+    <c- k>return</c-> <c- n>key1</c-> <c- o>&lt;</c-> <c- n>key2</c-><c- p>;</c->
 <c- p>});</c->
 </pre>
    <p>Though one could say that it makes code simpler or at least more readable, on the other hand,
 its syntax forces the programmer to give names to otherwise unneeded variables, which is often
 considered a bad practice.</p>
+   <p>With <a data-link-type="biblio" href="#biblio-p2169r3" title="A Nice Placeholder With No Name">[P2169R3]</a> the situation with unused variables for structured binding becomes better but
+still might require the user to write a quite amount of underscores depending on the use case:</p>
+<pre class="language-cpp highlight"><c- n>std</c-><c- o>::</c-><c- n>vector</c-><c- o>&lt;</c-><c- n>std</c-><c- o>::</c-><c- n>tuple</c-><c- o>&lt;</c-><c- b>int</c-><c- p>,</c-> <c- b>int</c-><c- p>,</c-> <c- b>int</c-><c- p>,</c-> <c- b>int</c-><c- o>>></c-> <c- n>v</c-><c- p>{{</c-><c- mi>3</c-><c- p>,</c-><c- mi>1</c-><c- p>,</c-><c- mi>1</c-><c- p>,</c-><c- mi>1</c-><c- p>},{</c-><c- mi>2</c-><c- p>,</c-><c- mi>4</c-><c- p>,</c-><c- mi>4</c-><c- p>,</c-><c- mi>4</c-><c- p>},{</c-><c- mi>1</c-><c- p>,</c-><c- mi>7</c-><c- p>,</c-><c- mi>7</c-><c- p>,</c-><c- mi>7</c-><c- p>}};</c->
+<c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>sort</c-><c- p>(</c-><c- n>v</c-><c- p>,</c-> <c- p>[](</c-><c- k>auto</c-> <c- n>x</c-><c- p>,</c-> <c- k>auto</c-> <c- n>y</c-><c- p>)</c->
+<c- p>{</c->
+    <c- c1>// key-based sorting</c->
+    <c- k>auto</c-> <c- p>[</c-><c- n>key1</c-><c- p>,</c-> <c- n>_</c-><c- p>,</c-> <c- n>_</c-><c- p>,</c-> <c- n>_</c-><c- p>]</c-> <c- o>=</c-> <c- n>x</c-><c- p>;</c->
+    <c- k>auto</c-> <c- p>[</c-><c- n>key2</c-><c- p>,</c-> <c- n>_</c-><c- p>,</c-> <c- n>_</c-><c- p>,</c-> <c- n>_</c-><c- p>]</c-> <c- o>=</c-> <c- n>y</c-><c- p>;</c->
+    <c- k>return</c-> <c- n>key1</c-> <c- o>&lt;</c-> <c- n>key2</c-><c- p>;</c->
+<c- p>});</c->
+</pre>
    <h3 class="heading settled" data-level="1.2" id="projection_alternative"><span class="secno">1.2. </span><span class="content">Projections-based alternative</span><a class="self-link" href="#projection_alternative"></a></h3>
    <p>Projections provide another option to achieve the same behavior:</p>
 <pre class="language-cpp highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>sort</c-><c- p>(</c-><c- n>v</c-><c- p>,</c-> <c- n>std</c-><c- o>::</c-><c- n>less</c-><c- p>{},</c-> <c- p>[](</c-><c- k>auto</c-> <c- n>x</c-><c- p>)</c->
 <c- p>{</c->
-    <c- k>return</c-> <c- n>std</c-><c- o>::</c-><c- n>get</c-><c- o>&lt;</c-><c- mi>0</c-><c- o>></c-><c- p>(</c-><c- n>x</c-><c- p>);</c-> <c- c1>// key-based sorting</c->
+    <c- c1>// key-based sorting</c->
+    <c- k>return</c-> <c- n>std</c-><c- o>::</c-><c- n>get</c-><c- o>&lt;</c-><c- mi>0</c-><c- o>></c-><c- p>(</c-><c- n>x</c-><c- p>);</c->
 <c- p>});</c->
 </pre>
    <p>A variant that properly handles references would use a generic lambda:</p>
 <pre class="highlight"><c- p>[](</c-><c- k>auto</c-><c- o>&amp;&amp;</c-> <c- n>x</c-><c- p>)</c-> <c- o>-></c-> <c- k>auto</c-><c- o>&amp;&amp;</c->
 <c- p>{</c->
-    <c- k>return</c-> <c- n>std</c-><c- o>::</c-><c- n>get</c-><c- o>&lt;</c-><c- mi>0</c-><c- o>></c-><c- p>(</c-><c- n>std</c-><c- o>::</c-><c- n>forward</c-><c- o>&lt;</c-><c- k>decltype</c-><c- p>(</c-><c- n>x</c-><c- p>)</c-><c- o>></c-><c- p>(</c-><c- n>x</c-><c- p>));</c-> <c- c1>// key-based sorting</c->
+    <c- c1>// key-based sorting</c->
+    <c- k>return</c-> <c- n>std</c-><c- o>::</c-><c- n>get</c-><c- o>&lt;</c-><c- mi>0</c-><c- o>></c-><c- p>(</c-><c- n>std</c-><c- o>::</c-><c- n>forward</c-><c- o>&lt;</c-><c- k>decltype</c-><c- p>(</c-><c- n>x</c-><c- p>)</c-><c- o>></c-><c- p>(</c-><c- n>x</c-><c- p>));</c->
 <c- p>}</c->
 </pre>
    <p>While this code achieves the desired result, it requires more syntactic boilerplate
@@ -2215,6 +2283,7 @@ would apply the filter for all operations on the input data, including element s
 </pre>
       <td>
 <pre class="highlight"><c- n>std</c-><c- o>::</c-><c- n>vector</c-><c- o>&lt;</c-><c- n>std</c-><c- o>::</c-><c- n>tuple</c-><c- o>&lt;</c-><c- b>int</c-><c- p>,</c-> <c- b>int</c-><c- o>>></c-> <c- n>v</c-><c- p>{{</c-><c- mi>3</c-><c- p>,</c-><c- mi>1</c-><c- p>},{</c-><c- mi>2</c-><c- p>,</c-><c- mi>4</c-><c- p>},{</c-><c- mi>1</c-><c- p>,</c-><c- mi>7</c-><c- p>}};</c->
+
 <c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>sort</c-><c- p>(</c-><c- n>v</c-><c- p>,</c-> <c- p>[](</c-><c- k>auto</c-> <c- n>x</c-><c- p>,</c-> <c- k>auto</c-> <c- n>y</c-><c- p>)</c->
 <c- p>{</c->
     <c- k>return</c-> <c- n>std</c-><c- o>::</c-><c- n>get</c-><c- o>&lt;</c-><c- mi>0</c-><c- o>></c-><c- p>(</c-><c- n>x</c-><c- p>)</c-> <c- o>&lt;</c-> <c- n>std</c-><c- o>::</c-><c- n>get</c-><c- o>&lt;</c-><c- mi>0</c-><c- o>></c-><c- p>(</c-><c- n>y</c-><c- p>);</c-> <c- c1>// key-based sorting</c->
@@ -2232,9 +2301,10 @@ would apply the filter for all operations on the input data, including element s
 <c- c1>// Key = 3, Value = 1</c->
 </pre>
    </table>
-   <p>With <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>zip_view</c-></code> appearance in the standard the easy use of projection for <em>TupleLike</em> objects might become even more important because its dereferenceable type
-is exactly <em>TupleLike</em>.</p>
-   <h3 class="heading settled" data-level="1.5" id="radix_sort"><span class="secno">1.5. </span><span class="content">Radix sort use-case</span><a class="self-link" href="#radix_sort"></a></h3>
+   <h3 class="heading settled" data-level="1.5" id="usefulness_with_zip_view"><span class="secno">1.5. </span><span class="content">Usefulness with <code class="highlight"><c- n>zip_view</c-></code></span><a class="self-link" href="#usefulness_with_zip_view"></a></h3>
+   <p>With <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>zip_view</c-></code> appearance in the standard the easy use of projection for <em>Tuple-Like</em> objects might become even more important because its dereferenceable type
+is exactly <em>Tuple-Like</em>.</p>
+   <h3 class="heading settled" data-level="1.6" id="radix_sort"><span class="secno">1.6. </span><span class="content">Radix sort use case</span><a class="self-link" href="#radix_sort"></a></h3>
    <p>Counting-based sorts, and Radix Sort in particular, provide another motivating use case.
 Today it is not possible to have a C++ standard conformant implementation that uses
 Radix Sort algorithm underneath because the complexity of <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>sort</c-></code> is defined as
@@ -2243,28 +2313,26 @@ the number of comparator calls, while counting-based sorts do not use a comparat
 parallel algorithms, such as oneAPI Data Parallel C++ Library (oneDPL) and CUDA Thrust, use Radix Sort
 conditionally under the hood of <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>sort</c-></code>, checking data types of the input and the comparator.
 In this case, a special comparator is of no help to sort values by keys, and projections seem the only viable option.</p>
-   <p>In that case the proposed API becomes wider applicable than just with C++ standard library
-use-cases.</p>
+   <p>That makes the proposed API applicable wider than just with the C++ standard library use cases.</p>
    <h2 class="heading settled" data-level="2" id="proposed_api"><span class="secno">2. </span><span class="content">Proposed API</span><a class="self-link" href="#proposed_api"></a></h2>
    <p>We propose the following API:</p>
-<pre class="language-cpp highlight"><c- k>namespace</c-> <c- nn>ranges</c-> <c- p>{</c->
-    <c- kr>inline</c-> <c- k>namespace</c-> <c- d>/* unspecified */</c-> <c- p>{</c->
-        <c- k>template</c-> <c- o>&lt;</c-><c- b>size_t</c-> <c- n>I</c-><c- o>></c->
-        <c- kr>inline</c-> <c- k>constexpr</c-> <c- d>/* unspecified */</c-> <c- n>get_element</c-> <c- o>=</c-> <c- d>/* unspecified */</c-><c- p>;</c->
-    <c- p>}</c->
-    <c- kr>inline</c-> <c- k>constexpr</c-> <c- k>auto</c-> <c- n>get_key</c-> <c- o>=</c-> <c- n>get_element</c-><c- o>&lt;</c-><c- mi>0</c-><c- o>></c-><c- p>;</c->
-    <c- kr>inline</c-> <c- k>constexpr</c-> <c- k>auto</c-> <c- n>get_value</c-> <c- o>=</c-> <c- n>get_element</c-><c- o>&lt;</c-><c- mi>1</c-><c- o>></c-><c- p>;</c->
+<pre class="language-cpp highlight"><c- kr>inline</c-> <c- k>namespace</c-> <c- d>/* unspecified */</c->
+<c- p>{</c->
+    <c- k>template</c-> <c- o>&lt;</c-><c- b>size_t</c-> <c- n>I</c-><c- o>></c->
+    <c- kr>inline</c-> <c- k>constexpr</c-> <c- d>/* unspecified */</c-> <c- n>get_element</c-> <c- o>=</c-> <c- d>/* unspecified */</c-><c- p>;</c->
 <c- p>}</c->
+<c- kr>inline</c-> <c- k>constexpr</c-> <c- k>auto</c-> <c- n>get_key</c-> <c- o>=</c-> <c- n>get_element</c-><c- o>&lt;</c-><c- mi>0</c-><c- o>></c-><c- p>;</c->
+<c- kr>inline</c-> <c- k>constexpr</c-> <c- k>auto</c-> <c- n>get_value</c-> <c- o>=</c-> <c- n>get_element</c-><c- o>&lt;</c-><c- mi>1</c-><c- o>></c-><c- p>;</c->
 </pre>
-   <p>With that API the motivating use-case code with the desired behavior would be:</p>
+   <p>With that API the motivating use case code with the desired behavior would be:</p>
 <pre class="language-cpp highlight"><c- n>std</c-><c- o>::</c-><c- n>vector</c-><c- o>&lt;</c-><c- n>std</c-><c- o>::</c-><c- n>tuple</c-><c- o>&lt;</c-><c- b>int</c-><c- p>,</c-> <c- b>int</c-><c- o>>></c-> <c- n>v</c-><c- p>{{</c-><c- mi>3</c-><c- p>,</c-><c- mi>1</c-><c- p>},{</c-><c- mi>2</c-><c- p>,</c-><c- mi>4</c-><c- p>},{</c-><c- mi>1</c-><c- p>,</c-><c- mi>7</c-><c- p>}};</c->
-<c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>sort</c-><c- p>(</c-><c- n>v</c-><c- p>,</c-> <c- n>std</c-><c- o>::</c-><c- n>less</c-><c- p>{},</c-> <c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>get_element</c-><c- o>&lt;</c-><c- mi>0</c-><c- o>></c-><c- p>);</c->
+<c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>sort</c-><c- p>(</c-><c- n>v</c-><c- p>,</c-> <c- n>std</c-><c- o>::</c-><c- n>less</c-><c- p>{},</c-> <c- n>std</c-><c- o>::</c-><c- n>get_element</c-><c- o>&lt;</c-><c- mi>0</c-><c- o>></c-><c- p>);</c->
 </pre>
    <p>or even</p>
 <pre class="language-cpp highlight"><c- n>std</c-><c- o>::</c-><c- n>vector</c-><c- o>&lt;</c-><c- n>std</c-><c- o>::</c-><c- n>tuple</c-><c- o>&lt;</c-><c- b>int</c-><c- p>,</c-> <c- b>int</c-><c- o>>></c-> <c- n>v</c-><c- p>{{</c-><c- mi>3</c-><c- p>,</c-><c- mi>1</c-><c- p>},{</c-><c- mi>2</c-><c- p>,</c-><c- mi>4</c-><c- p>},{</c-><c- mi>1</c-><c- p>,</c-><c- mi>7</c-><c- p>}};</c->
-<c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>sort</c-><c- p>(</c-><c- n>v</c-><c- p>,</c-> <c- n>std</c-><c- o>::</c-><c- n>less</c-><c- p>{},</c-> <c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>get_key</c-><c- p>);</c->
+<c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>sort</c-><c- p>(</c-><c- n>v</c-><c- p>,</c-> <c- n>std</c-><c- o>::</c-><c- n>less</c-><c- p>{},</c-> <c- n>std</c-><c- o>::</c-><c- n>get_key</c-><c- p>);</c->
 </pre>
-   <p>Let’s look at Tony Tables:</p>
+   <p>Let’s look at comparison tables (a.k.a. Tony Tables):</p>
    <p>Comparison of proposed API with comparator-based version</p>
    <table>
     <tbody>
@@ -2306,15 +2374,14 @@ use-cases.</p>
    <h3 class="heading settled" data-level="2.1" id="possible_implementation"><span class="secno">2.1. </span><span class="content">Possible implementation</span><a class="self-link" href="#possible_implementation"></a></h3>
 <pre class="language-cpp highlight"><c- k>namespace</c-> <c- nn>std</c->
 <c- p>{</c->
-<c- k>namespace</c-> <c- nn>ranges</c->
-<c- p>{</c->
 <c- k>namespace</c-> <c- nn>__detail</c->
 <c- p>{</c->
 <c- k>template</c-> <c- o>&lt;</c-><c- n>std</c-><c- o>::</c-><c- b>size_t</c-> <c- n>_Ip</c-><c- o>></c->
 <c- k>struct</c-> <c- nc>__get_element_fn</c->
 <c- p>{</c->
     <c- k>template</c-> <c- o>&lt;</c-><c- k>typename</c-> <c- nc>_TupleLike</c-><c- o>></c->
-    <c- k>decltype</c-><c- p>(</c-><c- k>auto</c-><c- p>)</c-> <c- k>operator</c-><c- p>()(</c-><c- n>_TupleLike</c-><c- o>&amp;&amp;</c-> <c- n>__tuple_like</c-><c- p>)</c-> <c- k>const</c->
+    <c- k>auto</c-> <c- k>operator</c-><c- p>()(</c-><c- n>_TupleLike</c-><c- o>&amp;&amp;</c-> <c- n>__tuple_like</c-><c- p>)</c-> <c- k>const</c-> <c- o>-></c->
+         <c- k>decltype</c-><c- p>(</c-><c- n>get</c-><c- o>&lt;</c-><c- n>_Ip</c-><c- o>></c-><c- p>(</c-><c- n>std</c-><c- o>::</c-><c- n>forward</c-><c- o>&lt;</c-><c- n>_TupleLike</c-><c- o>></c-><c- p>(</c-><c- n>__tuple_like</c-><c- p>)))</c->
     <c- p>{</c->
         <c- k>return</c-> <c- n>get</c-><c- o>&lt;</c-><c- n>_Ip</c-><c- o>></c-><c- p>(</c-><c- n>std</c-><c- o>::</c-><c- n>forward</c-><c- o>&lt;</c-><c- n>_TupleLike</c-><c- o>></c-><c- p>(</c-><c- n>__tuple_like</c-><c- p>));</c->
     <c- p>}</c->
@@ -2329,50 +2396,69 @@ use-cases.</p>
 
 <c- kr>inline</c-> <c- k>constexpr</c-> <c- k>auto</c-> <c- n>get_key</c-> <c- o>=</c-> <c- n>get_element</c-><c- o>&lt;</c-><c- mi>0</c-><c- o>></c-><c- p>;</c->
 <c- kr>inline</c-> <c- k>constexpr</c-> <c- k>auto</c-> <c- n>get_value</c-> <c- o>=</c-> <c- n>get_element</c-><c- o>&lt;</c-><c- mi>1</c-><c- o>></c-><c- p>;</c->
-<c- p>}</c-> <c- c1>// namespace ranges</c->
 <c- p>}</c-> <c- c1>// namespace std</c->
 </pre>
    <h2 class="heading settled" data-level="3" id="design_decisions"><span class="secno">3. </span><span class="content">Design considerations</span><a class="self-link" href="#design_decisions"></a></h2>
-   <p>We would actually prefer to use the <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>get</c-></code> name instead of the proposed one. Unfortunately,
-this name is already taken for overloads for <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>subrange</c-></code>.</p>
+   <p>Alternative name for the proposed API could be <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>get</c-></code>. Unfortunately,
+this name is already taken for <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>subrange</c-></code> overload.</p>
    <p>Potentially <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>get</c-></code> could be repurposed for the proposed CPO with minimal API break
 for tricky scenarios only while still working as expected in existing reasonable use cases, as explained below.
 But we (likely) could not avoid an ABI break.</p>
-   <h3 class="heading settled" data-level="3.1" id="potential_change"><span class="secno">3.1. </span><span class="content">What could be done to use <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>get</c-></code> name</span><a class="self-link" href="#potential_change"></a></h3>
+   <h3 class="heading settled" data-level="3.1" id="std_ranges_get_name"><span class="secno">3.1. </span><span class="content">What could be done to use <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>get</c-></code> name</span><a class="self-link" href="#std_ranges_get_name"></a></h3>
    <p>In all major standard library implementations (GCC, LLVM, Microsoft) the <code class="highlight"><c- n>get</c-></code> overload for <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>subrange</c-></code> is defined in <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-></code>. Adding another definition of <code class="highlight"><c- n>get</c-></code> to
 the same namespace would obviously create name ambiguity.</p>
-   <p>However, library implementors could move both <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>get</c-></code> and <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>subrange</c-></code> to some implementation specific
-namespace (e.g., <code class="highlight"><c- n>detail</c-></code>). That way <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>get</c-></code> can still be found by ADL for <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>subrange</c-></code>. At the same time, one could then use <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>get</c-></code> name for a CPO that could
-successfully find the necessary overload for <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>get</c-></code>, including the case when the argument
-is a <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>subrange</c-></code>.</p>
-   <p>Please see the example that explains the idea and shows how it might look like:</p>
-<pre class="language-cpp highlight"><c- k>namespace</c-> <c- nn>std</c-><c- o>::</c-><c- nn>ranges</c->
+   <p>However, library implementors could move the current <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>get</c-></code> function to an implementation specific
+namespace (e.g., <code class="highlight"><c- n>__detail</c-></code>) and inherit (possibly privately) <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>subrange</c-></code> from an empty tag class
+(e.g., <code class="highlight"><c- n>adl_hook</c-></code>) defined in the same namespace.
+That way <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>__detail</c-><c- o>::</c-><c- n>get</c-></code> can still be found by ADL for <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>subrange</c-></code>, and at the same time,
+the <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>get</c-></code> name becomes free to be redefined as a CPO that could successfully find a necessary overload
+for <code class="highlight"><c- n>get</c-></code>, including the case when the argument is a <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>subrange</c-></code>.
+Moreover, the proposed <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>get</c-></code> CPO type could have a parameter pack in the interface to cover the use case when
+the current <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>get</c-></code> function is used with explicit template arguments.</p>
+   <p>Please see the example that explains the idea and shows how it might look like. A full implementation with examples
+is available <a href="https://godbolt.org/z/boKcMWd5f">here</a>.</p>
+<pre class="language-cpp highlight"><c- k>namespace</c-> <c- nn>std</c->
 <c- p>{</c->
-<c- c1>// Moving std::ranges::subrange and std::ranges::get to __detail namespace</c->
+<c- k>namespace</c-> <c- nn>ranges</c->
+<c- p>{</c->
+<c- c1>// Necessary to make namespace __detail being considered by ADL</c->
+<c- c1>// for get&lt;0>(std::ranges::subrange&lt;something>{}) without moving</c->
+<c- c1>// the subrange itself to another namespace</c->
 <c- k>namespace</c-> <c- nn>__detail</c->
 <c- p>{</c->
-    <c- c1>// Pseudo subrange</c->
-    <c- k>template</c-> <c- o>&lt;</c-><c- k>typename</c-> <c- nc>T</c-><c- o>></c->
-    <c- k>struct</c-> <c- nc>subrange</c-> <c- p>{};</c->
-
-    <c- k>template</c-> <c- o>&lt;</c-><c- n>std</c-><c- o>::</c-><c- b>size_t</c-> <c- n>_Ip</c-><c- p>,</c-> <c- k>typename</c-> <c- nc>T</c-><c- o>></c-> 
-    <c- k>auto</c-> <c- n>get</c-><c- p>(</c-><c- n>subrange</c-><c- o>&lt;</c-><c- n>T</c-><c- o>></c-><c- p>);</c->
-<c- p>}</c->
-<c- c1>// Make the std::ranges::subrange name accessible from std::ranges namespace</c->
-<c- k>using</c-> <c- n>__detail</c-><c- o>::</c-><c- n>subrange</c-><c- p>;</c->
+<c- k>struct</c-> <c- nc>adl_hook</c-> <c- p>{};</c->
 <c- p>}</c->
 
-<c- c1>// Possible implementation of std::ranges::get CPO</c->
+<c- c1>// thanks to the empty-base optimization, inheriting adl_hook does not break ABI</c->
+<c- k>template</c-> <c- o>&lt;</c-><c- k>class</c-> <c- nc>T</c-><c- o>></c-> <c- k>class</c-> <c- nc>subrange</c-> <c- o>:</c-> <c- n>__detail</c-><c- o>::</c-><c- n>adl_hook</c-> <c- p>{</c->
+    <c- k>public</c-><c- o>:</c-> <c- n>T</c-> <c- n>whatever</c-><c- p>;</c->
+<c- p>};</c->
+
+<c- k>namespace</c-> <c- nn>__detail</c->
+<c- p>{</c->
+<c- k>template</c-> <c- o>&lt;</c-><c- n>std</c-><c- o>::</c-><c- b>size_t</c-><c- p>,</c-> <c- k>class</c-> <c- nc>T</c-><c- o>></c->
+<c- k>auto</c-> <c- n>get</c-><c- p>(</c-><c- n>subrange</c-><c- o>&lt;</c-><c- n>T</c-><c- o>></c-> <c- n>x</c-><c- p>)</c-> <c- p>{</c->
+    <c- k>return</c-> <c- n>x</c-><c- p>.</c-><c- n>whatever</c-><c- p>;</c->
+<c- p>}</c->
+<c- p>}</c-> <c- c1>// namespace __detail</c->
+<c- p>}</c-> <c- c1>// namespace ranges</c->
+
+<c- k>using</c-> <c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>__detail</c-><c- o>::</c-><c- n>get</c-><c- p>;</c->
+<c- p>}</c-> <c- c1>// namespace std</c->
+
 <c- k>namespace</c-> <c- nn>std</c->
 <c- p>{</c->
 <c- k>namespace</c-> <c- nn>ranges</c->
 <c- p>{</c->
 <c- k>namespace</c-> <c- nn>__detail</c->
 <c- p>{</c->
-<c- k>template</c-> <c- o>&lt;</c-><c- n>std</c-><c- o>::</c-><c- b>size_t</c-> <c- n>_Ip</c-><c- o>></c->
+<c- c1>// Introduce Args... to cover the case of calling get with explicit template arguments</c->
+<c- k>template</c-> <c- o>&lt;</c-><c- n>std</c-><c- o>::</c-><c- b>size_t</c-> <c- n>_Ip</c-><c- p>,</c-> <c- k>typename</c-><c- p>...</c-> <c- n>Args</c-><c- o>></c->
 <c- k>struct</c-> <c- nc>__get_fn</c->
 <c- p>{</c->
-    <c- k>template</c-> <c- o>&lt;</c-><c- k>typename</c-> <c- nc>_TupleLike</c-><c- o>></c->
+    <c- c1>// No more than std::tuple_size_v template arguments should be allowed</c->
+    <c- k>template</c-> <c- o>&lt;</c-><c- k>typename</c-> <c- nc>_TupleLike</c-><c- o>></c-> <c- k>requires</c-> <c- p>(</c-><c- k>sizeof</c-><c- p>...(</c-><c- n>Args</c-><c- p>)</c-> <c- o>&lt;=</c-> <c- n>std</c-><c- o>::</c-><c- n>tuple_size_v</c-><c- o>&lt;</c-><c- n>std</c-><c- o>::</c-><c- n>remove_cvref_t</c-><c- o>&lt;</c-><c- n>_TupleLike</c-><c- o>>></c->
+                                     <c- o>&amp;&amp;</c-> <c- n>__are_tuple_elements_convertible_to_args</c-><c- o>&lt;</c-><c- n>std</c-><c- o>::</c-><c- n>remove_cvref_t</c-><c- o>&lt;</c-><c- n>_TupleLike</c-><c- o>></c-><c- p>,</c-> <c- n>Args</c-><c- p>...</c-><c- o>>::</c-><c- n>value</c-><c- p>)</c->
     <c- k>decltype</c-><c- p>(</c-><c- k>auto</c-><c- p>)</c-> <c- k>operator</c-><c- p>()(</c-><c- n>_TupleLike</c-><c- o>&amp;&amp;</c-> <c- n>__tuple_like</c-><c- p>)</c-> <c- k>const</c->
     <c- p>{</c->
         <c- k>return</c-> <c- n>get</c-><c- o>&lt;</c-><c- n>_Ip</c-><c- o>></c-><c- p>(</c-><c- n>std</c-><c- o>::</c-><c- n>forward</c-><c- o>&lt;</c-><c- n>_TupleLike</c-><c- o>></c-><c- p>(</c-><c- n>__tuple_like</c-><c- p>));</c->
@@ -2382,27 +2468,197 @@ is a <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>:
 
 <c- kr>inline</c-> <c- k>namespace</c-> <c- nn>__get_fn_namespace</c->
 <c- p>{</c->
-<c- k>template</c-> <c- o>&lt;</c-><c- n>std</c-><c- o>::</c-><c- b>size_t</c-> <c- n>_Ip</c-><c- o>></c->
-<c- kr>inline</c-> <c- k>constexpr</c-> <c- n>__detail</c-><c- o>::</c-><c- n>__get_fn</c-><c- o>&lt;</c-><c- n>_Ip</c-><c- o>></c-> <c- n>get</c-><c- p>;</c->
+<c- k>template</c-> <c- o>&lt;</c-><c- n>std</c-><c- o>::</c-><c- b>size_t</c-> <c- n>_Ip</c-><c- p>,</c-> <c- k>typename</c-><c- p>...</c-> <c- n>Args</c-><c- o>></c->
+<c- kr>inline</c-> <c- k>constexpr</c-> <c- n>__detail</c-><c- o>::</c-><c- n>__get_fn</c-><c- o>&lt;</c-><c- n>_Ip</c-><c- p>,</c-> <c- n>Args</c-><c- p>...</c-><c- o>></c-> <c- n>get</c-><c- p>;</c->
 <c- p>}</c-> <c- c1>// inline namespace __get_fn_namespace</c->
 <c- p>}</c-> <c- c1>// namespace ranges</c->
-<c- k>using</c-> <c- n>ranges</c-><c- o>::</c-><c- n>__detail</c-><c- o>::</c-><c- n>get</c-><c- p>;</c->
 <c- p>}</c-> <c- c1>// namespace std</c->
 </pre>
-   <p>With such an implementation, three major use-cases continue working: <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>get</c-><c- o>&lt;</c-><c- mi>0</c-><c- o>></c-><c- p>(</c-><c- n>sub_r</c-><c- p>)</c-></code>, <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>get</c-><c- o>&lt;</c-><c- mi>0</c-><c- o>></c-><c- p>(</c-><c- n>sub_r</c-><c- p>)</c-></code> and <code class="highlight"><c- n>get</c-><c- o>&lt;</c-><c- mi>0</c-><c- o>></c-><c- p>(</c-><c- n>sub_r</c-><c- p>)</c-></code> - where <code class="highlight"><c- n>sub_r</c-></code> is <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>subrange</c-></code> object.</p>
-   <p>Definitely that would break the ABI because the fully qualified names become
-different comparing with what we have right now. For more tricky scenarios
-(e.g., explicit template instantiation of <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>get</c-></code>) the API is also broken.
-Since the <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>subrange</c-></code> API is relatively new, perhaps only a small amount
+   <p>With such an implementation, all important cases from our perspective continue working:</p>
+   <ul>
+    <li data-md>
+     <p><code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>get</c-><c- o>&lt;</c-><c- mi>0</c-><c- o>></c-><c- p>(</c-><c- n>sub_r</c-><c- p>)</c-></code></p>
+    <li data-md>
+     <p><code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>get</c-><c- o>&lt;</c-><c- mi>0</c-><c- o>></c-><c- p>(</c-><c- n>sub_r</c-><c- p>)</c-></code></p>
+    <li data-md>
+     <p><code class="highlight"><c- n>get</c-><c- o>&lt;</c-><c- mi>0</c-><c- o>></c-><c- p>(</c-><c- n>sub_r</c-><c- p>)</c-></code></p>
+    <li data-md>
+     <p><code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>get</c-><c- o>&lt;</c-><c- mi>0</c-><c- p>,</c-> <c- n>some_arg</c-><c- o>></c-><c- p>(</c-><c- n>sub_r</c-><c- p>)</c-></code> (can also be used without namespace)</p>
+   </ul>
+   <p>where <code class="highlight"><c- n>sub_r</c-></code> is <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>subrange</c-></code> object.</p>
+   <p>The API breaking change appears when <code class="highlight"><c- n>get</c-></code> has all explicit template arguments for <code class="highlight"><c- n>subrange</c-></code>,
+i.e., <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>get</c-><c- o>&lt;</c-><c- n>Iarg</c-><c- p>,</c-> <c- n>Sarg</c-><c- p>,</c-> <c- n>Karg</c-><c- o>></c-><c- p>(</c-><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>subrange</c-><c- o>&lt;</c-><c- n>Iarg</c-><c- p>,</c-> <c- n>Sarg</c-><c- p>,</c-> <c- n>Karg</c-><c- o>></c-><c- p>{})</c-></code>. The problem is
+with the last <code class="highlight"><c- n>Karg</c-></code> argument, which is unrelated to <code class="highlight"><c- n>tuple_size_v</c-></code> and <code class="highlight"><c- n>tuple_element_t</c-></code> of the subrange.
+Even if we say that the proposed backward compatible CPO with <code class="highlight"><c- n>Args</c-><c- p>...</c-></code> does not constraint <code class="highlight"><c- k>sizeof</c-><c- p>...(</c-><c- n>Args</c-><c- p>)</c-></code> and ignores the tail outside <code class="highlight"><c- n>tuple_size_v</c-><c- o>&lt;</c-><c- n>subrange</c-><c- o>></c-></code>, it doesn’t help
+for the mentioned use case because <code class="highlight"><c- n>K</c-></code> of <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>subrange</c-></code> is a non-type template parameter.
+Anyway, this scenario doesn’t look common because explicit template parameters are used relatively rarely
+and furthermore, <code class="highlight"><c- n>K</c-></code> has the default argument that is substituted based on a sentinel.</p>
+   <p>Definitely such a change would break the ABI for <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>get</c-></code> because the fully qualified name of
+this function would change from what is in C++ standard library implementations today.
+But we think that that ABI break would have low impact because <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>get</c-></code> is likely
+inlined and so doesn’t create a visible symbol in translation units.
+We could imagine other tricky scenario where the API might be broken when <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>get</c-></code> is used for something else but call. For example: <code class="highlight"><c- o>&amp;</c-><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>get</c-><c- o>&lt;</c-><c- mi>0</c-><c- o>></c-></code>, <code class="highlight"><c- k>decltype</c-><c- p>(</c-><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>get</c-><c- o>&lt;</c-><c- mi>0</c-><c- o>></c-><c- p>)</c-></code>, etc. However, these scenarios don’t look common.</p>
+   <p>Since the <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>subrange</c-></code> API is relatively new, perhaps only a small amount
 of users would be affected but it can not be predicted accurately.</p>
    <p>We would like to hear the opinion of the audience whether going with the <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>get</c-></code> name
 is worth introducing potential inconvenience for some C++ users.</p>
-   <h2 class="heading settled" data-level="4" id="further_steps"><span class="secno">4. </span><span class="content">Further steps</span><a class="self-link" href="#further_steps"></a></h2>
+   <h2 class="heading settled" data-level="4" id="tuple_like_concept"><span class="secno">4. </span><span class="content"><em>tuple-like</em> concept</span><a class="self-link" href="#tuple_like_concept"></a></h2>
+   <p>With the proposed <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>get_element</c-></code> CPO, the <em>tuple-like</em> concept can be generalized to cover
+wider range of types rather than just the listed standard types. Although we think it
+deserves a separate paper, yet we would like to provide some ruminations how it might look like.</p>
+   <h3 class="heading settled" data-level="4.1" id="tuple_like_with_get_element"><span class="secno">4.1. </span><span class="content"><em>tuple-like</em> concept generalization with <code class="highlight"><c- n>get_element</c-></code></span><a class="self-link" href="#tuple_like_with_get_element"></a></h3>
+   <p>The existing <em>has-tuple-element</em> exposition-only concept can be taken and modified with <code class="highlight"><c- n>get_element</c-></code> in the following way:</p>
+<pre class="language-cpp highlight"><c- k>template</c-><c- o>&lt;</c-> <c- k>class</c-> <c- nc>T</c-><c- p>,</c-> <c- n>std</c-><c- o>::</c-><c- b>size_t</c-> <c- n>N</c-> <c- o>></c->
+<c- k>concept</c-> <c- d>/*has-tuple-element*/</c-> <c- o>=</c->  <c- c1>// exposition only</c->
+    <c- k>requires</c-><c- p>(</c-><c- n>T</c-> <c- n>t</c-><c- p>)</c-> <c- p>{</c->
+        <c- k>typename</c-> <c- nc>std</c-><c- o>::</c-><c- n>tuple_size</c-><c- o>&lt;</c-><c- n>T</c-><c- o>>::</c-><c- n>type</c-><c- p>;</c->
+        <c- k>requires</c-> <c- n>N</c-> <c- o>&lt;</c-> <c- n>std</c-><c- o>::</c-><c- n>tuple_size_v</c-><c- o>&lt;</c-><c- n>T</c-><c- o>></c-><c- p>;</c->
+        <c- k>typename</c-> <c- nc>std</c-><c- o>::</c-><c- n>tuple_element_t</c-><c- o>&lt;</c-><c- n>N</c-><c- p>,</c-> <c- n>T</c-><c- o>></c-><c- p>;</c->
+        <c- c1>// std::get_element substitutes for std::get, the rest is the same</c->
+        <c- p>{</c-> <c- n>std</c-><c- o>::</c-><c- n>get_element</c-><c- o>&lt;</c-><c- n>N</c-><c- o>></c-><c- p>(</c-><c- n>t</c-><c- p>)</c-> <c- p>}</c-> <c- o>-></c-> <c- n>std</c-><c- o>::</c-><c- n>convertible_to</c-><c- o>&lt;</c-><c- k>const</c-> <c- n>std</c-><c- o>::</c-><c- n>tuple_element_t</c-><c- o>&lt;</c-><c- n>N</c-><c- p>,</c-> <c- n>T</c-><c- o>>&amp;></c-><c- p>;</c->
+    <c- p>};</c->
+</pre>
+   <p>With that modification the old code continues to work. We relax the concept. Since it’s
+exposition only and, to the best of our knowledge, doesn’t affect overload resolution or class
+specialization then it should not cause unexpected overloads being called.</p>
+   <p>Then the <em>tuple-like</em> concept can reuse <em>has-tuple-element</em> and do something like:</p>
+<pre class="language-cpp highlight"><c- c1>// necessary to check if std::tuple_size_v is well-formed before using it</c->
+<c- k>template</c-> <c- o>&lt;</c-><c- k>typename</c-> <c- nc>T</c-><c- o>></c->
+<c- k>concept</c-> <c- d>/*has-tuple-size*/</c-> <c- o>=</c->  <c- c1>// exposition only</c->
+<c- k>requires</c-> <c- p>{</c->
+    <c- k>typename</c-> <c- nc>std</c-><c- o>::</c-><c- n>tuple_size</c-><c- o>&lt;</c-><c- n>T</c-><c- o>>::</c-><c- n>type</c-><c- p>;</c->
+<c- p>};</c->
+
+<c- k>template</c-> <c- o>&lt;</c-><c- k>typename</c-> <c- nc>T</c-><c- o>></c->
+<c- k>concept</c-> <c- d>/* tuple-like */</c-> <c- o>=</c-> <c- o>!</c-><c- n>std</c-><c- o>::</c-><c- n>is_reference_v</c-><c- o>&lt;</c-><c- n>T</c-><c- o>></c-> <c- o>&amp;&amp;</c->
+                           <c- d>/*has-tuple-size*/</c-><c- o>&lt;</c-><c- n>T</c-><c- o>></c-> <c- o>&amp;&amp;</c->
+                           <c- p>[]</c-><c- o>&lt;</c-><c- n>std</c-><c- o>::</c-><c- b>size_t</c-><c- p>...</c-> <c- n>I</c-><c- o>></c-><c- p>(</c-><c- n>std</c-><c- o>::</c-><c- n>index_sequence</c-><c- o>&lt;</c-><c- n>I</c-><c- p>...</c-><c- o>></c-><c- p>)</c-> <c- p>{</c-> 
+                               <c- k>return</c-> <c- p>(...</c-> <c- o>&amp;&amp;</c-> <c- d>/*has-tuple-element*/</c-><c- o>&lt;</c-><c- n>T</c-><c- p>,</c-> <c- n>I</c-><c- o>></c-><c- p>);</c->
+                           <c- p>}</c-> <c- p>(</c-><c- n>std</c-><c- o>::</c-><c- n>make_index_sequence</c-><c- o>&lt;</c-><c- n>std</c-><c- o>::</c-><c- n>tuple_size_v</c-><c- o>&lt;</c-><c- n>T</c-><c- o>>></c-><c- p>{});</c->
+</pre>
+   <h3 class="heading settled" data-level="4.2" id="tuple_like_with_structured_binding"><span class="secno">4.2. </span><span class="content"><em>tuple-like</em> concept generalization with structured binding</span><a class="self-link" href="#tuple_like_with_structured_binding"></a></h3>
+   <p>Another way to generalize the <em>tuple-like</em> concept is via structured binding. Basically it’s proposed in <a data-link-type="biblio" href="#biblio-p2141r1" title="Aggregates are named tuples">[P2141R1]</a>.
+Please see <a href="#p2141_connection">§ 5.2 Connection with [P2141R1]</a> for more information.</p>
+   <h2 class="heading settled" data-level="5" id="other_papers_connections"><span class="secno">5. </span><span class="content">Connections with other papers</span><a class="self-link" href="#other_papers_connections"></a></h2>
+   <h3 class="heading settled" data-level="5.1" id="p2547_connection"><span class="secno">5.1. </span><span class="content">Connection with <a data-link-type="biblio" href="#biblio-p2547r1" title="Language support for customisable functions">[P2547R1]</a></span><a class="self-link" href="#p2547_connection"></a></h3>
+   <p><a data-link-type="biblio" href="#biblio-p2547r1" title="Language support for customisable functions">[P2547R1]</a> uses <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>get</c-></code> as the example and a good candidate to be a customizable function.
+Authors plan to ship the customizable functions proposal first and deal with customizing
+standard library functions later. That means we should not expect that examples in this paper
+automatically would be transformed to customizable functions when it will land.</p>
+   <p>Moreover, at this time the authors of <a data-link-type="biblio" href="#biblio-p2547r1" title="Language support for customisable functions">[P2547R1]</a> don’t see how to introduce customizable functions
+with the same names (e.g. <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>get</c-></code>) without the ABI break, so they will likely need to choose
+different names.</p>
+   <h3 class="heading settled" data-level="5.2" id="p2141_connection"><span class="secno">5.2. </span><span class="content">Connection with <a data-link-type="biblio" href="#biblio-p2141r1" title="Aggregates are named tuples">[P2141R1]</a></span><a class="self-link" href="#p2141_connection"></a></h3>
+   <p><a data-link-type="biblio" href="#biblio-p2141r1" title="Aggregates are named tuples">[P2141R1]</a>'s main goal is allow aggregates being interpreted as <em>Tuple-Like</em>. At the same time, it touches
+the <em>tuple-like</em> concept making it as generic as for the types structured binding can work with. It also adds
+a yet another <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>get</c-></code> overload that works with any <em>Tuple-Like</em> object except those that are already in
+the <code class="highlight"><c- n>std</c-><c- o>::</c-></code> namespace.</p>
+   <p>With <a data-link-type="biblio" href="#biblio-p2141r1" title="Aggregates are named tuples">[P2141R1]</a> being adopted <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>get</c-></code> does the right thing and works with <em>Tuple-Like</em> object, so we may use
+just <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>get</c-><c- o>&lt;</c-><c- n>_Ip</c-><c- o>></c-><c- p>(</c-><c- n>std</c-><c- o>::</c-><c- n>forward</c-><c- o>&lt;</c-><c- n>_TupleLike</c-><c- o>></c-><c- p>(</c-><c- n>__tuple_like</c-><c- p>))</c-></code> within the implementation of <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>get_element</c-></code> instead of
+the unqualified <code class="highlight"><c- n>get</c-></code> call.</p>
+   <p>Independently of <a data-link-type="biblio" href="#biblio-p2141r1" title="Aggregates are named tuples">[P2141R1]</a> <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>get_element</c-></code> brings its own value by covering the described motivation use-cases.
+Furthermore, in the standard there are already precedences of having two similar things with slightly different
+semantics, for example, <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>less</c-></code> and <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>less</c-></code>, where the latter is not even a CPO.</p>
+   <h2 class="heading settled" data-level="6" id="wording"><span class="secno">6. </span><span class="content">Formal wording</span><a class="self-link" href="#wording"></a></h2>
+   <p>Below, substitute the � character with a number the editor finds appropriate for the table, paragraph, section or sub-section.</p>
+   <h3 class="heading settled" data-level="6.1" id="wording_tuple_syn"><span class="secno">6.1. </span><span class="content">Modify Header <code class="highlight"><c- o>&lt;</c-><c- n>tuple</c-><c- o>></c-></code> synopsis <a href="https://eel.is/c++draft/tuple.syn">[<strong>tuple.syn</strong>] </a></span><a class="self-link" href="#wording_tuple_syn"></a></h3>
+   <blockquote>
+     [...] 
+<pre class="highlight"><c- c1>// [tuple.helper], tuple helper classes</c->
+<c- k>template</c-> <c- o>&lt;</c-><c- k>class</c-> <c- nc>T</c-><c- o>></c->
+  <c- k>constexpr</c-> <c- b>size_t</c-> <c- n>tuple_size_v</c-> <c- o>=</c-> <c- n>tuple_size</c-><c- o>&lt;</c-><c- n>T</c-><c- o>>::</c-><c- n>value</c-><c- p>;</c->
+</pre>
+    <ins>
+<pre class="highlight"><c- kr>inline</c-> <c- k>namespace</c-> <c- d>/* unspecified */</c-> <c- p>{</c->
+    <c- k>template</c-> <c- o>&lt;</c-><c- b>size_t</c-> <c- n>I</c-><c- o>></c->
+    <c- kr>inline</c-> <c- k>constexpr</c-> <c- d>/* unspecified */</c-> <c- n>get_element</c-> <c- o>=</c-> <c- d>/* unspecified */</c-><c- p>;</c->
+<c- p>}</c->
+<c- kr>inline</c-> <c- k>constexpr</c-> <c- k>auto</c-> <c- n>get_key</c-> <c- o>=</c-> <c- n>get_element</c-><c- o>&lt;</c-><c- mi>0</c-><c- o>></c-><c- p>;</c->
+<c- kr>inline</c-> <c- k>constexpr</c-> <c- k>auto</c-> <c- n>get_value</c-> <c- o>=</c-> <c- n>get_element</c-><c- o>&lt;</c-><c- mi>1</c-><c- o>></c-><c- p>;</c->
+</pre>
+    </ins>
+   </blockquote>
+   <h3 class="heading settled" data-level="6.2" id="wording_tuple_sections"><span class="secno">6.2. </span><span class="content">Add the following sections into <a href="http://eel.is/c++draft/tuple">[<strong>tuple</strong>]</a></span><a class="self-link" href="#wording_tuple_sections"></a></h3>
+   <blockquote>
+     [...]<br> � Element access [tuple.elem]<br> 
+    <ins> <span>� Customization Point Objects [tuple.cust]
+    � <code class="highlight"><c- n>get_element</c-></code> [tuple.cust.get_elem]</span> </ins>
+   </blockquote>
+   <h3 class="heading settled" data-level="6.3" id="wording_tuple_get_elem"><span class="secno">6.3. </span><span class="content">Add the following wording into [<strong>tuple.cust.get_elem</strong>]</span><a class="self-link" href="#wording_tuple_get_elem"></a></h3>
+   <ins>
+    <blockquote> <span>1. The name <code class="highlight"><c- n>get_element</c-></code> denotes a customization point object (<a href="https://eel.is/c++draft/customization.point.object">[<b>customization.point.object</b>])</a>.
+    The expression <code class="highlight"><c- n>get_element</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-><c- p>(</c-><c- n>E</c-><c- p>)</c-></code> where <code class="highlight"><c- n>I</c-></code> is <code class="highlight"><c- n>std</c-><c- o>::</c-><c- b>size_t</c-></code> for a subexpression <code class="highlight"><c- n>E</c-></code> is
+    expression-equivalent to: <ol><li data-md><p><code class="highlight"><c- n>get</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-><c- p>(</c-><c- n>E</c-><c- p>)</c-></code>, if <code class="highlight"><c- n>E</c-></code> has class or enumeration type and <code class="highlight"><c- n>get</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-><c- p>(</c-><c- n>E</c-><c- p>)</c-></code> is a well-formed expression
+when treated as an unevaluated operand, where the meaning of <code class="highlight"><c- n>get</c-></code> is established as-if by
+performing argument-dependent lookup only (<a href="https://eel.is/c++draft/basic.lookup.argdep">[<b>basic.lookup.argdep]</b>)</a>.</p> </li><li data-md><p>Otherwise, <code class="highlight"><c- n>get_element</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-><c- p>(</c-><c- n>E</c-><c- p>)</c-></code> is ill-formed.</p> </li></ol></span></blockquote>
+   </ins>
+   <h3 class="heading settled" data-level="6.4" id="wording_feature_macro"><span class="secno">6.4. </span><span class="content">Add feature test macro to the end of <a href="http://eel.is/c++draft/version.syn">[<strong>version.syn</strong>]</a></span><a class="self-link" href="#wording_feature_macro"></a></h3>
+   <ins>
+    <blockquote>
+      [...] 
+<pre class="highlight"><c- cp>#define __cpp_lib_element_access_customization_point  20����L</c->
+ <i><c- c1>// also in </c-></i><c- c1>&lt;tuple></c-><i><c- c1>, </c-></i><c- c1>&lt;utility></c-><i><c- c1>, </c-></i><c- c1>&lt;array></c-><i><c- c1>, </c-></i><c- c1>&lt;ranges></c->
+</pre>
+     <p>[...]</p>
+    </blockquote>
+   </ins>
+   <h2 class="heading settled" data-level="7" id="revision_history"><span class="secno">7. </span><span class="content">Revision history</span><a class="self-link" href="#revision_history"></a></h2>
+   <h3 class="heading settled" data-level="7.1" id="r0_r1"><span class="secno">7.1. </span><span class="content">R0 => R1</span><a class="self-link" href="#r0_r1"></a></h3>
    <ul>
     <li data-md>
-     <p>Add wording</p>
+     <p>Address the "structured binding unused variables" questions with <a data-link-type="biblio" href="#biblio-p2169r3" title="A Nice Placeholder With No Name">[P2169R3]</a></p>
     <li data-md>
-     <p>Add a feature test macro if necessary</p>
+     <p>Add ruminations about possible relaxation of the <em>tuple-like</em> concept</p>
+    <li data-md>
+     <p>Add connections to <a data-link-type="biblio" href="#biblio-p2547r1" title="Language support for customisable functions">[P2547R1]</a> and <a data-link-type="biblio" href="#biblio-p2141r1" title="Aggregates are named tuples">[P2141R1]</a></p>
+    <li data-md>
+     <p>Apply an approach to minimize ABI and API breaking for the <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>get</c-></code> name</p>
+    <li data-md>
+     <p>Add wording and a feature test macro for the <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>get_element</c-></code> API</p>
+   </ul>
+   <h2 class="heading settled" data-level="8" id="polls"><span class="secno">8. </span><span class="content">Polls</span><a class="self-link" href="#polls"></a></h2>
+   <h3 class="heading settled" data-level="8.1" id="sg9_issaquah_2023"><span class="secno">8.1. </span><span class="content">SG9 polls, Issaquah 2023</span><a class="self-link" href="#sg9_issaquah_2023"></a></h3>
+   <p><strong>POLL</strong>: The solution proposed in the paper "P2769: <code class="highlight"><c- n>get_element</c-></code> customization point object" should be renamed to <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>get</c-></code>.</p>
+   <table>
+    <tbody>
+     <tr>
+      <th>SF
+      <th>F
+      <th>N
+      <th>A
+      <th>SA
+     <tr>
+      <td> 1
+      <td>2
+      <td>1
+      <td>2
+      <td> 1
+   </table>
+   <p><strong>POLL</strong>: The solution proposed in the paper "P2769: <code class="highlight"><c- n>get_element</c-></code> customization point object" should be moved out of the <code class="highlight"><c- n>ranges</c-></code> namespace (<code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>get_element</c-></code>).</p>
+   <table>
+    <tbody>
+     <tr>
+      <th>SF
+      <th>F
+      <th>N
+      <th>A
+      <th>SA
+     <tr>
+      <td> 2
+      <td>4
+      <td>0
+      <td>1
+      <td> 0
+   </table>
+   <h2 class="heading settled" data-level="9" id="acknowledgements"><span class="secno">9. </span><span class="content">Acknowledgements</span><a class="self-link" href="#acknowledgements"></a></h2>
+   <ul>
+    <li data-md>
+     <p>Thanks to Casey Carter for providing <code class="highlight"><c- n>adl_hook</c-></code> trick for <a href="#design_decisions">§ 3 Design considerations</a></p>
+    <li data-md>
+     <p>Thanks to Corentin Jabot for providing the input for <a href="#p2547_connection">§ 5.1 Connection with [P2547R1]</a> and for
+the initial <em>tuple-like</em> concept relaxing idea</p>
+    <li data-md>
+     <p>Thanks to Benjamin Brock for paper review and design discussions.</p>
    </ul>
   </main>
 <script>
@@ -2534,3 +2790,13 @@ is worth introducing potential inconvenience for some C++ users.</p>
 
 })();
 </script>
+  <h2 class="no-num no-ref heading settled" id="references"><span class="content">References</span><a class="self-link" href="#references"></a></h2>
+  <h3 class="no-num no-ref heading settled" id="informative"><span class="content">Informative References</span><a class="self-link" href="#informative"></a></h3>
+  <dl>
+   <dt id="biblio-p2141r1">[P2141R1]
+   <dd>Antony Polukhin. <a href="https://wg21.link/P2141R1"><cite>Aggregates are named tuples</cite></a>. 3 May 2023. URL: <a href="https://wg21.link/P2141R1">https://wg21.link/P2141R1</a>
+   <dt id="biblio-p2169r3">[P2169R3]
+   <dd>Corentin Jabot, Michael Park. <a href="https://wg21.link/p2169r3"><cite>A Nice Placeholder With No Name</cite></a>. 15 December 2022. URL: <a href="https://wg21.link/p2169r3">https://wg21.link/p2169r3</a>
+   <dt id="biblio-p2547r1">[P2547R1]
+   <dd>Lewis Baker, Corentin Jabot, Gašper Ažman. <a href="https://wg21.link/p2547r1"><cite>Language support for customisable functions</cite></a>. 16 July 2022. URL: <a href="https://wg21.link/p2547r1">https://wg21.link/p2547r1</a>
+  </dl>
