@@ -1,0 +1,438 @@
+<pre class='metadata'>
+Title: C++ parallel algorithms and P2300
+Shortname: P2500
+Level: 1
+Status: P
+Group: wg21
+URL: https://wg21.link/P2500R1
+Editor: Ruslan Arutyunyan, Intel, ruslan.arutyunyan@intel.com
+        Alexey Kukanov, Intel, alexey.kukanov@intel.com
+Markup Shorthands: markdown yes
+Audience: SG1, LEWG
+Abstract: This paper provides the facilities to integrate [[P2300R7]] with C++ parallel algorithms
+</pre>
+
+# Motivation # {#motivation}
+
+C++ parallel algorithms, together with executions policies, were a good start for supporting parallelism in the C++ standard.
+The C++ standard execution policies represent "how" a particular algorithm should be executed; in other words,
+they set semantical requirements to user callable objects passed to parallel algorithms.
+However, there is no explicit way to specify what hardware an algorithm should be executed on.
+
+In the lack of better facilities in the C++ standard library, execution policies tend to be used to combine semantics
+of both "how" and "where" the code should be executed. Examples can be seen in
+<a href="https://nvidia.github.io/thrust/api/groups/group__execution__policies.html">Thrust</a>
+and <a href="https://oneapi-src.github.io/oneDPL/parallel_api/execution_policies.html">oneDPL</a> libraries.
+
+[[P2300R7]] introduces the ``scheduler`` concept that represents an execution context.
+Comparing to execution policies, it's a more flexible abstraction for answering "where" the code
+should be executed, because a ``scheduler`` could be tightly connected to the platform it sends work to.
+
+As [[P2300R7]] progresses towards being added into C++26, we should answer the question how other parts
+of the C++ standard library would interoperate with schedulers/senders/receivers.
+
+[[P2214R2]] outlined a plan to extend the standard Ranges library in C++23. The plan puts adding parallel overloads
+for the range algorithms into "Tier 2", among other motivating that by the need to carefully consider how these would work
+when [[P2300R7]] lands in the standard. To the best of our knowledge, nobody has yet approached this question.
+
+This paper is targeted to C++26 and proposes the way for standard C++ algorithms to utilize [[P2300R7]] facilities.
+
+# Design overview # {#design_overview}
+
+## Design goals ## {#design_goals}
+
+The key question we need to address is how the API of C++ algorithms, including parallel and range based ones,
+should be extended or modified to express the notion that a certain algorithm should run in a certain execution context.
+The core semantics of an algorithm is expected to be preserved, except for any adjustments dictated by the need
+to execute work possibly in parallel by an unknown set of threads of execution. In particular, we think execution
+of the algorithms should remain synchronous, i.e. complete all the work upon return.
+
+Another important design goal is to allow implementors of a particular execution context to also customize
+the implementation of C++ algorithms in that context. We consider this a must to provide best possible implementations
+for a given platform. At the same time, an algorithm should also have a default implementation, presumably expressed
+via other algorithms or some basic routines (see [[#further_work]]), allowing to customize only what is necessary.
+
+## Combining a scheduler with a policy ## {#combine_scheduler_with_policy}
+
+To achieve the first goal, we propose to extend the approach of C++ parallel algorithms and allow in the place of
+an execution policy also passing a *policy-aware scheduler* that combines a policy and a representation of
+an execution context. This follows the existing practice of using a single argument to specify both "where" and "how"
+to execute an algorithm. It also forces binding a policy with a context prior to the algorithm invocation, allowing for
+better handling of possible mismatches between the two, e.g. in case the execution context cannot properly support
+the semantics of the policy, as well as for reuse of the resulting policy-aware scheduler instance.
+
+An example declaration of ``std::for_each`` for the outlined approach would be:
+
+```cpp
+template <policy_aware_scheduler Scheduler, typename ForwardIterator, typename Function>
+void for_each(Scheduler&& sched, ForwardIterator first, ForwardIterator last, Function f);
+```
+
+A ``policy_aware_scheduler`` is obtained with the ``execute_on`` function applied to a desired scheduler
+and a desired execution policy. Eventually, invoking a parallel algorithm to execute by a scheduler
+looks like:
+
+```cpp
+std::for_each(std::execute_on(scheduler, std::execution::par), begin(data), end(data), callable);
+```
+
+See [[#policy_aware_scheduler]] and [[#execute_on_cpo]] sections for more details. 
+
+### Why ``scheduler`` ### {#sched_for_parallel_algorithms}
+
+The proposed API is blocking by design and behaves similarly to C++17 parallel algorithms. That means, when an
+algorithm returns the parallel execution is complete. The algorithm could build as complex a dependency graph within
+as it wants to, for which a ``scheduler`` allows to obtain as many senders as the algorithm needs for the implementation.
+
+If we imagine that the algorithm takes a ``sender``, it's unclear what to do then because that ``sender`` could represent
+any dependency chain built by the user, and all possible strategies of handling it we could imagine seem bad:
+* We could ignore the ``sender`` and just obtain the ``scheduler`` from it, but that's likely not what users would expect
+* We could run ``sync_wait`` on ``sender`` and then run the dependency graph that is built by the algorithm implementation,
+    but in this case we lose the value ``sync_wait`` might return
+* We could built the ``sender`` into the algorithm implementation chain, but again it's unclear what to do with the possible
+    return value of the ``sender``. For example it might return ``int`` while the algorithm semantically returns an iterator
+
+Furthermore, from the customization perspective we are interested in execution context first that exactly represented by
+a ``scheduler``.
+
+### Alternative API ### {#alternative_parallel_algorithms}
+
+An alternative API might instead take both ``scheduler`` and ``execution_policy`` as function parameters.
+
+```cpp
+template <scheduler Scheduler, execution_policy Policy, typename ForwardIterator, typename Function>
+void for_each(Scheduler&& sched, Policy&& p, ForwardIterator first, ForwardIterator last, Function f);
+```
+
+However, in our opinion it complicates the signature for no good reason. The algorithm implementation would still first need
+to check if the scheduler can work with the execution policy, just on a later stage comparing to the preferred approach.
+Such a check would have to be redirected to the scheduler and/or the policy itself, and so would anyway require either
+something like [[#execute_on_cpo]] or a member function defined by ``schedulers`` or by execution policies.
+
+## Parallel algorithms are customizable functions ## {#customizable_functions}
+
+In line with the second design goal, we use the notion of *customizable functions* for parallel algorithms.
+It is essentially the same notion as proposed in [[P2547R1#terminology]], but without specific details.
+Similar to the algorithm function templates in ``namespace std::ranges``, these cannot be found by argument-dependent lookup.
+In addition, these functions can be customized for a particular policy-aware scheduler. 
+The implementation should invoke such a customization, if exists, otherwise execute a default generic implementation.
+That allows customizing every particular algorithm by ``scheduler`` vendors, if necessary.
+
+We are not saying now which exactly customization mechanism will eventually be used, but it should be consistent
+across all parallel algorithms. The practical alternatives to consider are [[P2300R7#spec-func.tag_invoke]] and [[P2547R1]].
+We would prefer to define the parallel algorithms in a way that does not depend on a particular customization mechanism,
+however that might be not practically possible due to the syntactical differences in how customizations are declared.
+
+## Covering both "classic" and range algorithms ## {#cover_classic_and_range}
+
+[[P2500R0]] suggested to only extend the "classic" C++17 parallel algorithms with a policy-aware scheduler,
+without touching the C++20 constrained algorithms over ranges. Besides being limited in scope, that also has several drawbacks:
+
+* Keeping the existing algorithm names (``std::for_each`` etc.) and yet allowing their customization requires us to:
+    * Either redefine the names as customization point objects or as function objects supporting the ``tag_invoke`` mechanism.
+        That would likely be considered as an ABI breaking change.
+    * Or add function overloads constrained with ``policy_aware_scheduler``, and require that they call new, specially defined
+        customization point objects, like ``std::for_each_cpo``. Making this for every algorithm would double the number of entities.
+* The API with iterator pairs is more restrictive than with the iterator-and-sentinel pairs.
+    One can pass two iterators as the arguments to range-based algorithms that take iterator and sentinel, while it's not possible
+    to pass a sentinel instead of the second iterator to a "classic" algorithm.
+
+In the current revision, we instead propose to define customizable algorithms with scheduling support in ``namespace std::ranges``
+Implementation-wise, that most likely means extending the existing function object types with new constrained overloads
+of ``operator()``, which we think should not create any breaking changes. The algorithm functions in ``namespace std``
+can then be supplemented with new overloads for ``policy_aware_scheduler`` that are required to call respective algorithms
+from ``std::ranges``. This approach eliminates the drawbacks described above and also addresses the desire to support
+the execution semantics for the range-based algorithms. The consequence is that algorithms in ``std``
+can be customized only via range-based algorithms. We think it's a reasonable tradeoff comparing to dozens of artificial
+customization points or potential ABI breaks.
+
+### Absence of serial range-based algorithms ### {#serial_range_based_absence}
+
+We understand that some range-based algorithms do not exist even as serial ones today.
+For example ``<numeric>`` does not have respective algorithms in ``std::ranges``. It is supposed to
+be addressed either by this or by a complementary paper.
+
+## Standard execution policies for range algorithms ## {#policies_for_ranges}
+
+Since this proposal addresses the problem of extending range algorithms to work with schedulers, we think it makes sense
+to address the lack of execution policy overloads for range algorithms as well. Such overloads can be safely added without
+any risk of conflict with the scheduler support, as an execution policy does not satisfy the requirements for a policy-aware
+scheduler, and vice versa.
+
+At this point we do not, however, discuss how the appearance of schedulers may or should impact the execution rules for parallel
+algorithms specified in <a href="https://eel.is/c++draft/algorithms.parallel.exec">[algorithms.parallel.exec]</a>, and just assume
+that the same rules apply to the range algorithms with execution policies.
+
+# Proposed API # {#proposed_api}
+
+Note that ``std::ranges::for_each`` and ``std::for_each`` are used as references. When the design is ratified, it will be applied
+to all parallel algorithms.
+
+All the examples are also based on the ``for_each`` algorithms.
+
+# API Overview # {#api_overview}
+
+```cpp
+// Execution policy concept
+template <typename ExecutionPolicy>
+concept execution_policy = std::is_execution_policy_v<std::remove_cvref_t<ExecutionPolicy>>;
+
+// Policy aware scheduler
+template <typename S>
+concept policy_aware_scheduler = scheduler<S> && requires (S s)
+{
+    typename S::base_scheduler_type;
+    typename S::policy_type;
+    { s.get_policy() } -> execution_policy;
+};
+
+// execute_on customization point
+inline namespace /* unspecified */
+{
+inline constexpr /* unspecified */ execute_on = /* unspecified */;
+}
+
+// std::ranges::for_each as an parallel algorithm example. Others can be done similarly
+
+// Policy-based API
+template<execution_policy Policy, input_iterator I, sentinel_for<I> S, class Proj = identity,
+         indirectly_unary_invocable<projected<I, Proj>> Fun>
+  constexpr ranges::for_each_result<I, Fun>
+    ranges::for_each(Policy&& policy, I first, S last, Fun f, Proj proj = {});
+template<execution_policy Policy, input_range R, class Proj = identity,
+         indirectly_unary_invocable<projected<iterator_t<R>, Proj>> Fun>
+  constexpr ranges::for_each_result<borrowed_iterator_t<R>, Fun>
+    ranges::for_each(Policy&& policy, R&& r, Fun f, Proj proj = {});
+
+// Scheduler-based API
+template<policy_aware_scheduler Scheduler, input_iterator I, sentinel_for<I> S,
+         class Proj = identity, indirectly_unary_invocable<projected<I, Proj>> Fun>
+  constexpr ranges::for_each_result<I, Fun>
+    ranges::for_each(Scheduler sched, I first, S last, Fun f, Proj proj = {}) /*customizable*/;
+template<policy_aware_scheduler Scheduler, input_range R, class Proj = identity,
+         indirectly_unary_invocable<projected<iterator_t<R>, Proj>> Fun>
+  constexpr ranges::for_each_result<borrowed_iterator_t<R>, Fun>
+    ranges::for_each(Scheduler sched, R&& r, Fun f, Proj proj = {}) /*customizable*/;
+
+// "Classic" parallel algorithms with scheduler
+template <policy_aware_scheduler Scheduler, typename ForwardIterator, typename Function>
+  void
+    for_each(Scheduler&& sched, ForwardIterator first, ForwardIterator last, Function f);
+```
+
+## Possible implementations of a parallel algorithm ## {#parallel_algorithm_impl}
+
+Depending on a particular customization mechanism eventually chosen, a parallel algorithm can be implemented
+in one of the following ways.
+
+In the current design all proposed APIs are customizable via one customization point, which is
+the overload that takes ``I`` and ``S`` (iterator and sentinel) because others can be redirected to that. We suppose
+that users want necessary algorithm being customized once and then having all its overloads automatically customized.
+It's unclear so far, why there should be such a flexibility that would allow customizing every particular overload
+individually but we are open for a discussion where people think it might be useful.
+
+### Customizable with ``tag_invoke`` ### {#alg_customize_tag_invoke}
+
+```cpp
+// std::ranges::for_each possible implementation
+namespace ranges
+{
+namespace __detail
+{
+struct __for_each_fn
+{
+    // ...
+    // Existing serial overloads
+    // ...
+
+    template<policy_aware_scheduler Scheduler, input_iterator I, sentinel_for<I> S,
+             class Proj = identity, indirectly_unary_invocable<projected<I, Proj>> Fun>
+    constexpr for_each_result<I, Fun>
+    operator()(Scheduler sched, I first, S last, Fun f, Proj proj = {}) const
+    {
+        if constexpr (std::tag_invocable<__for_each_fn, Scheduler, It, S, Callable>)
+        {
+            std::tag_invoke(*this, sched, first, last, f, proj);
+        }
+        else
+        {
+            // default implementation
+        }
+    }
+
+    template<policy_aware_scheduler Scheduler, input_range R, class Proj = identity,
+             indirectly_unary_invocable<projected<iterator_t<R>, Proj>> Fun>
+    constexpr for_each_result<borrowed_iterator_t<R>, Fun>
+    operator()(Scheduler sched, R&& r, Fun f, Proj proj = {}) const
+    {
+        return (*this)(sched, std::ranges::begin(r), std::ranges::end(r), f, proj);
+    }
+}; // struct for_each
+} // namespace __detail
+inline namespace __for_each_fn_namespace
+{
+inline constexpr __detail::__for_each_fn for_each;
+} // __for_each_fn_namespace
+} // namespace ranges
+```
+
+### Customizable with language support ### {#alg_customize_language}
+
+Here we assume that all ``std::ranges::for_each`` overloads, including ones that do not take a policy or a scheduler,
+are defined as ``customizable`` or ``final`` functions (in the sense of [[P2547R1]]). We have not explored if it is
+practical to change the existing implementations of range algorithms in such a way.
+
+```cpp
+// std::ranges::for_each possible implementation
+namespace ranges
+{
+    // ...
+    // Existing serial overloads
+    // ...
+
+    template<policy_aware_scheduler Scheduler, input_iterator I, sentinel_for<I> S,
+             class Proj = identity, indirectly_unary_invocable<projected<I, Proj>> Fun>
+    constexpr for_each_result<I, Fun>
+    for_each(Scheduler sched, I first, S last, Fun f, Proj proj = {}) customizable;
+
+    template<policy_aware_scheduler Scheduler, input_iterator I, sentinel_for<I> S,
+             class Proj = identity, indirectly_unary_invocable<projected<I, Proj>> Fun>
+    constexpr for_each_result<I, Fun>
+    for_each(Scheduler&& sched, I first, S last, Fun f, Proj proj = {}) default
+    {
+        // default implementation
+    }
+
+    template<policy_aware_scheduler Scheduler, input_range R, class Proj = identity,
+             indirectly_unary_invocable<projected<iterator_t<R>, Proj>> Fun>
+    constexpr for_each_result<borrowed_iterator_t<R>, Fun>
+    for_each(Scheduler sched, R&& r, Fun f, Proj proj = {})
+    {
+        return std::ranges::for_each(sched, std::ranges::begin(r), std::ranges::end(r), f, proj);
+    }
+}
+```
+
+## ``execute_on`` ## {#execute_on_cpo}
+
+``execute_on`` is the customization point that serves the purpose to tie ``scheduler`` and ``execution_policy``.
+
+It's up to a ``scheduler`` customization to check if it can work with the provided execution policy.
+
+A possible implementation is:
+
+```cpp
+namespace __detail
+{
+struct __execute_on_fn {
+    policy_aware_scheduler auto operator()(scheduler auto sched,
+                                           execution_policy auto policy) const
+    {
+        return std::tag_invoke(*this, sched, policy);
+    }
+}; // __execute_on_fn
+} // namespace __detail
+
+inline namespace __execute_on_fn_namespace
+{
+inline constexpr __detail::__execute_on_fn execute_on;
+} // __execute_on_fn_namespace
+```
+
+``execute_on`` does not have a default implementation because it is generally impossible.
+Talking about execution policies we mean a broader set of those than just the standard ones (examples from 
+Thrust and oneDPL libraries are referenced in [[#motivation]]). It's hard to predict what should SYCL-based
+or CUDA-based scheduler do if the passed policy is something that the scheduler knows nothing about.
+
+One could argue that for unsupported policies we should always fallback to sequential execution. But it's
+also incorrect in general case because the scheduler might represent an accelerator where sequential
+execution is not supported. Even on a CPU, falling back to sequential execution might be incorrect too,
+because the data might be allocated on an accelerator and be inaccessible for the CPU.
+
+So it's up to the scheduler to decide whether to provide a fallback for unknown/unsupported policies or not,
+and if yes, to define what this fallback is doing.
+
+## ``policy_aware_scheduler`` ## {#policy_aware_scheduler}
+
+``policy_aware_scheduler`` is a concept that represents an entity that combines ``scheduler`` and
+``execution_policy``. It allows to get both execution policy type and execution policy object
+from the ``policy_aware_scheduler`` returned by ``execute_on`` call.
+
+Note: ``policy_type`` and ``execution_policy`` object are not necessarily the same which ``execute_on`` was called with.
+
+```cpp
+template <typename S>
+concept policy_aware_scheduler = scheduler<S> && requires (S s) {
+    typename S::base_scheduler_type;
+    typename S::policy_type;
+    { s.get_policy() } -> execution_policy;
+};
+```
+
+See [[#exec_concept]] for more details about ``execution_policy`` concept.
+
+Customizations of the parallel algorithms can reuse the existing implementation (e.g., TBB-based, SYCL-based, CUDA-based)
+of parallel algorithms with ``ExecutionPolicy`` template parameter for "known" ``base_scheduler_type`` type.
+
+## ``execution_policy`` concept ## {#exec_concept}
+
+The execution policy concept is necessary if we want to constrain the return type of the ``s.get_policy()``
+method for ``policy_aware_scheduler``.
+
+Since the scheduler tells "where" algorithms are executed and policies tell "how" algorithms are executed, we consider
+the set of policies currently defined in the ``std::execution`` namespace to be sufficient. So, the concept definition could look like:
+
+```cpp
+template <typename ExecutionPolicy>
+concept execution_policy = std::is_execution_policy_v<std::remove_cvref_t<ExecutionPolicy>>;
+```
+
+We are open to make it more generic to allow adding custom policies for a particular scheduler, if somebody sees the value in it.
+For that case we either need to allow specializing ``std::is_execution_policy`` or to define another trait.
+
+# Further exploration # {#further_work}
+
+The authors plan to explore how to specify a set of basic functions (a so-called "parallel backend") which
+parallel algorithms can be expressed with. It might be proposed in a separate paper based on the analysis.
+
+# Revision History # {#revision_history#}
+
+## R0 => R1 ## {#r0_r1}
+
+* Defined the API in terms of "customizable functions" instead of CPO
+* Set range-based algorithms as the primary customization point for schedulers
+* Proposed support for standard execution policies to range-based algorithms
+* Defined scheduler-aware parallel algorithms in ``namespace std`` via constrained overloads redirecting to the range-based analogues
+* Clarified behavior of execute_on
+
+<pre class=biblio>
+{
+    "P2300R7": {
+        "authors": ["Michał Dominiak",
+                    "Georgy Evtushenko",
+                    "Lewis Baker",
+                    "Lucian Radu Teodorescu",
+                    "Lee Howes",
+                    "Kirk Shoop",
+                    "Michael Garland",
+                    "Eric Niebler",
+                    "Bryce Adelstein Lelbach"],
+        "href": "https://wg21.link/P2300R7",
+        "title": "std::execution",
+        "publisher": ["Michał Dominiak",
+                      "Georgy Evtushenko",
+                      "Lewis Baker",
+                      "Lucian Radu Teodorescu",
+                      "Lee Howes",
+                      "Kirk Shoop",
+                      "Michael Garland",
+                      "Eric Niebler",
+                      "Bryce Adelstein Lelbach"
+        ],
+        "date": "May 2023",
+        "deliveredBy": [
+            "https://wg21.link/P2300R7"
+        ]
+    }
+}
+</pre>
