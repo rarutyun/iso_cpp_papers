@@ -32,16 +32,97 @@ an opportunity to fuse several computations into one parallel algorithm call, th
 That is especially valuable for heterogeneous implementations of parallel algorithms, for which the range-based API helps
 reducing the number of kernels submitted to an accelerator.
 
+Users are already using ranges and range adaptors by passing range iterators to the existing non-range parallel
+algorithms. [[P2408R5]] was adopted to enable this. This pattern is often featured when teaching C++ parallel algorithms
+and appears in many codebases.
+
+`iota` and `cartesian_product` are especially common, as many compute workloads want to iterate over indices, not
+objects, and many work with multidimensional data. `transform` is also common, as it enables fusion of elementwise
+operations into a single parallel algorithm call, which can avoid the need for temporary storage and is more
+performant than two separate calls.
+
+However, passing range iterators to non-range algorithms is unwieldy and verbose. It is surprising to
+users that they cannot simply pass the ranges to the parallel algorithms as they would for serial algorithms.
+
+<table>
+<tr>
+<th colspan=2>Scalar-Vector Multiply
+<tr>
+<th>Before
+<th>After
+<tr>
+<td>
+<pre><code>
+std::span<double> data = …;
+double C = …;
+
+auto indices = std::views::iota(1, data.size());
+std::for_each(std::execution::par_unseq,
+  std::ranges::begin(indices),
+  std::ranges::end(indices),
+  [=] (auto i) { data[i] *= C; });
+</code></pre>
+<td>
+<pre><code>
+std::span<double> data = …;
+double C = …;
+
+std::for_each(std::execution::par_unseq,
+  std::views::iota(1, data.size()),
+  [=] (auto i) { data[i] *= C; });
+</code></pre>
+</table>
+
+<table>
+<tr>
+<th colspan=2>Matrix Transpose
+<tr>
+<th>Before
+<th>After
+<tr>
+<td>
+<pre><code>
+std::mdspan A{input,  N, M};
+std::mdspan B{output, M, N};
+
+auto indices = std::views::cartesian_product(
+  std::views::iota(0, A.extent(0)),
+  std::views::iota(0, A.extent(1)));
+
+std::for_each(std::execution::par_unseq,
+  std::ranges::begin(indices),
+  std::ranges::end(indices),
+  [=] (auto idx) {
+    auto [i, j] = idx;
+    B[j, i] = A[i, j];
+  });
+</code></pre>
+<td>
+<pre><code>
+std::mdspan A{input,  N, M};
+std::mdspan B{output, M, N};
+
+std::for_each(std::execution::par_unseq,
+  std::views::cartesian_product(
+    std::views::iota(0, A.extent(0)),
+    std::views::iota(0, A.extent(1))),
+  [=] (auto idx) {
+    auto [i, j] = idx;
+    B[j, i] = A[i, j];
+  });
+</code></pre>
+</table>
+
+# Design overview # {#design_overview}
+
+This paper proposes execution policy support for C++ range-based algorithms. In the nutshell, the proposal extends C++
+range algorithms with overloads taking any standard C++ execution policy as a function parameter. These overloads are
+further referred to as *parallel range algorithms*.
+
 Earlier, [[P2500R2]] proposed to add the range-based C++ parallel algorithms together with its primary goal of extending
 algorithms with schedulers. We have decided to split those parts to separate papers, which could progress independently.
 
 This paper is targeted to C++26.
-
-# Design overview # {#design_overview}
-
-This proposal addresses absence of execution policy support for C++ range-based algorithms. In the nutshell,
-the proposal extends C++ range algorithms with overloads taking any standard C++ execution policy as a function
-parameter. These overloads are further referred to as *parallel range algorithms*.
 
 ## Design summary ## {#design_summary}
 
@@ -252,7 +333,7 @@ For comparison, the `sized_range` concept adds a requirement of `std::ranges::si
 ## Requirements for callable parameters ## {#callable_parameters}
 
 In [[P3179R0]] we proposed that parallel range algorithms should require function objects for predicates, comparators, etc.
-to have `const`-qualified `operator()`, with the intent to provide compile-time diagnostics for mutable	function objects 
+to have `const`-qualified `operator()`, with the intent to provide compile-time diagnostics for mutable	function objects
 which might be unsafe for parallel execution. We have got contradictory feedback from SG1 and SG9 on that topic:
 SG1 preferred to keep the behavior consistent with C++17 parallel algorithms, while SG9 supported our design intent.
 
