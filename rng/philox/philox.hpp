@@ -282,6 +282,22 @@ private: // functions
         state_i = n - 1;
     }
 
+    void reset_counter()
+    {
+        for (std::size_t j = 0; j < n; ++j) {
+            x[j] = 0;
+        }
+        state_i = n - 1;
+    }
+
+    void reset_counter()
+    {
+        for (std::size_t j = 0; j < n; ++j) {
+            x[j] = 0;
+        }
+        state_i = n - 1;
+    }
+
     static constexpr result_type max_impl()
     {
         return w == std::numeric_limits<result_type>::digits
