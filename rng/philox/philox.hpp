@@ -2,6 +2,7 @@
 #define STD_PHILOX_HPP
 
 #include <type_traits>
+#include <tuple>
 #include <utility>
 #include <cstdint>
 #include <array>
@@ -9,6 +10,7 @@
 #include <climits>
 #include <istream>
 #include <ostream>
+#include <algorithm>
 
 namespace std {
 
@@ -105,10 +107,14 @@ public:
 
     // equality operators
     friend bool operator==(const philox_engine& left, const philox_engine& right) {
-        return std::ranges::equal(left.x, right.x)
+        bool result = std::ranges::equal(left.x, right.x)
             && std::ranges::equal(left.k, right.k)
-            // && std::ranges::equal(left.y, right.y); should it be the part of equality comparison?
             && left.state_i == right.state_i;
+        for (auto i = left.state_i + 1; (i < n) && result; ++i)
+        {
+            result &= left.y[i] == right.y[i];
+        }
+        return result;
     }
 
     // generating functions
@@ -155,21 +161,20 @@ public:
 private: // utilities
     using uint_types = std::tuple<std::uint8_t, std::uint16_t, std::uint32_t, std::uint64_t>;
     using promotion_types = std::tuple<std::uint16_t, std::uint32_t, std::uint64_t, __uint128_t>;
-
-    static consteval std::size_t log2(std::size_t val)
+public:
+    static consteval std::size_t get_log_index(std::size_t val)
     {
-        return ((val <= 2) ? 1 : 1 + log2(val / 2));
+        val = (val - 1) / CHAR_BIT + 1;
+        auto width = std::bit_width(val);
+
+        std::size_t subtrahend = static_cast<std::size_t>(std::has_single_bit(val));
+
+        return width - subtrahend;
     }
+private:
 
-    static consteval std::size_t ceil_log2(std::size_t val)
-    {
-        std::size_t additive = static_cast<std::size_t>(!std::has_single_bit(val));
-
-        return log2(val) + additive;
-    }
-
-    using counter_type = std::tuple_element_t<ceil_log2(w / CHAR_BIT), uint_types>;
-    using promotion_type = std::tuple_element_t<ceil_log2(w / CHAR_BIT), promotion_types>;
+    using counter_type = std::tuple_element_t<get_log_index(w), uint_types>;
+    using promotion_type = std::tuple_element_t<get_log_index(w), promotion_types>;
 
     static constexpr counter_type counter_mask = ~counter_type(0) >> (sizeof(counter_type) * CHAR_BIT - w);
     static constexpr result_type result_mask = ~result_type(0) >> (sizeof(result_type) * CHAR_BIT - w);
@@ -192,11 +197,18 @@ private: // functions
     {
         for (std::size_t q = 0; q != r; ++q)
         {
-            std::array<counter_type, n> v = x;
-            if constexpr(n == 4)
-            {
-                v[0] ^= v[2] ^= v[0] ^= v[2];
-            }
+            static constexpr std::array<std::array<std::size_t, 16>, 4> permute_indices
+            {{
+                {0, 1},
+                {2, 1, 0, 3},
+                {0, 5, 2, 7, 6, 3, 4, 1},
+                {2, 1, 4, 9, 6, 15, 0, 3, 10, 13, 12, 11, 14, 7, 8, 5}
+            }};
+            auto row = get_log_index(n * CHAR_BIT) - 1;
+            std::array<counter_type, n> v = [&x, row]<std::size_t... Is>(std::index_sequence<Is...>) {
+                return std::array<counter_type, n>{x[permute_indices[row][Is]]...};
+            }(std::make_index_sequence<n>{});
+
             for (std::size_t k = 0; k < array_size; ++k)
             {
                 auto [mulhi, mullo] = mulhilo(v[2 * k], multipliers[k]);
@@ -225,7 +237,7 @@ private: // functions
 
     void increment_counter(unsigned long long z)
     {
-        for(int j = 0; j < n; j++) {
+        for(std::size_t j = 0; j < n; j++) {
             z += (unsigned long long)x[j];
             x[j] = z & counter_mask;
             z = z >> w;
@@ -253,3 +265,5 @@ using philox4x64 = philox_engine<std::uint_fast64_t, 64, 4, 10, 0xCA5A8263951211
 } // namespace std
 
 #endif // STD_PHILOX_HPP
+
+
