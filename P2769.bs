@@ -1,16 +1,17 @@
 <pre class='metadata'>
 Title: get_element customization point object
 Shortname: P2769
-Level: 1
+Level: 2
 Status: P
 Group: wg21
 Default Highlight: cpp
-URL: https://wg21.link/P2769R1
+URL: https://wg21.link/P2769R2
 Editor: Ruslan Arutyunyan, Intel, ruslan.arutyunyan@intel.com
         Alexey Kukanov, Intel, alexey.kukanov@intel.com
-Audience: SG9, LEWG
+Audience: LEWG
 Markup Shorthands: markdown yes
-Abstract: This paper introduces a CPO to read from tuple like objects, which can be used as projection for <code>std::ranges</code> algorithms.
+Abstract: This paper introduces a CPO to read elements of tuple like objects, and uses it to define a generic
+          <i>tuple-like</i> concept.
 </pre>
 
 <style>
@@ -27,9 +28,119 @@ span, span * {
 
 # Motivation # {#motivation}
 
-## Motivating use case ## {#motivating_use_case}
+## Allowing user-defined tuples, or "true" motivation :) ## {#true_motivation}
 
-Having `std::pair`, `std::tuple` and other *Tuple-Like* objects as the value types for the algorithms
+The section addresses the LEWG feedback. While we always had in mind that with `get_element`
+facility we can make *tuple-like* generic enough, we assumed it to be developed as a separate proposal.
+However, based on the LEWG poll ([[#lewg_telecon_2024_01_23]]), the `get_element` paper should enable
+user-defined tuples to make its motivation strong enough.
+
+So, let's go to the problem statement. Today the C++ standard defines *tuple-like* types as only 5 types from `std` namespace:
+- `std::tuple`
+- `std::pair`
+- `std::array`
+- `std::complex`(allowed since C++26)
+- `std::ranges::subrange`
+
+That sounds like a huge limitation for a generic library because, in principle, user-defined types could be treated like tuples.
+`std::tuple_size` and `std::tuple_element` are already customizable by users. The problematic part is
+`std::get` which is not a customization point.
+
+Furthermore, there is already partial support for user-defined tuples in the language. For example the *structured binding*
+language feature has special rules for finding a `get` function for an arbitrary type (in a nutshell, either as a
+non-static-member-function or by argument-dependent lookup).
+
+Unfortunately, rules are different in different places in the standard today. For example, *has-tuple-element*
+exposition-only concept for `elements_view` allows only the 5 *tuple-like* types listed above and does not consider user-defined types.
+
+[[P2165R4]] added constraints for existing API (like `std::apply`, `std::tuple_cat`, etc.) to take *tuple-like* and also
+provides better compatibility between *tuple-like* objects by adding extra APIs, which is great. The unfortunate part of the story,
+however, is that the mentioned APIs are still limited by the definition of the *tuple-like* concept (5 standard types).
+
+Since the proposed `get_element` API is a customization point object we can use it to extend the tuple protocol to user-defined
+types, and since this facility is using ADL lookup for `get` it is not going to be a breaking change.
+
+For the following (simplified) code snippet:
+
+```cpp
+namespace user {
+
+template <typename T, typename U>
+struct my_tuple_like
+{
+public:
+    my_tuple_like(T tt, U uu) : t(tt), u(uu) {}
+private:
+    T t;
+    U u;
+
+    template <std::size_t I>
+    friend auto get(my_tuple_like<T, U> t_like)
+    {
+        static_assert (I == 0 || I == 1);
+        if constexpr (I == 0)
+            return t_like.t;
+        else if (I == 1)
+            return t_like.u;
+    }
+};
+
+} // namespace user
+
+namespace std {
+
+template <typename T, typename U>
+struct tuple_size<user::my_tuple_like<T, U>> : std::integral_constant<std::size_t, 2> {};
+
+template <typename T, typename U>
+struct tuple_element<0, user::my_tuple_like<T, U>> {
+    using type = T;
+};
+
+template <typename T, typename U>
+struct tuple_element<1, user::my_tuple_like<T, U>> {
+    using type = U;
+};
+
+} // namespace std
+```
+
+please see the Before-After table
+
+<table>
+    <tr>
+        <th>Before</th>
+        <th>After</th>
+    </tr>
+    <tr>
+        <td>
+            <pre>
+                auto [x, y] = user::my_tuple_like{3,3};
+
+                // This code does not compile
+                // std::apply([](auto x, auto y) {
+                //     return x + y;
+                // }, user::my_tuple_like{3,3});
+            </pre>
+        </td>
+        <td>
+            <pre>
+                auto [x, y] = user::my_tuple_like{3,3};
+
+                // Works fine, assuming that std::apply uses std::get_element
+                std::apply([](auto x, auto y) {
+                    return x + y;
+                }, user::my_tuple_like{3,3});
+            </pre>
+        </td>
+    </tr>
+</table>
+
+Of course, `std::apply` is just an example. `my_tuple_like` would work with any API that supports *tuple-like* types.
+
+## The original motivating use case ## {#motivating_use_case}
+
+Having `std::pair`, `std::tuple` and other *tuple-like* objects as the value types for the algorithms
 creates a plenty of opportunities. With special views, such as `std::ranges::elements_view`, we can
 specify which tuple elements to access when iterating over collections of such objects. However,
 we cannot easily use a predicate to make a decision based on only some of tuple elements, for example keys or values.
@@ -81,7 +192,7 @@ std::ranges::sort(v, [](auto x, auto y)
 });
 ```
 
-## Projections-based alternative ## {#projection_alternative}
+### Projections-based alternative ### {#projection_alternative}
 
 Projections provide another option to achieve the same behavior:
 
@@ -106,7 +217,7 @@ A variant that properly handles references would use a generic lambda:
 While this code achieves the desired result, it requires more syntactic boilerplate
 (lambda, forwarding etc.) than the useful code.
 
-## The desired approach ## {#desired_approach}
+### The desired approach ### {#desired_approach}
 
 The nicest way to get what we want would be:
 ```cpp
@@ -117,7 +228,7 @@ std::ranges::sort(v, std::less{}, std::get<0>);
 But it doesn't work because `std::get` is a function template, and one cannot pass function
 templates as arguments without instantiating them.
 
-## Why not `std::ranges::views::elements` ## {#not_views_elements}
+### Why not `std::ranges::views::elements` ### {#not_views_elements}
 
 The necessary result cannot be achieved with `std::ranges::views::elements`, which
 would apply the filter for all operations on the input data, including element swap
@@ -142,9 +253,9 @@ would apply the filter for all operations on the input data, including element s
                 for (auto& x : v)
                 {
                     auto [key, val] = x;
-                    std::cout << "Key = " << key << ", Value = " << val << std::endl;
+                    std::cout &lt;&lt; "Key = " &lt;&lt; key &lt;&lt; ", Value = " &lt;&lt; val &lt;&lt; std::endl;
                 }
-                
+
                 // Output (only keys are sorted):
                 // Key = 1, Value = 1
                 // Key = 2, Value = 4
@@ -163,7 +274,7 @@ would apply the filter for all operations on the input data, including element s
                 for (auto& x : v)
                 {
                     auto [key, val] = x;
-                    std::cout << "Key = " << key << ", Value = " << val << std::endl;
+                    std::cout &lt;&lt; "Key = " &lt;&lt; key &lt;&lt; ", Value = " &lt;&lt; val &lt;&lt; std::endl;
                 }
 
                 // Output (values are sorted based on keys):
@@ -308,6 +419,45 @@ inline constexpr auto get_value = get_element<1>;
 } // namespace std
 ```
 
+## *tuple-like* concept ## {#tuple_like_concept}
+
+With the proposed `std::get_element` CPO, the *tuple-like* concept can be generalized to cover
+wider range of types rather than just the listed standard types.
+
+### *tuple-like* concept generalization with `get_element` ### {#tuple_like_with_get_element}
+
+With `get_element` we can define an exposition only helper concept *can-get-tuple-element*
+in the following way:
+
+```cpp
+// necessary to check if std::tuple_size_v is well-formed before using it
+template <typename T>
+concept /*has-tuple-size*/ =  // exposition only
+requires {
+    typename std::tuple_size<T>::type;
+};
+
+template< class T, std::size_t N >
+concept /*can-get-tuple-element*/ =  // exposition only
+    /*has-tuple-size*/<T> &&
+    requires(T t) {
+        requires N < std::tuple_size_v<T>;
+        typename std::tuple_element_t<N, T>;
+        { std::get_element<N>(t) } -> std::convertible_to<const std::tuple_element_t<N, T>&>;
+    };
+```
+
+Then the *tuple-like* concept can use *can-get-tuple-element* and do something like:
+
+```cpp
+template <typename T>
+concept /*tuple-like*/ = !std::is_reference_v<T> &&
+                         /*has-tuple-size*/<T> &&
+                         []<std::size_t... I>(std::index_sequence<I...>) {
+                             return (... && /*can-get-tuple-element*/<T, I>);
+                         } (std::make_index_sequence<std::tuple_size_v<T>>{});
+```
+
 # Design considerations # {#design_decisions}
 
 Alternative name for the proposed API could be `std::ranges::get`. Unfortunately,
@@ -316,6 +466,9 @@ this name is already taken for `std::ranges::subrange` overload.
 Potentially `std::ranges::get` could be repurposed for the proposed CPO with minimal API break
 for tricky scenarios only while still working as expected in existing reasonable use cases, as explained below.
 But we (likely) could not avoid an ABI break.
+
+As `std::get_element` have got more support than `std::ranges::get` at [[#sg9_issaquah_2023]], the rest of this section
+is kept primarily for recording the evaluated and rejected alternative.
 
 ## What could be done to use `std::ranges::get` name ## {#std_ranges_get_name}
 
@@ -421,59 +574,6 @@ We could imagine other tricky scenario where the API might be broken when `std::
 Since the `std::ranges::subrange` API is relatively new, perhaps only a small amount
 of users would be affected but it can not be predicted accurately.
 
-We would like to hear the opinion of the audience whether going with the `std::ranges::get` name
-is worth introducing potential inconvenience for some C++ users.
-
-# *tuple-like* concept # {#tuple_like_concept}
-
-With the proposed `std::get_element` CPO, the *tuple-like* concept can be generalized to cover
-wider range of types rather than just the listed standard types. Although we think it
-deserves a separate paper, yet we would like to provide some ruminations how it might look like.
-
-## *tuple-like* concept generalization with `get_element` ## {#tuple_like_with_get_element}
-
-The existing *has-tuple-element* exposition-only concept can be taken and modified with `get_element`
-in the following way:
-
-```cpp
-template< class T, std::size_t N >
-concept /*has-tuple-element*/ =  // exposition only
-    requires(T t) {
-        typename std::tuple_size<T>::type;
-        requires N < std::tuple_size_v<T>;
-        typename std::tuple_element_t<N, T>;
-        // std::get_element substitutes for std::get, the rest is the same
-        { std::get_element<N>(t) } -> std::convertible_to<const std::tuple_element_t<N, T>&>;
-    };
-```
-
-With that modification the old code continues to work. We relax the concept. Since it's
-exposition only and, to the best of our knowledge, doesn't affect overload resolution or class
-specialization then it should not cause unexpected overloads being called.
-
-Then the *tuple-like* concept can reuse *has-tuple-element* and do something like:
-
-```cpp
-// necessary to check if std::tuple_size_v is well-formed before using it
-template <typename T>
-concept /*has-tuple-size*/ =  // exposition only
-requires {
-    typename std::tuple_size<T>::type;
-};
-
-template <typename T>
-concept /* tuple-like */ = !std::is_reference_v<T> &&
-                           /*has-tuple-size*/<T> &&
-                           []<std::size_t... I>(std::index_sequence<I...>) { 
-                               return (... && /*has-tuple-element*/<T, I>);
-                           } (std::make_index_sequence<std::tuple_size_v<T>>{});
-```
-
-## *tuple-like* concept generalization with structured binding ## {#tuple_like_with_structured_binding}
-
-Another way to generalize the *tuple-like* concept is via structured binding. Basically it's proposed in [[P2141R1]].
-Please see [[#p2141_connection]] for more information.
-
 # Connections with other papers # {#other_papers_connections}
 
 ## Connection with [[P2547R1]] ## {#p2547_connection}
@@ -502,9 +602,53 @@ Independently of [[P2141R1]] `std::get_element` brings its own value by covering
 Furthermore, in the standard there are already precedences of having two similar things with slightly different
 semantics, for example, `std::less` and `std::ranges::less`, where the latter is not even a CPO.
 
+[[P2141R1]] also gives another way to generalize the *tuple-like* concept (via structured binding).
+
+# Further work # {#further_work}
+
+- <s>Substitute std::get_element for std::get in formal wording of the APIs with tuple-like</s>
+- Broader implementation experience
+
 # Formal wording # {#wording}
 
 Below, substitute the � character with a number the editor finds appropriate for the table, paragraph, section or sub-section.
+
+## Modify Concept <i>tuple-like</i> <a href="https://eel.is/c++draft/tuple.like">[**tuple.like**] </a> ## {#wording_tuple_like}
+
+<blockquote>
+<ins>
+<pre>
+template&lt;typename T>
+concept <i>has-tuple-size</i> =  // exposition only
+  requires {
+      typename tuple_size&lt;T>::type;
+  };
+
+template&lt;class T, size_t N>
+concept <i>can-get-tuple-element</i> = // exposition only
+  <i>has-tuple-size</i>&lt;T> &&
+  requires(T t) {
+      requires N < std::tuple_size_v&lt;T>;
+      typename std::tuple_element_t&lt;N, T>;
+      { std::get_element&lt;N>(t) } -> std::convertible_to&lt;const std::tuple_element_t&lt;N, T>&>;
+  };
+</pre>
+</ins>
+<pre>
+template&lt;typename T>
+concept <i>tuple-like</i> = <del><i>see-below</i></del>
+    <ins>!is_reference_v&lt;T> &&</ins>
+    <ins><i>has-tuple-size</i>&lt;T> &&</ins>
+    <ins>[]&lt;size_t... I>(index_sequence&lt;I...>) {</ins>
+        <ins>return (... && ranges::<i>can-get-tuple-element</i>&lt;T, I>);</ins>
+    <ins>} (make_index_sequence&lt;tuple_size_v&lt;T>>{});</ins>
+</pre>
+<del>
+A type <code>T</code> models and satisfies the exposition-only concept *tuple-like* if <code>remove_cvref_t&lt;T></code>
+is a specialization of <code>array</code>, <code>complex</code>, <code>pair</code>, <code>tuple</code>,
+or <code>ranges​::​subrange</code>.
+</del>
+</blockquote>
 
 ## Modify Header <code>&lt;tuple></code> synopsis <a href="https://eel.is/c++draft/tuple.syn">[**tuple.syn**] </a> ## {#wording_tuple_syn}
 
@@ -543,7 +687,7 @@ inline constexpr auto get_value = get_element&lt;1>;
 <ins>
 <blockquote>
 <span>1. The name <code>get_element</code> denotes a customization point object (<a href="https://eel.is/c++draft/customization.point.object">[<b>customization.point.object</b>])</a>.
-    The expression <code>get_element&lt;I>(E)</code> where <code>I</code> is <code>std::size_t</code> for a subexpression <code>E</code> is
+    The expression <code>get_element&lt;I>(E)</code> where <code>I</code> is <code>size_t</code> for a subexpression <code>E</code> is
     expression-equivalent to:
     1. <code>get&lt;I>(E)</code>, if <code>E</code> has class or enumeration type and <code>get&lt;I>(E)</code> is a well-formed expression
         when treated as an unevaluated operand, where the meaning of <code>get</code> is established as-if by
@@ -565,7 +709,211 @@ inline constexpr auto get_value = get_element&lt;1>;
 </blockquote>
 </ins>
 
+## Modify `tuple` construct <a href="http://eel.is/c++draft/tuple.cnstr">[**tuple.cnstr**]</a> ## {#modify_constructor}
+
+<blockquote>
+`template<tuple-like UTuple>`<br>&nbsp;&nbsp;
+  `constexpr explicit(see below) tuple(UTuple&& u);`
+
+Let `I` be the pack `0, 1, …, (sizeof...(Types) - 1)`.
+
+*Constraints*:
+- `different-from<UTuple, tuple>` ([range.utility.helpers]) is `true`,
+- `remove_cvref_t<UTuple>` is not a specialization of `ranges​::​subrange`,
+- `sizeof...(Types)` equals `tuple_size_v<remove_cvref_t<UTuple>>`,
+- `(is_constructible_v<Types, decltype(get`<span><ins>`_element`</ins></span>`<I>(std​::​forward<UTuple>(u)))> && ...)` is `true`, and
+- either `sizeof...(Types)` is not 1, or (when `Types...` expands to `T`) `is_convertible_v<UTuple, T>`
+    and `is_constructible_v<T, UTuple>` are both `false`.
+
+Effects: For all *i*, initializes the *i*th element of `*this` with `get`<span><ins>`_element`</ins></span>`<i>(std​::​forward<UTuple>(u)).`
+
+Remarks: The expression inside explicit is equivalent to:
+`!(is_convertible_v<decltype(get`<span><ins>`_element`</ins></span>`<I>(std::forward<UTuple>(u))), Types> && ...)`
+The constructor is defined as deleted if
+`(reference_constructs_from_temporary_v<Types, decltype(get`<span><ins>`_element`</ins></span>
+`<I>(std::forward<UTuple>(u)))> || ...)` is `true`.
+
+</blockquote>
+
+## Modify `tuple` assignment <a href="http://eel.is/c++draft/tuple.assign">[**tuple.assign**]</a> ## {#modify_assignment}
+
+<blockquote>
+`template <tuple-like UTuple>`<br>&nbsp;&nbsp;
+  `constexpr tuple& operator=(UTuple&& u);`
+
+*Constraints*:
+- `different-from<UTuple, tuple>` ([range.utility.helpers]) is `true`,
+- `remove_cvref_t<UTuple>` is not a specialization of `ranges​::​subrange`,
+- `sizeof...(Types)` equals `tuple_size_v<remove_cvref_t<UTuple>>`, and,
+- `is_assignable_v<Ti&, decltype(get`<span><ins>`_element`</ins></span>`<i>(std​::​forward<UTuple>(u)))>` is `true` for all *i*.
+
+*Effects*: For all *i*, assigns `get`<span><ins>`_element`</ins></span>`<i>(std​::​forward<UTuple>(u))` to `get`<span><ins>`_element`</ins></span>`<i>(*this)`.
+
+*Returns*: `*this`.
+
+`template<tuple-like UTuple>`<br>&nbsp;&nbsp;
+  `constexpr const tuple& operator=(UTuple&& u) const;`
+
+*Constraints*:
+- `different-from<UTuple, tuple>` ([range.utility.helpers]) is `true`,
+- `remove_cvref_t<UTuple>` is not a specialization of `ranges​::​subrange`,
+- `sizeof...(Types)` equals `tuple_size_v<remove_cvref_t<UTuple>>`, and,
+- `is_assignable_v<const Ti&, decltype(get`<span><ins>`_element`</ins></span>`<i>(std​::​forward<UTuple>(u)))>` is `true` for all *i*.
+
+*Effects*: For all *i*, assigns `get`<span><ins>`_element`</ins></span>`<i>(std​::​forward<UTuple>(u))` to
+`get`<span><ins>`_element`</ins></span>`<i>(*this)`.
+
+*Returns*: `*this`.
+</blockquote>
+
+## Modify `tuple_cat` in tuple creation <a href="https://eel.is/c++draft/tuple.creation">[**tuple.creation**]</a> ## {#modify_tuple_cat}
+
+<blockquote>
+`template<tuple-like... Tuples>`<br>&nbsp;&nbsp;
+  `constexpr tuple<CTypes...> tuple_cat(Tuples&&... tpls);`
+
+Let *n* be `sizeof...(Tuples)`. For every integer `0 <= i < n`:
+
+- Let `Ti` be the ith type in `Tuples`.
+- Let `Ui` be `remove_cvref_t<Ti>`.
+- Let `tpi` be the *i*th element in the function parameter pack `tpls`.
+- Let `Si` be `tuple_size_v<Ui>`.
+- Let `Eki` be `tuple_element_t<k, Ui>`.
+- Let `eki` be `get`<span><ins>`_element`</ins></span>`<k>(std::forward<Ti>(tpi))`.
+- Let `Elemsi` be a pack of the types `E0i,...,ESi−1i`.
+- Let `elemsi` be a pack of the expressions `e0i`,...,`eSi−1i`.
+
+The types in `CTypes` are equal to the ordered sequence of the expanded packs of types `Elems0..., Elems1..., ..., Elemsn−1...`.
+Let `celems` be the ordered sequence of the expanded packs of expressions `elems0..., ..., elemsn−1...`.
+
+*Mandates*: `(is_constructible_v<CTypes, decltype(celems)> && ...)` is `true`.
+
+*Returns*: `tuple<CTypes...>(celems...)`
+</blockquote>
+
+## Modify `apply` in <a href="https://eel.is/c++draft/tuple.apply">[**tuple.apply**]</a> ## {#modify_tuple_apply}
+
+<blockquote>
+`template<class F, tuple-like Tuple>`<br>&nbsp;&nbsp;
+`constexpr decltype(auto) apply(F&& f, Tuple&& t) noexcept(see below);`
+
+*Effects*: Given the exposition-only function template:
+<span>
+<pre>
+<code>
+namespace std {
+  template`<class F, tuple-like Tuple, size_t... I>`
+  constexpr decltype(auto) apply-impl(F&& f, Tuple&& t, index_sequence`<I...>`) {
+                                                                        <i>// exposition only</i>
+    return INVOKE(`std::forward<F>(f)`, get<ins>_element</ins>`<I>(std::forward<Tuple>(t))...);`     <i>// see [func.require]</i>
+  }
+}
+</code>
+</pre>
+</span>
+Equivalent to:
+<span><pre><code> return apply-impl(std::forward<F>(f), std::forward<Tuple>(t),
+                   make_index_sequence`<tuple_size_v<remove_reference_t<Tuple>>>{});`</code></pre></span>
+
+*Remarks*: Let `I` be the pack `0, 1, ..., (tuple_size_v<remove_reference_t<Tuple>> - 1)`. The exception specification is equivalent to:
+<pre>
+  noexcept(invoke(std::forward&lt;F>(f), get<ins>_element</ins>&lt;I>(std::forward&lt;Tuple>(t))...))</pre>
+</blockquote>
+
+<blockquote>
+`template<class T, tuple-like Tuple>`
+<pre>`  constexpr T make_from_tuple(Tuple&& t);`</pre>
+
+*Mandates*: If `tuple_size_v<remove_reference_t<Tuple>>` is 1, then<br>
+&nbsp;&nbsp;`reference_constructs_from_temporary_vT, decltype(get`<span><ins>`_element`</ins></span>`<0>(declval<Tuple>()))>` is `false`.
+
+Effects: Given the exposition-only function template:
+<pre>
+namespace std {
+  template&lt;class T, tuple-like Tuple, size_t... I>
+    requires is_constructible_v&lt;T, decltype(get<ins>_element</ins>&lt;I>(declval&lt;Tuple>()))...>
+  constexpr T make-from-tuple-impl(Tuple&& t, index_sequence&lt;I...>) {   // exposition only
+    return T(get<ins>_element</ins>&lt;I>(std::forward&lt;Tuple>(t))...);
+  }
+}
+</pre>
+</blockquote>
+
+## Modify relation operators in <a href="https://eel.is/c++draft/tuple.rel">[**tuple.rel**]</a> ## {#modify_tuple_rel}
+
+<blockquote>
+<pre>
+template&lt;class... TTypes, class... UTypes>
+constexpr bool operator==(const tuple&lt;TTypes...>& t, const tuple&lt;UTypes...>& u);
+template&lt;class... TTypes, tuple-like UTuple>
+constexpr bool operator==(const tuple&lt;TTypes...>& t, const UTuple& u);
+</pre>
+
+For the first overload let `UTuple` be `tuple<UTypes...>`.
+
+*Constraints*: For all `i`, where `0  <= i < sizeof...(TTypes)`, `get<i>(t) == get`<span><ins>`_element`</ins></span>`<i>(u)`
+is a valid expression and `decltype(get<i>(t) == get`<span><ins>`_element`</ins></span>`<i>(u))` models boolean-testable. `sizeof...(TTypes)` equals `tuple_size_v<UTuple>`.
+
+*Returns*: `true` if `get<i>(t) == get`<span><ins>`_element`</ins></span>`<i>(u)` for all `i`, otherwise `false`.
+
+[Note 1: If `sizeof...(TTypes)` equals zero, returns `true`. — end note]
+
+*Remarks*:
+- The elementary comparisons are performed in order from the zeroth index upwards.
+    No comparisons or element accesses are performed after the first equality comparison that evaluates to `false`.
+- The second overload is to be found via argument-dependent lookup ([basic.lookup.argdep]) only.
+
+<pre>
+template&lt;class... TTypes, class... UTypes>
+  constexpr common_comparison_category_t&lt;synth-three-way-result&lt;TTypes, UTypes>...>
+    operator&lt;=>(const tuple&lt;TTypes...>& t, const tuple&lt;UTypes...>& u);
+template&lt;class... TTypes, tuple-like UTuple>
+  constexpr common_comparison_category_t&lt;synth-three-way-result&lt;TTypes, Elems>...>
+    operator&lt;=>(const tuple&lt;TTypes...>& t, const UTuple& u);
+</pre>
+
+For the second overload, `Elems` denotes the pack of types `tuple_element_t<0, UTuple>, tuple_element_t<1, UTuple>, …, tuple_element_t<tuple_size_v<UTuple> - 1, UTuple>`.
+
+*Effects*: Performs a lexicographical comparison between `t` and `u`. If `sizeof...(TTypes)` equals zero, returns `strong_ordering​::​equal`.
+
+Otherwise, equivalent to: `if (auto c = synth-three-way(get<0>(t), get`<span><ins>`_element`</ins></span>`<0>(u)); c != 0) return c;`
+`return ttail <=> utail;`
+
+where `rtail` for some `r` is a tuple containing all but the first element of `r`.
+
+*Remarks*: The second overload is to be found via argument-dependent lookup ([basic.lookup.argdep]) only.
+
+## Modify <a href="https://eel.is/c++draft/range.elements.iterator">[**range.elements.iterator**]</a> ## {#modify_range_elements_iterator}
+
+The member *typedef-name* `iterator_category` is defined if and only if *Base* models `forward_range`.
+In that case, `iterator_category` is defined as follows: Let `C` denote the type
+`iterator_traits<iterator_t<Base>>​::​iterator_category.`
+- If `std​::​get`<span><ins>`_element`</ins></span>`<N>(*current_)` is an rvalue, `iterator_category`
+    denotes `input_iterator_tag`.
+- Otherwise, if C models `derived_from<random_access_iterator_tag>`, `iterator_category` denotes
+    `random_access_iterator_tag.`
+- Otherwise, `iterator_category` denotes `C`.
+
+`static constexpr decltype(auto) `<i>`get-element`</i>`(const iterator_t<Base>& i);`
+
+*Effects*: Equivalent to:
+<pre>
+if constexpr (is_reference_v&lt;range_reference_t&lt;Base>>) {
+  return std::get<ins>`_element`</ins>&lt;N>(*i);
+} else {
+  using E = remove_cv_t&lt;tuple_element_t&lt;N, range_reference_t&lt;Base>>>;
+  return static_cast&lt;E>(std::get<ins>`_element`</ins>&lt;N>(*i));
+}
+</pre>
+
+</blockquote>
+
 # Revision history # {#revision_history}
+
+## R1 => R2 ## {#r1_r2}
+
+* Add extra motivation to allow user-defined tuples in the standard
+* Propose changes to *tuple-like* concept with wording
 
 ## R0 => R1 ## {#r0_r1}
 
@@ -590,11 +938,11 @@ inline constexpr auto get_value = get_element&lt;1>;
     <th>SA</th>
 </tr>
 <tr>
-    <td>&nbsp1</td>
+    <td>&nbsp;1</td>
     <td>2</td>
     <td>1</td>
     <td>2</td>
-    <td>&nbsp1</td>
+    <td>&nbsp;1</td>
 </tr>
 </table>
 
@@ -609,11 +957,51 @@ inline constexpr auto get_value = get_element&lt;1>;
     <th>SA</th>
 </tr>
 <tr>
-    <td>&nbsp2</td>
+    <td>&nbsp;2</td>
     <td>4</td>
     <td>0</td>
     <td>1</td>
-    <td>&nbsp0</td>
+    <td>&nbsp;0</td>
+</tr>
+</table>
+
+## Library Evolution Telecon 2024-01-23 ## {#lewg_telecon_2024_01_23}
+
+**POLL**: [[P2769R1]] (`get_element` customization point object) needs to allow for user tuple-likes before it can ship
+
+<table>
+<tr>
+    <th>SF</th>
+    <th>F</th>
+    <th>N</th>
+    <th>A</th>
+    <th>SA</th>
+</tr>
+<tr>
+    <td>&nbsp;3</td>
+    <td>3</td>
+    <td>4</td>
+    <td>2</td>
+    <td>&nbsp;0</td>
+</tr>
+</table>
+
+**POLL**: LEWG should spend more time on [[P2769R1]] (`get_element` customization point object)
+
+<table>
+<tr>
+    <th>SF</th>
+    <th>F</th>
+    <th>N</th>
+    <th>A</th>
+    <th>SA</th>
+</tr>
+<tr>
+    <td>&nbsp;5</td>
+    <td>4</td>
+    <td>0</td>
+    <td>2</td>
+    <td>&nbsp;0</td>
 </tr>
 </table>
 
@@ -623,18 +1011,3 @@ inline constexpr auto get_value = get_element&lt;1>;
 * Thanks to Corentin Jabot for providing the input for [[#p2547_connection]] and for
     the initial *tuple-like* concept relaxing idea
 * Thanks to Benjamin Brock for paper review and design discussions.
-
-<pre class=biblio>
-{
-    "P2141R1": {
-        "authors": ["Antony Polukhin"],
-        "href": "https://wg21.link/P2141R1",
-        "title": "Aggregates are named tuples",
-        "publisher": "Antony Polukhin",
-        "date": "3 May 2023",
-        "deliveredBy": [
-            "https://wg21.link/P2141R1"
-        ]
-    }
-}
-</pre>
