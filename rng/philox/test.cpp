@@ -83,6 +83,74 @@ void discard_test() {
     }
 }
 
+template <typename Engine>
+void set_counter_conformance_test() {
+    Engine engine;
+    std::array<typename Engine::result_type, Engine::word_count> counter;
+    for(int i = 0; i < Engine::word_count - 1; i++) {
+        counter[i] = 0;
+    }
+    
+    counter[Engine::word_count - 1] = 2499; // to get 10'000 element
+    engine.set_counter(counter);
+
+    for(int i = 0; i < Engine::word_count - 1; i++) {
+        engine();
+    }
+
+    typename Engine::result_type reference;
+    if(std::is_same_v<Engine, std::philox4x32>) {
+        reference = 1955073260;
+    }
+    else {
+        reference = 3409172418970261260;
+    }
+    if(engine() == reference) {
+        std::cout << __PRETTY_FUNCTION__ << " passed" << std::endl;
+    } else {
+        std::cout << __PRETTY_FUNCTION__ << " failed" << std::endl;
+    }
+}
+
+template <typename Engine>
+void skip_test() {
+    using T = typename Engine::result_type;
+    Engine engine1;
+    std::array<T, Engine::word_count> counter = {0, 0, 0, 5};
+    engine1.set_counter(counter);
+    Engine engine2;
+    engine2.discard(5 * Engine::word_count);
+
+    if(engine1() == engine2()) {
+        std::cout << __PRETTY_FUNCTION__ << " passed" << std::endl;
+    } else {
+        std::cout << __PRETTY_FUNCTION__ << " failed" << std::endl;
+    }
+}
+
+template <typename Engine>
+void counter_overflow_test() {
+    using T = typename Engine::result_type;
+    Engine engine1;
+    std::array<T, Engine::word_count> counter;
+    for(int i = 0; i < Engine::word_count; i++) {
+        counter[i] = std::numeric_limits<T>::max();
+    }
+
+    engine1.set_counter(counter);
+    for(int i = 0; i < Engine::word_count; i++) {
+        engine1();
+    } // all counters overflowed == start from 0 0 0 0
+
+    Engine engine2;
+
+    if(engine1() == engine2()) {
+        std::cout << __PRETTY_FUNCTION__ << " passed" << std::endl;
+    } else {
+        std::cout << __PRETTY_FUNCTION__ << " failed" << std::endl;
+    }
+}
+
 
 int main() {
     conformance_test<std::philox4x32>();
@@ -93,6 +161,15 @@ int main() {
 
     discard_test<std::philox4x32>();
     discard_test<std::philox4x64>();
+
+    set_counter_conformance_test<std::philox4x32>();
+    set_counter_conformance_test<std::philox4x64>();
+
+    skip_test<std::philox4x32>();
+    skip_test<std::philox4x64>();
+
+    counter_overflow_test<std::philox4x32>();
+    counter_overflow_test<std::philox4x64>();
 
     return 0;
 }
