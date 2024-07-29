@@ -115,17 +115,23 @@ void set_counter_conformance_test() {
 template <typename Engine>
 void skip_test() {
     using T = typename Engine::result_type;
-    Engine engine1;
-    std::array<T, Engine::word_count> counter = {0, 0, 0, 5};
-    engine1.set_counter(counter);
-    Engine engine2;
-    engine2.discard(5 * Engine::word_count);
+    for(T i = 1; i <= Engine::word_count + 1; i++) {
+        Engine engine1;
+        std::array<T, Engine::word_count> counter = {0, 0, 0, i / Engine::word_count};
+        engine1.set_counter(counter);
+        for(T j = 0; j < i % Engine::word_count; j++) {
+            engine1();
+        }
 
-    if(engine1() == engine2()) {
-        std::cout << __PRETTY_FUNCTION__ << " passed" << std::endl;
-    } else {
-        std::cout << __PRETTY_FUNCTION__ << " failed" << std::endl;
+        Engine engine2;
+        engine2.discard(i);
+
+        if(engine1() != engine2()) {
+            std::cout << __PRETTY_FUNCTION__ << " failed for " << i << " skip" << std::endl;
+            return;
+        }
     }
+    std::cout << __PRETTY_FUNCTION__ << " passed" << std::endl;
 }
 
 template <typename Engine>
