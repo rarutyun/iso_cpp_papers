@@ -11,6 +11,7 @@
 #include <istream>
 #include <ostream>
 #include <algorithm>
+#include <bit>
 
 namespace std {
 namespace detail {
@@ -98,10 +99,8 @@ public:
     template<class Sseq>
     void seed(Sseq& q)
     {
-        using seq_result_type = typename Sseq::result_type;
-
         constexpr std::size_t p = (w - 1) / 32 + 1; // ceil division
-        std::array<seq_result_type, n / 2 * p> a;
+        std::array<result_type, n / 2 * p> a;
         q.generate(a.begin(), a.end());
 
         for (std::size_t i = 0; i < (n / 2); ++i)
@@ -155,16 +154,18 @@ public:
         else {
             z -= available_in_buffer;
             int tail = z % n;
-            if (tail == 0 && state_i == (n - 1)) {
+            if (tail == 0) {
                 increment_counter(z / n);
+                state_i = n - 1;
             }
-            else {
-                state_i = tail != 0 ? tail - 1 : (n - 1);
-                if (z > 1) {
+            else
+            {
+                if (z > n) {
                     increment_counter((z - 1) / n);
                 }
                 y = philox_generate(k, x);
                 increment_counter();
+                state_i = tail - 1;
             }
         }
     }
