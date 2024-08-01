@@ -13,22 +13,7 @@
 #include <algorithm>
 
 namespace std {
-
-template <typename UIntType, std::size_t w, std::size_t n, std::size_t r, UIntType... consts>
-struct philox_engine
-{
-private:
-    static_assert(n > 0);
-    static_assert(r > 0);
-    static_assert((n & (n - 1)) == 0); // n is a power of two
-    static_assert(sizeof...(consts) == n); // check if n is even
-    static_assert(n <= 16); // any power of 2 that is <= 16
-    static_assert(w > 0 && w <= std::numeric_limits<UIntType>::digits);
-
-    static constexpr std::size_t array_size = n / 2;
-
-    using half_index_sequence = std::make_index_sequence<array_size>;
-
+namespace internal {
     template <typename IndexSequence, template <std::size_t...> typename TransformFunction>
     struct transform_index_sequence_impl;
 
@@ -52,9 +37,23 @@ private:
     {
         static constexpr std::size_t value = Is * 2;
     };
+} // namespace internal
 
-    using even_indices_sequence = transform_index_sequence<half_index_sequence, even_transform>;
-    using odd_indices_sequence = transform_index_sequence<half_index_sequence, odd_transform>;
+template <typename UIntType, std::size_t w, std::size_t n, std::size_t r, UIntType... consts>
+struct philox_engine
+{
+private:
+    static_assert(n == 2 || n == 4 || n == 8 || n == 16);
+    static_assert(r > 0);
+    static_assert(sizeof...(consts) == n); // check if n is even
+    static_assert(w > 0 && w <= std::numeric_limits<UIntType>::digits);
+
+    static constexpr std::size_t array_size = n / 2;
+
+    using half_index_sequence = std::make_index_sequence<array_size>;
+
+    using even_indices_sequence = internal::transform_index_sequence<half_index_sequence, internal::even_transform>;
+    using odd_indices_sequence = internal::transform_index_sequence<half_index_sequence, internal::odd_transform>;
 
     static constexpr auto extract_elements = []<std::size_t... Is>(std::index_sequence<Is...>)
     {
@@ -67,11 +66,11 @@ public:
     using result_type = UIntType;
 
     // engine characteristics
-    static constexpr size_t word_size = w;
-    static constexpr size_t word_count = n;
-    static constexpr size_t round_count = r;
-    static constexpr array<result_type, array_size> multipliers = extract_elements(even_indices_sequence{});
-    static constexpr array<result_type, array_size> round_consts = extract_elements(odd_indices_sequence{});
+    static constexpr std::size_t word_size = w;
+    static constexpr std::size_t word_count = n;
+    static constexpr std::size_t round_count = r;
+    static constexpr std::array<result_type, array_size> multipliers = extract_elements(even_indices_sequence{});
+    static constexpr std::array<result_type, array_size> round_consts = extract_elements(odd_indices_sequence{});
     static constexpr result_type min() { return 0; }
     static constexpr result_type max() { return max_impl(); }
     static constexpr result_type default_seed = 20111115u;
@@ -93,7 +92,7 @@ public:
         for (std::size_t j = 0; j < n; ++j) {
             x[j] = 0;
         }
-        state_i = 3;
+        state_i = n - 1;
     }
 
     template<class Sseq>
@@ -112,7 +111,7 @@ public:
             && left.state_i == right.state_i;
         for (auto i = left.state_i + 1; (i < n) && result; ++i)
         {
-            result &= left.y[i] == right.y[i];
+            result = result && (left.y[i] == right.y[i]);
         }
         return result;
     }
@@ -130,32 +129,35 @@ public:
     }
 
     void discard(unsigned long long z) {
-        std::uint32_t num_available = n - 1 - state_i;
-        if (z < num_available) {
+        std::uint32_t available_in_buffer = n - 1 - state_i;
+        if (z <= available_in_buffer) {
             state_i += z;
         }
         else {
+            z -= available_in_buffer;
             int tail = z % n;
-            if (tail == 0 && state_i == 3) {
+            if (tail == 0 && state_i == (n - 1)) {
                 increment_counter(z / n);
             }
             else {
-                z -= num_available;
-                state_i = tail - 1;
-                increment_counter((z - 1) / n);
+                state_i = tail != 0 ? tail - 1 : (n - 1);
+                if (z > 1) {
+                    increment_counter((z - 1) / n);
+                }
                 y = philox_generate(k, x);
                 increment_counter();
             }
         }
     }
+
     // inserters and extractors
     template<class charT, class traits>
-    friend basic_ostream<charT, traits>&
-    operator<<(basic_ostream<charT, traits>& os, const philox_engine& x);
+    friend std::basic_ostream<charT, traits>&
+    operator<<(std::basic_ostream<charT, traits>& os, const philox_engine& x);
 
     template<class charT, class traits>
-    friend basic_istream<charT, traits>&
-    operator>>(basic_istream<charT, traits>& is, philox_engine& x);
+    friend std::basic_istream<charT, traits>&
+    operator>>(std::basic_istream<charT, traits>& is, philox_engine& x);
 
 
 private: // utilities
@@ -164,12 +166,8 @@ private: // utilities
 public:
     static consteval std::size_t get_log_index(std::size_t val)
     {
-        val = (val - 1) / CHAR_BIT + 1;
-        auto width = std::bit_width(val);
-
-        std::size_t subtrahend = static_cast<std::size_t>(std::has_single_bit(val));
-
-        return width - subtrahend;
+        auto z = std::max(val, std::size_t(8));
+        return std::bit_width(z - 1u) - 3u;
     }
 private:
 
@@ -237,10 +235,14 @@ private: // functions
 
     void increment_counter(unsigned long long z)
     {
-        for(std::size_t j = 0; j < n; j++) {
-            z += (unsigned long long)x[j];
-            x[j] = z & counter_mask;
-            z = z >> w;
+        using increment_type = __uint128_t;
+
+        increment_type tmp = z;
+        for (std::size_t j = 0; j < n; j++)
+        {
+            tmp += x[j];
+            x[j] = tmp & counter_mask;
+            tmp = tmp >> w;
         }
     }
 
