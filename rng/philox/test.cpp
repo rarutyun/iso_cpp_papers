@@ -69,14 +69,17 @@ void discard_test() {
         std::cout << __PRETTY_FUNCTION__ << " passed step 1 discard from the intial state" << std::endl;
 
         for(int i = 1; i < n; i++) {
-            engine.seed();
-            for(size_t j = 0; j < i - 1; j++) {
-                engine();
-            }
-            engine.discard(1);
-            if(reference[i] != engine()) {
-                std::cout << __PRETTY_FUNCTION__ << " failed on step " << i << std::endl;
-                break;
+            for(int j = 1; j < i; j++) {
+                engine.seed();
+                for(size_t k = 0; k < i - j; k++) {
+                    engine();
+                }
+                engine.discard(j);
+                if(reference[i] != engine()) {
+                    std::cout << __PRETTY_FUNCTION__ << " failed on step " << i << " " << j << std::endl;
+                    exit(-1);
+                    break;
+                }
             }
         }
         std::cout << __PRETTY_FUNCTION__ << " passed step 2 discard after generation" << std::endl;
