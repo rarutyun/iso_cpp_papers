@@ -13,7 +13,7 @@
 #include <algorithm>
 
 namespace std {
-namespace internal {
+namespace detail {
     template <typename IndexSequence, template <std::size_t...> typename TransformFunction>
     struct transform_index_sequence_impl;
 
@@ -37,7 +37,7 @@ namespace internal {
     {
         static constexpr std::size_t value = Is * 2;
     };
-} // namespace internal
+} // namespace detail
 
 template <typename UIntType, std::size_t w, std::size_t n, std::size_t r, UIntType... consts>
 struct philox_engine
@@ -52,8 +52,8 @@ private:
 
     using half_index_sequence = std::make_index_sequence<array_size>;
 
-    using even_indices_sequence = internal::transform_index_sequence<half_index_sequence, internal::even_transform>;
-    using odd_indices_sequence = internal::transform_index_sequence<half_index_sequence, internal::odd_transform>;
+    using even_indices_sequence = detail::transform_index_sequence<half_index_sequence, detail::even_transform>;
+    using odd_indices_sequence = detail::transform_index_sequence<half_index_sequence, detail::odd_transform>;
 
     static constexpr auto extract_elements = []<std::size_t... Is>(std::index_sequence<Is...>)
     {
@@ -82,21 +82,40 @@ public:
     }
 
     template<class Sseq>
-    explicit philox_engine(Sseq& q);
+    explicit philox_engine(Sseq& q)
+    {
+        seed(q);
+    }
 
     void seed(result_type value = default_seed) {
         k[0] = value & result_mask;
         for (std::size_t j = 1; j < array_size; ++j) {
             k[j] = 0;
         }
-        for (std::size_t j = 0; j < n; ++j) {
-            x[j] = 0;
-        }
-        state_i = n - 1;
+        reset_counter();
     }
 
     template<class Sseq>
-    void seed(Sseq& q);
+    void seed(Sseq& q)
+    {
+        using seq_result_type = typename Sseq::result_type;
+
+        constexpr std::size_t p = (w - 1) / 32 + 1; // ceil division
+        std::array<seq_result_type, n / 2 * p> a;
+        q.generate(a.begin(), a.end());
+
+        for (std::size_t i = 0; i < (n / 2); ++i)
+        {
+            result_type sum = 0;
+            for (std::size_t j = 0; j < p; ++j)
+            {
+                sum += a[i * p + j] << (32 * j);
+            }
+            k[i] = sum & result_mask;
+        }
+
+        reset_counter();
+    }
 
     void set_counter(const array<result_type, n>& counter) {
         for (std::size_t j = 0; j < n; ++j) {
@@ -244,6 +263,14 @@ private: // functions
             x[j] = tmp & counter_mask;
             tmp = tmp >> w;
         }
+    }
+
+    void reset_counter()
+    {
+        for (std::size_t j = 0; j < n; ++j) {
+            x[j] = 0;
+        }
+        state_i = n - 1;
     }
 
     static constexpr result_type max_impl()
