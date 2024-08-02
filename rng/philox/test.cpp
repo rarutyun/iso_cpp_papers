@@ -1,30 +1,80 @@
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <limits.h>
+#include <random>
 
 #include "philox.hpp"
 
 // Test the conformance of the implementation with the ISO C++ standard
 template <typename Engine>
 void conformance_test() {
+    Engine engine;
+    for(int i = 0; i < 9999; i++) {
+        engine();
+    }
+    typename Engine::result_type reference;
+    if(std::is_same_v<Engine, std::philox4x32>) {
+        reference = 1955073260;
+    }
+    else {
+        reference = 3409172418970261260;
+    }
+    if(engine() == reference) {
+        std::cout << __PRETTY_FUNCTION__ << " passed" << std::endl;
+    } else {
+        std::cout << __PRETTY_FUNCTION__ << " failed" << std::endl;
+    }
+}
+
+// Test public API
+template <typename Engine>
+void api_test() {
     {
         Engine engine;
-        for(int i = 0; i < 9999; i++) {
-            engine();
+        engine.seed();
+    }
+    {
+        Engine engine(1);
+        engine.seed(1);
+    }
+    {
+        std::seed_seq s;
+        Engine engine(s);
+        engine.seed(s);
+    }
+    {
+        Engine engine;
+        Engine engine2;
+        if(!(engine == engine2) || (engine != engine2)) {
+            std::cout << __PRETTY_FUNCTION__ << " failed !=, == for the same engines" << std::endl;
+            return;
         }
-        typename Engine::result_type reference;
-        if(std::is_same_v<Engine, std::philox4x32>) {
-            reference = 1955073260;
-        }
-        else {
-            reference = 3409172418970261260;
-        }
-        if(engine() == reference) {
-            std::cout << __PRETTY_FUNCTION__ << " passed" << std::endl;
-        } else {
-            std::cout << __PRETTY_FUNCTION__ << " failed" << std::endl;
+        engine2.seed(42);
+        if((engine == engine2) || !(engine != engine2)) {
+            std::cout << __PRETTY_FUNCTION__ << " failed !=, == for the different engines" << std::endl;
+            return;
         }
     }
+    {
+        std::ostringstream os;
+        Engine engine;
+        os << engine << std::endl;
+        Engine engine2;
+        engine2();
+        std::istringstream in(os.str());
+        in >> engine2;
+        if(engine != engine2) {
+            std::cout << __PRETTY_FUNCTION__ << " failed for >> << operators" << std::endl;
+            return;
+        }
+    }
+    {
+        Engine engine;
+        engine.min();
+        engine.max();
+    }
+    std::cout << __PRETTY_FUNCTION__ << " passed" << std::endl;
 }
 
 template <typename Engine>
@@ -77,7 +127,6 @@ void discard_test() {
                 engine.discard(j);
                 if(reference[i] != engine()) {
                     std::cout << __PRETTY_FUNCTION__ << " failed on step " << i << " " << j << std::endl;
-                    exit(-1);
                     break;
                 }
             }
@@ -198,6 +247,9 @@ void discard_overflow_test() {
 int main() {
     conformance_test<std::philox4x32>();
     conformance_test<std::philox4x64>();
+
+    api_test<std::philox4x32>();
+    api_test<std::philox4x64>();
 
     seed_test<std::philox4x32>();
     seed_test<std::philox4x64>();
