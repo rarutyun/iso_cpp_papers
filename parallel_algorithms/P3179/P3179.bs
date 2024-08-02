@@ -68,7 +68,7 @@ std::for_each(std::execution::par_unseq,
 std::span<double> data = …;
 double C = …;
 
-std::for_each(std::execution::par_unseq,
+std::ranges::for_each(std::execution::par_unseq,
   std::views::iota(1, data.size()),
   [=] (auto i) { data[i] *= C; });
 </code></pre>
@@ -103,7 +103,7 @@ std::for_each(std::execution::par_unseq,
 std::mdspan A{input,  N, M};
 std::mdspan B{output, M, N};
 
-std::for_each(std::execution::par_unseq,
+std::ranges::for_each(std::execution::par_unseq,
   std::views::cartesian_product(
     std::views::iota(0, A.extent(0)),
     std::views::iota(0, A.extent(1))),
