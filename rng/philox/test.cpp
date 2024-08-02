@@ -160,6 +160,40 @@ void counter_overflow_test() {
     }
 }
 
+template <typename Engine>
+void discard_overflow_test() {
+    using T = typename Engine::result_type;
+    Engine engine1;
+    std::array<T, Engine::word_count> counter;
+
+    for(int i = 0; i < Engine::word_count; i++) {
+        counter[i] = 0;
+    }
+    
+    if(std::is_same_v<Engine, std::philox4x32>) {
+        counter[1] = 1;
+    }
+    else if(std::is_same_v<Engine, std::philox4x64>) {
+        counter[2] = 1;
+    }
+
+    engine1.set_counter(counter);
+
+    Engine engine2;
+
+    for(int i = 0; i < Engine::word_count; i++) {
+        engine2();
+    }
+    for(int i = 0; i < Engine::word_count; i++) {
+        engine2.discard(std::numeric_limits<unsigned long long>::max());
+    }
+
+    if(engine1() == engine2()) {
+        std::cout << __PRETTY_FUNCTION__ << " passed" << std::endl;
+    } else {
+        std::cout << __PRETTY_FUNCTION__ << " failed" << std::endl;
+    }
+}
 
 int main() {
     conformance_test<std::philox4x32>();
@@ -179,6 +213,9 @@ int main() {
 
     counter_overflow_test<std::philox4x32>();
     counter_overflow_test<std::philox4x64>();
+
+    discard_overflow_test<std::philox4x32>();
+    discard_overflow_test<std::philox4x64>();
 
     return 0;
 }
