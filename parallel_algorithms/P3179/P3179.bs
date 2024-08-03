@@ -17,6 +17,16 @@ Abstract: This paper proposes adding parallel algorithms that work together with
     table, th, td {
         border: 1px solid black;
 }
+
+.ins, ins, ins * {
+    background-color: rgb(200, 250, 200);
+    color: rgb(0, 136, 0);
+    text-decoration: none;
+}
+
+span, span * {
+    white-space: pre;
+}
 </style>
 
 # Motivation # {#motivation}
@@ -599,45 +609,44 @@ When the design is ratified, it will be spread across other algorithms.
 template <class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S,
           class Proj = identity, indirectly_unary_invocable<projected<I, Proj>> Fun>
   I
-    ranges::for_each(ExecutionPolicy&& policy, I first, S last, Fun f, Proj proj = {});
+    for_each(ExecutionPolicy&& policy, I first, S last, Fun f, Proj proj = {});
 
-template <class ExecutionPolicy, random_access_range R, class Proj = identity,
-         indirectly_unary_invocable<projected<iterator_t<R>, Proj>> Fun>
-requires sized_sentinel_for<ranges::sentinel_t<R>, ranges::iterator_t<R>>
+template <class ExecutionPolicy, ranges::random_access_range R, class Proj = identity,
+         indirectly_unary_invocable<projected<ranges::iterator_t<R>, Proj>> Fun>
+requires ranges::sized_range<R>
   ranges::borrowed_iterator_t<R>
-    ranges::for_each(ExecutionPolicy&& policy, R&& r, Fun f, Proj proj = {});
+    for_each(ExecutionPolicy&& policy, R&& r, Fun f, Proj proj = {});
 
 // binary transform with an output range and an output sentinel
 template< typename ExecutionPolicy,
           random_access_iterator I1, sentinel_for<I1> S1,
           random_access_iterator I2, sentinel_for<I2> S2,
-          random_access_iterator O, sized_sentinel_for<O> SO,
+          random_access_iterator O,
           copy_constructible F,
           class Proj1 = identity, class Proj2 = identity >
-requires indirectly_writable<O,
+  requires indirectly_writable<O,
              indirect_result_t<F&, projected<I1, Proj1>, projected<I2, Proj2>>>
          && (sized_sentinel_for<S1, I1> || sized_sentinel_for<S2, I2>)
-constexpr binary_transform_result<I1, I2, O>
-    transform( ExecutionPolicy&& policy, I1 first1, S1 last1, I2 first2, S2 last2, O result, SO s,
+  ranges::binary_transform_result<I1, I2, O>
+    transform( ExecutionPolicy&& policy, I1 first1, S1 last1, I2 first2, S2 last2, O result,
                F binary_op, Proj1 proj1 = {}, Proj2 proj2 = {} );
 
 template< typename ExecutionPolicy,
           ranges::random_access_range R1,
           ranges::random_access_range R2,
-          ranges::random_access_range RR,
+          random_access_iterator O,
           copy_constructible F,
           class Proj1 = identity, class Proj2 = identity >
-requires indirectly_writable<ranges::iterator_t<RR>,
+requires indirectly_writable<O,
              indirect_result_t<F&,
                  projected<ranges::iterator_t<R1>, Proj1>,
                  projected<ranges::iterator_t<R2>, Proj2>>>
-         && (sized_sentinel_for<ranges::sentinel_t<R1>, ranges::iterator_t<R1>>
-             || sized_sentinel_for<ranges::sentinel_t<R2>, ranges::iterator_t<R2>>)
-         && sized_sentinel_for<ranges::sentinel_t<RR>, ranges::iterator_t<RR>>
-constexpr binary_transform_result<ranges::borrowed_iterator_t<R1>,
+         && (ranges::sized_range<R1>
+             || ranges::sized_range<R2>)
+ranges::binary_transform_result<ranges::borrowed_iterator_t<R1>,
                                   ranges::borrowed_iterator_t<R2>,
-                                  ranges::borrowed_iterator_t<RR>>
-    transform( ExecutionPolicy&& policy, R1&& r1, R2&& r2, RR&& result, F binary_op,
+                                  O>
+    transform( ExecutionPolicy&& policy, R1&& r1, R2&& r2, O result, F binary_op,
                Proj1 proj1 = {}, Proj2 proj2 = {} );
 
 ```
@@ -713,14 +722,155 @@ Here are questions we want to answer (potentially not a complete list):
 - Are races not possible because of implementation strategy chosen by standard libraries?
 - Do we need to add extra requirements towards thread safety to the standard views?
 
+# Formal wording # {#formal_wording}
+
+## Modify `all_of` in <a href="https://eel.is/c++draft/alg.all.of">[**alg.all.of**]</a> ## {#modify_alg_all_of}
+
+<pre>
+template&lt;input_iterator I, sentinel_for&lt;I> S, class Proj = identity,
+         indirect_unary_predicate&lt;projected&lt;I, Proj>> Pred>
+  constexpr bool ranges::all_of(I first, S last, Pred pred, Proj proj = {});
+template&lt;input_range R, class Proj = identity,
+         indirect_unary_predicate&lt;projected&lt;iterator_t&lt;R>, Proj>> Pred>
+  constexpr bool ranges::all_of(R&& r, Pred pred, Proj proj = {});
+<ins>
+template&lt;class ExecutionPolicy, random_access_iterator I, sized_sentinel_for&lt;I> S, class Proj = identity,
+         indirect_unary_predicate&lt;projected&lt;I, Proj>> Pred>
+  constexpr bool ranges::all_of(ExecutionPolicy&& exec, I first, S last, Pred pred, Proj proj = {});
+template&lt;class ExecutionPolicy, random_access_range R, class Proj = identity,
+         indirect_unary_predicate&lt;projected&lt;iterator_t&lt;R>, Proj>> Pred>
+  requires ranges::sized_range&lt;R>
+  constexpr bool ranges::all_of(ExecutionPolicy&& exec, R&& r, Pred pred, Proj proj = {});
+</ins>
+</pre>
+
+## Modify `any_of` in <a href="https://eel.is/c++draft/alg.any.of">[**alg.any.of**]</a> ## {#modify_alg_any_of}
+
+<pre>
+template&lt;class InputIterator, class Predicate>
+  constexpr bool any_of(InputIterator first, InputIterator last, Predicate pred);
+template&lt;class ExecutionPolicy, class ForwardIterator, class Predicate>
+  bool any_of(ExecutionPolicy&& exec, ForwardIterator first, ForwardIterator last,
+              Predicate pred);
+
+template&lt;input_iterator I, sentinel_for&lt;I> S, class Proj = identity,
+         indirect_unary_predicate&lt;projected&lt;I, Proj>> Pred>
+  constexpr bool ranges::any_of(I first, S last, Pred pred, Proj proj = {});
+template&lt;input_range R, class Proj = identity,
+         indirect_unary_predicate&lt;projected&lt;iterator_t&lt;R>, Proj>> Pred>
+  constexpr bool ranges::any_of(R&& r, Pred pred, Proj proj = {});
+<ins>
+template&lt;class ExecutionPolicy, random_access_iterator I, sized_sentinel_for&lt;I> S, class Proj = identity,
+         indirect_unary_predicate&lt;projected&lt;I, Proj>> Pred>
+  bool ranges::any_of(ExecutionPolicy&& exec, I first, S last, Pred pred, Proj proj = {});
+template&lt;class ExecutionPolicy, random_access_range R, class Proj = identity,
+         indirect_unary_predicate&lt;projected&lt;iterator_t&lt;R>, Proj>> Pred>
+  requires ranges::sized_range&lt;R>
+  bool ranges::any_of(ExecutionPolicy&& exec, R&& r, Pred pred, Proj proj = {});
+</ins>
+</pre>
+
+## Modify `none_of` in <a href="https://eel.is/c++draft/alg.none.of">[**alg.none.of**]</a> ## {#modify_alg_none_of}
+
+<pre>
+template&lt;class InputIterator, class Predicate>
+  constexpr bool none_of(InputIterator first, InputIterator last, Predicate pred);
+template&lt;class ExecutionPolicy, class ForwardIterator, class Predicate>
+  bool none_of(ExecutionPolicy&& exec, ForwardIterator first, ForwardIterator last,
+               Predicate pred);
+
+template&lt;input_iterator I, sentinel_for&lt;I> S, class Proj = identity,
+         indirect_unary_predicate&lt;projected&lt;I, Proj>> Pred>
+  constexpr bool ranges::none_of(I first, S last, Pred pred, Proj proj = {});
+template&lt;input_range R, class Proj = identity,
+         indirect_unary_predicate&lt;projected&lt;iterator_t&lt;R>, Proj>> Pred>
+  constexpr bool ranges::none_of(R&& r, Pred pred, Proj proj = {});
+<ins>
+template&lt;class ExecutionPolicy, random_access_iterator I, sized_sentinel_for&lt;I> S, class Proj = identity,
+         indirect_unary_predicate&lt;projected&lt;I, Proj>> Pred>
+  bool ranges::none_of(ExecutionPolicy&& exec, I first, S last, Pred pred, Proj proj = {});
+template&lt;class ExecutionPolicy, random_access_range R, class Proj = identity,
+         indirect_unary_predicate&lt;projected&lt;iterator_t&lt;R>, Proj>> Pred>
+  requires ranges::sized_range&lt;R>
+  bool ranges::none_of(ExecutionPolicy&& exec, R&& r, Pred pred, Proj proj = {});
+</ins>
+</pre>
+
+## Modify `contains` in <a href="https://eel.is/c++draft/alg.contains">[**alg.contains**]</a> ## {#modify_alg_contains}
+
+<pre>
+template&lt;input_iterator I, sentinel_for&lt;I> S, class Proj = identity,
+         class T = projected_value_t&lt;I, Proj>>
+  requires indirect_binary_predicate&lt;ranges::equal_to, projected&lt;I, Proj>, const T*>
+  constexpr bool ranges::contains(I first, S last, const T& value, Proj proj = {});
+template&lt;input_range R, class Proj = identity, class T = projected_value_t&lt;iterator_t&lt;R>, Proj>>
+  requires indirect_binary_predicate&lt;ranges::equal_to, projected&lt;iterator_t&lt;R>, Proj>, const T*>
+  constexpr bool ranges::contains(R&& r, const T& value, Proj proj = {});
+</pre>
+
+<i>Returns</i>: `ranges​::​find(std​::​move(first), last, value, proj) != last.`
+<ins>
+<pre>
+template&lt;class ExecutionPolicy, random_access_iterator I, sized_sentinel_for&lt;I> S, class Proj = identity,
+         class T = projected_value_t&lt;I, Proj>>
+  requires indirect_binary_predicate&lt;ranges::equal_to, projected&lt;I, Proj>, const T*>
+  bool ranges::contains(ExecutionPolicy&& exec, I first, S last, const T& value, Proj proj = {});
+template&lt;class ExecutionPolicy, random_access_range R, class Proj = identity, class T = projected_value_t&lt;iterator_t&lt;R>, Proj>>
+  requires indirect_binary_predicate&lt;ranges::equal_to, projected&lt;iterator_t&lt;R>, Proj>, const T*> &&
+    ranges::sized_range&lt;R>
+  bool ranges::contains(ExecutionPolicy&& exec, R&& r, const T& value, Proj proj = {});
+</pre>
+
+<i>Returns</i>: `ranges​::​find(std::forward<ExecutionPolicy>(exec), std​::​move(first), last, value, proj) != last.`
+</ins>
+<pre>
+template&lt;forward_iterator I1, sentinel_for&lt;I1> S1,
+         forward_iterator I2, sentinel_for&lt;I2> S2,
+         class Pred = ranges::equal_to, class Proj1 = identity, class Proj2 = identity>
+  requires indirectly_comparable&lt;I1, I2, Pred, Proj1, Proj2>
+  constexpr bool ranges::contains_subrange(I1 first1, S1 last1, I2 first2, S2 last2,
+                                           Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
+template&lt;forward_range R1, forward_range R2,
+         class Pred = ranges::equal_to, class Proj1 = identity, class Proj2 = identity>
+  requires indirectly_comparable&lt;iterator_t&lt;R1>, iterator_t&lt;R2>, Pred, Proj1, Proj2>
+  constexpr bool ranges::contains_subrange(R1&& r1, R2&& r2, Pred pred = {},
+                                           Proj1 proj1 = {}, Proj2 proj2 = {});
+</pre>
+
+<i>Returns</i>: `first2 == last2 || !ranges​::​search(first1, last1, first2, last2, pred, proj1, proj2).empty().`
+
+<ins>
+<pre>
+template&lt;class ExecutionPolicy, random_access_iterator I1, sized_sentinel_for&lt;I1> S1,
+         random_access_iterator I2, sized_sentinel_for&lt;I2> S2,
+         class Pred = ranges::equal_to, class Proj1 = identity, class Proj2 = identity>
+  requires indirectly_comparable&lt;I1, I2, Pred, Proj1, Proj2>
+  bool ranges::contains_subrange(ExecutionPolicy&& exec, I1 first1, S1 last1, I2 first2, S2 last2,
+                                 Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
+template&lt;class ExecutionPolicy, random_access_range R1, random_access_range R2,
+         class Pred = ranges::equal_to, class Proj1 = identity, class Proj2 = identity>
+  requires indirectly_comparable&lt;iterator_t&lt;R1>, iterator_t&lt;R2>, Pred, Proj1, Proj2> &&
+    ranges::sized_range&lt;R1> && ranges::sized_range&lt;R2>
+  bool ranges::contains_subrange(ExecutionPolicy&& exec, R1&& r1, R2&& r2, Pred pred = {},
+                                 Proj1 proj1 = {}, Proj2 proj2 = {});
+</pre>
+
+<i>Returns</i>: `first2 == last2 || !ranges​::​search(std::forward<ExecutionPolicy>(exec), first1, last1, first2, last2, pred, proj1, proj2).empty().`
+</ins>
+
 # Revision history # {#revision_history}
+
+## R2 => R3 ## {#r2_r3}
+
+- Use `iterator` as an output.
+- Add wording
 
 ## R1 => R2 ## {#r1_r2}
 
 - Summarize proposed differences from the serial range algorithms and from the non-range parallel algorithms
 - Allow all but one input sequences to be unbounded
 - List existing algorithms that take ranges for output
-- Update arguments and mitigations for using ranges for output
+- Update arguments and mitigation for using ranges for output
 - Add more arguments in support of random access ranges
 - Fix the signatures of `for_each` to match the proposed design
 
@@ -733,9 +883,33 @@ Here are questions we want to answer (potentially not a complete list):
 
 # Polls # {#polls}
 
+## Joint SG1 + SG9, St. Louis, 2024 ## {#sg1_sg9_st_louis_2024}
+
+**Poll**: Continue work on P3179R2 for IS'26 with these notes:
+1. RandomAccess for inputs and outputs
+2. Iterators for outputs
+3. We believe the overloads are worth it
+
+<table>
+  <tr>
+    <th>SF
+    <th>F
+    <th>N
+    <th>A
+    <th>SA
+  </tr>
+  <tr>
+    <td>7
+    <td>4
+    <td>2
+    <td>1
+    <td>0
+  </tr>
+</table>
+
 ## SG9, Tokyo 2024 ## {#sg9_tokyo_2024}
 
-Poll 1: `for_each` shouldn't return the callable
+**Poll 1**: `for_each` shouldn't return the callable
 <table>
   <tr>
     <th>SF</th>
@@ -753,7 +927,7 @@ Poll 1: `for_each` shouldn't return the callable
   </tr>
 </table>
 
-Poll 2: Parallel `std::ranges` algos should return the same type as serial `std::ranges` algos
+**Poll 2**: Parallel `std::ranges` algos should return the same type as serial `std::ranges` algos
 
 <table>
   <tr>
@@ -761,7 +935,7 @@ Poll 2: Parallel `std::ranges` algos should return the same type as serial `std:
   </tr>
 </table>
 
-Poll 3: Parallel ranges algos should require `forward_range`, not `random_access_range`
+**Poll 3**: Parallel ranges algos should require `forward_range`, not `random_access_range`
 
 <table>
   <tr>
@@ -780,7 +954,7 @@ Poll 3: Parallel ranges algos should require `forward_range`, not `random_access
   </tr>
 </table>
 
-Poll 4: Range-based parallel algos should require const operator()
+**Poll 4**: Range-based parallel algos should require const operator()
 
 <table>
   <tr>
