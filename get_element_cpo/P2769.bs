@@ -1,11 +1,11 @@
 <pre class='metadata'>
 Title: get_element customization point object
 Shortname: P2769
-Level: 2
+Level: 3
 Status: P
 Group: wg21
 Default Highlight: cpp
-URL: https://wg21.link/P2769R2
+URL: https://wg21.link/P2769R3
 Editor: Ruslan Arutyunyan, Intel, ruslan.arutyunyan@intel.com
         Alexey Kukanov, Intel, alexey.kukanov@intel.com
 Audience: LEWG
@@ -401,8 +401,15 @@ struct __get_element_fn
 {
     template <typename _TupleLike>
     auto operator()(_TupleLike&& __tuple_like) const ->
-         decltype(get<_Ip>(std::forward<_TupleLike>(__tuple_like)))
+         decltype(auto)
     {
+        constexpr bool __get_member_well_formed = requires {
+            std::forward<_TupleLike>(__tuple_like).template get<_Ip>();
+        };
+        if constexpr (__get_member_well_formed)
+        {
+            return std::forward<_TupleLike>(__tuple_like).template get<_Ip>();
+        }
         return get<_Ip>(std::forward<_TupleLike>(__tuple_like));
     }
 };
@@ -460,119 +467,75 @@ concept /*tuple-like*/ = !std::is_reference_v<T> &&
 
 # Design considerations # {#design_decisions}
 
-Alternative name for the proposed API could be `std::ranges::get`. Unfortunately,
-this name is already taken for `std::ranges::subrange` overload.
+## `std::ranges::get` ## {#ranges_get}
 
-Potentially `std::ranges::get` could be repurposed for the proposed CPO with minimal API break
-for tricky scenarios only while still working as expected in existing reasonable use cases, as explained below.
-But we (likely) could not avoid an ABI break.
+Alternative design was considered to name the proposed API `std::ranges::get`. Please see [[P2769R2]] for more information.
 
-As `std::get_element` have got more support than `std::ranges::get` at [[#sg9_issaquah_2023]], the rest of this section
-is kept primarily for recording the evaluated and rejected alternative.
+Given that we discussed it several times in C++ committee and nobody wants to pursue with this solution authors don't think
+that keeping the exhaustive information about that design alternative worth it starting from R3.
 
-## What could be done to use `std::ranges::get` name ## {#std_ranges_get_name}
+## Breaking code example ## {#breaking_code}
 
-In all major standard library implementations (GCC, LLVM, Microsoft) the `get` overload for
-`std::ranges::subrange` is defined in `std::ranges`. Adding another definition of `get` to
-the same namespace would obviously create name ambiguity.
+With the proposed API some user code might be broken because `get_element` makes ADL call underneath. Consider the
+following example:
 
-However, library implementors could move the current `std::ranges::get` function to an implementation specific
-namespace (e.g., `__detail`) and inherit (possibly privately) `std::ranges::subrange` from an empty tag class
-(e.g., `adl_hook`) defined in the same namespace.
-That way `std::ranges::__detail::get` can still be found by ADL for `std::ranges::subrange`, and at the same time,
-the `std::ranges::get` name becomes free to be redefined as a CPO that could successfully find a necessary overload
-for `get`, including the case when the argument is a `std::ranges::subrange`.
-Moreover, the proposed `std::ranges::get` CPO type could have a parameter pack in the interface to cover the use case when
-the current `std::ranges::get` function is used with explicit template arguments.
+```cpp
+namespace my {
+    struct type{};
 
-Please see the example that explains the idea and shows how it might look like. A full implementation with examples
-is available [here](https://godbolt.org/z/boKcMWd5f).
+    template <std::size_t I, typename... Args>
+    decltype(auto) get(std::tuple<Args...>& t)
+    {
+        return std::get<I>(t);
+    }
+
+}
+
+int main()
+{
+    std::tuple<my::type> t;
+
+    // std::get_element<0>(t); // call to ADL get is ambiguous here
+
+    std::apply([](auto) { /* do something */ }, t); // potential breaking change, apply uses get_element
+}
+```
+
+This breaking change could be avoided by checking in the `get_element` implementation if the function argument type is one
+five types `std::get` can work with. The implementation with pseudo-code would look like:
+
 
 ```cpp
 namespace std
 {
-namespace ranges
-{
-// Necessary to make namespace __detail being considered by ADL
-// for get<0>(std::ranges::subrange<something>{}) without moving
-// the subrange itself to another namespace
 namespace __detail
 {
-struct adl_hook {};
-}
-
-// thanks to the empty-base optimization, inheriting adl_hook does not break ABI
-template <class T> class subrange : __detail::adl_hook {
-    public: T whatever;
-};
-
-namespace __detail
+template <std::size_t _Ip>
+struct __get_element_fn
 {
-template <std::size_t, class T>
-auto get(subrange<T> x) {
-    return x.whatever;
-}
-} // namespace __detail
-} // namespace ranges
-
-using std::ranges::__detail::get;
-} // namespace std
-
-namespace std
-{
-namespace ranges
-{
-namespace __detail
-{
-// Introduce Args... to cover the case of calling get with explicit template arguments
-template <std::size_t _Ip, typename... Args>
-struct __get_fn
-{
-    // No more than std::tuple_size_v template arguments should be allowed
-    template <typename _TupleLike> requires (sizeof...(Args) <= std::tuple_size_v<std::remove_cvref_t<_TupleLike>>
-                                     && __are_tuple_elements_convertible_to_args<std::remove_cvref_t<_TupleLike>, Args...>::value)
-    decltype(auto) operator()(_TupleLike&& __tuple_like) const
+    template <typename _TupleLike>
+    auto operator()(_TupleLike&& __tuple_like) const ->
+         decltype(auto)
     {
+        constexpr bool __get_member_well_formed = requires {
+            std::forward<_TupleLike>(__tuple_like).template get<_Ip>();
+        };
+        // using __type = std::remove_cvref_t<_TupleLike>'
+        // if constexpr (type is std::tuple or std::pair or std::array or std::ranges::subrange or std::complex)
+        // {
+        //     std::get<_Ip>(std::forward<_TupleLike>(__tuple_like));
+        // }
+        if constexpr (__get_member_well_formed)
+        {
+            return std::forward<_TupleLike>(__tuple_like).template get<_Ip>();
+        }
         return get<_Ip>(std::forward<_TupleLike>(__tuple_like));
     }
 };
 } // namespace __detail
-
-inline namespace __get_fn_namespace
-{
-template <std::size_t _Ip, typename... Args>
-inline constexpr __detail::__get_fn<_Ip, Args...> get;
-} // inline namespace __get_fn_namespace
-} // namespace ranges
-} // namespace std
 ```
-
-With such an implementation, all important cases from our perspective continue working:
-* `std::ranges::get<0>(sub_r)`
-* `std::get<0>(sub_r)`
-* `get<0>(sub_r)`
-* `std::ranges::get<0, some_arg>(sub_r)` (can also be used without namespace)
-
-where `sub_r` is `std::ranges::subrange` object.
-
-The API breaking change appears when `get` has all explicit template arguments for `subrange`,
-i.e., `std::ranges::get<Iarg, Sarg, Karg>(std::ranges::subrange<Iarg, Sarg, Karg>{})`. The problem is
-with the last `Karg` argument, which is unrelated to `tuple_size_v` and `tuple_element_t` of the subrange.
-Even if we say that the proposed backward compatible CPO with `Args...` does not constraint `sizeof...(Args)`
-and ignores the tail outside `tuple_size_v<subrange>`, it doesn't help
-for the mentioned use case because `K` of `std::ranges::subrange` is a non-type template parameter.
-Anyway, this scenario doesn't look common because explicit template parameters are used relatively rarely
-and furthermore, `K` has the default argument that is substituted based on a sentinel.
-
-Definitely such a change would break the ABI for `std::ranges::get` because the fully qualified name of
-this function would change from what is in C++ standard library implementations today.
-But we think that that ABI break would have low impact because `std::ranges::get` is likely
-inlined and so doesn't create a visible symbol in translation units.
-We could imagine other tricky scenario where the API might be broken when `std::ranges::get` is used for something else but call. For example:
-`&std::ranges::get<0>`, `decltype(std::ranges::get<0>)`, etc. However, these scenarios don't look common.
-
-Since the `std::ranges::subrange` API is relatively new, perhaps only a small amount
-of users would be affected but it can not be predicted accurately.
+**However**, the breaking change code example looks weird. It should be very uncommon. Authors recommendation is to not care
+about the scenario mentioned above/
 
 # Connections with other papers # {#other_papers_connections}
 
@@ -606,7 +569,6 @@ semantics, for example, `std::less` and `std::ranges::less`, where the latter is
 
 # Further work # {#further_work}
 
-- <s>Substitute std::get_element for std::get in formal wording of the APIs with tuple-like</s>
 - Broader implementation experience
 
 # Formal wording # {#wording}
@@ -909,6 +871,12 @@ if constexpr (is_reference_v&lt;range_reference_t&lt;Base>>) {
 </blockquote>
 
 # Revision history # {#revision_history}
+
+## R2 => R3 ## {#r2_r3}
+
+* Remove the exhaustive information about `std::ranges::get` design alternative
+* Align the behavior of `get_element` with *Structured Binding*
+* Add support for value categories for *tuple-like* concept
 
 ## R1 => R2 ## {#r1_r2}
 
