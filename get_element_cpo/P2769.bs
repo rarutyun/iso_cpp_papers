@@ -537,8 +537,8 @@ struct __get_element_fn
 } // namespace std
 ```
 
-However, the breaking change code example looks weird because the overload in `my` namespace does not use any
-user-defined type. The overload is generic and is not different from `std::get`. **Authors recommendation** is to not care
+However, such potential change is very unlikely. In particular, there is no user-defined type involved. If such code was deployed, it's likely to be already broken. Indeed, while `std::get` is not a customisation point, it is often used unqualified (and therefore found by ADL), such that the code above can already be ambiguous.
+Therefore we do not think that this potential breaking change requires any preventive measure (and we don't think such measure exist)
 about the scenario mentioned above.
 
 ## `get_element` for `std::variant` (or other non-tuple-like) ## {#get_element_std_variant}
@@ -551,7 +551,7 @@ While it might be good for `get_element` to be applicable in the same context wh
 with the current proposal (purposefully):
 - `std::get` has overloads that allow to access `tuple` elements by type, while `std::get_element` doesn't.
 - It hard to imagine the generic code that expects both `tuple-like` or `std::variant` as an argument because it's always
-    safe to access any of `tuple-like` elements but for `std::variant` only one alternative is "active".
+    safe to access any element of a `tuple-like` object whereas for `std::variant` only one alternative is "active" - and therefore safe to access. Supporting variant in this interface would make it easy to introduce UB in generic code.
 - If `get_element` is unconstrained it becomes too wide, his applicability goes beyond just `std::get` use cases. We
     could potentially constraint is with either `tuple_size || std::variant` but this looks weird because of the generic
     code argument above.
@@ -670,18 +670,16 @@ inline constexpr auto get_value = get_element&lt;1>;
 <ins>
 <blockquote>
 The name <code>get_element</code> denotes a customization point object (<a href="https://eel.is/c++draft/customization.point.object">[<b>customization.point.object</b>])</a>.
-     The expression <code>get_element&lt;I>(E)</code> where <code>I</code> is <code>size_t</code> for a subexpression
-     <code>E</code> is expression-equivalent to:
-1. <code>E.get&lt;I>()</code> if <code>E</code> has class or enumeration type <code>T</code>, which has non-static
-     member function template <code>get</code> and <code>E.get&lt;I>()</code> is a well-formed expression.
-1. Otherwise, <code>get&lt;I>(E)</code>, if <code>E</code> has class or enumeration type and <code>get&lt;I>(E)</code>
-     is a well-formed expression when treated as an unevaluated operand, where the meaning of <code>get</code>
+     Given <code>I</code> an integral constant of type <code>size_t</code> and a subexpression E <code>E</code> with type <code>T</code>:
+
+  - If  <code> tuple_size_t&lt;remove_cvref_t&lt;T>> </code> does not denote a valid type, 
+    <code>get_element&lt;I>(E)</code> is ill-formed.
+  - Otherwise, if  <code>E.get&lt;I>()</code> is a is a valid expression,  <code>get_element&lt;I>(E)</code> 
+    is expression equivalent to <code>E.get&lt;I>()</code>
+  -  Otherwise,  if <code>E</code> has class type and <code>get&lt;I>(E)</code> is a valid expression where the meaning of <code>get</code>
      is established as-if by performing argument-dependent lookup only
-     (<a href="https://eel.is/c++draft/basic.lookup.argdep">[<b>basic.lookup.argdep]</b>)</a>.
-1. Otherwise, <code>get_element&lt;I>(E)</code> is ill-formed.
-     If for type <code>T</code> of expression <code>E</code> the
-     <code>typename tuple_size&lt;remove_cvref_t&lt;T>>::type</code> expression is ill-formed,
-     <code>get_element&lt;I>(E)</code> is ill-formed
+     (<a href="https://eel.is/c++draft/basic.lookup.argdep">[<b>basic.lookup.argdep]</b>)</a>,  <code>get_element&lt;I>(E)</code>  is expression equivalent to <code>E.get&lt;I>()</code>
+   - Otherwise, <code>get_element&lt;I>(E)</code> is ill-formed.
 
 </blockquote>
 </ins>
