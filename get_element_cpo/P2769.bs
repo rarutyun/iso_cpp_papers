@@ -399,7 +399,9 @@ namespace __detail
 template <std::size_t _Ip>
 struct __get_element_fn
 {
-    template <typename _TupleLike>
+    template <typename _TupleLike> requires requires {
+        typename std::tuple_size<std::remove_cvref_t<_TupleLike>>::type;
+    }
     auto operator()(_TupleLike&& __tuple_like) const ->
          decltype(auto)
     {
@@ -436,34 +438,34 @@ wider range of types rather than just the listed standard types.
 With `get_element` we can define an exposition only helper concept *can-get-tuple-element*
 in the following way:
 
-```cpp
+<pre>
 // necessary to check if std::tuple_size_v is well-formed before using it
-template <typename T>
-concept /*has-tuple-size*/ =  // exposition only
-requires {
-    typename std::tuple_size<T>::type;
-};
-
-template<class T, std::size_t I>
-concept /*can-get-tuple-element*/ =  // exposition only
-    /*has-tuple-size*/<std::remove_cvref_t<T>> &&
-    requires(T&& t) {
-        typename std::tuple_element_t<I, std::remove_cvref_t<T>>;
-        { std::get_element<I>(std::forward<T>(t)) } ->
-            std::convertible_to<const std::tuple_element_t<I, std::remove_cvref_t<T>>&>;
+template &lt;typename T>
+concept <i>has-tuple-size</i> = // exposition only
+    requires {
+        typename std::tuple_size&lt;T>::type;
     };
-```
+
+template&lt;class T, std::size_t I>
+concept <i>can-get-tuple-element</i> = // exposition only
+    <i>has-tuple-size</i>&lt;std::remove_cvref_t&lt;T>> &&
+    requires(T&& t) {
+        typename std::tuple_element_t&lt;I, std::remove_cvref_t&lt;T>>;
+        { std::get_element&lt;I>(std::forward&lt;T>(t)) } ->
+            std::convertible_to&lt;const std::tuple_element_t&lt;I, std::remove_cvref_t&lt;T>>&>;
+    };
+</pre>
 
 Then the *tuple-like* concept can use *can-get-tuple-element* and do something like:
 
-```cpp
-template <typename T>
-concept tuple_like = /*has-tuple-size*/<std::remove_cvref_t<T>> &&
-                         []<std::size_t... I>(std::index_sequence<I...>) {
-                             return (... && /*can-get-tuple-element*/<T, I>);
-                         } (std::make_index_sequence<std::tuple_size_v<std::remove_cvref_t<T>>{});
+<pre>
+template &lt;typename T>
+concept tuple_like = <i>has-tuple-size</i>&lt;std::remove_cvref_t&lt;T>> &&
+                      []&lt;std::size_t... I>(std::index_sequence&lt;I...>) {
+                          return (... && <i>can-get-tuple-element</i>&lt;T, I>);
+                      } (std::make_index_sequence&lt;std::tuple_size_v&lt;std::remove_cvref_t&lt;T>>{});
 
-```
+</pre>
 
 # Design considerations # {#design_decisions}
 
@@ -591,7 +593,7 @@ semantics, for example, `std::less` and `std::ranges::less`, where the latter is
 
 # Further work # {#further_work}
 
-- Broader implementation experience
+- Broader implementation experience (should be done before meeting in Poland, 2024)
 
 # Formal wording # {#wording}
 
@@ -669,17 +671,18 @@ inline constexpr auto get_value = get_element&lt;1>;
 
 <ins>
 <blockquote>
-The name <code>get_element</code> denotes a customization point object (<a href="https://eel.is/c++draft/customization.point.object">[<b>customization.point.object</b>])</a>.
-     Given <code>I</code> an integral constant of type <code>size_t</code> and a subexpression E <code>E</code> with type <code>T</code>:
+The name <code>get_element</code> denotes a customization point object
+(<a href="https://eel.is/c++draft/customization.point.object">[<b>customization.point.object</b>])</a>.
+Given <code>I</code> an integral constant of type <code>size_t</code> and a subexpression <code>E</code> with type <code>T</code>:
 
-  - If  <code> tuple_size_t&lt;remove_cvref_t&lt;T>> </code> does not denote a valid type, 
+- If <code>typename tuple_size&lt;remove_cvref_t&lt;T>>::type</code> does not denote a valid type,
     <code>get_element&lt;I>(E)</code> is ill-formed.
-  - Otherwise, if  <code>E.get&lt;I>()</code> is a is a valid expression,  <code>get_element&lt;I>(E)</code> 
+- Otherwise, if  <code>E.get&lt;I>()</code> is a is a valid expression, <code>get_element&lt;I>(E)</code>
     is expression equivalent to <code>E.get&lt;I>()</code>
-  -  Otherwise,  if <code>E</code> has class type and <code>get&lt;I>(E)</code> is a valid expression where the meaning of <code>get</code>
+-  Otherwise,  if <code>E</code> has class type and <code>get&lt;I>(E)</code> is a valid expression where the meaning of <code>get</code>
      is established as-if by performing argument-dependent lookup only
      (<a href="https://eel.is/c++draft/basic.lookup.argdep">[<b>basic.lookup.argdep]</b>)</a>,  <code>get_element&lt;I>(E)</code>  is expression equivalent to <code>E.get&lt;I>()</code>
-   - Otherwise, <code>get_element&lt;I>(E)</code> is ill-formed.
+- Otherwise, <code>get_element&lt;I>(E)</code> is ill-formed.
 
 </blockquote>
 </ins>
