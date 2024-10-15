@@ -478,10 +478,11 @@ Then the *tuple-like* concept can use *can-get-tuple-element* and do something l
 
 <pre>
 template &lt;typename T>
-concept tuple_like = <i>has-tuple-size</i>&lt;std::remove_cvref_t&lt;T>> &&
-                      []&lt;std::size_t... I>(std::index_sequence&lt;I...>) {
-                          return (... && <i>can-get-tuple-element</i>&lt;T, I>);
-                      } (std::make_index_sequence&lt;std::tuple_size_v&lt;std::remove_cvref_t&lt;T>>{});
+concept <i>tuple-like</i> = // exposition only
+    <i>has-tuple-size</i>&lt;std::remove_cvref_t&lt;T>> &&
+    []&lt;std::size_t... I>(std::index_sequence&lt;I...>) {
+        return (... && <i>can-get-tuple-element</i>&lt;T, I>);
+    } (std::make_index_sequence&lt;std::tuple_size_v&lt;std::remove_cvref_t&lt;T>>{});
 
 </pre>
 
@@ -641,7 +642,7 @@ concept <i>can-get-tuple-element</i> = // exposition only
 </ins>
 <pre>
 template&lt;typename T>
-concept <i>tuple-like</i> = <del><i>see-below</i></del>
+concept <i>tuple-like</i> = <del><i>see-below</i></del><ins>// exposition only</ins>
     <ins><i>has-tuple-size</i>&lt;remove_cvref_t&lt;T>> &&</ins>
     <ins>[]&lt;size_t... I>(index_sequence&lt;I...>) {</ins>
         <ins>return (... && <i>can-get-tuple-element</i>&lt;T, I>);</ins>
