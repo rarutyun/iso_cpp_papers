@@ -491,8 +491,8 @@ concept tuple_like = <i>has-tuple-size</i>&lt;std::remove_cvref_t&lt;T>> &&
 
 Alternative design was considered to name the proposed API `std::ranges::get`.
 
-Given that we discussed this option several times in C++ committee and it didn't have even a weak support to pursue authors
-don't think that keeping the detailed information in R3 is useful. Please see [[P2769R2]] for more information.
+Given that we discussed this option several times in C++ committee and it didn't have even a weak support to pursue,
+authors think that keeping the detailed information in R3 is unnecessary. Please see [[P2769R2]] for more information.
 
 ## Breaking code example ## {#breaking_code}
 
@@ -561,14 +561,14 @@ However, such potential change is very unlikely. In particular, there is no user
 Therefore we do not think that this potential breaking change requires any preventive measure (and we don't think such measure exist)
 about the scenario mentioned above.
 
-## `get_element` for `std::variant` (or other non-tuple-like) ## {#get_element_std_variant}
+## `get_element` for `std::variant` and other non-tuple-like types ## {#get_element_std_variant}
 
 During the discussion in LEWG (St. Louis, 2024) we got a feedback that it's better to constraint `get_element` with
 `tuple_size` and possibly `tuple_element`. The idea was to not use it for something that is not `tuple-like`, e.g.,
 `std::variant`.
 
-While it might be good for `get_element` to be applicable in the same context where `std::get` is used it's not like that
-with the current proposal (purposefully):
+The current proposal purposefully does not consider `get_element` to be applicable in all the same contexts
+where `std::get` is used:
 - `std::get` has overloads that allow to access `tuple` elements by type, while `std::get_element` doesn't.
 - It hard to imagine the generic code that expects both `tuple-like` or `std::variant` as an argument because it's always
     safe to access any element of a `tuple-like` object whereas for `std::variant` only one alternative is "active" -
@@ -692,15 +692,16 @@ inline constexpr auto get_value = get_element&lt;1>;
 <blockquote>
 The name <code>get_element</code> denotes a customization point object
 (<a href="https://eel.is/c++draft/customization.point.object">[<b>customization.point.object</b>])</a>.
-Given <code>I</code> an integral constant of type <code>size_t</code> and a subexpression <code>E</code> with type <code>T</code>:
+Given an integral constant <code>I</code> of type <code>size_t</code> and a subexpression <code>E</code> having type <code>T</code>:
 
 - If <code>typename tuple_size&lt;remove_cvref_t&lt;T>>::type</code> does not denote a valid type,
     <code>get_element&lt;I>(E)</code> is ill-formed.
-- Otherwise, if  <code>E.get&lt;I>()</code> is a is a valid expression, <code>get_element&lt;I>(E)</code>
+- Otherwise, if  <code>E.get&lt;I>()</code> is a valid expression, <code>get_element&lt;I>(E)</code>
     is expression equivalent to <code>E.get&lt;I>()</code>
 -  Otherwise,  if <code>E</code> has class type and <code>get&lt;I>(E)</code> is a valid expression where the meaning of <code>get</code>
      is established as-if by performing argument-dependent lookup only
-     (<a href="https://eel.is/c++draft/basic.lookup.argdep">[<b>basic.lookup.argdep]</b>)</a>,  <code>get_element&lt;I>(E)</code>  is expression equivalent to <code>E.get&lt;I>()</code>
+     (<a href="https://eel.is/c++draft/basic.lookup.argdep">[<b>basic.lookup.argdep]</b>)</a>,
+     <code>get_element&lt;I>(E)</code> is expression equivalent to <code>get&lt;I>(E)</code>
 - Otherwise, <code>get_element&lt;I>(E)</code> is ill-formed.
 
 </blockquote>
