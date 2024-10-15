@@ -302,8 +302,8 @@ That makes the proposed API applicable wider than just with the C++ standard lib
 
 ## Other use cases ## {#other_use_cases}
 
-With the `std::ranges::zip_view` appearance in the standard the easy use of projection for *Tuple-Like*
-objects might become even more important because its dereferenceable type is exactly *Tuple-Like*.
+With the `std::ranges::zip_view` appearance in the standard the easy use of projection for *tuple-like*
+objects might become even more important because its dereferenceable type is exactly *tuple-like*.
 
 Another example where it would be convenient to pass `std::get` to a function we discovered in
 [a blog article](https://brevzin.github.io/c++/2023/05/23/map-api/) by Barry Revzin.
@@ -565,14 +565,14 @@ about the scenario mentioned above.
 ## `get_element` for `std::variant` and other non-tuple-like types ## {#get_element_std_variant}
 
 During the discussion in LEWG (St. Louis, 2024) we got a feedback that it's better to constraint `get_element` with
-`tuple_size` and possibly `tuple_element`. The idea was to not use it for something that is not `tuple-like`, e.g.,
+`tuple_size` and possibly `tuple_element`. The idea was to not use it for something that is not *tuple-like*, e.g.,
 `std::variant`.
 
 The current proposal purposefully does not consider `get_element` to be applicable in all the same contexts
 where `std::get` is used:
 - `std::get` has overloads that allow to access `tuple` elements by type, while `std::get_element` doesn't.
-- It hard to imagine the generic code that expects both `tuple-like` or `std::variant` as an argument because it's always
-    safe to access any element of a `tuple-like` object whereas for `std::variant` only one alternative is "active" -
+- It hard to imagine the generic code that expects both *tuple-like* or `std::variant` as an argument because it's always
+    safe to access any element of a *tuple-like* object whereas for `std::variant` only one alternative is "active" -
     and therefore safe to access. Supporting variant in this interface would make it easy to introduce UB in generic code.
 - If `get_element` is unconstrained it becomes too wide, his applicability goes beyond just `std::get` use cases. We
     could potentially constraint is with either `tuple_size || std::variant` but this looks weird because of the generic
@@ -596,12 +596,12 @@ different names.
 
 ## Connection with [[P2141R1]] ## {#p2141_connection}
 
-[[P2141R1]]'s main goal is allow aggregates being interpreted as *Tuple-Like*. At the same time, it touches
+[[P2141R1]]'s main goal is allow aggregates being interpreted as *tuple-like*. At the same time, it touches
 the *tuple-like* concept making it as generic as for the types structured binding can work with. It also adds
-a yet another `std::get` overload that works with any *Tuple-Like* object except those that are already in
+a yet another `std::get` overload that works with any *tuple-like* object except those that are already in
 the `std::` namespace.
 
-With [[P2141R1]] being adopted `std::get` does the right thing and works with *Tuple-Like* object, so we may use
+With [[P2141R1]] being adopted `std::get` does the right thing and works with *tuple-like* object, so we may use
 just `std::get<_Ip>(std::forward<_TupleLike>(__tuple_like))` within the implementation of `std::get_element` instead of
 the unqualified `get` call.
 
