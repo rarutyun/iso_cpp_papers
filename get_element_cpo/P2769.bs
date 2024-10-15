@@ -305,6 +305,25 @@ That makes the proposed API applicable wider than just with the C++ standard lib
 With the `std::ranges::zip_view` appearance in the standard the easy use of projection for *Tuple-Like*
 objects might become even more important because its dereferenceable type is exactly *Tuple-Like*.
 
+Another example where it would be convenient to pass `std::get` to a function we discovered in
+[a blog article](https://brevzin.github.io/c++/2023/05/23/map-api/) by Barry Revzin.
+Let's assume there is a function that returns `std::optional` over a *tuple-like* type:
+
+```cpp
+auto find(Key const&) const -> optional<pair<Key const, Value> const&>;
+```
+
+Now imagine the caller wants to use only one element out of the returned *tuple-like* object, or some default value
+in case the received `std::optional` is empty. Applying `value_or` directly to the result would require providing
+default values for all tuple elements, so it makes sense to convert it first to a single-element optional
+with `transform`, and only then get the value with `value_or`:
+
+```cpp
+find(key).transform(get<1>).value_or(-1);
+```
+
+Except, quoting the author, "of course that you can’t just pass `get<1>` like that, so it’s not as easy at it should be."
+
 # Proposed API # {#proposed_api}
 
 We propose the following API:
