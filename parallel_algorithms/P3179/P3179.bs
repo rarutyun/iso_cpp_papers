@@ -2800,6 +2800,155 @@ template<class ExecutionPolicy, random_access_range R1, random_access_range R2, 
 </xmp>
 </ins>
 
+## Modify `iota` in <a href="https://eel.is/c++draft/numeric.iota">[**numeric.iota**]</a> ## {#modify_numeric_iota}
+////// TODO: IOTA is questionable
+<xmp class="wordingStyle">
+template<input_or_output_iterator O, sentinel_for<O> S, weakly_incrementable T>
+  requires indirectly_writable<O, const T&>
+  constexpr ranges::iota_result<O, T> ranges::iota(O first, S last, T value);
+template<weakly_incrementable T, output_range<const T&> R>
+  constexpr ranges::iota_result<borrowed_iterator_t<R>, T> ranges::iota(R&& r, T value);
+</xmp>
+
+<ins>
+<xmp class="wordingStyle">
+template<class ExecutionPolicy, random_access_iterator O, sized_sentinel_for<O> S, weakly_incrementable T>
+  requires indirectly_writable<O, const T&>
+  ranges::iota_result<O, T> ranges::iota(ExecutionPolicy&& exec, O first, S last, T value);
+template<class ExecutionPolicy, random_access_range R, weakly_incrementable T>
+  requires sized_range<R> && indirectly_writable<iterator_t<R>, const T&>
+  ranges::iota_result<borrowed_iterator_t<R>, T> ranges::iota(ExecutionPolicy&& exec, R&& r, T value);
+</xmp>
+</ins>
+
+## Modify <a href="https://eel.is/c++draft/memory.syn">[**memory.syn**]</a> ## {#modify_memory_syn}
+
+<pre>
+<i>// [specialized.algorithms], specialized algorithms</i>
+<i>// [special.mem.concepts], special memory concepts</i>
+template&lt;class I>
+  concept <i>nothrow-input-iterator</i> = <i>see below</i>;       <i>// exposition only</i>
+template&lt;class I>
+  concept <i>nothrow-forward-iterator</i> = <i>see below</i>;     <i>// exposition only</i>
+<ins>
+template&lt;class I>
+  concept <i>nothrow-random-access-iterator</i> = <i>see below</i>;     <i>// exposition only</i>
+</ins>
+template&lt;class S, class I>
+  concept <i>nothrow-sentinel-for</i> = <i>see below</i>;         <i>// exposition only</i>
+<ins>
+template&lt;class S, class I>
+  concept <i>nothrow-sized-sentinel-for</i> = <i>see below</i>;   <i>// exposition only</i>
+</ins>
+template&lt;class R>
+  concept <i>nothrow-input-range</i> = <i>see below</i>;          <i>// exposition only</i>
+template&lt;class R>
+  concept <i>nothrow-forward-range</i> = <i>see below</i>;        <i>// exposition only</i>
+<ins>
+template&lt;class I>
+  concept <i>nothrow-random-access-range</i> = <i>see below</i>;     <i>// exposition only</i>
+</ins>
+</pre>
+
+<pre class="wordingStyle">
+template&lt;<i>nothrow-forward-iterator</i> I, <i>nothrow-sentinel-for</i>&lt;I> S>
+  requires default_initializable&lt;iter_value_t&lt;I>>
+    I uninitialized_default_construct(I first, S last);                         <i>// freestanding</i>
+template&lt;<i>nothrow-forward-range</i> R>
+  requires default_initializable&lt;range_value_t&lt;R>>
+    borrowed_iterator_t&lt;R> uninitialized_default_construct(R&& r);              <i>// freestanding</i>
+
+template&lt;<i>nothrow-forward-iterator</i> I>
+  requires default_initializable&lt;iter_value_t&lt;I>>
+    I uninitialized_default_construct_n(I first, iter_difference_t&lt;I> n);       <i>// freestanding</i>
+</pre>
+
+<ins>
+<pre class="wordingStyle">
+template&lt;class ExecutionPolicy, <i>nothrow-random-access-iterator</i> I, <i>nothrow-sized-sentinel-for</i>&lt;I> S>
+  requires default_initializable&lt;iter_value_t&lt;I>>
+  I uninitialized_default_construct(ExecutionPolicy&& exec, I first, S last); <i>// see [algorithms.parallel.overloads]</i>
+
+template&lt;class ExecutionPolicy, <i>nothrow-random-access-range</i> R>
+  requires default_initializable&lt;range_value_t&lt;R>> && sized_range&lt;R>
+  borrowed_iterator_t&lt;R> uninitialized_default_construct(ExecutionPolicy&& exec, R&& r); <i>// see [algorithms.parallel.overloads]</i>
+
+template&lt;class ExecutionPolicy, <i>nothrow-random-access-iterator</i> I>
+  requires default_initializable&lt;iter_value_t&lt;I>>
+  I uninitialized_default_construct_n(ExecutionPolicy&& exec, I first, iter_difference_t&lt;I> n); <i>// see [algorithms.parallel.overloads]</i>
+</pre>
+</ins>
+
+<pre class="wordingStyle">
+template&lt;<i>nothrow-forward-iterator</i> I, <i>nothrow-sentinel-for</i>&lt;I> S>
+  requires default_initializable&lt;iter_value_t&lt;I>>
+    I uninitialized_value_construct(I first, S last);                           <i>// freestanding</i>
+template&lt;<i>nothrow-forward-range</i> R>
+  requires default_initializable&lt;range_value_t&lt;R>>
+    borrowed_iterator_t&lt;R> uninitialized_value_construct(R&& r);                <i>// freestanding</i>
+
+template&lt;<i>nothrow-forward-iterator</i> I>
+  requires default_initializable&lt;iter_value_t&lt;I>>
+    I uninitialized_value_construct_n(I first, iter_difference_t&lt;I> n);         <i>// freestanding</i>
+</pre>
+
+<ins>
+<pre class="wordingStyle">
+template&lt;class ExecutionPolicy, <i>nothrow-random-access-iterator</i> I, <i>nothrow-sized-sentinel-for&lt;</i>I> S>
+  requires default_initializable&lt;iter_value_t&lt;I>>
+  I uninitialized_value_construct(ExecutionPolicy&& exec, I first, S last); <i>// see [algorithms.parallel.overloads]</i>
+
+template&lt;class ExecutionPolicy, <i>nothrow-random-access-range</i> R>
+  requires default_initializable&lt;range_value_t&lt;R>> && sized_range&lt;R>
+  borrowed_iterator_t&lt;R> uninitialized_value_construct(ExecutionPolicy&& exec, R&& r); <i>// see [algorithms.parallel.overloads]</i>
+
+template&lt;class ExecutionPolicy, <i>nothrow-random-access-iterator</i> I>
+  requires default_initializable&lt;iter_value_t&lt;I>>
+  I uninitialized_value_construct_n(ExecutionPolicy&& exec, I first, iter_difference_t&lt;I> n); <i>// see [algorithms.parallel.overloads]</i>
+</pre>
+</ins>
+
+<pre class="wordingStyle">
+template&lt;input_iterator I, sentinel_for&lt;I> S1,
+          nothrow-forward-iterator O, nothrow-sentinel-for&lt;O> S2>
+  requires constructible_from&lt;iter_value_t&lt;O>, iter_reference_t&lt;I>>
+    uninitialized_copy_result&lt;I, O>
+      uninitialized_copy(I ifirst, S1 ilast, O ofirst, S2 olast);               <i>// freestanding</i>
+template&lt;input_range IR, nothrow-forward-range OR>
+  requires constructible_from&lt;range_value_t&lt;OR>, range_reference_t&lt;IR>>
+    uninitialized_copy_result&lt;borrowed_iterator_t&lt;IR>, borrowed_iterator_t&lt;OR>>
+      uninitialized_copy(IR&& in_range, OR&& out_range);                        <i>// freestanding</i>
+
+template&lt;class I, class O>
+  using uninitialized_copy_n_result = in_out_result&lt;I, O>;                      <i>// freestanding</i>
+template&lt;input_iterator I, nothrow-forward-iterator O, nothrow-sentinel-for&lt;O> S>
+  requires constructible_from&lt;iter_value_t&lt;O>, iter_reference_t&lt;I>>
+    uninitialized_copy_n_result&lt;I, O>
+      uninitialized_copy_n(I ifirst, iter_difference_t&lt;I> n,                    <i>// freestanding</i>
+                            O ofirst, S olast);
+</pre>
+
+<ins>
+<pre class="wordingStyle">
+template&lt;class ExecutionPolicy, random_access_iterator I, sized_sentinel_for&lt;I> S1,
+         <i>nothrow-random-access-iterator</i> O, <i>nothrow-sized-sentinel-for</i>&lt;O> S2>
+  requires constructible_from&lt;iter_value_t&lt;O>, iter_reference_t&lt;I>>
+    uninitialized_copy_result&lt;I, O>
+      uninitialized_copy(ExecutionPolicy&& exec, I ifirst, S1 ilast, O ofirst, S2 olast); <i>// see [algorithms.parallel.overloads]</i>
+
+template&lt;class ExecutionPolicy, random_access_range IR, <i>nothrow-random-access-range</i> OR>
+  requires constructible_from&lt;range_value_t&lt;OR>, range_reference_t&lt;IR>> && sized_range&lt;IR> && sized_range&lt;OR>
+    uninitialized_copy_result&lt;borrowed_iterator_t&lt;IR>, borrowed_iterator_t&lt;OR>>
+      uninitialized_copy(ExecutionPolicy&& exec, IR&& in_range, OR&& out_range); <i>// see [algorithms.parallel.overloads]</i>
+
+template&lt;class ExecutionPolicy, random_access_iterator I, <i>nothrow-random-access-iterator</i> O,
+         <i>nothrow-sized-sentinel-for</i>&lt;O> S>
+  requires constructible_from&lt;iter_value_t&lt;O>, iter_reference_t&lt;I>>
+    uninitialized_copy_n_result&lt;I, O>
+      uninitialized_copy_n(ExecutionPolicy&& exec, I ifirst, iter_difference_t&lt;I> n, <i>// see [algorithms.parallel.overloads]</i>
+                           O ofirst, S olast);
+</pre>
+</ins>
 
 # Revision history # {#revision_history}
 
