@@ -31,7 +31,7 @@ span, span * {
 ## Allowing user-defined tuples, or "true" motivation :) ## {#true_motivation}
 
 The section addresses the LEWG feedback. While we always had in mind that with `get_element`
-facility we can make *tuple-like* generic enough, we assumed it to be developed as a separate proposal.
+facility we can make a generic concept for *tuple-like* types, we assumed it to be developed as a separate proposal.
 However, based on the LEWG poll ([[#lewg_telecon_2024_01_23]]), the `get_element` paper should enable
 user-defined tuples to make its motivation strong enough.
 
@@ -55,10 +55,10 @@ exposition-only concept for `elements_view` allows only the 5 *tuple-like* types
 
 [[P2165R4]] added constraints for existing API (like `std::apply`, `std::tuple_cat`, etc.) to take *tuple-like* and also
 provides better compatibility between *tuple-like* objects by adding extra APIs, which is great. The unfortunate part of the story,
-however, is that the mentioned APIs are still limited by the definition of the *tuple-like* concept (5 standard types).
+however, is that the mentioned APIs are still limited by the definition of the *tuple-like* concept (the 5 standard types).
 
-Since the proposed `get_element` API is a customization point object we can use it to extend the tuple protocol to user-defined
-types, and since this facility is using ADL lookup for `get` it is not going to be a breaking change.
+In this paper, we proposed a new customization point object, `get_element`, which can be used to extend the tuple protocol to user-defined
+types. Since this facility uses argument-dependent lookup for `get`, using it to re-define *tuple-like* will not be a breaking change.
 
 For the following (simplified) code snippet:
 
@@ -140,7 +140,7 @@ Of course, `std::apply` is just an example. `my_tuple_like` would work with any 
 
 ## The original motivating use case ## {#motivating_use_case}
 
-Having `std::pair`, `std::tuple` and other *tuple-like* objects as the value types for the algorithms
+Having `std::pair`, `std::tuple` and other *tuple-like* types as the value types for the algorithms
 creates a plenty of opportunities. With special views, such as `std::ranges::elements_view`, we can
 specify which tuple elements to access when iterating over collections of such objects. However,
 we cannot easily use a predicate to make a decision based on only some of tuple elements, for example keys or values.
@@ -286,12 +286,6 @@ would apply the filter for all operations on the input data, including element s
     </tr>
 </table>
 
-## Usefulness with `zip_view` ## {#usefulness_with_zip_view}
-
-With `std::ranges::zip_view` appearance in the standard the easy use of projection for *Tuple-Like*
-objects might become even more important because its dereferenceable type
-is exactly *Tuple-Like*.
-
 ## Radix sort use case ## {#radix_sort}
 
 Counting-based sorts, and Radix Sort in particular, provide another motivating use case.
@@ -305,6 +299,11 @@ conditionally under the hood of `std::sort`, checking data types of the input an
 In this case, a special comparator is of no help to sort values by keys, and projections seem the only viable option.
 
 That makes the proposed API applicable wider than just with the C++ standard library use cases.
+
+## Other use cases ## {#other_use_cases}
+
+With the `std::ranges::zip_view` appearance in the standard the easy use of projection for *Tuple-Like*
+objects might become even more important because its dereferenceable type is exactly *Tuple-Like*.
 
 # Proposed API # {#proposed_api}
 
@@ -553,7 +552,8 @@ While it might be good for `get_element` to be applicable in the same context wh
 with the current proposal (purposefully):
 - `std::get` has overloads that allow to access `tuple` elements by type, while `std::get_element` doesn't.
 - It hard to imagine the generic code that expects both `tuple-like` or `std::variant` as an argument because it's always
-    safe to access any element of a `tuple-like` object whereas for `std::variant` only one alternative is "active" - and therefore safe to access. Supporting variant in this interface would make it easy to introduce UB in generic code.
+    safe to access any element of a `tuple-like` object whereas for `std::variant` only one alternative is "active" -
+    and therefore safe to access. Supporting variant in this interface would make it easy to introduce UB in generic code.
 - If `get_element` is unconstrained it becomes too wide, his applicability goes beyond just `std::get` use cases. We
     could potentially constraint is with either `tuple_size || std::variant` but this looks weird because of the generic
     code argument above.
