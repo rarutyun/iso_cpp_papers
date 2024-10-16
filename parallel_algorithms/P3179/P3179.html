@@ -1564,7 +1564,7 @@ Possible extra rowspan handling
   <meta content="Bikeshed version 6270e4735, updated Tue Aug 6 12:12:30 2024 -0700" name="generator">
   <link href="https://wg21.link/P3179R3" rel="canonical">
   <link href="https://isocpp.org/favicon.ico" rel="icon">
-  <meta content="8891d257303506089be14d7008bb891177bd1162" name="revision">
+  <meta content="0ced0e7f346ed58e64dbda0d38d2c2eedac17fd0" name="revision">
   <meta content="dark light" name="color-scheme">
 <style>
     table, th, td {
@@ -2948,7 +2948,43 @@ in the view itself.</p>
     <p><i>Returns</i>: <code class="highlight"><c- n>first2</c-> <c- o>==</c-> <c- n>last2</c-> <c- o>||</c-> <c- o>!</c-><c- n>ranges</c->​<c- o>::</c->​<c- n>search</c-><c- p>(</c-><c- n>std</c-><c- o>::</c-><c- n>forward</c-><c- o>&lt;</c-><c- n>ExecutionPolicy</c-><c- o>></c-><c- p>(</c-><c- n>exec</c-><c- p>),</c-> <c- n>first1</c-><c- p>,</c-> <c- n>last1</c-><c- p>,</c-> <c- n>first2</c-><c- p>,</c-> <c- n>last2</c-><c- p>,</c-> <c- n>pred</c-><c- p>,</c-> <c- n>proj1</c-><c- p>,</c-> <c- n>proj2</c-><c- p>).</c-><c- n>empty</c-><c- p>().</c-></code></p>
    </ins>
    <h3 class="heading settled" data-level="7.5" id="modify_alg_foreach"><span class="secno">7.5. </span><span class="content">Modify <code class="highlight"><c- n>for_each</c-></code> in <a href="https://eel.is/c++draft/alg.foreach">[<strong>alg.foreach</strong>]</a></span><a class="self-link" href="#modify_alg_foreach"></a></h3>
-   <p>!!!!!!!!!!!! TODO: ADD FOR_EACH!!!!!!!!!!!!</p>
+<pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>input_iterator</c-> <c- n>I</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>S</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c->
+         <c- n>indirectly_unary_invocable</c-><c- o>&lt;</c-><c- n>projected</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Proj</c-><c- o>>></c-> <c- n>Fun</c-><c- o>></c->
+  <c- k>constexpr</c-> <c- n>ranges</c-><c- o>::</c-><c- n>for_each_result</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Fun</c-><c- o>></c->
+    <c- n>ranges</c-><c- o>::</c-><c- n>for_each</c-><c- p>(</c-><c- n>I</c-> <c- n>first</c-><c- p>,</c-> <c- n>S</c-> <c- n>last</c-><c- p>,</c-> <c- n>Fun</c-> <c- n>f</c-><c- p>,</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
+<c- k>template</c-><c- o>&lt;</c-><c- n>input_range</c-> <c- n>R</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c->
+         <c- n>indirectly_unary_invocable</c-><c- o>&lt;</c-><c- n>projected</c-><c- o>&lt;</c-><c- n>iterator_t</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c-><c- p>,</c-> <c- n>Proj</c-><c- o>>></c-> <c- n>Fun</c-><c- o>></c->
+  <c- k>constexpr</c-> <c- n>ranges</c-><c- o>::</c-><c- n>for_each_result</c-><c- o>&lt;</c-><c- n>borrowed_iterator_t</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c-><c- p>,</c-> <c- n>Fun</c-><c- o>></c->
+    <c- n>ranges</c-><c- o>::</c-><c- n>for_each</c-><c- p>(</c-><c- n>R</c-><c- o>&amp;&amp;</c-> <c- n>r</c-><c- p>,</c-> <c- n>Fun</c-> <c- n>f</c-><c- p>,</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
+</pre>
+   <p><em>Effects</em>: Calls <code class="highlight"><c- n>invoke</c-><c- p>(</c-><c- n>f</c-><c- p>,</c-> <c- n>invoke</c-><c- p>(</c-><c- n>proj</c-><c- p>,</c-> <c- o>*</c-><c- n>i</c-><c- p>))</c-></code> for every iterator <code class="highlight"><c- n>i</c-></code> in the range <code class="highlight"><c- p>[</c-><c- n>first</c-><c- p>,</c-> <c- n>last</c-><c- p>)</c-></code>, starting from <code class="highlight"><c- n>first</c-></code> and proceeding to <code class="highlight"><c- n>last</c-> <c- o>-</c-> <c- mi>1</c-></code>.</p>
+   <p>[<em>Note x</em>: If the result of <code class="highlight"><c- n>invoke</c-><c- p>(</c-><c- n>proj</c-><c- p>,</c-> <c- o>*</c-><c- n>i</c-><c- p>)</c-></code> is a mutable reference, <code class="highlight"><c- n>f</c-></code> can apply non-constant functions. — <em>end note</em>]</p>
+   <p><em>Returns</em>: <code class="highlight"><c- p>{</c-><c- n>last</c-><c- p>,</c-> <c- n>std</c->​<c- o>::</c->​<c- n>move</c-><c- p>(</c-><c- n>f</c-><c- p>)}.</c-></code></p>
+   <p><em>Complexity</em>: Applies <code class="highlight"><c- n>f</c-></code> and <code class="highlight"><c- n>proj</c-></code> exactly <code class="highlight"><c- n>last</c-> <c- o>-</c-> <c- n>first</c-></code> times.</p>
+   <p><em>Remarks</em>: If <code class="highlight"><c- n>f</c-></code> returns a result, the result is ignored.</p>
+   <p>[<em>Note x</em>: The overloads in namespace <code class="highlight"><c- n>ranges</c-></code> require <code class="highlight"><c- n>Fun</c-></code> to model <code class="highlight"><c- n>copy_constructible</c-></code>. — <em>end note</em>]</p>
+   <ins>
+<pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- k>class</c-> <c- nc>ExecutionPolicy</c-><c- p>,</c-> <c- n>random_access_iterator</c-> <c- n>I</c-><c- p>,</c-> <c- n>sized_sentinel_for</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>S</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c->
+         <c- n>indirectly_unary_invocable</c-><c- o>&lt;</c-><c- n>projected</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Proj</c-><c- o>>></c-> <c- n>Fun</c-><c- o>></c->
+  <c- n>ranges</c-><c- o>::</c-><c- n>for_each_result</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Fun</c-><c- o>></c->
+    <c- n>ranges</c-><c- o>::</c-><c- n>for_each</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>I</c-> <c- n>first</c-><c- p>,</c-> <c- n>S</c-> <c- n>last</c-><c- p>,</c-> <c- n>Fun</c-> <c- n>f</c-><c- p>,</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
+
+<c- k>template</c-><c- o>&lt;</c-><c- k>class</c-> <c- nc>ExecutionPolicy</c-><c- p>,</c-> <c- n>random_access_range</c-> <c- n>R</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c->
+         <c- n>indirectly_unary_invocable</c-><c- o>&lt;</c-><c- n>projected</c-><c- o>&lt;</c-><c- n>iterator_t</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c-><c- p>,</c-> <c- n>Proj</c-><c- o>>></c-> <c- n>Fun</c-><c- o>></c->
+    <c- k>requires</c-> <c- n>sized_range</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c->
+  <c- n>ranges</c-><c- o>::</c-><c- n>for_each_result</c-><c- o>&lt;</c-><c- n>borrowed_iterator_t</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c-><c- p>,</c-> <c- n>Fun</c-><c- o>></c->
+    <c- n>ranges</c-><c- o>::</c-><c- n>for_each</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>R</c-><c- o>&amp;&amp;</c-> <c- n>r</c-><c- p>,</c-> <c- n>Fun</c-> <c- n>f</c-><c- p>,</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
+</pre>
+    <p><em>Effects</em>: Calls <code class="highlight"><c- n>invoke</c-><c- p>(</c-><c- n>f</c-><c- p>,</c-> <c- n>invoke</c-><c- p>(</c-><c- n>proj</c-><c- p>,</c-> <c- o>*</c-><c- n>i</c-><c- p>))</c-></code> for every iterator <code class="highlight"><c- n>i</c-></code> in the range <code class="highlight"><c- p>[</c-><c- n>first</c-><c- p>,</c-> <c- n>last</c-><c- p>)</c-></code>, starting from <code class="highlight"><c- n>first</c-></code> and proceeding to <code class="highlight"><c- n>last</c-> <c- o>-</c-> <c- mi>1</c-></code>.</p>
+    <p>[<em>Note x</em>: If the result of <code class="highlight"><c- n>invoke</c-><c- p>(</c-><c- n>proj</c-><c- p>,</c-> <c- o>*</c-><c- n>i</c-><c- p>)</c-></code> is a mutable reference, <code class="highlight"><c- n>f</c-></code> can apply non-constant functions. — <em>end note</em>]</p>
+    <p><em>Returns</em>: <code class="highlight"><c- n>last</c-><c- p>.</c-></code></p>
+    <p><em>Complexity</em>: Applies <code class="highlight"><c- n>f</c-></code> and <code class="highlight"><c- n>proj</c-></code> exactly <code class="highlight"><c- n>last</c-> <c- o>-</c-> <c- n>first</c-></code> times.</p>
+    <p><em>Remarks</em>: If <code class="highlight"><c- n>f</c-></code> returns a result, the result is ignored. Implementations do not have the freedom granted under
+[algorithms.parallel.exec] to make arbitrary copies of elements from the input sequence.</p>
+    <p>[<em>Note x</em>: The overloads in namespace <code class="highlight"><c- n>ranges</c-></code> require <code class="highlight"><c- n>Fun</c-></code> to model <code class="highlight"><c- n>copy_constructible</c-></code>. — <em>end note</em>]</p>
+    <p>[<em>Note x</em>: Do not return a copy of its <code class="highlight"><c- n>Fun</c-></code> parameter, since parallelization often does not permit efficient state
+accumulation. — <em>end note</em>]</p>
+   </ins>
    <h3 class="heading settled" data-level="7.6" id="modify_alg_find"><span class="secno">7.6. </span><span class="content">Modify <code class="highlight"><c- n>find</c-></code> in <a href="https://eel.is/c++draft/alg.find">[<strong>alg.find</strong>]</a></span><a class="self-link" href="#modify_alg_find"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>input_iterator</c-> <c- n>I</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>S</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c->
          <c- k>class</c-> <c- nc>T</c-> <c- o>=</c-> <c- n>projected_value_t</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Proj</c-><c- o>>></c->
@@ -3237,29 +3273,72 @@ in the view itself.</p>
 </pre>
    </ins>
    <h3 class="heading settled" data-level="7.14" id="modify_alg_search"><span class="secno">7.14. </span><span class="content">Modify <code class="highlight"><c- n>search</c-></code> in <a href="https://eel.is/c++draft/alg.search">[<strong>alg.search</strong>]</a></span><a class="self-link" href="#modify_alg_search"></a></h3>
-    // TODO Search wording 
-<pre class="language-cpp highlight"><c- k>template</c-><c- o>&lt;</c-><c- k>class</c-> <c- nc>ExecutionPolicy</c-><c- p>,</c-> <c- n>random_access_iterator</c-> <c- n>I1</c-><c- p>,</c-> <c- n>sized_sentinel_for</c-><c- o>&lt;</c-><c- n>I1</c-><c- o>></c-> <c- n>S1</c-><c- p>,</c-> <c- n>random_access_iterator</c-> <c- n>I2</c-><c- p>,</c->
-         <c- n>sized_sentinel_for</c-><c- o>&lt;</c-><c- n>I2</c-><c- o>></c-> <c- n>S2</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Pred</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>equal_to</c-><c- p>,</c->
+<pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>forward_iterator</c-> <c- n>I1</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I1</c-><c- o>></c-> <c- n>S1</c-><c- p>,</c-> <c- n>forward_iterator</c-> <c- n>I2</c-><c- p>,</c->
+         <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I2</c-><c- o>></c-> <c- n>S2</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Pred</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>equal_to</c-><c- p>,</c->
          <c- k>class</c-> <c- nc>Proj1</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj2</c-> <c- o>=</c-> <c- n>identity</c-><c- o>></c->
   <c- k>requires</c-> <c- n>indirectly_comparable</c-><c- o>&lt;</c-><c- n>I1</c-><c- p>,</c-> <c- n>I2</c-><c- p>,</c-> <c- n>Pred</c-><c- p>,</c-> <c- n>Proj1</c-><c- p>,</c-> <c- n>Proj2</c-><c- o>></c->
-  <c- n>subrange</c-><c- o>&lt;</c-><c- n>I1</c-><c- o>></c-> <c- n>ranges</c-><c- o>::</c-><c- n>search</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>I1</c-> <c- n>first1</c-><c- p>,</c-> <c- n>S1</c-> <c- n>last1</c-><c- p>,</c-> <c- n>I2</c-> <c- n>first2</c-><c- p>,</c-> <c- n>S2</c-> <c- n>last2</c-><c- p>,</c-> <c- n>Pred</c-> <c- n>pred</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj1</c-> <c- n>proj1</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj2</c-> <c- n>proj2</c-> <c- o>=</c-> <c- p>{});</c->
-
-<c- k>template</c-><c- o>&lt;</c-><c- k>class</c-> <c- nc>ExecutionPolicy</c-><c- p>,</c-> <c- n>random_access_range</c-> <c- n>R1</c-><c- p>,</c-> <c- n>random_access_range</c-> <c- n>R2</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Pred</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>equal_to</c-><c- p>,</c->
+  <c- k>constexpr</c-> <c- n>subrange</c-><c- o>&lt;</c-><c- n>I1</c-><c- o>></c->
+    <c- n>ranges</c-><c- o>::</c-><c- n>search</c-><c- p>(</c-><c- n>I1</c-> <c- n>first1</c-><c- p>,</c-> <c- n>S1</c-> <c- n>last1</c-><c- p>,</c-> <c- n>I2</c-> <c- n>first2</c-><c- p>,</c-> <c- n>S2</c-> <c- n>last2</c-><c- p>,</c-> <c- n>Pred</c-> <c- n>pred</c-> <c- o>=</c-> <c- p>{},</c->
+                   <c- n>Proj1</c-> <c- n>proj1</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj2</c-> <c- n>proj2</c-> <c- o>=</c-> <c- p>{});</c->
+<c- k>template</c-><c- o>&lt;</c-><c- n>forward_range</c-> <c- n>R1</c-><c- p>,</c-> <c- n>forward_range</c-> <c- n>R2</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Pred</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>equal_to</c-><c- p>,</c->
          <c- k>class</c-> <c- nc>Proj1</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj2</c-> <c- o>=</c-> <c- n>identity</c-><c- o>></c->
-  <c- k>requires</c-> <c- n>indirectly_comparable</c-><c- o>&lt;</c-><c- n>iterator_t</c-><c- o>&lt;</c-><c- n>R1</c-><c- o>></c-><c- p>,</c-> <c- n>iterator_t</c-><c- o>&lt;</c-><c- n>R2</c-><c- o>></c-><c- p>,</c-> <c- n>Pred</c-><c- p>,</c-> <c- n>Proj1</c-><c- p>,</c-> <c- n>Proj2</c-><c- o>></c-> <c- o>&amp;&amp;</c-> <c- n>sized_range</c-><c- o>&lt;</c-><c- n>R1</c-><c- o>></c-> <c- o>&amp;&amp;</c-> <c- n>sized_range</c-><c- o>&lt;</c-><c- n>R2</c-><c- o>></c->
-  <c- n>borrowed_subrange_t</c-><c- o>&lt;</c-><c- n>R1</c-><c- o>></c-> <c- n>ranges</c-><c- o>::</c-><c- n>search</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>R1</c-><c- o>&amp;&amp;</c-> <c- n>r1</c-><c- p>,</c-> <c- n>R2</c-><c- o>&amp;&amp;</c-> <c- n>r2</c-><c- p>,</c-> <c- n>Pred</c-> <c- n>pred</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj1</c-> <c- n>proj1</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj2</c-> <c- n>proj2</c-> <c- o>=</c-> <c- p>{});</c->
-
-<c- k>template</c-><c- o>&lt;</c-><c- k>class</c-> <c- nc>ExecutionPolicy</c-><c- p>,</c-> <c- n>random_access_iterator</c-> <c- n>I</c-><c- p>,</c-> <c- n>sized_sentinel_for</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>S</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Pred</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>equal_to</c-><c- p>,</c->
-         <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c-> <c- k>class</c-> <c- nc>T</c-> <c- o>=</c-> <c- n>projected_value_t</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Proj</c-><c- o>>></c->
-  <c- k>requires</c-> <c- n>indirectly_comparable</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- k>const</c-> <c- n>T</c-><c- o>*</c-><c- p>,</c-> <c- n>Pred</c-><c- p>,</c-> <c- n>Proj</c-><c- o>></c->
-  <c- n>subrange</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>ranges</c-><c- o>::</c-><c- n>search_n</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>I</c-> <c- n>first</c-><c- p>,</c-> <c- n>S</c-> <c- n>last</c-><c- p>,</c-> <c- n>iter_difference_t</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>count</c-><c- p>,</c-> <c- k>const</c-> <c- n>T</c-><c- o>&amp;</c-> <c- n>value</c-><c- p>,</c-> <c- n>Pred</c-> <c- n>pred</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
-
-<c- k>template</c-><c- o>&lt;</c-><c- k>class</c-> <c- nc>ExecutionPolicy</c-><c- p>,</c-> <c- n>random_access_range</c-> <c- n>R</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Pred</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>equal_to</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c-> <c- k>class</c-> <c- nc>T</c-> <c- o>=</c-> <c- n>projected_value_t</c-><c- o>&lt;</c-><c- n>iterator_t</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c-><c- p>,</c-> <c- n>Proj</c-><c- o>>></c->
-  <c- k>requires</c-> <c- n>indirectly_comparable</c-><c- o>&lt;</c-><c- n>iterator_t</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c-><c- p>,</c-> <c- k>const</c-> <c- n>T</c-><c- o>*</c-><c- p>,</c-> <c- n>Pred</c-><c- p>,</c-> <c- n>Proj</c-><c- o>></c-> <c- o>&amp;&amp;</c-> <c- n>sized_range</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c->
-  <c- n>borrowed_subrange_t</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c-> <c- n>ranges</c-><c- o>::</c-><c- n>search_n</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>R</c-><c- o>&amp;&amp;</c-> <c- n>r</c-><c- p>,</c-> <c- n>range_difference_t</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c-> <c- n>count</c-><c- p>,</c-> <c- k>const</c-> <c- n>T</c-><c- o>&amp;</c-> <c- n>value</c-><c- p>,</c-> <c- n>Pred</c-> <c- n>pred</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
+  <c- k>requires</c-> <c- n>indirectly_comparable</c-><c- o>&lt;</c-><c- n>iterator_t</c-><c- o>&lt;</c-><c- n>R1</c-><c- o>></c-><c- p>,</c-> <c- n>iterator_t</c-><c- o>&lt;</c-><c- n>R2</c-><c- o>></c-><c- p>,</c-> <c- n>Pred</c-><c- p>,</c-> <c- n>Proj1</c-><c- p>,</c-> <c- n>Proj2</c-><c- o>></c->
+  <c- k>constexpr</c-> <c- n>borrowed_subrange_t</c-><c- o>&lt;</c-><c- n>R1</c-><c- o>></c->
+    <c- n>ranges</c-><c- o>::</c-><c- n>search</c-><c- p>(</c-><c- n>R1</c-><c- o>&amp;&amp;</c-> <c- n>r1</c-><c- p>,</c-> <c- n>R2</c-><c- o>&amp;&amp;</c-> <c- n>r2</c-><c- p>,</c-> <c- n>Pred</c-> <c- n>pred</c-> <c- o>=</c-> <c- p>{},</c->
+                   <c- n>Proj1</c-> <c- n>proj1</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj2</c-> <c- n>proj2</c-> <c- o>=</c-> <c- p>{});</c->
 </pre>
+   <ins>
+<pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- k>class</c-> <c- nc>ExecutionPolicy</c-><c- p>,</c-> <c- n>random_access_iterator</c-> <c- n>I1</c-><c- p>,</c-> <c- n>sized_sentinel_for</c-><c- o>&lt;</c-><c- n>I1</c-><c- o>></c-> <c- n>S1</c-><c- p>,</c->
+         <c- n>random_access_iterator</c-> <c- n>I2</c-><c- p>,</c-> <c- n>sized_sentinel_for</c-><c- o>&lt;</c-><c- n>I2</c-><c- o>></c-> <c- n>S2</c-><c- p>,</c->
+         <c- k>class</c-> <c- nc>Pred</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>equal_to</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj1</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj2</c-> <c- o>=</c-> <c- n>identity</c-><c- o>></c->
+  <c- k>requires</c-> <c- n>indirectly_comparable</c-><c- o>&lt;</c-><c- n>I1</c-><c- p>,</c-> <c- n>I2</c-><c- p>,</c-> <c- n>Pred</c-><c- p>,</c-> <c- n>Proj1</c-><c- p>,</c-> <c- n>Proj2</c-><c- o>></c->
+    <c- n>subrange</c-><c- o>&lt;</c-><c- n>I1</c-><c- o>></c->
+      <c- n>ranges</c-><c- o>::</c-><c- n>search</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>I1</c-> <c- n>first1</c-><c- p>,</c-> <c- n>S1</c-> <c- n>last1</c-><c- p>,</c-> <c- n>I2</c-> <c- n>first2</c-><c- p>,</c-> <c- n>S2</c-> <c- n>last2</c-><c- p>,</c->
+                     <c- n>Pred</c-> <c- n>pred</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj1</c-> <c- n>proj1</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj2</c-> <c- n>proj2</c-> <c- o>=</c-> <c- p>{});</c->
+
+<c- k>template</c-><c- o>&lt;</c-><c- k>class</c-> <c- nc>ExecutionPolicy</c-><c- p>,</c-> <c- n>random_access_range</c-> <c- n>R1</c-><c- p>,</c-> <c- n>random_access_range</c-> <c- n>R2</c-><c- p>,</c->
+         <c- k>class</c-> <c- nc>Pred</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>equal_to</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj1</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj2</c-> <c- o>=</c-> <c- n>identity</c-><c- o>></c->
+  <c- k>requires</c-> <c- n>indirectly_comparable</c-><c- o>&lt;</c-><c- n>iterator_t</c-><c- o>&lt;</c-><c- n>R1</c-><c- o>></c-><c- p>,</c-> <c- n>iterator_t</c-><c- o>&lt;</c-><c- n>R2</c-><c- o>></c-><c- p>,</c-> <c- n>Pred</c-><c- p>,</c-> <c- n>Proj1</c-><c- p>,</c-> <c- n>Proj2</c-><c- o>></c->
+           <c- o>&amp;&amp;</c-> <c- n>sized_range</c-><c- o>&lt;</c-><c- n>R1</c-><c- o>></c-> <c- o>&amp;&amp;</c-> <c- n>sized_range</c-><c- o>&lt;</c-><c- n>R2</c-><c- o>></c->
+    <c- n>borrowed_subrange_t</c-><c- o>&lt;</c-><c- n>R1</c-><c- o>></c->
+      <c- n>ranges</c-><c- o>::</c-><c- n>search</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>R1</c-><c- o>&amp;&amp;</c-> <c- n>r1</c-><c- p>,</c-> <c- n>R2</c-><c- o>&amp;&amp;</c-> <c- n>r2</c-><c- p>,</c->
+                     <c- n>Pred</c-> <c- n>pred</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj1</c-> <c- n>proj1</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj2</c-> <c- n>proj2</c-> <c- o>=</c-> <c- p>{});</c->
+</pre>
+   </ins>
+<pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>forward_iterator</c-> <c- n>I</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>S</c-><c- p>,</c->
+         <c- k>class</c-> <c- nc>Pred</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>equal_to</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c->
+         <c- k>class</c-> <c- nc>T</c-> <c- o>=</c-> <c- n>projected_value_t</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Proj</c-><c- o>>></c->
+  <c- k>requires</c-> <c- n>indirectly_comparable</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- k>const</c-> <c- n>T</c-><c- o>*</c-><c- p>,</c-> <c- n>Pred</c-><c- p>,</c-> <c- n>Proj</c-><c- o>></c->
+  <c- k>constexpr</c-> <c- n>subrange</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c->
+    <c- n>ranges</c-><c- o>::</c-><c- n>search_n</c-><c- p>(</c-><c- n>I</c-> <c- n>first</c-><c- p>,</c-> <c- n>S</c-> <c- n>last</c-><c- p>,</c-> <c- n>iter_difference_t</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>count</c-><c- p>,</c->
+                     <c- k>const</c-> <c- n>T</c-><c- o>&amp;</c-> <c- n>value</c-><c- p>,</c-> <c- n>Pred</c-> <c- n>pred</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
+<c- k>template</c-><c- o>&lt;</c-><c- n>forward_range</c-> <c- n>R</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Pred</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>equal_to</c-><c- p>,</c->
+         <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c-> <c- k>class</c-> <c- nc>T</c-> <c- o>=</c-> <c- n>projected_value_t</c-><c- o>&lt;</c-><c- n>iterator_t</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c-><c- p>,</c-> <c- n>Proj</c-><c- o>>></c->
+  <c- k>requires</c-> <c- n>indirectly_comparable</c-><c- o>&lt;</c-><c- n>iterator_t</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c-><c- p>,</c-> <c- k>const</c-> <c- n>T</c-><c- o>*</c-><c- p>,</c-> <c- n>Pred</c-><c- p>,</c-> <c- n>Proj</c-><c- o>></c->
+  <c- k>constexpr</c-> <c- n>borrowed_subrange_t</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c->
+    <c- n>ranges</c-><c- o>::</c-><c- n>search_n</c-><c- p>(</c-><c- n>R</c-><c- o>&amp;&amp;</c-> <c- n>r</c-><c- p>,</c-> <c- n>range_difference_t</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c-> <c- n>count</c-><c- p>,</c->
+                     <c- k>const</c-> <c- n>T</c-><c- o>&amp;</c-> <c- n>value</c-><c- p>,</c-> <c- n>Pred</c-> <c- n>pred</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
+</pre>
+   <ins>
+<pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- k>class</c-> <c- nc>ExecutionPolicy</c-><c- p>,</c-> <c- n>random_access_iterator</c-> <c- n>I</c-><c- p>,</c-> <c- n>sized_sentinel_for</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>S</c-><c- p>,</c->
+         <c- k>class</c-> <c- nc>Pred</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>equal_to</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c->
+         <c- k>class</c-> <c- nc>T</c-> <c- o>=</c-> <c- n>projected_value_t</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Proj</c-><c- o>>></c->
+  <c- k>requires</c-> <c- n>indirectly_comparable</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- k>const</c-> <c- n>T</c-><c- o>*</c-><c- p>,</c-> <c- n>Pred</c-><c- p>,</c-> <c- n>Proj</c-><c- o>></c->
+    <c- n>subrange</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c->
+      <c- n>ranges</c-><c- o>::</c-><c- n>search_n</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>I</c-> <c- n>first</c-><c- p>,</c-> <c- n>S</c-> <c- n>last</c-><c- p>,</c-> <c- n>iter_difference_t</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>count</c-><c- p>,</c->
+                       <c- k>const</c-> <c- n>T</c-><c- o>&amp;</c-> <c- n>value</c-><c- p>,</c-> <c- n>Pred</c-> <c- n>pred</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
+
+<c- k>template</c-><c- o>&lt;</c-><c- k>class</c-> <c- nc>ExecutionPolicy</c-><c- p>,</c-> <c- n>random_access_range</c-> <c- n>R</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Pred</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>equal_to</c-><c- p>,</c->
+         <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c-> <c- k>class</c-> <c- nc>T</c-> <c- o>=</c-> <c- n>projected_value_t</c-><c- o>&lt;</c-><c- n>iterator_t</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c-><c- p>,</c-> <c- n>Proj</c-><c- o>>></c->
+  <c- k>requires</c-> <c- n>indirectly_comparable</c-><c- o>&lt;</c-><c- n>iterator_t</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c-><c- p>,</c-> <c- k>const</c-> <c- n>T</c-><c- o>*</c-><c- p>,</c-> <c- n>Pred</c-><c- p>,</c-> <c- n>Proj</c-><c- o>></c->
+           <c- o>&amp;&amp;</c-> <c- n>sized_range</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c->
+    <c- n>borrowed_subrange_t</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c->
+      <c- n>ranges</c-><c- o>::</c-><c- n>search_n</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>R</c-><c- o>&amp;&amp;</c-> <c- n>r</c-><c- p>,</c-> <c- n>range_difference_t</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c-> <c- n>count</c-><c- p>,</c->
+                       <c- k>const</c-> <c- n>T</c-><c- o>&amp;</c-> <c- n>value</c-><c- p>,</c-> <c- n>Pred</c-> <c- n>pred</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
+</pre>
+   </ins>
    <h3 class="heading settled" data-level="7.15" id="modify_alg_starts_with"><span class="secno">7.15. </span><span class="content">Modify <code class="highlight"><c- n>starts_with</c-></code> in <a href="https://eel.is/c++draft/alg.starts.with">[<strong>alg.starts.with</strong>]</a></span><a class="self-link" href="#modify_alg_starts_with"></a></h3>
-<pre class="highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>input_iterator</c-> <c- n>I1</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I1</c-><c- o>></c-> <c- n>S1</c-><c- p>,</c-> <c- n>input_iterator</c-> <c- n>I2</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I2</c-><c- o>></c-> <c- n>S2</c-><c- p>,</c->
+<pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>input_iterator</c-> <c- n>I1</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I1</c-><c- o>></c-> <c- n>S1</c-><c- p>,</c-> <c- n>input_iterator</c-> <c- n>I2</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I2</c-><c- o>></c-> <c- n>S2</c-><c- p>,</c->
          <c- k>class</c-> <c- nc>Pred</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>equal_to</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj1</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj2</c-> <c- o>=</c-> <c- n>identity</c-><c- o>></c->
   <c- k>requires</c-> <c- n>indirectly_comparable</c-><c- o>&lt;</c-><c- n>I1</c-><c- p>,</c-> <c- n>I2</c-><c- p>,</c-> <c- n>Pred</c-><c- p>,</c-> <c- n>Proj1</c-><c- p>,</c-> <c- n>Proj2</c-><c- o>></c->
   <c- k>constexpr</c-> <c- b>bool</c-> <c- n>ranges</c-><c- o>::</c-><c- n>starts_with</c-><c- p>(</c-><c- n>I1</c-> <c- n>first1</c-><c- p>,</c-> <c- n>S1</c-> <c- n>last1</c-><c- p>,</c-> <c- n>I2</c-> <c- n>first2</c-><c- p>,</c-> <c- n>S2</c-> <c- n>last2</c-><c- p>,</c-> <c- n>Pred</c-> <c- n>pred</c-> <c- o>=</c-> <c- p>{},</c->
