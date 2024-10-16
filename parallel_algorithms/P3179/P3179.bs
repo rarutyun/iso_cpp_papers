@@ -3202,10 +3202,10 @@ move construction, copy assignment, move assignment, or comparisons between vali
 <ins>
 <pre class="wordingStyle">
 template&lt;class S, class I>
-concept <i>nothrow-sized_sentinel-for</i> = sized_sentinel_for&lt;S, I>; <i>// exposition only</i>
+concept <i>nothrow-sized-sentinel-for</i> = sized_sentinel_for&lt;S, I>; <i>// exposition only</i>
 </pre>
 
-Types `S` and `I` model <code><i>nothrow-sentinel-for</i></code> only if no exceptions are thrown from copy construction,
+Types `S` and `I` model <code><i>nothrow-sized-sentinel-for</i></code> only if no exceptions are thrown from copy construction,
 move construction, copy assignment, move assignment, or comparisons between valid values of type `I` and `S`.
 
 [*Note X*: This concept allows some `sized_sentinel_for` ([iterator.concept.sizedsentinel]) operations to throw exceptions. — *end note*]
@@ -3224,7 +3224,7 @@ concept <i>nothrow-forward-iterator</i> = <i>// exposition only</i>
 <ins>
 <pre class="wordingStyle">
 template&lt;class I>
-concept <i>nothrow-random_access-iterator</i> = <i>// exposition only</i>
+concept <i>nothrow-random-access-iterator</i> = <i>// exposition only</i>
   <i>nothrow-forward-iterator</i>&lt;I> &&
   random_access_iterator&lt;I> &&
   <i>nothrow-sentinel-for</i>&lt;I, I>;
