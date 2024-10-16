@@ -1564,7 +1564,7 @@ Possible extra rowspan handling
   <meta content="Bikeshed version 6270e4735, updated Tue Aug 6 12:12:30 2024 -0700" name="generator">
   <link href="https://wg21.link/P3179R3" rel="canonical">
   <link href="https://isocpp.org/favicon.ico" rel="icon">
-  <meta content="c256fe153317d98580d8694833cea7e2533f8c63" name="revision">
+  <meta content="3b00523c05caeb7c2749e4222e5048f0a9350863" name="revision">
   <meta content="dark light" name="color-scheme">
 <style>
     table, th, td {
@@ -2343,8 +2343,8 @@ further referred to as <em>parallel range algorithms</em>.</p>
     <li data-md>
      <p><code class="highlight"><c- n>for_each</c-></code> and <code class="highlight"><c- n>for_each_n</c-></code> return only an iterator but not the function.</p>
     <li data-md>
-     <p>Parallel range algorithms take <code class="highlight"><c- n>range</c-></code>, not an iterator, as an output for the overloads with ranges, and additionally take
-an output sentinel for the "iterator and sentinel" overloads. (<a href="#range_as_output">§ 2.6 Taking range as an output</a>)</p>
+     <p><s>Parallel range algorithms take <code class="highlight"><c- n>range</c-></code>, not an iterator, as an output for the overloads with ranges, and additionally take
+an output sentinel for the "iterator and sentinel" overloads. (<a href="#range_as_output">§ 2.6 Taking range as an output</a>)</s></p>
     <li data-md>
      <p>Until better parallelism-friendly abstractions are proposed, parallel algorithms require <code class="highlight"><c- n>random_access_</c-><c- p>{</c-><c- n>iterator</c-><c- p>,</c-><c- n>range</c-><c- p>}</c-></code>. (<a href="#random_access_requirement">§ 2.5 Requiring random_access_iterator or random_access_range</a>)</p>
     <li data-md>
@@ -2497,51 +2497,13 @@ For now, random access ranges with known bounds (see <a href="#require_bounded_r
 that exists in the standard. Starting from that and gradually enabling other types of iteration spaces
 in a source-compatible manner seems to us better than blanket allowance of any <code class="highlight"><c- n>forward_range</c-></code>.</p>
    <h3 class="heading settled" data-level="2.6" id="range_as_output"><span class="secno">2.6. </span><span class="content">Taking <code class="highlight"><c- n>range</c-></code> as an output</span><a class="self-link" href="#range_as_output"></a></h3>
-   <p>We would like to propose a range as the output for the overloads that take ranges for input. Similarly, we propose
-a sentinel for output where input is passed as "iterator and sentinel". See <a href="#proposed_api">§ 4 Proposed API</a> for the examples.</p>
-   <p>The reasons for that are:</p>
-   <ul>
-    <li data-md>
-     <p>It creates a safer API where all the data sequences have known limits.</p>
-    <li data-md>
-     <p>Not for all algorithms the output size is defined by the input size. An example is <code class="highlight"><c- n>copy_if</c-></code> (and similar algorithms with <em>filtering</em> semantics), where the output sequence is allowed to be shorter than the input one.
-Knowing the expected size of the output may open opportunities for more efficient parallel implementations.</p>
-    <li data-md>
-     <p>Passing a range for output makes code a bit simpler in the cases typical for parallel execution.</p>
-   </ul>
-   <p>It is worth noting that to various degrees these reasons are also applicable to serial algorithms.</p>
-   <p>There are already range algorithms  - <code class="highlight"><c- n>fill</c-></code>, <code class="highlight"><c- n>generate</c-></code>, and <code class="highlight"><c- n>iota</c-></code> - that take a range or an "iterator and sentinel" pair
-for their output. Their specifics is absence of input sequences, so the output sequence needs a boundary.
-Nevertheless, these are precedents of specifying output as a range, and extending it from algorithms with zero input sequences
-to those with one or more seems appropriate.</p>
-   <p>We think that in practice parallel algorithms mainly write the output data into a container or storage
-with preallocated space, for efficiency reasons. So, typically parallel algorithms receive <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>begin</c-><c- p>(</c-><c- n>v</c-><c- p>)</c-></code> or <code class="highlight"><c- n>v</c-><c- p>.</c-><c- n>begin</c-><c- p>()</c-></code> or <code class="highlight"><c- n>v</c-><c- p>.</c-><c- n>data</c-><c- p>()</c-></code> for output, where <code class="highlight"><c- n>v</c-></code> is an instance of <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>vector</c-></code> or <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>array</c-></code>.
-Allowing <code class="highlight"><c- n>v</c-></code> to be passed directly for output in the same way as for input results in a slightly simpler code.</p>
-   <p>Also, using classes such as <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>back_insert_iterator</c-></code> or <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ostream_iterator</c-></code>, which do not have a range underneath,
-is already not possible with C++17 parallel algorithms that require at least forward iterators.
-Migrating such code to use algorithms with execution policies will require modifications in any case.</p>
-   <p>All in all, we think for parallel algorithms taking ranges and sentinels for output makes more sense than only taking an iterator.</p>
-   <p>The main concern we have heard about this approach is the mismatch between serial and parallel variations.
-That is, if serial range algorithms only take iterators for output and parallel range algorithms only take ranges,
-switching between those will always require code changes. That can be resolved by:</p>
-   <ul>
-    <li data-md>
-     <p>(A) adding <em>output-as-range</em> to serial range algorithms,</p>
-    <li data-md>
-     <p>(B) adding <em>output-as-iterator</em> to parallel range algorithms</p>
-   </ul>
-   <p>or both.</p>
-   <p>The option (A) gives some of the described benefits to serial range algorithms as well; one could argue that it
-would be a useful addition on its own.
-The option (B) does not seem to have benefits besides the aligned semantics, while it has the downside of not enforcing
-the requirements we propose in <a href="#require_bounded_ranges">§ 2.7 Requiring ranges to be bounded</a>.</p>
-   <p>With either (A) or (B), the output parameter for range algorithm overloads could be both a range and an iterator.
-In the formal wording, this could be represented either as two separate overloads with different requirements
-on that parameter, or with an exposition-only <em>range-or-iterator</em> concept that combines the requirements
-by logical disjunction, as its name suggest. We did not explore which makes more sense; at glance, there seems
-to be little practical difference for library implementors.</p>
-   <p>For "iterator and sentinel" overloads we prefer to always require a sentinel for output, despite the mismatch with
-the corresponding serial overloads.</p>
+   <p>In the previous revision we proposed a range as the output for the overloads that take ranges for input. Similarly, we proposed a sentinel for output where input is passed as "iterator and sentinel".</p>
+   <p>This topic was discussed on the joint SG1 and SG9 session (St. Louis, 2024) and the feedback was that the extra discussion
+is required and the semantics of some algorithms is not clear with the range-as-an-output. Thus, it requires deeper
+investigation.</p>
+   <p>We do <strong>not</strong> push for this design aspect as a part of this proposal. Instead, we are going to write a separate paper to cover
+this topic.</p>
+   <p>See <a data-link-type="biblio" href="#biblio-p3179r2" title="C++ parallel range algorithms">[P3179R2]</a> for more details.</p>
    <h3 class="heading settled" data-level="2.7" id="require_bounded_ranges"><span class="secno">2.7. </span><span class="content">Requiring ranges to be bounded</span><a class="self-link" href="#require_bounded_ranges"></a></h3>
    <p>One of the requirements we want to put on the parallel range algorithms is to disallow unbounded input and output.
 The reasons for that are:</p>
@@ -5150,6 +5112,8 @@ move construction, copy assignment, move assignment, or comparisons between vali
    <dd>Bryce Adelstein Lelbach. <a href="https://wg21.link/p3159r0"><cite>C++ Range Adaptors and Parallel Algorithms</cite></a>. 18 March 2024. URL: <a href="https://wg21.link/p3159r0">https://wg21.link/p3159r0</a>
    <dt id="biblio-p3179r0">[P3179R0]
    <dd>Ruslan Arutyunyan, Alexey Kukanov. <a href="https://wg21.link/p3179r0"><cite>C++ parallel range algorithms</cite></a>. 15 March 2024. URL: <a href="https://wg21.link/p3179r0">https://wg21.link/p3179r0</a>
+   <dt id="biblio-p3179r2">[P3179R2]
+   <dd>Ruslan Arutyunyan, Alexey Kukanov, Bryce Adelstein Lelbach. <a href="https://wg21.link/p3179r2"><cite>C++ parallel range algorithms</cite></a>. 25 June 2024. URL: <a href="https://wg21.link/p3179r2">https://wg21.link/p3179r2</a>
    <dt id="biblio-p3300r0">[P3300R0]
    <dd>Bryce Adelstein Lelbach. <a href="https://wg21.link/p3300r0"><cite>C++ Asynchronous Parallel Algorithms</cite></a>. 15 February 2024. URL: <a href="https://wg21.link/p3300r0">https://wg21.link/p3300r0</a>
   </dl>
