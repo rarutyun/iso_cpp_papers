@@ -30,13 +30,13 @@ span, span * {
 
 ## Allowing user-defined tuples, or "true" motivation :) ## {#true_motivation}
 
-The section addresses the LEWG feedback. While we always had in mind that with `get_element`
+The section addresses the LEWG feedback. While we always had in mind that with the `get_element`
 facility we can make a generic concept for <code><i>tuple-like</i></code> types, we assumed it to be developed as a separate
 proposal. However, based on the LEWG poll ([[#lewg_telecon_2024_01_23]]), the `get_element` paper should enable
 user-defined tuples to make its motivation strong enough.
 
 So, let's go to the problem statement. Today the C++ standard defines <code><i>tuple-like</i></code> types as only 5 types
-from `std` namespace:
+from the `std` namespace:
 - `std::tuple`
 - `std::pair`
 - `std::array`
@@ -55,7 +55,7 @@ Unfortunately, rules are different in different places in the standard today. Fo
 exposition-only concept for `elements_view` allows only the 5 <code><i>tuple-like</i></code> types listed above and does not
 consider user-defined types.
 
-[[P2165R4]] added constraints for existing API (like `std::apply`, `std::tuple_cat`, etc.) to take
+[[P2165R4]] added constraints for existing APIs (like `std::apply`, `std::tuple_cat`, etc.) to take
 <code><i>tuple-like</i></code> and also provides better compatibility between <code><i>tuple-like</i></code> objects
 by adding extra APIs, which is great. The unfortunate part of the story, however, is that the mentioned APIs are still
 limited by the definition of the <code><i>tuple-like</i></code> concept (the 5 standard types).
@@ -85,7 +85,7 @@ private:
         static_assert (I == 0 || I == 1);
         if constexpr (I == 0)
             return t_like.t;
-        else if (I == 1)
+        else if constexpr (I == 1)
             return t_like.u;
     }
 };
@@ -146,7 +146,7 @@ Of course, `std::apply` is just an example. `my_tuple_like` would work with any 
 
 ## The original motivating use case ## {#motivating_use_case}
 
-Having `std::pair`, `std::tuple` and other <code><i>tuple-like</i></code> types as the value types for the algorithms
+Having `std::pair`, `std::tuple` and other <code><i>tuple-like</i></code> types as the value types for algorithms
 creates a plenty of opportunities. With special views, such as `std::ranges::elements_view`, we can
 specify which tuple elements to access when iterating over collections of such objects. However,
 we cannot easily use a predicate to make a decision based on only some of tuple elements, for example keys or values.
@@ -499,12 +499,12 @@ concept <i>tuple-like</i> = // exposition only
 Alternative design was considered to name the proposed API `std::ranges::get`.
 
 Given that we discussed this option several times in C++ committee and it didn't even have a weak support to pursue,
-authors think that keeping the detailed information in R3 is unnecessary. Please see [[P2769R2]] for more information.
+authors think that keeping the detailed information is no more necessary. Please see [[P2769R2]] for more information.
 
 ## Breaking code example ## {#breaking_code}
 
-With the proposed API some user code might be broken because `get_element` makes ADL call underneath. Consider the
-following example:
+With the proposed API some user code might be broken because `get_element` makes an ADL call underneath.
+Consider the following example:
 
 ```cpp
 namespace my {
@@ -532,14 +532,13 @@ int main()
 However, such potential break is very unlikely. In particular, there is no user-defined type involved in the `get`
 overload in `my` namespace. If such code in `my` namespace was deployed, it's likely to be already broken.
 Indeed, while `std::get` is not a customization point, it is often used unqualified (and therefore found by ADL),
-such that the code with in `my` namespace already leads to ambiguity. Therefore we do not think that this potential
-breaking change requires any preventive measure (and we don't think such a measure exists) about the scenario mentioned
-above.
+such that the code with in `my` namespace already leads to ambiguity.
 
-This breaking change could be mitigated by checking in the `get_element` implementation if the function argument type is one
-four types `std::get` can work with (`std::complex` is not necessary because it supports tuple protocol since C++26).
-However, authors do **not** recommend this solution because of the reasons mentioned above. The implementation
-(with pseudo-code) is provided below for the sake of completeness:
+This potential breaking change could be mitigated by checking in the `get_element` implementation if the function argument type
+is one of the four types `std::get` now works with (ignoring `std::complex` supported only since C++26).
+The implementation (with pseudo-code) is provided below for the sake of completeness.
+However, the authors do not think any preventive measures are required because of the reasons mentioned above,
+and therefore do **not** recommend this solution.
 
 ```cpp
 namespace std
@@ -580,18 +579,18 @@ During the discussion in LEWG (St. Louis, 2024) we got a feedback that it's bett
 <code><i>tuple-like</i></code>, e.g., `std::variant`.
 
 The current proposal purposefully does not consider `get_element` to be applicable in all the same contexts
-where `std::get` is used:
+where `std::get` is used, for the following reasons:
 - `std::get` has overloads that allow to access `tuple` elements by type, while `std::get_element` doesn't.
-- It hard to imagine the generic code that expects both <code><i>tuple-like</i></code> or `std::variant` as an argument
-    because it's always safe to access any element of a <code><i>tuple-like</i></code> object whereas for `std::variant`
-    only one alternative is "active" - and therefore safe to access. Supporting variant in this interface would make it
-    easy to introduce UB in generic code.
-- If `get_element` is unconstrained it becomes too wide, his applicability goes beyond just `std::get` use cases. We
-    could potentially constraint is with either `tuple_size || std::variant` but this looks weird because of the generic
-    code argument above.
+- It is hard to imagine generic code that works with either <code><i>tuple-like</i></code> or `std::variant`
+    because it is always safe to access any element of a <code><i>tuple-like</i></code> object whereas for `std::variant`
+    only one alternative is "active" and safe to access. Restricting `get_element` can therefore prevent
+    potential UB in generic code.
 
-Thus, the recommendation is to constrain `get_element` with `tuple_size` because it should be sufficient without
-`tuple_element`. Structured binding does the same.
+Moreover, `get_element` could use `tuple_size` to require that the specified element index is within the size
+of the given <code><i>tuple-like</i></code> type, not relying on `get` to have such check.
+
+Thus, the recommendation is to constrain `get_element` with `tuple_size`. It should be sufficient without
+`tuple_element`; structured binding does the same.
 
 # Connections with other papers # {#other_papers_connections}
 
@@ -626,7 +625,8 @@ semantics, for example, `std::less` and `std::ranges::less`, where the latter is
 # Further discussion # {#further_work}
 
 - Broader implementation experience (should be done before meeting in Poland, 2024)
-- Make <code><i>tuple-like</i></code> public concept
+- Make <code><i>tuple-like</i></code> a public concept
+- Consider requiring the index for `get_element` to be within the size of the tuple
 
 # Formal wording # {#wording}
 
