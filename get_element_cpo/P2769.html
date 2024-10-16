@@ -1564,7 +1564,7 @@ Possible extra rowspan handling
   <meta content="Bikeshed version 6270e4735, updated Tue Aug 6 12:12:30 2024 -0700" name="generator">
   <link href="https://wg21.link/P2769R3" rel="canonical">
   <link href="https://isocpp.org/favicon.ico" rel="icon">
-  <meta content="60000054f2cc50e2bc4c4e87cf1c3272564fd964" name="revision">
+  <meta content="8e2ffc70e15d0c465f3cc104a7ac19a76f5f0855" name="revision">
   <meta content="dark light" name="color-scheme">
 <style>
 ins, ins * {
@@ -2205,11 +2205,11 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <main>
    <h2 class="heading settled" data-level="1" id="motivation"><span class="secno">1. </span><span class="content">Motivation</span><a class="self-link" href="#motivation"></a></h2>
    <h3 class="heading settled" data-level="1.1" id="true_motivation"><span class="secno">1.1. </span><span class="content">Allowing user-defined tuples, or "true" motivation :)</span><a class="self-link" href="#true_motivation"></a></h3>
-   <p>The section addresses the LEWG feedback. While we always had in mind that with <code class="highlight"><c- n>get_element</c-></code> facility we can make a generic concept for <code class="highlight"><i><c- n>tuple</c-><c- o>-</c-><c- n>like</c-></i></code> types, we assumed it to be developed as a separate
+   <p>The section addresses the LEWG feedback. While we always had in mind that with the <code class="highlight"><c- n>get_element</c-></code> facility we can make a generic concept for <code class="highlight"><i><c- n>tuple</c-><c- o>-</c-><c- n>like</c-></i></code> types, we assumed it to be developed as a separate
 proposal. However, based on the LEWG poll (<a href="#lewg_telecon_2024_01_23">§ 8.2 Library Evolution Telecon 2024-01-23</a>), the <code class="highlight"><c- n>get_element</c-></code> paper should enable
 user-defined tuples to make its motivation strong enough.</p>
    <p>So, let’s go to the problem statement. Today the C++ standard defines <code class="highlight"><i><c- n>tuple</c-><c- o>-</c-><c- n>like</c-></i></code> types as only 5 types
-from <code class="highlight"><c- n>std</c-></code> namespace:</p>
+from the <code class="highlight"><c- n>std</c-></code> namespace:</p>
    <ul>
     <li data-md>
      <p><code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>tuple</c-></code></p>
@@ -2228,7 +2228,7 @@ tuples. <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>tuple_size</c->
 non-static-member-function or by argument-dependent lookup).</p>
    <p>Unfortunately, rules are different in different places in the standard today. For example, <em>has-tuple-element</em> exposition-only concept for <code class="highlight"><c- n>elements_view</c-></code> allows only the 5 <code class="highlight"><i><c- n>tuple</c-><c- o>-</c-><c- n>like</c-></i></code> types listed above and does not
 consider user-defined types.</p>
-   <p><a data-link-type="biblio" href="#biblio-p2165r4" title="Compatibility between tuple, pair and tuple-like objects">[P2165R4]</a> added constraints for existing API (like <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>apply</c-></code>, <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>tuple_cat</c-></code>, etc.) to take <code class="highlight"><i><c- n>tuple</c-><c- o>-</c-><c- n>like</c-></i></code> and also provides better compatibility between <code class="highlight"><i><c- n>tuple</c-><c- o>-</c-><c- n>like</c-></i></code> objects
+   <p><a data-link-type="biblio" href="#biblio-p2165r4" title="Compatibility between tuple, pair and tuple-like objects">[P2165R4]</a> added constraints for existing APIs (like <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>apply</c-></code>, <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>tuple_cat</c-></code>, etc.) to take <code class="highlight"><i><c- n>tuple</c-><c- o>-</c-><c- n>like</c-></i></code> and also provides better compatibility between <code class="highlight"><i><c- n>tuple</c-><c- o>-</c-><c- n>like</c-></i></code> objects
 by adding extra APIs, which is great. The unfortunate part of the story, however, is that the mentioned APIs are still
 limited by the definition of the <code class="highlight"><i><c- n>tuple</c-><c- o>-</c-><c- n>like</c-></i></code> concept (the 5 standard types).</p>
    <p>In this paper, we proposed a new customization point object, <code class="highlight"><c- n>get_element</c-></code>, which can be used to extend the tuple protocol
@@ -2252,7 +2252,7 @@ See the example in <a href="#breaking_code">§ 3.2 Breaking code example</a> s
         <c- k>static_assert</c-> <c- p>(</c-><c- n>I</c-> <c- o>==</c-> <c- mi>0</c-> <c- o>||</c-> <c- n>I</c-> <c- o>==</c-> <c- mi>1</c-><c- p>);</c->
         <c- k>if</c-> <c- k>constexpr</c-> <c- p>(</c-><c- n>I</c-> <c- o>==</c-> <c- mi>0</c-><c- p>)</c->
             <c- k>return</c-> <c- n>t_like</c-><c- p>.</c-><c- n>t</c-><c- p>;</c->
-        <c- k>else</c-> <c- k>if</c-> <c- p>(</c-><c- n>I</c-> <c- o>==</c-> <c- mi>1</c-><c- p>)</c->
+        <c- k>else</c-> <c- k>if</c-> <c- k>constexpr</c-> <c- p>(</c-><c- n>I</c-> <c- o>==</c-> <c- mi>1</c-><c- p>)</c->
             <c- k>return</c-> <c- n>t_like</c-><c- p>.</c-><c- n>u</c-><c- p>;</c->
     <c- p>}</c->
 <c- p>};</c->
@@ -2302,7 +2302,7 @@ See the example in <a href="#breaking_code">§ 3.2 Breaking code example</a> s
    </table>
    <p>Of course, <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>apply</c-></code> is just an example. <code class="highlight"><c- n>my_tuple_like</c-></code> would work with any API that supports <code class="highlight"><i><c- n>tuple</c-><c- o>-</c-><c- n>like</c-></i></code> types.</p>
    <h3 class="heading settled" data-level="1.2" id="motivating_use_case"><span class="secno">1.2. </span><span class="content">The original motivating use case</span><a class="self-link" href="#motivating_use_case"></a></h3>
-   <p>Having <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>pair</c-></code>, <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>tuple</c-></code> and other <code class="highlight"><i><c- n>tuple</c-><c- o>-</c-><c- n>like</c-></i></code> types as the value types for the algorithms
+   <p>Having <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>pair</c-></code>, <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>tuple</c-></code> and other <code class="highlight"><i><c- n>tuple</c-><c- o>-</c-><c- n>like</c-></i></code> types as the value types for algorithms
 creates a plenty of opportunities. With special views, such as <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>elements_view</c-></code>, we can
 specify which tuple elements to access when iterating over collections of such objects. However,
 we cannot easily use a predicate to make a decision based on only some of tuple elements, for example keys or values.</p>
@@ -2565,10 +2565,10 @@ wider range of types rather than just the listed standard types.</p>
    <h3 class="heading settled" data-level="3.1" id="ranges_get"><span class="secno">3.1. </span><span class="content"><code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>get</c-></code></span><a class="self-link" href="#ranges_get"></a></h3>
    <p>Alternative design was considered to name the proposed API <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>ranges</c-><c- o>::</c-><c- n>get</c-></code>.</p>
    <p>Given that we discussed this option several times in C++ committee and it didn’t even have a weak support to pursue,
-authors think that keeping the detailed information in R3 is unnecessary. Please see <a data-link-type="biblio" href="#biblio-p2769r2" title="get_element customization point object">[P2769R2]</a> for more information.</p>
+authors think that keeping the detailed information is no more necessary. Please see <a data-link-type="biblio" href="#biblio-p2769r2" title="get_element customization point object">[P2769R2]</a> for more information.</p>
    <h3 class="heading settled" data-level="3.2" id="breaking_code"><span class="secno">3.2. </span><span class="content">Breaking code example</span><a class="self-link" href="#breaking_code"></a></h3>
-   <p>With the proposed API some user code might be broken because <code class="highlight"><c- n>get_element</c-></code> makes ADL call underneath. Consider the
-following example:</p>
+   <p>With the proposed API some user code might be broken because <code class="highlight"><c- n>get_element</c-></code> makes an ADL call underneath.
+Consider the following example:</p>
 <pre class="language-cpp highlight"><c- k>namespace</c-> <c- nn>my</c-> <c- p>{</c->
     <c- k>struct</c-> <c- nc>type</c-><c- p>{};</c->
 
@@ -2592,13 +2592,12 @@ following example:</p>
 </pre>
    <p>However, such potential break is very unlikely. In particular, there is no user-defined type involved in the <code class="highlight"><c- n>get</c-></code> overload in <code class="highlight"><c- n>my</c-></code> namespace. If such code in <code class="highlight"><c- n>my</c-></code> namespace was deployed, it’s likely to be already broken.
 Indeed, while <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>get</c-></code> is not a customization point, it is often used unqualified (and therefore found by ADL),
-such that the code with in <code class="highlight"><c- n>my</c-></code> namespace already leads to ambiguity. Therefore we do not think that this potential
-breaking change requires any preventive measure (and we don’t think such a measure exists) about the scenario mentioned
-above.</p>
-   <p>This breaking change could be mitigated by checking in the <code class="highlight"><c- n>get_element</c-></code> implementation if the function argument type is one
-four types <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>get</c-></code> can work with (<code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>complex</c-></code> is not necessary because it supports tuple protocol since C++26).
-However, authors do <strong>not</strong> recommend this solution because of the reasons mentioned above. The implementation
-(with pseudo-code) is provided below for the sake of completeness:</p>
+such that the code with in <code class="highlight"><c- n>my</c-></code> namespace already leads to ambiguity.</p>
+   <p>This potential breaking change could be mitigated by checking in the <code class="highlight"><c- n>get_element</c-></code> implementation if the function argument type
+is one of the four types <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>get</c-></code> now works with (ignoring <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>complex</c-></code> supported only since C++26).
+The implementation (with pseudo-code) is provided below for the sake of completeness.
+However, the authors do not think any preventive measures are required because of the reasons mentioned above,
+and therefore do <strong>not</strong> recommend this solution.</p>
 <pre class="language-cpp highlight"><c- k>namespace</c-> <c- nn>std</c->
 <c- p>{</c->
 <c- k>namespace</c-> <c- nn>__detail</c->
@@ -2632,20 +2631,17 @@ However, authors do <strong>not</strong> recommend this solution because of the 
    <h3 class="heading settled" data-level="3.3" id="get_element_std_variant"><span class="secno">3.3. </span><span class="content"><code class="highlight"><c- n>get_element</c-></code> for <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>variant</c-></code> and other non-tuple-like types</span><a class="self-link" href="#get_element_std_variant"></a></h3>
    <p>During the discussion in LEWG (St. Louis, 2024) we got a feedback that it’s better to constraint <code class="highlight"><c- n>get_element</c-></code> with <code class="highlight"><c- n>tuple_size</c-></code> and possibly <code class="highlight"><c- n>tuple_element</c-></code>. The idea was to not use it for something that is not <code class="highlight"><i><c- n>tuple</c-><c- o>-</c-><c- n>like</c-></i></code>, e.g., <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>variant</c-></code>.</p>
    <p>The current proposal purposefully does not consider <code class="highlight"><c- n>get_element</c-></code> to be applicable in all the same contexts
-where <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>get</c-></code> is used:</p>
+where <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>get</c-></code> is used, for the following reasons:</p>
    <ul>
     <li data-md>
      <p><code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>get</c-></code> has overloads that allow to access <code class="highlight"><c- n>tuple</c-></code> elements by type, while <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>get_element</c-></code> doesn’t.</p>
     <li data-md>
-     <p>It hard to imagine the generic code that expects both <code class="highlight"><i><c- n>tuple</c-><c- o>-</c-><c- n>like</c-></i></code> or <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>variant</c-></code> as an argument
-because it’s always safe to access any element of a <code class="highlight"><i><c- n>tuple</c-><c- o>-</c-><c- n>like</c-></i></code> object whereas for <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>variant</c-></code> only one alternative is "active" - and therefore safe to access. Supporting variant in this interface would make it
-easy to introduce UB in generic code.</p>
-    <li data-md>
-     <p>If <code class="highlight"><c- n>get_element</c-></code> is unconstrained it becomes too wide, his applicability goes beyond just <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>get</c-></code> use cases. We
-could potentially constraint is with either <code class="highlight"><c- n>tuple_size</c-> <c- o>||</c-> <c- n>std</c-><c- o>::</c-><c- n>variant</c-></code> but this looks weird because of the generic
-code argument above.</p>
+     <p>It is hard to imagine generic code that works with either <code class="highlight"><i><c- n>tuple</c-><c- o>-</c-><c- n>like</c-></i></code> or <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>variant</c-></code> because it is always safe to access any element of a <code class="highlight"><i><c- n>tuple</c-><c- o>-</c-><c- n>like</c-></i></code> object whereas for <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>variant</c-></code> only one alternative is "active" and safe to access. Restricting <code class="highlight"><c- n>get_element</c-></code> can therefore prevent
+potential UB in generic code.</p>
    </ul>
-   <p>Thus, the recommendation is to constrain <code class="highlight"><c- n>get_element</c-></code> with <code class="highlight"><c- n>tuple_size</c-></code> because it should be sufficient without <code class="highlight"><c- n>tuple_element</c-></code>. Structured binding does the same.</p>
+   <p>Moreover, <code class="highlight"><c- n>get_element</c-></code> could use <code class="highlight"><c- n>tuple_size</c-></code> to require that the specified element index is within the size
+of the given <code class="highlight"><i><c- n>tuple</c-><c- o>-</c-><c- n>like</c-></i></code> type, not relying on <code class="highlight"><c- n>get</c-></code> to have such check.</p>
+   <p>Thus, the recommendation is to constrain <code class="highlight"><c- n>get_element</c-></code> with <code class="highlight"><c- n>tuple_size</c-></code>. It should be sufficient without <code class="highlight"><c- n>tuple_element</c-></code>; structured binding does the same.</p>
    <h2 class="heading settled" data-level="4" id="other_papers_connections"><span class="secno">4. </span><span class="content">Connections with other papers</span><a class="self-link" href="#other_papers_connections"></a></h2>
    <h3 class="heading settled" data-level="4.1" id="p2547_connection"><span class="secno">4.1. </span><span class="content">Connection with <a data-link-type="biblio" href="#biblio-p2547r1" title="Language support for customisable functions">[P2547R1]</a></span><a class="self-link" href="#p2547_connection"></a></h3>
    <p><a data-link-type="biblio" href="#biblio-p2547r1" title="Language support for customisable functions">[P2547R1]</a> uses <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>get</c-></code> as the example and a good candidate to be a customizable function.
@@ -2671,7 +2667,9 @@ semantics, for example, <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n
     <li data-md>
      <p>Broader implementation experience (should be done before meeting in Poland, 2024)</p>
     <li data-md>
-     <p>Make <code class="highlight"><i><c- n>tuple</c-><c- o>-</c-><c- n>like</c-></i></code> public concept</p>
+     <p>Make <code class="highlight"><i><c- n>tuple</c-><c- o>-</c-><c- n>like</c-></i></code> a public concept</p>
+    <li data-md>
+     <p>Consider requiring the index for <code class="highlight"><c- n>get_element</c-></code> to be within the size of the tuple</p>
    </ul>
    <h2 class="heading settled" data-level="6" id="wording"><span class="secno">6. </span><span class="content">Formal wording</span><a class="self-link" href="#wording"></a></h2>
    <p>Below, substitute the � character with a number the editor finds appropriate for the table, paragraph, section or sub-section.</p>
