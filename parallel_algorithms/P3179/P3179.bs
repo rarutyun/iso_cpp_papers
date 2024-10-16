@@ -918,7 +918,6 @@ and proceeding to `last - 1`.
 
 [*Note x*: Do not return a copy of its `Fun` parameter, since parallelization often does not permit efficient state
 accumulation. — *end note*]
-
 </ins>
 
 ## Modify `find` in <a href="https://eel.is/c++draft/alg.find">[**alg.find**]</a> ## {#modify_alg_find}
@@ -1938,7 +1937,6 @@ template<class ExecutionPolicy, random_access_range R, random_access_iterator O,
 </ins>
 
 ## Modify `unique` in <a href="https://eel.is/c++draft/alg.unique">[**alg.unique**]</a> ## {#modify_unique}
-!!!!! TODO: REVIEW CONSTRAINTS FOR UNIQUE_COPY !!!!!!!
 <xmp class="wordingStyle">
 template<permutable I, sentinel_for<I> S, class Proj = identity,
          indirect_equivalence_relation<projected<I, Proj>> C = ranges::equal_to>
@@ -2046,29 +2044,73 @@ template<class ExecutionPolicy, random_access_range R, random_access_iterator O>
 </ins>
 
 ## Modify `rotate` in <a href="https://eel.is/c++draft/alg.rotate">[**alg.rotate**]</a> ## {#modify_rotate}
-!!!!! TODO !!!!!
+
+<xmp class="wordingStyle">
+template<permutable I, sentinel_for<I> S>
+  constexpr subrange<I> ranges::rotate(I first, I middle, S last);
+</xmp>
+
 <ins>
 <xmp class="wordingStyle">
-// 27.11.1 Rotate[alg.rotate]
 template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S>
   requires permutable<I>
   subrange<I> ranges::rotate(ExecutionPolicy&& exec, I first, I middle, S last);
+</xmp>
+</ins>
+
+<xmp class="wordingStyle">
+template<forward_range R>
+  requires permutable<iterator_t<R>>
+  constexpr borrowed_subrange_t<R> ranges::rotate(R&& r, iterator_t<R> middle);
+</xmp>
+*Effects*: Equivalent to: `return ranges​::​rotate(ranges​::​begin(r), middle, ranges​::​end(r));`
+
+<ins>
+<xmp class="wordingStyle">
 template<class ExecutionPolicy, random_access_range R>
   requires permutable<iterator_t<R>> && sized_range<R>
   borrowed_subrange_t<R> ranges::rotate(ExecutionPolicy&& exec, R&& r, iterator_t<R> middle);
 </xmp>
+*Effects*: Equivalent to: `return ranges​::​rotate(std::forward<ExecutionPolicy>(exec), ranges​::​begin(r), middle,
+ranges​::​end(r));`
 </ins>
+
+<xmp class="wordingStyle">
+template<forward_iterator I, sentinel_for<I> S, weakly_incrementable O>
+    requires indirectly_copyable<I, O>
+    constexpr ranges::rotate_copy_result<I, O>
+      ranges::rotate_copy(I first, I middle, S last, O result);
+</xmp>
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, weakly_incrementable O>
+template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, random_access_iterator O>
   requires indirectly_copyable<I, O>
   ranges::rotate_copy_result<I, O> ranges::rotate_copy(ExecutionPolicy&& exec, I first, I middle, S last, O result);
+</xmp>
+</ins>
+
+<xmp class="wordingStyle">
+template<forward_range R, weakly_incrementable O>
+  requires indirectly_copyable<iterator_t<R>, O>
+  constexpr ranges::rotate_copy_result<borrowed_iterator_t<R>, O>
+    ranges::rotate_copy(R&& r, iterator_t<R> middle, O result);
+</xmp>
+
+*Effects*: Equivalent to:
+`return ranges::rotate_copy(ranges::begin(r), middle, ranges::end(r), std::move(result));`
+
+<ins>
+<xmp class="wordingStyle">
 template<class ExecutionPolicy, random_access_range R, random_access_iterator O>
   requires indirectly_copyable<iterator_t<R>, O> && sized_range<R>
   ranges::rotate_copy_result<borrowed_iterator_t<R>, O> ranges::rotate_copy(ExecutionPolicy&& exec, R&& r, iterator_t<R> middle, O result);
 </xmp>
+*Effects*: Equivalent to:
+`return ranges::rotate_copy(std::forward<ExecutionPolicy>(exec), ranges::begin(r), middle, ranges::end(r),
+std::move(result));`
 </ins>
+
 
 ## Modify `shift` in <a href="https://eel.is/c++draft/alg.shift">[**alg.shift**]</a> ## {#modify_shift}
 
