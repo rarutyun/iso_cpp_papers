@@ -11,7 +11,7 @@ Editor: Ruslan Arutyunyan, Intel, ruslan.arutyunyan@intel.com
 Audience: LEWG
 Markup Shorthands: markdown yes
 Abstract: This paper introduces a CPO to read elements of tuple like objects, and uses it to define a generic
-          <i>tuple-like</i> concept.
+          <code><i>tuple-like</i></code> concept.
 </pre>
 
 <style>
@@ -31,19 +31,20 @@ span, span * {
 ## Allowing user-defined tuples, or "true" motivation :) ## {#true_motivation}
 
 The section addresses the LEWG feedback. While we always had in mind that with `get_element`
-facility we can make a generic concept for *tuple-like* types, we assumed it to be developed as a separate proposal.
-However, based on the LEWG poll ([[#lewg_telecon_2024_01_23]]), the `get_element` paper should enable
+facility we can make a generic concept for <code><i>tuple-like</i></code> types, we assumed it to be developed as a separate
+proposal. However, based on the LEWG poll ([[#lewg_telecon_2024_01_23]]), the `get_element` paper should enable
 user-defined tuples to make its motivation strong enough.
 
-So, let's go to the problem statement. Today the C++ standard defines *tuple-like* types as only 5 types from `std` namespace:
+So, let's go to the problem statement. Today the C++ standard defines <code><i>tuple-like</i></code> types as only 5 types
+from `std` namespace:
 - `std::tuple`
 - `std::pair`
 - `std::array`
 - `std::complex`(since C++26)
 - `std::ranges::subrange`
 
-That sounds like a huge limitation for a generic library because, in principle, user-defined types could be treated like tuples.
-`std::tuple_size` and `std::tuple_element` are already customizable by users. The problematic part is
+That sounds like a huge limitation for a generic library because, in principle, user-defined types could be treated like
+tuples. `std::tuple_size` and `std::tuple_element` are already customizable by users. The problematic part is
 `std::get` which is not a customization point.
 
 Furthermore, there is already partial support for user-defined tuples in the language. For example the *structured binding*
@@ -51,14 +52,18 @@ language feature has special rules for finding a `get` function for an arbitrary
 non-static-member-function or by argument-dependent lookup).
 
 Unfortunately, rules are different in different places in the standard today. For example, *has-tuple-element*
-exposition-only concept for `elements_view` allows only the 5 *tuple-like* types listed above and does not consider user-defined types.
+exposition-only concept for `elements_view` allows only the 5 <code><i>tuple-like</i></code> types listed above and does not
+consider user-defined types.
 
-[[P2165R4]] added constraints for existing API (like `std::apply`, `std::tuple_cat`, etc.) to take *tuple-like* and also
-provides better compatibility between *tuple-like* objects by adding extra APIs, which is great. The unfortunate part of the story,
-however, is that the mentioned APIs are still limited by the definition of the *tuple-like* concept (the 5 standard types).
+[[P2165R4]] added constraints for existing API (like `std::apply`, `std::tuple_cat`, etc.) to take
+<code><i>tuple-like</i></code> and also provides better compatibility between <code><i>tuple-like</i></code> objects
+by adding extra APIs, which is great. The unfortunate part of the story, however, is that the mentioned APIs are still
+limited by the definition of the <code><i>tuple-like</i></code> concept (the 5 standard types).
 
-In this paper, we proposed a new customization point object, `get_element`, which can be used to extend the tuple protocol to user-defined
-types. Since this facility uses argument-dependent lookup for `get`, using it to re-define *tuple-like* will not be a breaking change.
+In this paper, we proposed a new customization point object, `get_element`, which can be used to extend the tuple protocol
+to user-defined types. Since this facility uses argument-dependent lookup for `get`, using it to redefine
+<code><i>tuple-like</i></code> should not be a breaking change for the vast majority of the code.
+See the example in [[#breaking_code]] section for more details.
 
 For the following (simplified) code snippet:
 
@@ -136,11 +141,12 @@ please see the Before-After table
     </tr>
 </table>
 
-Of course, `std::apply` is just an example. `my_tuple_like` would work with any API that supports *tuple-like* types.
+Of course, `std::apply` is just an example. `my_tuple_like` would work with any API that supports
+<code><i>tuple-like</i></code> types.
 
 ## The original motivating use case ## {#motivating_use_case}
 
-Having `std::pair`, `std::tuple` and other *tuple-like* types as the value types for the algorithms
+Having `std::pair`, `std::tuple` and other <code><i>tuple-like</i></code> types as the value types for the algorithms
 creates a plenty of opportunities. With special views, such as `std::ranges::elements_view`, we can
 specify which tuple elements to access when iterating over collections of such objects. However,
 we cannot easily use a predicate to make a decision based on only some of tuple elements, for example keys or values.
@@ -302,27 +308,27 @@ That makes the proposed API applicable wider than just with the C++ standard lib
 
 ## Other use cases ## {#other_use_cases}
 
-With the `std::ranges::zip_view` appearance in the standard the easy use of projection for *tuple-like*
-objects might become even more important because its dereferenceable type is exactly *tuple-like*.
+With the `std::ranges::zip_view` appearance in the standard the easy use of projection for <code><i>tuple-like</i></code>
+objects might become even more important because its dereferenceable type is exactly <code><i>tuple-like</i></code>.
 
 Another example where it would be convenient to pass `std::get` to a function we discovered in
 [a blog article](https://brevzin.github.io/c++/2023/05/23/map-api/) by Barry Revzin.
-Let's assume there is a function that returns `std::optional` over a *tuple-like* type:
+Let's assume there is a function that returns `std::optional` over a <code><i>tuple-like</i></code> type:
 
 ```cpp
 auto find(Key const&) const -> optional<pair<Key const, Value> const&>;
 ```
 
-Now imagine the caller wants to use only one element out of the returned *tuple-like* object, or some default value
-in case the received `std::optional` is empty. Applying `value_or` directly to the result would require providing
-default values for all tuple elements, so it makes sense to convert it first to a single-element optional
+Now imagine the caller wants to use only one element out of the returned <code><i>tuple-like</i></code> object, or some
+default value in case the received `std::optional` is empty. Applying `value_or` directly to the result would require
+providing default values for all tuple elements, so it makes sense to convert it first to a single-element optional
 with `transform`, and only then get the value with `value_or`:
 
 ```cpp
 find(key).transform(get<1>).value_or(-1);
 ```
 
-Except, quoting the author, "of course that you can’t just pass `get<1>` like that, so it’s not as easy at it should be."
+except, quoting the author, "of course that you can’t just pass `get<1>` like that, so it’s not as easy at it should be."
 
 # Proposed API # {#proposed_api}
 
@@ -446,12 +452,12 @@ inline constexpr auto get_value = get_element<1>;
 } // namespace std
 ```
 
-## *tuple-like* concept ## {#tuple_like_concept}
+## <code><i>tuple-like</i></code> concept ## {#tuple_like_concept}
 
-With the proposed `std::get_element` CPO, the *tuple-like* concept can be generalized to cover
+With the proposed `std::get_element` CPO, the <code><i>tuple-like</i></code> concept can be generalized to cover
 wider range of types rather than just the listed standard types.
 
-### *tuple-like* concept generalization with `get_element` ### {#tuple_like_with_get_element}
+### <code><i>tuple-like</i></code> concept generalization with `get_element` ### {#tuple_like_with_get_element}
 
 With `get_element` we can define an exposition only helper concept *can-get-tuple-element*
 in the following way:
@@ -474,7 +480,7 @@ concept <i>can-get-tuple-element</i> = // exposition only
     };
 </pre>
 
-Then the *tuple-like* concept can use *can-get-tuple-element* and do something like:
+Then the <code><i>tuple-like</i></code> concept can use *can-get-tuple-element* and do something like:
 
 <pre>
 template &lt;typename T>
@@ -492,7 +498,7 @@ concept <i>tuple-like</i> = // exposition only
 
 Alternative design was considered to name the proposed API `std::ranges::get`.
 
-Given that we discussed this option several times in C++ committee and it didn't have even a weak support to pursue,
+Given that we discussed this option several times in C++ committee and it didn't even have a weak support to pursue,
 authors think that keeping the detailed information in R3 is unnecessary. Please see [[P2769R2]] for more information.
 
 ## Breaking code example ## {#breaking_code}
@@ -523,8 +529,17 @@ int main()
 }
 ```
 
-This breaking change could be avoided by checking in the `get_element` implementation if the function argument type is one
-five types `std::get` can work with. The implementation with pseudo-code would look like:
+However, such potential break is very unlikely. In particular, there is no user-defined type involved in the `get`
+overload in `my` namespace. If such code in `my` namespace was deployed, it's likely to be already broken.
+Indeed, while `std::get` is not a customization point, it is often used unqualified (and therefore found by ADL),
+such that the code with in `my` namespace already leads to ambiguity. Therefore we do not think that this potential
+breaking change requires any preventive measure (and we don't think such a measure exists) about the scenario mentioned
+above.
+
+This breaking change could be mitigated by checking in the `get_element` implementation if the function argument type is one
+four types `std::get` can work with (`std::complex` is not necessary because it supports tuple protocol since C++26).
+However, authors do **not** recommend this solution because of the reasons mentioned above. The implementation
+(with pseudo-code) is provided below for the sake of completeness:
 
 ```cpp
 namespace std
@@ -558,28 +573,25 @@ struct __get_element_fn
 } // namespace std
 ```
 
-However, such potential change is very unlikely. In particular, there is no user-defined type involved. If such code was deployed, it's likely to be already broken. Indeed, while `std::get` is not a customisation point, it is often used unqualified (and therefore found by ADL), such that the code above can already be ambiguous.
-Therefore we do not think that this potential breaking change requires any preventive measure (and we don't think such measure exist)
-about the scenario mentioned above.
-
 ## `get_element` for `std::variant` and other non-tuple-like types ## {#get_element_std_variant}
 
 During the discussion in LEWG (St. Louis, 2024) we got a feedback that it's better to constraint `get_element` with
-`tuple_size` and possibly `tuple_element`. The idea was to not use it for something that is not *tuple-like*, e.g.,
-`std::variant`.
+`tuple_size` and possibly `tuple_element`. The idea was to not use it for something that is not
+<code><i>tuple-like</i></code>, e.g., `std::variant`.
 
 The current proposal purposefully does not consider `get_element` to be applicable in all the same contexts
 where `std::get` is used:
 - `std::get` has overloads that allow to access `tuple` elements by type, while `std::get_element` doesn't.
-- It hard to imagine the generic code that expects both *tuple-like* or `std::variant` as an argument because it's always
-    safe to access any element of a *tuple-like* object whereas for `std::variant` only one alternative is "active" -
-    and therefore safe to access. Supporting variant in this interface would make it easy to introduce UB in generic code.
+- It hard to imagine the generic code that expects both <code><i>tuple-like</i></code> or `std::variant` as an argument
+    because it's always safe to access any element of a <code><i>tuple-like</i></code> object whereas for `std::variant`
+    only one alternative is "active" - and therefore safe to access. Supporting variant in this interface would make it
+    easy to introduce UB in generic code.
 - If `get_element` is unconstrained it becomes too wide, his applicability goes beyond just `std::get` use cases. We
     could potentially constraint is with either `tuple_size || std::variant` but this looks weird because of the generic
     code argument above.
 
 Thus, the recommendation is to constrain `get_element` with `tuple_size` because it should be sufficient without
-`tuple_element`. *Structured Binding* does the same.
+`tuple_element`. Structured binding does the same.
 
 # Connections with other papers # {#other_papers_connections}
 
@@ -596,24 +608,25 @@ different names.
 
 ## Connection with [[P2141R1]] ## {#p2141_connection}
 
-[[P2141R1]]'s main goal is allow aggregates being interpreted as *tuple-like*. At the same time, it touches
-the *tuple-like* concept making it as generic as for the types structured binding can work with. It also adds
-a yet another `std::get` overload that works with any *tuple-like* object except those that are already in
-the `std::` namespace.
+[[P2141R1]]'s main goal is allow aggregates being interpreted as <code><i>tuple-like</i></code>. At the same time, it
+touches the <code><i>tuple-like</i></code> concept making it as generic as for the types structured binding can work with.
+It also adds yet another `std::get` overload that works with any <code><i>tuple-like</i></code> object except those that
+are already in the `std::` namespace.
 
-With [[P2141R1]] being adopted `std::get` does the right thing and works with *tuple-like* object, so we may use
-just `std::get<_Ip>(std::forward<_TupleLike>(__tuple_like))` within the implementation of `std::get_element` instead of
-the unqualified `get` call.
+With [[P2141R1]] being adopted `std::get` does the right thing and works with <code><i>tuple-like</i></code> object, so we
+may use just `std::get<_Ip>(std::forward<_TupleLike>(__tuple_like))` within the implementation of `std::get_element`
+instead of the unqualified `get` call.
 
 Independently of [[P2141R1]] `std::get_element` brings its own value by covering the described motivation use-cases.
 Furthermore, in the standard there are already precedences of having two similar things with slightly different
 semantics, for example, `std::less` and `std::ranges::less`, where the latter is not even a CPO.
 
-[[P2141R1]] also gives another way to generalize the *tuple-like* concept (via structured binding).
+[[P2141R1]] also gives another way to generalize the <code><i>tuple-like</i></code> concept (via structured binding).
 
-# Further work # {#further_work}
+# Further discussion # {#further_work}
 
 - Broader implementation experience (should be done before meeting in Poland, 2024)
+- Make <code><i>tuple-like</i></code> public concept
 
 # Formal wording # {#wording}
 
@@ -625,13 +638,13 @@ Below, substitute the � character with a number the editor finds appropriate f
 <ins>
 <pre>
 template&lt;typename T>
-concept <i>has-tuple-size</i> =  // exposition only
+concept <i>has-tuple-size</i> =  <i>// exposition only</i>
   requires {
       typename tuple_size&lt;T>::type;
   };
 
 template&lt;class T, size_t I>
-concept <i>can-get-tuple-element</i> = // exposition only
+concept <i>can-get-tuple-element</i> = <i>// exposition only</i>
   <i>has-tuple-size</i>&lt;remove_cvref_t&lt;T>> &&
   requires(T&& t) {
       typename tuple_element_t&lt;I, remove_cvref_t&lt;T>>;
@@ -642,7 +655,7 @@ concept <i>can-get-tuple-element</i> = // exposition only
 </ins>
 <pre>
 template&lt;typename T>
-concept <i>tuple-like</i> = <del><i>see-below</i></del><ins>// exposition only</ins>
+concept <i>tuple-like</i> = <del><i>see-below</i></del> <i>// exposition only</i>
     <ins><i>has-tuple-size</i>&lt;remove_cvref_t&lt;T>> &&</ins>
     <ins>[]&lt;size_t... I>(index_sequence&lt;I...>) {</ins>
         <ins>return (... && <i>can-get-tuple-element</i>&lt;T, I>);</ins>
@@ -714,7 +727,7 @@ Given an integral constant <code>I</code> of type <code>size_t</code> and a sube
 <blockquote>
 [...]
 <pre highlight="cpp">
- #define __cpp_lib_element_access_customization_point  20����L
+ #define __cpp_lib_get_element_customization_point  20����L
   <i>// also in </i>&lt;tuple><i>, </i>&lt;utility><i>, </i>&lt;array><i>, </i>&lt;ranges>
 </pre>
 [...]
@@ -999,14 +1012,57 @@ Returns: `*this`.
 *Returns*: `*this`.
 </blockquote>
 
+## Modify "Exposition-only helpers" in <a href="https://eel.is/c++draft/mdspan.sub.helpers">[**mdspan.sub.helpers**]</a> ## {#mdspan_sub_helpers}
+
+<blockquote>
+<pre>
+template&lt;class T>
+  constexpr T <i>de-ice</i>(T val) { return val; }
+template&lt;integral-constant-like T>
+  constexpr auto <i>de-ice</i>(T) { return T::value; }
+
+template&lt;class IndexType, size_t k, class... SliceSpecifiers>
+  constexpr IndexType first_(SliceSpecifiers... slices);
+</pre>
+*Mandates*: `IndexType` is a signed or unsigned integer type.
+
+Let <i>ϕk</i> denote the following value:
+- <i>sk</i> if <i>Sk</i> models `convertible_to<IndexType>;`
+- otherwise, <code>get<ins>_element</ins>&lt;0>(<i>sk</i>)</code> if <i>Sk</i> models <code><i>index-pair-like</i>&lt;IndexType></code>;
+- otherwise, <code><i>de-ice</i>(<i>sk</i>.offset)</code> if <i>Sk</i> is a specialization of `strided_slice`;
+- otherwise, `0`.
+
+Preconditions: <i>ϕk</i> is representable as a value of type `IndexType`.
+
+Returns: <code>extents&lt;IndexType>​::<i>​index-cast(ϕk)</i></code>.
+
+<pre>
+template&lt;size_t k, class Extents, class... SliceSpecifiers>
+  constexpr auto last_(const Extents& src, SliceSpecifiers... slices);
+</pre>
+*Mandates*: `Extents` is a specialization of extents.
+Let `index_type` be typename `Extents​::​index_type.`
+Let <i>λk</i> denote the following value:
+- <code><i>de-ice(sk)</i> + 1</code> if <i>Sk</i> models `convertible_to<index_type>;` otherwise
+- <code>get<ins>_element</ins>&lt;1>(<i>sk</i>)</code> if <i>Sk</i> models
+    <code><i>index-pair-like</i>&lt;index_type></code>; otherwise
+- <code><i>de-ice</i>(<i>sk</i>.offset) + <i>de-ice</i>(<i>sk</i>.extent)</code> if <i>Sk</i> is a specialization
+    of `strided_slice`; otherwise
+- `src.extent(k)`.
+
+Preconditions: <i>λk</i> is representable as a value of type `index_type`.
+
+Returns: <code>Extents​::<i>​index-cast(λk)</i></code>.
+</blockquote>
+
 # Revision history # {#revision_history}
 
 ## R2 => R3 ## {#r2_r3}
 
-* Remove the detailed about `std::ranges::get` design alternative
-* Align the behavior of `get_element` with *Structured Binding*
+* Remove the details about `std::ranges::get` design alternative
+* Align the behavior of `get_element` with *structured binding*
 * Add support for value categories for *tuple-like* concept
-* Modify <code><i>pair-like</i></code> to use `get_element`
+* Modify <code><i>pair-like</i></code> and <code><i>index-pair-like</i></code> to use `get_element`
 * Constrain `get_element` with `tuple_size`
 
 ## R1 => R2 ## {#r1_r2}
@@ -1137,6 +1193,6 @@ Returns: `*this`.
 # Acknowledgements # {#acknowledgements}
 
 * Thanks to Casey Carter for providing `adl_hook` trick. See [[P2769R2]] for more details.
-* Thanks to Corentin Jabot for providing the input for [[#p2547_connection]], for
-    the initial *tuple-like* concept idea, and reviewing R3 revision
+* Thanks to Corentin Jabot for continuous contribution that improved `get_element` proposal.
 * Thanks to Benjamin Brock for paper review and design discussions.
+* Thanks to Mark Hoemmen for confirming wording changes for `submdspan`.
