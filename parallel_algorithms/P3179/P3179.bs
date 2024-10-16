@@ -1232,7 +1232,7 @@ template<class ExecutionPolicy, random_access_iterator I1, sentinel_for<I1> S1, 
                      Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
 template<class ExecutionPolicy, random_access_range R1, random_access_range R2,
          class Pred = ranges::equal_to, class Proj1 = identity, class Proj2 = identity>
-  requires indirectly_comparable<iterator_t<R1>, iterator_t<R2>, Pred, Proj1, Proj2> && sized_range<R1> && sized_range<R2>
+  requires indirectly_comparable<iterator_t<R1>, iterator_t<R2>, Pred, Proj1, Proj2> && (sized_range<R1> || sized_range<R2>)
   ranges::mismatch_result<borrowed_iterator_t<R1>, borrowed_iterator_t<R2>>
     ranges::mismatch(ExecutionPolicy&& exec, R1&& r1, R2&& r2, Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
 </xmp>
@@ -1256,15 +1256,17 @@ template<input_range R1, input_range R2, class Pred = ranges::equal_to,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1, random_access_iterator I2, sized_sentinel_for<I2> S2,
+template<class ExecutionPolicy, random_access_iterator I1, sentinel_for<I1> S1,
+         random_access_iterator I2, sentinel_for<I2> S2,
          class Pred = ranges::equal_to, class Proj1 = identity, class Proj2 = identity>
-  requires indirectly_comparable<I1, I2, Pred, Proj1, Proj2>
+  requires indirectly_comparable<I1, I2, Pred, Proj1, Proj2> &&
+    (sized_sentinel_for<S1, I1> || sized_sentinel_for<S2, I2>)
   bool ranges::equal(ExecutionPolicy&& exec, I1 first1, S1 last1, I2 first2, S2 last2,
                      Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
-
 template<class ExecutionPolicy, random_access_range R1, random_access_range R2, class Pred = ranges::equal_to,
          class Proj1 = identity, class Proj2 = identity>
-  requires indirectly_comparable<iterator_t<R1>, iterator_t<R2>, Pred, Proj1, Proj2> && (sized_range<R1> || sized_range<R2>)
+  requires indirectly_comparable<iterator_t<R1>, iterator_t<R2>, Pred, Proj1, Proj2> &&
+    (sized_range<R1> || sized_range<R2>)
   bool ranges::equal(ExecutionPolicy&& exec, R1&& r1, R2&& r2,
                      Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
 </xmp>
@@ -1364,14 +1366,16 @@ template<input_range R1, input_range R2, class Pred = ranges::equal_to, class Pr
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I1, sentinel_for<I1> S1, random_access_iterator I2, sentinel_for<I2> S2,
+template<class ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1,
+         random_access_iterator I2, sized_sentinel_for<I2> S2,
          class Pred = ranges::equal_to, class Proj1 = identity, class Proj2 = identity>
-  requires indirectly_comparable<I1, I2, Pred, Proj1, Proj2> && (sized_sentinel_for<S1, I1> || sized_sentinel_for<S2, I2>)
+  requires indirectly_comparable<I1, I2, Pred, Proj1, Proj2>
   bool ranges::starts_with(ExecutionPolicy&& exec, I1 first1, S1 last1, I2 first2, S2 last2,
                            Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
 template<class ExecutionPolicy, random_access_range R1, random_access_range R2, class Pred = ranges::equal_to,
          class Proj1 = identity, class Proj2 = identity>
-  requires indirectly_comparable<iterator_t<R1>, iterator_t<R2>, Pred, Proj1, Proj2> && (sized_range<R1> || sized_range<R2>)
+  requires indirectly_comparable<iterator_t<R1>, iterator_t<R2>, Pred, Proj1, Proj2> &&
+    sized_range<R1> && sized_range<R2>
   bool ranges::starts_with(ExecutionPolicy&& exec, R1&& r1, R2&& r2, Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
 </xmp>
 
@@ -1712,17 +1716,20 @@ template<input_range R, class O, class Proj = identity,
 <ins>
 <xmp class="wordingStyle">
 template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, random_access_iterator O,
-         class Proj = identity, class T1 = projected_value_t<I, Proj>, class T2 = T1>
-  requires indirectly_copyable<I, O> && indirectly_writable<O, const T2&> &&
-           indirect_binary_predicate<ranges::equal_to, projected<I, Proj>, const T1*>
+         class Proj = identity, class T1 = projected_value_t<I, Proj>, class T2 = iter_value_t<O>>
+  requires indirectly_copyable<I, O> &&
+           indirect_binary_predicate<ranges::equal_to, projected<I, Proj>, const T1*> &&
+           indirectly_writable<O, const T2&>
   ranges::replace_copy_result<I, O>
     ranges::replace_copy(ExecutionPolicy&& exec, I first, S last, O result,
                          const T1& old_value, const T2& new_value, Proj proj = {});
-template<class ExecutionPolicy, random_access_range R, random_access_iterator O, class Proj = identity,
-         class T1 = projected_value_t<iterator_t<R>, Proj>, class T2 = T1>
-  requires indirectly_copyable<iterator_t<R>, O> && indirectly_writable<O, const T2&> &&
+
+template<class ExecutionPolicy, random_access_range R, random_access_iterator O,
+         class Proj = identity, class T1 = projected_value_t<iterator_t<R>, Proj>,
+         class T2 = iter_value_t<O>>
+  requires indirectly_copyable<iterator_t<R>, O> &&
            indirect_binary_predicate<ranges::equal_to, projected<iterator_t<R>, Proj>, const T1*> &&
-           sized_range<R>
+           indirectly_writable<O, const T2&> && sized_range<R>
   ranges::replace_copy_result<borrowed_iterator_t<R>, O>
     ranges::replace_copy(ExecutionPolicy&& exec, R&& r, O result,
                          const T1& old_value, const T2& new_value, Proj proj = {});
@@ -1743,20 +1750,19 @@ template<input_range R, class O, class T = iter_value_t<O>, class Proj = identit
     ranges::replace_copy_if(R&& r, O result, Pred pred, const T& new_value,
                             Proj proj = {});
 </xmp>
-!!! TODO: review the constrains carefully !!!
+
 <ins>
 <xmp class="wordingStyle">
 template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, random_access_iterator O,
-         class Proj = identity,
-         class T = projected_value_t<I, Proj>, indirect_unary_predicate<projected<I, Proj>> Pred>
+         class T = iter_value_t<O>, class Proj = identity, indirect_unary_predicate<projected<I, Proj>> Pred>
   requires indirectly_copyable<I, O> && indirectly_writable<O, const T&>
   ranges::replace_copy_if_result<I, O>
     ranges::replace_copy_if(ExecutionPolicy&& exec, I first, S last, O result,
-                            Pred pred, const T& new_value, Proj proj = {});
+                              Pred pred, const T& new_value, Proj proj = {});
+
 template<class ExecutionPolicy, random_access_range R, random_access_iterator O,
-         class Proj = identity, class T = projected_value_t<iterator_t<R>, Proj>,
-           indirect_unary_predicate<projected<iterator_t<R>, Proj>> Pred>
-  requires indirectly_copyable<iterator_t<R>, O> && indirectly_writable<O, const T&> &&
+         class T = iter_value_t<O>, class Proj = identity, indirect_unary_predicate<projected<iterator_t<R>, Proj>> Pred>
+  requires indirectly_copyable<iterator_t<R>, O> && indirectly_writable<O, const T&>&&
            sized_range<R>
   ranges::replace_copy_if_result<borrowed_iterator_t<R>, O>
     ranges::replace_copy_if(ExecutionPolicy&& exec, R&& r, O result,
