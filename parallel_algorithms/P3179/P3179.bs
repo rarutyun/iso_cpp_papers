@@ -690,6 +690,22 @@ Here are questions we want to answer (potentially not a complete list):
 
 # Formal wording # {#formal_wording}
 
+## Modify <a href="https://eel.is/c++draft/algorithms.parallel.defns">[**algorithms.parallel.defns**]</a> ## {#modify_alg_parallel_def}
+
+Parallel algorithms access objects indirectly accessible via their arguments by invoking the following functions:
+-- All operations of the categories of the iterators<ins>, sentinels</ins> or mdspan types that the algorithm is instantiated with.
+-- Operations on those sequence elements that are required by its specification.
+-- User-provided <del>function</del><ins>invocable</ins> objects to be applied during the execution of the algorithm, if required by the specification.
+-- Operations on those <del>function</del><ins>invocable</ins> objects required by the specification.
+
+## Modify <a href="https://eel.is/c++draft/algorithms.parallel.user">[**algorithms.parallel.user**]</a> ## {#modify_alg_parallel_user}
+
+Unless otherwise specified, <del>function</del><ins>invocable</ins> objects passed into parallel algorithms as objects of type
+`Predicate`, `BinaryPredicate`, `Compare`, `UnaryOperation`, `BinaryOperation`, `BinaryOperation1`, `BinaryOperation2`, `BinaryDivideOp`,
+<ins>`Proj`</ins> and the operators used by the analogous overloads to these parallel algorithms that are formed by an invocation
+with the specified default predicate or operation (where applicable) shall not directly or indirectly modify objects via their arguments,
+nor shall they rely on the identity of the provided objects.
+
 ## Modify `all_of` in <a href="https://eel.is/c++draft/alg.all.of">[**alg.all.of**]</a> ## {#modify_alg_all_of}
 
 <xmp class="wordingStyle">
