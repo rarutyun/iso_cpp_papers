@@ -1564,7 +1564,7 @@ Possible extra rowspan handling
   <meta content="Bikeshed version 6270e4735, updated Tue Aug 6 12:12:30 2024 -0700" name="generator">
   <link href="https://wg21.link/P3179R3" rel="canonical">
   <link href="https://isocpp.org/favicon.ico" rel="icon">
-  <meta content="3b00523c05caeb7c2749e4222e5048f0a9350863" name="revision">
+  <meta content="4871fecb72f5b7f6f3ad04ee58402c97d155dc48" name="revision">
   <meta content="dark light" name="color-scheme">
 <style>
     table, th, td {
@@ -2175,52 +2175,54 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
     <li>
      <a href="#formal_wording"><span class="secno">7</span> <span class="content">Formal wording</span></a>
      <ol class="toc">
-      <li><a href="#modify_alg_all_of"><span class="secno">7.1</span> <span class="content">Modify <code class="highlight"><c- n>all_of</c-></code> in <span>[<strong>alg.all.of</strong>]</span></span></a>
-      <li><a href="#modify_alg_any_of"><span class="secno">7.2</span> <span class="content">Modify <code class="highlight"><c- n>any_of</c-></code> in <span>[<strong>alg.any.of</strong>]</span></span></a>
-      <li><a href="#modify_alg_none_of"><span class="secno">7.3</span> <span class="content">Modify <code class="highlight"><c- n>none_of</c-></code> in <span>[<strong>alg.none.of</strong>]</span></span></a>
-      <li><a href="#modify_alg_contains"><span class="secno">7.4</span> <span class="content">Modify <code class="highlight"><c- n>contains</c-></code> in <span>[<strong>alg.contains</strong>]</span></span></a>
-      <li><a href="#modify_alg_foreach"><span class="secno">7.5</span> <span class="content">Modify <code class="highlight"><c- n>for_each</c-></code> in <span>[<strong>alg.foreach</strong>]</span></span></a>
-      <li><a href="#modify_alg_find"><span class="secno">7.6</span> <span class="content">Modify <code class="highlight"><c- n>find</c-></code> in <span>[<strong>alg.find</strong>]</span></span></a>
-      <li><a href="#modify_alg_find_last"><span class="secno">7.7</span> <span class="content">Modify <code class="highlight"><c- n>find_last</c-></code> in <span>[<strong>alg.find.last</strong>]</span></span></a>
-      <li><a href="#modify_alg_find_end"><span class="secno">7.8</span> <span class="content">Modify <code class="highlight"><c- n>find_end</c-></code> in <span>[<strong>alg.find.end</strong>]</span></span></a>
-      <li><a href="#modify_alg_find_first_of"><span class="secno">7.9</span> <span class="content">Modify <code class="highlight"><c- n>find_first_of</c-></code> in <span>[<strong>alg.find.first.of</strong>]</span></span></a>
-      <li><a href="#modify_alg_adjacent_find"><span class="secno">7.10</span> <span class="content">Modify <code class="highlight"><c- n>adjacent_find</c-></code> in <span>[<strong>alg.adjacent.find</strong>]</span></span></a>
-      <li><a href="#modify_alg_count"><span class="secno">7.11</span> <span class="content">Modify <code class="highlight"><c- n>count</c-></code> in <span>[<strong>alg.count</strong>]</span></span></a>
-      <li><a href="#modify_alg_mismatch"><span class="secno">7.12</span> <span class="content">Modify <code class="highlight"><c- n>mismatch</c-></code> in <span>[<strong>alg.mismatch</strong>]</span></span></a>
-      <li><a href="#modify_alg_equal"><span class="secno">7.13</span> <span class="content">Modify <code class="highlight"><c- n>equal</c-></code> in <span>[<strong>alg.equal</strong>]</span></span></a>
-      <li><a href="#modify_alg_search"><span class="secno">7.14</span> <span class="content">Modify <code class="highlight"><c- n>search</c-></code> in <span>[<strong>alg.search</strong>]</span></span></a>
-      <li><a href="#modify_alg_starts_with"><span class="secno">7.15</span> <span class="content">Modify <code class="highlight"><c- n>starts_with</c-></code> in <span>[<strong>alg.starts.with</strong>]</span></span></a>
-      <li><a href="#modify_alg_ends_with"><span class="secno">7.16</span> <span class="content">Modify <code class="highlight"><c- n>ends_with</c-></code> in <span>[<strong>alg.ends.with</strong>]</span></span></a>
-      <li><a href="#modify_copy"><span class="secno">7.17</span> <span class="content">Modify <code class="highlight"><c- n>copy</c-></code> in <span>[<strong>alg.copy</strong>]</span></span></a>
-      <li><a href="#modify_move"><span class="secno">7.18</span> <span class="content">Modify <code class="highlight"><c- n>move</c-></code> in <span>[<strong>alg.move</strong>]</span></span></a>
-      <li><a href="#modify_swap"><span class="secno">7.19</span> <span class="content">Modify <code class="highlight"><c- n>swap</c-></code> in <span>[<strong>alg.swap</strong>]</span></span></a>
-      <li><a href="#modify_transform"><span class="secno">7.20</span> <span class="content">Modify <code class="highlight"><c- n>transform</c-></code> in <span>[<strong>alg.transform</strong>]</span></span></a>
-      <li><a href="#modify_replace"><span class="secno">7.21</span> <span class="content">Modify <code class="highlight"><c- n>replace</c-></code> in <span>[<strong>alg.replace</strong>]</span></span></a>
-      <li><a href="#modify_fill"><span class="secno">7.22</span> <span class="content">Modify <code class="highlight"><c- n>fill</c-></code> in <span>[<strong>alg.fill</strong>]</span></span></a>
-      <li><a href="#modify_generate"><span class="secno">7.23</span> <span class="content">Modify <code class="highlight"><c- n>generate</c-></code> in <span>[<strong>alg.generate</strong>]</span></span></a>
-      <li><a href="#modify_remove"><span class="secno">7.24</span> <span class="content">Modify <code class="highlight"><c- n>remove</c-></code> in <span>[<strong>alg.remove</strong>]</span></span></a>
-      <li><a href="#modify_unique"><span class="secno">7.25</span> <span class="content">Modify <code class="highlight"><c- n>unique</c-></code> in <span>[<strong>alg.unique</strong>]</span></span></a>
-      <li><a href="#modify_reverse"><span class="secno">7.26</span> <span class="content">Modify <code class="highlight"><c- n>reverse</c-></code> in <span>[<strong>alg.reverse</strong>]</span></span></a>
-      <li><a href="#modify_rotate"><span class="secno">7.27</span> <span class="content">Modify <code class="highlight"><c- n>rotate</c-></code> in <span>[<strong>alg.rotate</strong>]</span></span></a>
-      <li><a href="#modify_shift"><span class="secno">7.28</span> <span class="content">Modify <code class="highlight"><c- n>shift</c-></code> in <span>[<strong>alg.shift</strong>]</span></span></a>
-      <li><a href="#modify_sort"><span class="secno">7.29</span> <span class="content">Modify <code class="highlight"><c- n>sort</c-></code> in <span>[<strong>sort</strong>]</span></span></a>
-      <li><a href="#modify_stable_sort"><span class="secno">7.30</span> <span class="content">Modify <code class="highlight"><c- n>stable_sort</c-></code> in <span>[<strong>stable.sort</strong>]</span></span></a>
-      <li><a href="#modify_partial_sort"><span class="secno">7.31</span> <span class="content">Modify <code class="highlight"><c- n>partial_sort</c-></code> in <span>[<strong>partial.sort</strong>]</span></span></a>
-      <li><a href="#modify_partial_sort_copy"><span class="secno">7.32</span> <span class="content">Modify <code class="highlight"><c- n>partial_sort_copy</c-></code> in <span>[<strong>partial.sort.copy</strong>]</span></span></a>
-      <li><a href="#modify_is_sorted"><span class="secno">7.33</span> <span class="content">Modify <code class="highlight"><c- n>is_sorted</c-></code> in <span>[<strong>is.sorted</strong>]</span></span></a>
-      <li><a href="#modify_nth_element"><span class="secno">7.34</span> <span class="content">Modify <code class="highlight"><c- n>nth_element</c-></code> in <span>[<strong>alg.nth.element</strong>]</span></span></a>
-      <li><a href="#modify_partitions"><span class="secno">7.35</span> <span class="content">Modify <code class="highlight"><c- n>partitions</c-></code> in <span>[<strong>alg.partitions</strong>]</span></span></a>
-      <li><a href="#modify_merge"><span class="secno">7.36</span> <span class="content">Modify <code class="highlight"><c- n>merge</c-></code> in <span>[<strong>alg.merge</strong>]</span></span></a>
-      <li><a href="#modify_includes"><span class="secno">7.37</span> <span class="content">Modify <code class="highlight"><c- n>includes</c-></code> in <span>[<strong>includes</strong>]</span></span></a>
-      <li><a href="#modify_set_union"><span class="secno">7.38</span> <span class="content">Modify <code class="highlight"><c- n>set_union</c-></code> in <span>[<strong>set.union</strong>]</span></span></a>
-      <li><a href="#modify_set_intersection"><span class="secno">7.39</span> <span class="content">Modify <code class="highlight"><c- n>set_intersection</c-></code> in <span>[<strong>set.intersection</strong>]</span></span></a>
-      <li><a href="#modify_set_difference"><span class="secno">7.40</span> <span class="content">Modify <code class="highlight"><c- n>set_difference</c-></code> in <span>[<strong>set.difference</strong>]</span></span></a>
-      <li><a href="#modify_set_symmetric_difference"><span class="secno">7.41</span> <span class="content">Modify <code class="highlight"><c- n>set_symmetric_difference</c-></code> in <span>[<strong>set.symmetric.difference</strong>]</span></span></a>
-      <li><a href="#modify_is_heap"><span class="secno">7.42</span> <span class="content">Modify <code class="highlight"><c- n>is_heap</c-></code> in <span>[<strong>is.heap</strong>]</span></span></a>
-      <li><a href="#modify_alg_min_max"><span class="secno">7.43</span> <span class="content">Modify <code class="highlight"><c- n>min</c-></code>, <code class="highlight"><c- n>max</c-></code>, <code class="highlight"><c- n>minmax</c-></code> in <span>[<strong>alg.min.max</strong>]</span></span></a>
-      <li><a href="#modify_alg_lex_comparison"><span class="secno">7.44</span> <span class="content">Modify <code class="highlight"><c- n>lexicographical_compare</c-></code> in <span>[<strong>alg.lex.comparison</strong>]</span></span></a>
-      <li><a href="#modify_memory_syn"><span class="secno">7.45</span> <span class="content">Modify <span>[<strong>memory.syn</strong>]</span></span></a>
-      <li><a href="#modify_special_mem_concepts"><span class="secno">7.46</span> <span class="content">Add exposition only concepts to <span>[<strong>special.mem.concepts</strong>]</span></span></a>
+      <li><a href="#modify_alg_parallel_def"><span class="secno">7.1</span> <span class="content">Modify <span>[<strong>algorithms.parallel.defns</strong>]</span></span></a>
+      <li><a href="#modify_alg_parallel_user"><span class="secno">7.2</span> <span class="content">Modify <span>[<strong>algorithms.parallel.user</strong>]</span></span></a>
+      <li><a href="#modify_alg_all_of"><span class="secno">7.3</span> <span class="content">Modify <code class="highlight"><c- n>all_of</c-></code> in <span>[<strong>alg.all.of</strong>]</span></span></a>
+      <li><a href="#modify_alg_any_of"><span class="secno">7.4</span> <span class="content">Modify <code class="highlight"><c- n>any_of</c-></code> in <span>[<strong>alg.any.of</strong>]</span></span></a>
+      <li><a href="#modify_alg_none_of"><span class="secno">7.5</span> <span class="content">Modify <code class="highlight"><c- n>none_of</c-></code> in <span>[<strong>alg.none.of</strong>]</span></span></a>
+      <li><a href="#modify_alg_contains"><span class="secno">7.6</span> <span class="content">Modify <code class="highlight"><c- n>contains</c-></code> in <span>[<strong>alg.contains</strong>]</span></span></a>
+      <li><a href="#modify_alg_foreach"><span class="secno">7.7</span> <span class="content">Modify <code class="highlight"><c- n>for_each</c-></code> in <span>[<strong>alg.foreach</strong>]</span></span></a>
+      <li><a href="#modify_alg_find"><span class="secno">7.8</span> <span class="content">Modify <code class="highlight"><c- n>find</c-></code> in <span>[<strong>alg.find</strong>]</span></span></a>
+      <li><a href="#modify_alg_find_last"><span class="secno">7.9</span> <span class="content">Modify <code class="highlight"><c- n>find_last</c-></code> in <span>[<strong>alg.find.last</strong>]</span></span></a>
+      <li><a href="#modify_alg_find_end"><span class="secno">7.10</span> <span class="content">Modify <code class="highlight"><c- n>find_end</c-></code> in <span>[<strong>alg.find.end</strong>]</span></span></a>
+      <li><a href="#modify_alg_find_first_of"><span class="secno">7.11</span> <span class="content">Modify <code class="highlight"><c- n>find_first_of</c-></code> in <span>[<strong>alg.find.first.of</strong>]</span></span></a>
+      <li><a href="#modify_alg_adjacent_find"><span class="secno">7.12</span> <span class="content">Modify <code class="highlight"><c- n>adjacent_find</c-></code> in <span>[<strong>alg.adjacent.find</strong>]</span></span></a>
+      <li><a href="#modify_alg_count"><span class="secno">7.13</span> <span class="content">Modify <code class="highlight"><c- n>count</c-></code> in <span>[<strong>alg.count</strong>]</span></span></a>
+      <li><a href="#modify_alg_mismatch"><span class="secno">7.14</span> <span class="content">Modify <code class="highlight"><c- n>mismatch</c-></code> in <span>[<strong>alg.mismatch</strong>]</span></span></a>
+      <li><a href="#modify_alg_equal"><span class="secno">7.15</span> <span class="content">Modify <code class="highlight"><c- n>equal</c-></code> in <span>[<strong>alg.equal</strong>]</span></span></a>
+      <li><a href="#modify_alg_search"><span class="secno">7.16</span> <span class="content">Modify <code class="highlight"><c- n>search</c-></code> in <span>[<strong>alg.search</strong>]</span></span></a>
+      <li><a href="#modify_alg_starts_with"><span class="secno">7.17</span> <span class="content">Modify <code class="highlight"><c- n>starts_with</c-></code> in <span>[<strong>alg.starts.with</strong>]</span></span></a>
+      <li><a href="#modify_alg_ends_with"><span class="secno">7.18</span> <span class="content">Modify <code class="highlight"><c- n>ends_with</c-></code> in <span>[<strong>alg.ends.with</strong>]</span></span></a>
+      <li><a href="#modify_copy"><span class="secno">7.19</span> <span class="content">Modify <code class="highlight"><c- n>copy</c-></code> in <span>[<strong>alg.copy</strong>]</span></span></a>
+      <li><a href="#modify_move"><span class="secno">7.20</span> <span class="content">Modify <code class="highlight"><c- n>move</c-></code> in <span>[<strong>alg.move</strong>]</span></span></a>
+      <li><a href="#modify_swap"><span class="secno">7.21</span> <span class="content">Modify <code class="highlight"><c- n>swap</c-></code> in <span>[<strong>alg.swap</strong>]</span></span></a>
+      <li><a href="#modify_transform"><span class="secno">7.22</span> <span class="content">Modify <code class="highlight"><c- n>transform</c-></code> in <span>[<strong>alg.transform</strong>]</span></span></a>
+      <li><a href="#modify_replace"><span class="secno">7.23</span> <span class="content">Modify <code class="highlight"><c- n>replace</c-></code> in <span>[<strong>alg.replace</strong>]</span></span></a>
+      <li><a href="#modify_fill"><span class="secno">7.24</span> <span class="content">Modify <code class="highlight"><c- n>fill</c-></code> in <span>[<strong>alg.fill</strong>]</span></span></a>
+      <li><a href="#modify_generate"><span class="secno">7.25</span> <span class="content">Modify <code class="highlight"><c- n>generate</c-></code> in <span>[<strong>alg.generate</strong>]</span></span></a>
+      <li><a href="#modify_remove"><span class="secno">7.26</span> <span class="content">Modify <code class="highlight"><c- n>remove</c-></code> in <span>[<strong>alg.remove</strong>]</span></span></a>
+      <li><a href="#modify_unique"><span class="secno">7.27</span> <span class="content">Modify <code class="highlight"><c- n>unique</c-></code> in <span>[<strong>alg.unique</strong>]</span></span></a>
+      <li><a href="#modify_reverse"><span class="secno">7.28</span> <span class="content">Modify <code class="highlight"><c- n>reverse</c-></code> in <span>[<strong>alg.reverse</strong>]</span></span></a>
+      <li><a href="#modify_rotate"><span class="secno">7.29</span> <span class="content">Modify <code class="highlight"><c- n>rotate</c-></code> in <span>[<strong>alg.rotate</strong>]</span></span></a>
+      <li><a href="#modify_shift"><span class="secno">7.30</span> <span class="content">Modify <code class="highlight"><c- n>shift</c-></code> in <span>[<strong>alg.shift</strong>]</span></span></a>
+      <li><a href="#modify_sort"><span class="secno">7.31</span> <span class="content">Modify <code class="highlight"><c- n>sort</c-></code> in <span>[<strong>sort</strong>]</span></span></a>
+      <li><a href="#modify_stable_sort"><span class="secno">7.32</span> <span class="content">Modify <code class="highlight"><c- n>stable_sort</c-></code> in <span>[<strong>stable.sort</strong>]</span></span></a>
+      <li><a href="#modify_partial_sort"><span class="secno">7.33</span> <span class="content">Modify <code class="highlight"><c- n>partial_sort</c-></code> in <span>[<strong>partial.sort</strong>]</span></span></a>
+      <li><a href="#modify_partial_sort_copy"><span class="secno">7.34</span> <span class="content">Modify <code class="highlight"><c- n>partial_sort_copy</c-></code> in <span>[<strong>partial.sort.copy</strong>]</span></span></a>
+      <li><a href="#modify_is_sorted"><span class="secno">7.35</span> <span class="content">Modify <code class="highlight"><c- n>is_sorted</c-></code> in <span>[<strong>is.sorted</strong>]</span></span></a>
+      <li><a href="#modify_nth_element"><span class="secno">7.36</span> <span class="content">Modify <code class="highlight"><c- n>nth_element</c-></code> in <span>[<strong>alg.nth.element</strong>]</span></span></a>
+      <li><a href="#modify_partitions"><span class="secno">7.37</span> <span class="content">Modify <code class="highlight"><c- n>partitions</c-></code> in <span>[<strong>alg.partitions</strong>]</span></span></a>
+      <li><a href="#modify_merge"><span class="secno">7.38</span> <span class="content">Modify <code class="highlight"><c- n>merge</c-></code> in <span>[<strong>alg.merge</strong>]</span></span></a>
+      <li><a href="#modify_includes"><span class="secno">7.39</span> <span class="content">Modify <code class="highlight"><c- n>includes</c-></code> in <span>[<strong>includes</strong>]</span></span></a>
+      <li><a href="#modify_set_union"><span class="secno">7.40</span> <span class="content">Modify <code class="highlight"><c- n>set_union</c-></code> in <span>[<strong>set.union</strong>]</span></span></a>
+      <li><a href="#modify_set_intersection"><span class="secno">7.41</span> <span class="content">Modify <code class="highlight"><c- n>set_intersection</c-></code> in <span>[<strong>set.intersection</strong>]</span></span></a>
+      <li><a href="#modify_set_difference"><span class="secno">7.42</span> <span class="content">Modify <code class="highlight"><c- n>set_difference</c-></code> in <span>[<strong>set.difference</strong>]</span></span></a>
+      <li><a href="#modify_set_symmetric_difference"><span class="secno">7.43</span> <span class="content">Modify <code class="highlight"><c- n>set_symmetric_difference</c-></code> in <span>[<strong>set.symmetric.difference</strong>]</span></span></a>
+      <li><a href="#modify_is_heap"><span class="secno">7.44</span> <span class="content">Modify <code class="highlight"><c- n>is_heap</c-></code> in <span>[<strong>is.heap</strong>]</span></span></a>
+      <li><a href="#modify_alg_min_max"><span class="secno">7.45</span> <span class="content">Modify <code class="highlight"><c- n>min</c-></code>, <code class="highlight"><c- n>max</c-></code>, <code class="highlight"><c- n>minmax</c-></code> in <span>[<strong>alg.min.max</strong>]</span></span></a>
+      <li><a href="#modify_alg_lex_comparison"><span class="secno">7.46</span> <span class="content">Modify <code class="highlight"><c- n>lexicographical_compare</c-></code> in <span>[<strong>alg.lex.comparison</strong>]</span></span></a>
+      <li><a href="#modify_memory_syn"><span class="secno">7.47</span> <span class="content">Modify <span>[<strong>memory.syn</strong>]</span></span></a>
+      <li><a href="#modify_special_mem_concepts"><span class="secno">7.48</span> <span class="content">Add exposition only concepts to <span>[<strong>special.mem.concepts</strong>]</span></span></a>
      </ol>
     <li>
      <a href="#revision_history"><span class="secno">8</span> <span class="content">Revision history</span></a>
@@ -2804,7 +2806,42 @@ in the view itself.</p>
      <p>Do we need to add extra requirements towards thread safety to the standard views?</p>
    </ul>
    <h2 class="heading settled" data-level="7" id="formal_wording"><span class="secno">7. </span><span class="content">Formal wording</span><a class="self-link" href="#formal_wording"></a></h2>
-   <h3 class="heading settled" data-level="7.1" id="modify_alg_all_of"><span class="secno">7.1. </span><span class="content">Modify <code class="highlight"><c- n>all_of</c-></code> in <a href="https://eel.is/c++draft/alg.all.of">[<strong>alg.all.of</strong>]</a></span><a class="self-link" href="#modify_alg_all_of"></a></h3>
+   <h3 class="heading settled" data-level="7.1" id="modify_alg_parallel_def"><span class="secno">7.1. </span><span class="content">Modify <a href="https://eel.is/c++draft/algorithms.parallel.defns">[<strong>algorithms.parallel.defns</strong>]</a></span><a class="self-link" href="#modify_alg_parallel_def"></a></h3>
+   <p>Parallel algorithms access objects indirectly accessible via their arguments by invoking the following functions:</p>
+   <ul>
+    <li data-md>
+     <p>
+      All operations of the categories of the iterators
+      <ins>, sentinels</ins>
+       or mdspan types that the algorithm is instantiated with.
+     </p>
+    <li data-md>
+     <p>Operations on those sequence elements that are required by its specification.</p>
+    <li data-md>
+     <p>
+      User-provided 
+      <del>function</del>
+      <ins>invocable</ins>
+       objects to be applied during the execution of the algorithm, if required by the specification.
+     </p>
+    <li data-md>
+     <p>
+      Operations on those 
+      <del>function</del>
+      <ins>invocable</ins>
+       objects required by the specification.
+     </p>
+   </ul>
+   <h3 class="heading settled" data-level="7.2" id="modify_alg_parallel_user"><span class="secno">7.2. </span><span class="content">Modify <a href="https://eel.is/c++draft/algorithms.parallel.user">[<strong>algorithms.parallel.user</strong>]</a></span><a class="self-link" href="#modify_alg_parallel_user"></a></h3>
+   <p>
+    Unless otherwise specified, 
+    <del>function</del>
+    <ins>invocable</ins>
+     objects passed into parallel algorithms as objects of type <code class="highlight"><c- n>Predicate</c-></code>, <code class="highlight"><c- n>BinaryPredicate</c-></code>, <code class="highlight"><c- n>Compare</c-></code>, <code class="highlight"><c- n>UnaryOperation</c-></code>, <code class="highlight"><c- n>BinaryOperation</c-></code>, <code class="highlight"><c- n>BinaryOperation1</c-></code>, <code class="highlight"><c- n>BinaryOperation2</c-></code>, <code class="highlight"><c- n>BinaryDivideOp</c-></code>, <span><ins><code class="highlight"><c- n>Proj</c-></code></ins></span> and the operators used by the analogous overloads to these parallel algorithms that are formed by an invocation
+with the specified default predicate or operation (where applicable) shall not directly or indirectly modify objects via their arguments,
+nor shall they rely on the identity of the provided objects.
+   </p>
+   <h3 class="heading settled" data-level="7.3" id="modify_alg_all_of"><span class="secno">7.3. </span><span class="content">Modify <code class="highlight"><c- n>all_of</c-></code> in <a href="https://eel.is/c++draft/alg.all.of">[<strong>alg.all.of</strong>]</a></span><a class="self-link" href="#modify_alg_all_of"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>input_iterator</c-> <c- n>I</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>S</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c->
          <c- n>indirect_unary_predicate</c-><c- o>&lt;</c-><c- n>projected</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Proj</c-><c- o>>></c-> <c- n>Pred</c-><c- o>></c->
   <c- k>constexpr</c-> <c- b>bool</c-> <c- n>ranges</c-><c- o>::</c-><c- n>all_of</c-><c- p>(</c-><c- n>I</c-> <c- n>first</c-><c- p>,</c-> <c- n>S</c-> <c- n>last</c-><c- p>,</c-> <c- n>Pred</c-> <c- n>pred</c-><c- p>,</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
@@ -2822,7 +2859,7 @@ in the view itself.</p>
   <c- k>constexpr</c-> <c- b>bool</c-> <c- n>ranges</c-><c- o>::</c-><c- n>all_of</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>R</c-><c- o>&amp;&amp;</c-> <c- n>r</c-><c- p>,</c-> <c- n>Pred</c-> <c- n>pred</c-><c- p>,</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.2" id="modify_alg_any_of"><span class="secno">7.2. </span><span class="content">Modify <code class="highlight"><c- n>any_of</c-></code> in <a href="https://eel.is/c++draft/alg.any.of">[<strong>alg.any.of</strong>]</a></span><a class="self-link" href="#modify_alg_any_of"></a></h3>
+   <h3 class="heading settled" data-level="7.4" id="modify_alg_any_of"><span class="secno">7.4. </span><span class="content">Modify <code class="highlight"><c- n>any_of</c-></code> in <a href="https://eel.is/c++draft/alg.any.of">[<strong>alg.any.of</strong>]</a></span><a class="self-link" href="#modify_alg_any_of"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>input_iterator</c-> <c- n>I</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>S</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c->
          <c- n>indirect_unary_predicate</c-><c- o>&lt;</c-><c- n>projected</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Proj</c-><c- o>>></c-> <c- n>Pred</c-><c- o>></c->
   <c- k>constexpr</c-> <c- b>bool</c-> <c- n>ranges</c-><c- o>::</c-><c- n>any_of</c-><c- p>(</c-><c- n>I</c-> <c- n>first</c-><c- p>,</c-> <c- n>S</c-> <c- n>last</c-><c- p>,</c-> <c- n>Pred</c-> <c- n>pred</c-><c- p>,</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
@@ -2840,7 +2877,7 @@ in the view itself.</p>
   <c- b>bool</c-> <c- n>ranges</c-><c- o>::</c-><c- n>any_of</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>R</c-><c- o>&amp;&amp;</c-> <c- n>r</c-><c- p>,</c-> <c- n>Pred</c-> <c- n>pred</c-><c- p>,</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.3" id="modify_alg_none_of"><span class="secno">7.3. </span><span class="content">Modify <code class="highlight"><c- n>none_of</c-></code> in <a href="https://eel.is/c++draft/alg.none.of">[<strong>alg.none.of</strong>]</a></span><a class="self-link" href="#modify_alg_none_of"></a></h3>
+   <h3 class="heading settled" data-level="7.5" id="modify_alg_none_of"><span class="secno">7.5. </span><span class="content">Modify <code class="highlight"><c- n>none_of</c-></code> in <a href="https://eel.is/c++draft/alg.none.of">[<strong>alg.none.of</strong>]</a></span><a class="self-link" href="#modify_alg_none_of"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>input_iterator</c-> <c- n>I</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>S</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c->
          <c- n>indirect_unary_predicate</c-><c- o>&lt;</c-><c- n>projected</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Proj</c-><c- o>>></c-> <c- n>Pred</c-><c- o>></c->
   <c- k>constexpr</c-> <c- b>bool</c-> <c- n>ranges</c-><c- o>::</c-><c- n>none_of</c-><c- p>(</c-><c- n>I</c-> <c- n>first</c-><c- p>,</c-> <c- n>S</c-> <c- n>last</c-><c- p>,</c-> <c- n>Pred</c-> <c- n>pred</c-><c- p>,</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
@@ -2858,7 +2895,7 @@ in the view itself.</p>
   <c- b>bool</c-> <c- n>ranges</c-><c- o>::</c-><c- n>none_of</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>R</c-><c- o>&amp;&amp;</c-> <c- n>r</c-><c- p>,</c-> <c- n>Pred</c-> <c- n>pred</c-><c- p>,</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.4" id="modify_alg_contains"><span class="secno">7.4. </span><span class="content">Modify <code class="highlight"><c- n>contains</c-></code> in <a href="https://eel.is/c++draft/alg.contains">[<strong>alg.contains</strong>]</a></span><a class="self-link" href="#modify_alg_contains"></a></h3>
+   <h3 class="heading settled" data-level="7.6" id="modify_alg_contains"><span class="secno">7.6. </span><span class="content">Modify <code class="highlight"><c- n>contains</c-></code> in <a href="https://eel.is/c++draft/alg.contains">[<strong>alg.contains</strong>]</a></span><a class="self-link" href="#modify_alg_contains"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>input_iterator</c-> <c- n>I</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>S</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c->
          <c- k>class</c-> <c- nc>T</c-> <c- o>=</c-> <c- n>projected_value_t</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Proj</c-><c- o>>></c->
   <c- k>requires</c-> <c- n>indirect_binary_predicate</c-><c- o>&lt;</c-><c- n>ranges</c-><c- o>::</c-><c- n>equal_to</c-><c- p>,</c-> <c- n>projected</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Proj</c-><c- o>></c-><c- p>,</c-> <c- k>const</c-> <c- n>T</c-><c- o>*></c->
@@ -2909,7 +2946,7 @@ in the view itself.</p>
 </pre>
     <p><i>Returns</i>: <code class="highlight"><c- n>first2</c-> <c- o>==</c-> <c- n>last2</c-> <c- o>||</c-> <c- o>!</c-><c- n>ranges</c->​<c- o>::</c->​<c- n>search</c-><c- p>(</c-><c- n>std</c-><c- o>::</c-><c- n>forward</c-><c- o>&lt;</c-><c- n>ExecutionPolicy</c-><c- o>></c-><c- p>(</c-><c- n>exec</c-><c- p>),</c-> <c- n>first1</c-><c- p>,</c-> <c- n>last1</c-><c- p>,</c-> <c- n>first2</c-><c- p>,</c-> <c- n>last2</c-><c- p>,</c-> <c- n>pred</c-><c- p>,</c-> <c- n>proj1</c-><c- p>,</c-> <c- n>proj2</c-><c- p>).</c-><c- n>empty</c-><c- p>().</c-></code></p>
    </ins>
-   <h3 class="heading settled" data-level="7.5" id="modify_alg_foreach"><span class="secno">7.5. </span><span class="content">Modify <code class="highlight"><c- n>for_each</c-></code> in <a href="https://eel.is/c++draft/alg.foreach">[<strong>alg.foreach</strong>]</a></span><a class="self-link" href="#modify_alg_foreach"></a></h3>
+   <h3 class="heading settled" data-level="7.7" id="modify_alg_foreach"><span class="secno">7.7. </span><span class="content">Modify <code class="highlight"><c- n>for_each</c-></code> in <a href="https://eel.is/c++draft/alg.foreach">[<strong>alg.foreach</strong>]</a></span><a class="self-link" href="#modify_alg_foreach"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>input_iterator</c-> <c- n>I</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>S</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c->
          <c- n>indirectly_unary_invocable</c-><c- o>&lt;</c-><c- n>projected</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Proj</c-><c- o>>></c-> <c- n>Fun</c-><c- o>></c->
   <c- k>constexpr</c-> <c- n>ranges</c-><c- o>::</c-><c- n>for_each_result</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Fun</c-><c- o>></c->
@@ -2928,16 +2965,15 @@ in the view itself.</p>
    <ins>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- k>class</c-> <c- nc>ExecutionPolicy</c-><c- p>,</c-> <c- n>random_access_iterator</c-> <c- n>I</c-><c- p>,</c-> <c- n>sized_sentinel_for</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>S</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c->
          <c- n>indirectly_unary_invocable</c-><c- o>&lt;</c-><c- n>projected</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Proj</c-><c- o>>></c-> <c- n>Fun</c-><c- o>></c->
-  <c- n>ranges</c-><c- o>::</c-><c- n>for_each_result</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Fun</c-><c- o>></c->
-    <c- n>ranges</c-><c- o>::</c-><c- n>for_each</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>I</c-> <c- n>first</c-><c- p>,</c-> <c- n>S</c-> <c- n>last</c-><c- p>,</c-> <c- n>Fun</c-> <c- n>f</c-><c- p>,</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
+  <c- n>I</c-> <c- n>ranges</c-><c- o>::</c-><c- n>for_each</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>I</c-> <c- n>first</c-><c- p>,</c-> <c- n>S</c-> <c- n>last</c-><c- p>,</c-> <c- n>Fun</c-> <c- n>f</c-><c- p>,</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
 
 <c- k>template</c-><c- o>&lt;</c-><c- k>class</c-> <c- nc>ExecutionPolicy</c-><c- p>,</c-> <c- n>random_access_range</c-> <c- n>R</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c->
          <c- n>indirectly_unary_invocable</c-><c- o>&lt;</c-><c- n>projected</c-><c- o>&lt;</c-><c- n>iterator_t</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c-><c- p>,</c-> <c- n>Proj</c-><c- o>>></c-> <c- n>Fun</c-><c- o>></c->
     <c- k>requires</c-> <c- n>sized_range</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c->
-  <c- n>ranges</c-><c- o>::</c-><c- n>for_each_result</c-><c- o>&lt;</c-><c- n>borrowed_iterator_t</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c-><c- p>,</c-> <c- n>Fun</c-><c- o>></c->
+  <c- n>borrowed_iterator_t</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c->
     <c- n>ranges</c-><c- o>::</c-><c- n>for_each</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>R</c-><c- o>&amp;&amp;</c-> <c- n>r</c-><c- p>,</c-> <c- n>Fun</c-> <c- n>f</c-><c- p>,</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
 </pre>
-    <p><em>Effects</em>: Calls <code class="highlight"><c- n>invoke</c-><c- p>(</c-><c- n>f</c-><c- p>,</c-> <c- n>invoke</c-><c- p>(</c-><c- n>proj</c-><c- p>,</c-> <c- o>*</c-><c- n>i</c-><c- p>))</c-></code> for every iterator <code class="highlight"><c- n>i</c-></code> in the range <code class="highlight"><c- p>[</c-><c- n>first</c-><c- p>,</c-> <c- n>last</c-><c- p>)</c-></code>, starting from <code class="highlight"><c- n>first</c-></code> and proceeding to <code class="highlight"><c- n>last</c-> <c- o>-</c-> <c- mi>1</c-></code>.</p>
+    <p><em>Effects</em>: Calls <code class="highlight"><c- n>invoke</c-><c- p>(</c-><c- n>f</c-><c- p>,</c-> <c- n>invoke</c-><c- p>(</c-><c- n>proj</c-><c- p>,</c-> <c- o>*</c-><c- n>i</c-><c- p>))</c-></code> for every iterator <code class="highlight"><c- n>i</c-></code> in the range <code class="highlight"><c- p>[</c-><c- n>first</c-><c- p>,</c-> <c- n>last</c-><c- p>)</c-></code>.</p>
     <p>[<em>Note x</em>: If the result of <code class="highlight"><c- n>invoke</c-><c- p>(</c-><c- n>proj</c-><c- p>,</c-> <c- o>*</c-><c- n>i</c-><c- p>)</c-></code> is a mutable reference, <code class="highlight"><c- n>f</c-></code> can apply non-constant functions. — <em>end note</em>]</p>
     <p><em>Returns</em>: <code class="highlight"><c- n>last</c-><c- p>.</c-></code></p>
     <p><em>Complexity</em>: Applies <code class="highlight"><c- n>f</c-></code> and <code class="highlight"><c- n>proj</c-></code> exactly <code class="highlight"><c- n>last</c-> <c- o>-</c-> <c- n>first</c-></code> times.</p>
@@ -2947,7 +2983,33 @@ in the view itself.</p>
     <p>[<em>Note x</em>: Do not return a copy of its <code class="highlight"><c- n>Fun</c-></code> parameter, since parallelization often does not permit efficient state
 accumulation. — <em>end note</em>]</p>
    </ins>
-   <h3 class="heading settled" data-level="7.6" id="modify_alg_find"><span class="secno">7.6. </span><span class="content">Modify <code class="highlight"><c- n>find</c-></code> in <a href="https://eel.is/c++draft/alg.find">[<strong>alg.find</strong>]</a></span><a class="self-link" href="#modify_alg_find"></a></h3>
+<pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>input_iterator</c-> <c- n>I</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c->
+         <c- n>indirectly_unary_invocable</c-><c- o>&lt;</c-><c- n>projected</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Proj</c-><c- o>>></c-> <c- n>Fun</c-><c- o>></c->
+  <c- k>constexpr</c-> <c- n>ranges</c-><c- o>::</c-><c- n>for_each_n_result</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Fun</c-><c- o>></c->
+    <c- n>ranges</c-><c- o>::</c-><c- n>for_each_n</c-><c- p>(</c-><c- n>I</c-> <c- n>first</c-><c- p>,</c-> <c- n>iter_difference_t</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>n</c-><c- p>,</c-> <c- n>Fun</c-> <c- n>f</c-><c- p>,</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
+</pre>
+   <p><em>Preconditions</em>: <code class="highlight"><c- n>n</c-> <c- o>>=</c-> <c- mi>0</c-></code> is <code class="highlight">true</code>.</p>
+   <p><em>Effects</em>: Calls <code class="highlight"><c- n>invoke</c-><c- p>(</c-><c- n>f</c-><c- p>,</c-> <c- n>invoke</c-><c- p>(</c-><c- n>proj</c-><c- p>,</c-> <c- o>*</c-><c- n>i</c-><c- p>))</c-></code> for every iterator <code class="highlight"><c- n>i</c-></code> in the range <code class="highlight"><c- p>[</c-><c- n>first</c-><c- p>,</c-> <c- n>first</c-> <c- o>+</c-> <c- n>n</c-><c- p>)</c-></code> in order.</p>
+   <p>[<em>Note x</em>: If the result of <code class="highlight"><c- n>invoke</c-><c- p>(</c-><c- n>proj</c-><c- p>,</c-> <c- o>*</c-><c- n>i</c-><c- p>)</c-></code> is a mutable reference, <code class="highlight"><c- n>f</c-></code> can apply non-constant functions. — <em>end note</em>]</p>
+   <p>Returns: <code class="highlight"><c- p>{</c-><c- n>first</c-> <c- o>+</c-> <c- n>n</c-><c- p>,</c-> <c- n>std</c->​<c- o>::</c->​<c- n>move</c-><c- p>(</c-><c- n>f</c-><c- p>)}</c-></code>.</p>
+   <p>Remarks: If <code class="highlight"><c- n>f</c-></code> returns a result, the result is ignored.</p>
+   <p>[<em>Note x</em>: The overload in namespace <code class="highlight"><c- n>ranges</c-></code> requires <code class="highlight"><c- n>Fun</c-></code> to model <code class="highlight"><c- n>copy_constructible</c-></code>. — <em>end note</em>]</p>
+   <ins>
+<pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- k>class</c-> <c- nc>ExecutionPolicy</c-><c- p>,</c-> <c- n>random_access_iterator</c-> <c- n>I</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c->
+         <c- n>indirectly_unary_invocable</c-><c- o>&lt;</c-><c- n>projected</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Proj</c-><c- o>>></c-> <c- n>Fun</c-><c- o>></c->
+  <c- n>I</c-> <c- n>ranges</c-><c- o>::</c-><c- n>for_each_n</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>I</c-> <c- n>first</c-><c- p>,</c-> <c- n>iter_difference_t</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>n</c-><c- p>,</c->
+                       <c- n>Fun</c-> <c- n>f</c-><c- p>,</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
+</pre>
+    <p><em>Preconditions</em>: <code class="highlight"><c- n>n</c-> <c- o>>=</c-> <c- mi>0</c-></code> is <code class="highlight">true</code>.</p>
+    <p><em>Effects</em>: Calls <code class="highlight"><c- n>invoke</c-><c- p>(</c-><c- n>f</c-><c- p>,</c-> <c- n>invoke</c-><c- p>(</c-><c- n>proj</c-><c- p>,</c-> <c- o>*</c-><c- n>i</c-><c- p>))</c-></code> for every iterator <code class="highlight"><c- n>i</c-></code> in the range <code class="highlight"><c- p>[</c-><c- n>first</c-><c- p>,</c-> <c- n>first</c-> <c- o>+</c-> <c- n>n</c-><c- p>)</c-></code>.</p>
+    <p>[<em>Note x</em>: If the result of <code class="highlight"><c- n>invoke</c-><c- p>(</c-><c- n>proj</c-><c- p>,</c-> <c- o>*</c-><c- n>i</c-><c- p>)</c-></code> is a mutable reference, <code class="highlight"><c- n>f</c-></code> can apply non-constant functions. — <em>end note</em>]</p>
+    <p>Returns: <code class="highlight"><c- n>first</c-> <c- o>+</c-> <c- n>n</c-></code>.</p>
+    <p>Remarks: If <code class="highlight"><c- n>f</c-></code> returns a result, the result is ignored.</p>
+    <p>[<em>Note x</em>: The overload in namespace <code class="highlight"><c- n>ranges</c-></code> requires <code class="highlight"><c- n>Fun</c-></code> to model <code class="highlight"><c- n>copy_constructible</c-></code>. — <em>end note</em>]</p>
+    <p>[<em>Note x</em>: Does not return a copy of its <code class="highlight"><c- n>Fun</c-></code> parameter, since parallelization often does not permit efficient state
+accumulation. — <em>end note</em>]</p>
+   </ins>
+   <h3 class="heading settled" data-level="7.8" id="modify_alg_find"><span class="secno">7.8. </span><span class="content">Modify <code class="highlight"><c- n>find</c-></code> in <a href="https://eel.is/c++draft/alg.find">[<strong>alg.find</strong>]</a></span><a class="self-link" href="#modify_alg_find"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>input_iterator</c-> <c- n>I</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>S</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c->
          <c- k>class</c-> <c- nc>T</c-> <c- o>=</c-> <c- n>projected_value_t</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Proj</c-><c- o>>></c->
   <c- k>requires</c-> <c- n>indirect_binary_predicate</c-><c- o>&lt;</c-><c- n>ranges</c-><c- o>::</c-><c- n>equal_to</c-><c- p>,</c-> <c- n>projected</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Proj</c-><c- o>></c-><c- p>,</c-> <c- k>const</c-> <c- n>T</c-><c- o>*></c->
@@ -3003,7 +3065,7 @@ accumulation. — <em>end note</em>]</p>
   <c- n>borrowed_iterator_t</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c-> <c- n>ranges</c-><c- o>::</c-><c- n>find_if_not</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>R</c-><c- o>&amp;&amp;</c-> <c- n>r</c-><c- p>,</c-> <c- n>Pred</c-> <c- n>pred</c-><c- p>,</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.7" id="modify_alg_find_last"><span class="secno">7.7. </span><span class="content">Modify <code class="highlight"><c- n>find_last</c-></code> in <a href="https://eel.is/c++draft/alg.find.last">[<strong>alg.find.last</strong>]</a></span><a class="self-link" href="#modify_alg_find_last"></a></h3>
+   <h3 class="heading settled" data-level="7.9" id="modify_alg_find_last"><span class="secno">7.9. </span><span class="content">Modify <code class="highlight"><c- n>find_last</c-></code> in <a href="https://eel.is/c++draft/alg.find.last">[<strong>alg.find.last</strong>]</a></span><a class="self-link" href="#modify_alg_find_last"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>forward_iterator</c-> <c- n>I</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>S</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c->
          <c- k>class</c-> <c- nc>T</c-> <c- o>=</c-> <c- n>projected_value_t</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Proj</c-><c- o>>></c->
   <c- k>requires</c-> <c- n>indirect_binary_predicate</c-><c- o>&lt;</c-><c- n>ranges</c-><c- o>::</c-><c- n>equal_to</c-><c- p>,</c-> <c- n>projected</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Proj</c-><c- o>></c-><c- p>,</c-> <c- k>const</c-> <c- n>T</c-><c- o>*></c->
@@ -3058,7 +3120,7 @@ accumulation. — <em>end note</em>]</p>
   <c- n>borrowed_subrange_t</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c-> <c- n>ranges</c-><c- o>::</c-><c- n>find_last_if_not</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>R</c-><c- o>&amp;&amp;</c-> <c- n>r</c-><c- p>,</c-> <c- n>Pred</c-> <c- n>pred</c-><c- p>,</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.8" id="modify_alg_find_end"><span class="secno">7.8. </span><span class="content">Modify <code class="highlight"><c- n>find_end</c-></code> in <a href="https://eel.is/c++draft/alg.find.end">[<strong>alg.find.end</strong>]</a></span><a class="self-link" href="#modify_alg_find_end"></a></h3>
+   <h3 class="heading settled" data-level="7.10" id="modify_alg_find_end"><span class="secno">7.10. </span><span class="content">Modify <code class="highlight"><c- n>find_end</c-></code> in <a href="https://eel.is/c++draft/alg.find.end">[<strong>alg.find.end</strong>]</a></span><a class="self-link" href="#modify_alg_find_end"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>forward_iterator</c-> <c- n>I1</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I1</c-><c- o>></c-> <c- n>S1</c-><c- p>,</c-> <c- n>forward_iterator</c-> <c- n>I2</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I2</c-><c- o>></c-> <c- n>S2</c-><c- p>,</c->
          <c- k>class</c-> <c- nc>Pred</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>equal_to</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj1</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj2</c-> <c- o>=</c-> <c- n>identity</c-><c- o>></c->
   <c- k>requires</c-> <c- n>indirectly_comparable</c-><c- o>&lt;</c-><c- n>I1</c-><c- p>,</c-> <c- n>I2</c-><c- p>,</c-> <c- n>Pred</c-><c- p>,</c-> <c- n>Proj1</c-><c- p>,</c-> <c- n>Proj2</c-><c- o>></c->
@@ -3087,7 +3149,7 @@ accumulation. — <em>end note</em>]</p>
                                            <c- n>Pred</c-> <c- n>pred</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj1</c-> <c- n>proj1</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj2</c-> <c- n>proj2</c-> <c- o>=</c-> <c- p>{});</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.9" id="modify_alg_find_first_of"><span class="secno">7.9. </span><span class="content">Modify <code class="highlight"><c- n>find_first_of</c-></code> in <a href="https://eel.is/c++draft/alg.find.first.of">[<strong>alg.find.first.of</strong>]</a></span><a class="self-link" href="#modify_alg_find_first_of"></a></h3>
+   <h3 class="heading settled" data-level="7.11" id="modify_alg_find_first_of"><span class="secno">7.11. </span><span class="content">Modify <code class="highlight"><c- n>find_first_of</c-></code> in <a href="https://eel.is/c++draft/alg.find.first.of">[<strong>alg.find.first.of</strong>]</a></span><a class="self-link" href="#modify_alg_find_first_of"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>input_iterator</c-> <c- n>I1</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I1</c-><c- o>></c-> <c- n>S1</c-><c- p>,</c-> <c- n>forward_iterator</c-> <c- n>I2</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I2</c-><c- o>></c-> <c- n>S2</c-><c- p>,</c->
          <c- k>class</c-> <c- nc>Pred</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>equal_to</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj1</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj2</c-> <c- o>=</c-> <c- n>identity</c-><c- o>></c->
   <c- k>requires</c-> <c- n>indirectly_comparable</c-><c- o>&lt;</c-><c- n>I1</c-><c- p>,</c-> <c- n>I2</c-><c- p>,</c-> <c- n>Pred</c-><c- p>,</c-> <c- n>Proj1</c-><c- p>,</c-> <c- n>Proj2</c-><c- o>></c->
@@ -3118,7 +3180,7 @@ accumulation. — <em>end note</em>]</p>
                                                 <c- n>Pred</c-> <c- n>pred</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj1</c-> <c- n>proj1</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj2</c-> <c- n>proj2</c-> <c- o>=</c-> <c- p>{});</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.10" id="modify_alg_adjacent_find"><span class="secno">7.10. </span><span class="content">Modify <code class="highlight"><c- n>adjacent_find</c-></code> in <a href="https://eel.is/c++draft/alg.adjacent.find">[<strong>alg.adjacent.find</strong>]</a></span><a class="self-link" href="#modify_alg_adjacent_find"></a></h3>
+   <h3 class="heading settled" data-level="7.12" id="modify_alg_adjacent_find"><span class="secno">7.12. </span><span class="content">Modify <code class="highlight"><c- n>adjacent_find</c-></code> in <a href="https://eel.is/c++draft/alg.adjacent.find">[<strong>alg.adjacent.find</strong>]</a></span><a class="self-link" href="#modify_alg_adjacent_find"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>forward_iterator</c-> <c- n>I</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>S</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c->
          <c- n>indirect_binary_predicate</c-><c- o>&lt;</c-><c- n>projected</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Proj</c-><c- o>></c-><c- p>,</c->
                                    <c- n>projected</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Proj</c-><c- o>>></c-> <c- n>Pred</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>equal_to</c-><c- o>></c->
@@ -3139,7 +3201,7 @@ accumulation. — <em>end note</em>]</p>
   <c- n>borrowed_iterator_t</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c-> <c- n>ranges</c-><c- o>::</c-><c- n>adjacent_find</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>R</c-><c- o>&amp;&amp;</c-> <c- n>r</c-><c- p>,</c-> <c- n>Pred</c-> <c- n>pred</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.11" id="modify_alg_count"><span class="secno">7.11. </span><span class="content">Modify <code class="highlight"><c- n>count</c-></code> in <a href="https://eel.is/c++draft/alg.count">[<strong>alg.count</strong>]</a></span><a class="self-link" href="#modify_alg_count"></a></h3>
+   <h3 class="heading settled" data-level="7.13" id="modify_alg_count"><span class="secno">7.13. </span><span class="content">Modify <code class="highlight"><c- n>count</c-></code> in <a href="https://eel.is/c++draft/alg.count">[<strong>alg.count</strong>]</a></span><a class="self-link" href="#modify_alg_count"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>input_iterator</c-> <c- n>I</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>S</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c->
          <c- k>class</c-> <c- nc>T</c-> <c- o>=</c-> <c- n>projected_value_t</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Proj</c-><c- o>>></c->
   <c- k>requires</c-> <c- n>indirect_binary_predicate</c-><c- o>&lt;</c-><c- n>ranges</c-><c- o>::</c-><c- n>equal_to</c-><c- p>,</c-> <c- n>projected</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Proj</c-><c- o>></c-><c- p>,</c-> <c- k>const</c-> <c- n>T</c-><c- o>*></c->
@@ -3179,7 +3241,7 @@ accumulation. — <em>end note</em>]</p>
   <c- n>range_difference_t</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c-> <c- n>ranges</c-><c- o>::</c-><c- n>count_if</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>R</c-><c- o>&amp;&amp;</c-> <c- n>r</c-><c- p>,</c-> <c- n>Pred</c-> <c- n>pred</c-><c- p>,</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.12" id="modify_alg_mismatch"><span class="secno">7.12. </span><span class="content">Modify <code class="highlight"><c- n>mismatch</c-></code> in <a href="https://eel.is/c++draft/alg.mismatch">[<strong>alg.mismatch</strong>]</a></span><a class="self-link" href="#modify_alg_mismatch"></a></h3>
+   <h3 class="heading settled" data-level="7.14" id="modify_alg_mismatch"><span class="secno">7.14. </span><span class="content">Modify <code class="highlight"><c- n>mismatch</c-></code> in <a href="https://eel.is/c++draft/alg.mismatch">[<strong>alg.mismatch</strong>]</a></span><a class="self-link" href="#modify_alg_mismatch"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>input_iterator</c-> <c- n>I1</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I1</c-><c- o>></c-> <c- n>S1</c-><c- p>,</c-> <c- n>input_iterator</c-> <c- n>I2</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I2</c-><c- o>></c-> <c- n>S2</c-><c- p>,</c->
          <c- k>class</c-> <c- nc>Pred</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>equal_to</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj1</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj2</c-> <c- o>=</c-> <c- n>identity</c-><c- o>></c->
   <c- k>requires</c-> <c- n>indirectly_comparable</c-><c- o>&lt;</c-><c- n>I1</c-><c- p>,</c-> <c- n>I2</c-><c- p>,</c-> <c- n>Pred</c-><c- p>,</c-> <c- n>Proj1</c-><c- p>,</c-> <c- n>Proj2</c-><c- o>></c->
@@ -3207,7 +3269,7 @@ accumulation. — <em>end note</em>]</p>
     <c- n>ranges</c-><c- o>::</c-><c- n>mismatch</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>R1</c-><c- o>&amp;&amp;</c-> <c- n>r1</c-><c- p>,</c-> <c- n>R2</c-><c- o>&amp;&amp;</c-> <c- n>r2</c-><c- p>,</c-> <c- n>Pred</c-> <c- n>pred</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj1</c-> <c- n>proj1</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj2</c-> <c- n>proj2</c-> <c- o>=</c-> <c- p>{});</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.13" id="modify_alg_equal"><span class="secno">7.13. </span><span class="content">Modify <code class="highlight"><c- n>equal</c-></code> in <a href="https://eel.is/c++draft/alg.equal">[<strong>alg.equal</strong>]</a></span><a class="self-link" href="#modify_alg_equal"></a></h3>
+   <h3 class="heading settled" data-level="7.15" id="modify_alg_equal"><span class="secno">7.15. </span><span class="content">Modify <code class="highlight"><c- n>equal</c-></code> in <a href="https://eel.is/c++draft/alg.equal">[<strong>alg.equal</strong>]</a></span><a class="self-link" href="#modify_alg_equal"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>input_iterator</c-> <c- n>I1</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I1</c-><c- o>></c-> <c- n>S1</c-><c- p>,</c-> <c- n>input_iterator</c-> <c- n>I2</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I2</c-><c- o>></c-> <c- n>S2</c-><c- p>,</c->
          <c- k>class</c-> <c- nc>Pred</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>equal_to</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj1</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj2</c-> <c- o>=</c-> <c- n>identity</c-><c- o>></c->
   <c- k>requires</c-> <c- n>indirectly_comparable</c-><c- o>&lt;</c-><c- n>I1</c-><c- p>,</c-> <c- n>I2</c-><c- p>,</c-> <c- n>Pred</c-><c- p>,</c-> <c- n>Proj1</c-><c- p>,</c-> <c- n>Proj2</c-><c- o>></c->
@@ -3236,7 +3298,7 @@ accumulation. — <em>end note</em>]</p>
                      <c- n>Pred</c-> <c- n>pred</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj1</c-> <c- n>proj1</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj2</c-> <c- n>proj2</c-> <c- o>=</c-> <c- p>{});</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.14" id="modify_alg_search"><span class="secno">7.14. </span><span class="content">Modify <code class="highlight"><c- n>search</c-></code> in <a href="https://eel.is/c++draft/alg.search">[<strong>alg.search</strong>]</a></span><a class="self-link" href="#modify_alg_search"></a></h3>
+   <h3 class="heading settled" data-level="7.16" id="modify_alg_search"><span class="secno">7.16. </span><span class="content">Modify <code class="highlight"><c- n>search</c-></code> in <a href="https://eel.is/c++draft/alg.search">[<strong>alg.search</strong>]</a></span><a class="self-link" href="#modify_alg_search"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>forward_iterator</c-> <c- n>I1</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I1</c-><c- o>></c-> <c- n>S1</c-><c- p>,</c-> <c- n>forward_iterator</c-> <c- n>I2</c-><c- p>,</c->
          <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I2</c-><c- o>></c-> <c- n>S2</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Pred</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>equal_to</c-><c- p>,</c->
          <c- k>class</c-> <c- nc>Proj1</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj2</c-> <c- o>=</c-> <c- n>identity</c-><c- o>></c->
@@ -3301,7 +3363,7 @@ accumulation. — <em>end note</em>]</p>
                        <c- k>const</c-> <c- n>T</c-><c- o>&amp;</c-> <c- n>value</c-><c- p>,</c-> <c- n>Pred</c-> <c- n>pred</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.15" id="modify_alg_starts_with"><span class="secno">7.15. </span><span class="content">Modify <code class="highlight"><c- n>starts_with</c-></code> in <a href="https://eel.is/c++draft/alg.starts.with">[<strong>alg.starts.with</strong>]</a></span><a class="self-link" href="#modify_alg_starts_with"></a></h3>
+   <h3 class="heading settled" data-level="7.17" id="modify_alg_starts_with"><span class="secno">7.17. </span><span class="content">Modify <code class="highlight"><c- n>starts_with</c-></code> in <a href="https://eel.is/c++draft/alg.starts.with">[<strong>alg.starts.with</strong>]</a></span><a class="self-link" href="#modify_alg_starts_with"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>input_iterator</c-> <c- n>I1</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I1</c-><c- o>></c-> <c- n>S1</c-><c- p>,</c-> <c- n>input_iterator</c-> <c- n>I2</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I2</c-><c- o>></c-> <c- n>S2</c-><c- p>,</c->
          <c- k>class</c-> <c- nc>Pred</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>equal_to</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj1</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj2</c-> <c- o>=</c-> <c- n>identity</c-><c- o>></c->
   <c- k>requires</c-> <c- n>indirectly_comparable</c-><c- o>&lt;</c-><c- n>I1</c-><c- p>,</c-> <c- n>I2</c-><c- p>,</c-> <c- n>Pred</c-><c- p>,</c-> <c- n>Proj1</c-><c- p>,</c-> <c- n>Proj2</c-><c- o>></c->
@@ -3329,7 +3391,7 @@ accumulation. — <em>end note</em>]</p>
 </pre>
     <p><i>Returns</i>: <code class="highlight"><c- n>ranges</c-><c- o>::</c-><c- n>mismatch</c-><c- p>(</c-><c- n>std</c-><c- o>::</c-><c- n>forward</c-><c- o>&lt;</c-><c- n>ExecutionPolicy</c-><c- o>></c-><c- p>(</c-><c- n>exec</c-><c- p>),</c-> <c- n>std</c-><c- o>::</c-><c- n>move</c-><c- p>(</c-><c- n>first1</c-><c- p>),</c-> <c- n>last1</c-><c- p>,</c-> <c- n>std</c-><c- o>::</c-><c- n>move</c-><c- p>(</c-><c- n>first2</c-><c- p>),</c-> <c- n>last2</c-><c- p>,</c-> <c- n>pred</c-><c- p>,</c-> <c- n>proj1</c-><c- p>,</c-> <c- n>proj2</c-><c- p>).</c-><c- n>in2</c-> <c- o>==</c-> <c- n>last2</c-></code></p>
    </ins>
-   <h3 class="heading settled" data-level="7.16" id="modify_alg_ends_with"><span class="secno">7.16. </span><span class="content">Modify <code class="highlight"><c- n>ends_with</c-></code> in <a href="https://eel.is/c++draft/alg.ends.with">[<strong>alg.ends.with</strong>]</a></span><a class="self-link" href="#modify_alg_ends_with"></a></h3>
+   <h3 class="heading settled" data-level="7.18" id="modify_alg_ends_with"><span class="secno">7.18. </span><span class="content">Modify <code class="highlight"><c- n>ends_with</c-></code> in <a href="https://eel.is/c++draft/alg.ends.with">[<strong>alg.ends.with</strong>]</a></span><a class="self-link" href="#modify_alg_ends_with"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>input_iterator</c-> <c- n>I1</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I1</c-><c- o>></c-> <c- n>S1</c-><c- p>,</c-> <c- n>input_iterator</c-> <c- n>I2</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I2</c-><c- o>></c-> <c- n>S2</c-><c- p>,</c->
          <c- k>class</c-> <c- nc>Pred</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>equal_to</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj1</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj2</c-> <c- o>=</c-> <c- n>identity</c-><c- o>></c->
   <c- k>requires</c-> <c- p>(</c-><c- n>forward_iterator</c-><c- o>&lt;</c-><c- n>I1</c-><c- o>></c-> <c- o>||</c-> <c- n>sized_sentinel_for</c-><c- o>&lt;</c-><c- n>S1</c-><c- p>,</c-> <c- n>I1</c-><c- o>></c-><c- p>)</c-> <c- o>&amp;&amp;</c->
@@ -3371,7 +3433,7 @@ accumulation. — <em>end note</em>]</p>
     <p>Let <code class="highlight"><c- n>N1</c-></code> be <code class="highlight"><c- n>ranges</c->​<c- o>::</c->​<c- n>distance</c-><c- p>(</c-><c- n>r1</c-><c- p>)</c-></code> and <code class="highlight"><c- n>N2</c-></code> be <code class="highlight"><c- n>ranges</c->​<c- o>::</c->​<c- n>distance</c-><c- p>(</c-><c- n>r2</c-><c- p>)</c-></code>.</p>
     <p><i>Returns</i>: <code class="highlight">false</code> if <code class="highlight"><c- n>N1</c-> <c- o>&lt;</c-> <c- n>N2</c-></code>, otherwise <code class="highlight"><c- n>ranges</c-><c- o>::</c-><c- n>equal</c-><c- p>(</c-><c- n>std</c-><c- o>::</c-><c- n>forward</c-><c- o>&lt;</c-><c- n>ExecutionPolicy</c-><c- o>></c-><c- p>,</c-> <c- n>views</c-><c- o>::</c-><c- n>drop</c-><c- p>(</c-><c- n>ranges</c-><c- o>::</c-><c- n>ref_view</c-><c- p>(</c-><c- n>r1</c-><c- p>),</c-> <c- n>N1</c-> <c- o>-</c-> <c- k>static_cast</c-><c- o>&lt;</c-><c- k>decltype</c-><c- p>(</c-><c- n>N1</c-><c- p>)</c-><c- o>></c-><c- p>(</c-><c- n>N2</c-><c- p>)),</c-> <c- n>r2</c-><c- p>,</c-> <c- n>pred</c-><c- p>,</c-> <c- n>proj1</c-><c- p>,</c-> <c- n>proj2</c-><c- p>)</c-></code></p>
    </ins>
-   <h3 class="heading settled" data-level="7.17" id="modify_copy"><span class="secno">7.17. </span><span class="content">Modify <code class="highlight"><c- n>copy</c-></code> in <a href="https://eel.is/c++draft/alg.copy">[<strong>alg.copy</strong>]</a></span><a class="self-link" href="#modify_copy"></a></h3>
+   <h3 class="heading settled" data-level="7.19" id="modify_copy"><span class="secno">7.19. </span><span class="content">Modify <code class="highlight"><c- n>copy</c-></code> in <a href="https://eel.is/c++draft/alg.copy">[<strong>alg.copy</strong>]</a></span><a class="self-link" href="#modify_copy"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- k>class</c-> <c- nc>ExecutionPolicy</c-><c- p>,</c-> <c- k>class</c-> <c- nc>ForwardIterator1</c-><c- p>,</c-> <c- k>class</c-> <c- nc>ForwardIterator2</c-><c- o>></c->
   <c- n>ForwardIterator2</c-> <c- n>copy</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>policy</c-><c- p>,</c->
                         <c- n>ForwardIterator1</c-> <c- n>first</c-><c- p>,</c-> <c- n>ForwardIterator1</c-> <c- n>last</c-><c- p>,</c->
@@ -3423,7 +3485,7 @@ accumulation. — <em>end note</em>]</p>
     <c- n>ranges</c-><c- o>::</c-><c- n>copy_if</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>R</c-><c- o>&amp;&amp;</c-> <c- n>r</c-><c- p>,</c-> <c- n>O</c-> <c- n>result</c-><c- p>,</c-> <c- n>Pred</c-> <c- n>pred</c-><c- p>,</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.18" id="modify_move"><span class="secno">7.18. </span><span class="content">Modify <code class="highlight"><c- n>move</c-></code> in <a href="https://eel.is/c++draft/alg.move">[<strong>alg.move</strong>]</a></span><a class="self-link" href="#modify_move"></a></h3>
+   <h3 class="heading settled" data-level="7.20" id="modify_move"><span class="secno">7.20. </span><span class="content">Modify <code class="highlight"><c- n>move</c-></code> in <a href="https://eel.is/c++draft/alg.move">[<strong>alg.move</strong>]</a></span><a class="self-link" href="#modify_move"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- k>class</c-> <c- nc>ExecutionPolicy</c-><c- p>,</c-> <c- k>class</c-> <c- nc>ForwardIterator1</c-><c- p>,</c-> <c- k>class</c-> <c- nc>ForwardIterator2</c-><c- o>></c->
   <c- n>ForwardIterator2</c-> <c- n>move</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>policy</c-><c- p>,</c->
                         <c- n>ForwardIterator1</c-> <c- n>first</c-><c- p>,</c-> <c- n>ForwardIterator1</c-> <c- n>last</c-><c- p>,</c->
@@ -3438,7 +3500,7 @@ accumulation. — <em>end note</em>]</p>
   <c- n>ranges</c-><c- o>::</c-><c- n>move_result</c-><c- o>&lt;</c-><c- n>borrowed_iterator_t</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c-><c- p>,</c-> <c- n>O</c-><c- o>></c-> <c- n>ranges</c-><c- o>::</c-><c- n>move</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>R</c-><c- o>&amp;&amp;</c-> <c- n>r</c-><c- p>,</c-> <c- n>O</c-> <c- n>result</c-><c- p>);</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.19" id="modify_swap"><span class="secno">7.19. </span><span class="content">Modify <code class="highlight"><c- n>swap</c-></code> in <a href="https://eel.is/c++draft/alg.swap">[<strong>alg.swap</strong>]</a></span><a class="self-link" href="#modify_swap"></a></h3>
+   <h3 class="heading settled" data-level="7.21" id="modify_swap"><span class="secno">7.21. </span><span class="content">Modify <code class="highlight"><c- n>swap</c-></code> in <a href="https://eel.is/c++draft/alg.swap">[<strong>alg.swap</strong>]</a></span><a class="self-link" href="#modify_swap"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>input_iterator</c-> <c- n>I1</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I1</c-><c- o>></c-> <c- n>S1</c-><c- p>,</c-> <c- n>input_iterator</c-> <c- n>I2</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I2</c-><c- o>></c-> <c- n>S2</c-><c- o>></c->
   <c- k>requires</c-> <c- n>indirectly_swappable</c-><c- o>&lt;</c-><c- n>I1</c-><c- p>,</c-> <c- n>I2</c-><c- o>></c->
   <c- k>constexpr</c-> <c- n>ranges</c-><c- o>::</c-><c- n>swap_ranges_result</c-><c- o>&lt;</c-><c- n>I1</c-><c- p>,</c-> <c- n>I2</c-><c- o>></c->
@@ -3459,7 +3521,7 @@ accumulation. — <em>end note</em>]</p>
     <c- n>ranges</c-><c- o>::</c-><c- n>swap_ranges</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>R1</c-><c- o>&amp;&amp;</c-> <c- n>r1</c-><c- p>,</c-> <c- n>R2</c-><c- o>&amp;&amp;</c-> <c- n>r2</c-><c- p>);</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.20" id="modify_transform"><span class="secno">7.20. </span><span class="content">Modify <code class="highlight"><c- n>transform</c-></code> in <a href="https://eel.is/c++draft/alg.transform">[<strong>alg.transform</strong>]</a></span><a class="self-link" href="#modify_transform"></a></h3>
+   <h3 class="heading settled" data-level="7.22" id="modify_transform"><span class="secno">7.22. </span><span class="content">Modify <code class="highlight"><c- n>transform</c-></code> in <a href="https://eel.is/c++draft/alg.transform">[<strong>alg.transform</strong>]</a></span><a class="self-link" href="#modify_transform"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>input_iterator</c-> <c- n>I</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>S</c-><c- p>,</c-> <c- n>weakly_incrementable</c-> <c- n>O</c-><c- p>,</c->
          <c- n>copy_constructible</c-> <c- n>F</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- o>></c->
   <c- k>requires</c-> <c- n>indirectly_writable</c-><c- o>&lt;</c-><c- n>O</c-><c- p>,</c-> <c- n>indirect_result_t</c-><c- o>&lt;</c-><c- n>F</c-><c- o>&amp;</c-><c- p>,</c-> <c- n>projected</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Proj</c-><c- o>>>></c->
@@ -3518,7 +3580,7 @@ accumulation. — <em>end note</em>]</p>
                       <c- n>F</c-> <c- n>binary_op</c-><c- p>,</c-> <c- n>Proj1</c-> <c- n>proj1</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj2</c-> <c- n>proj2</c-> <c- o>=</c-> <c- p>{});</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.21" id="modify_replace"><span class="secno">7.21. </span><span class="content">Modify <code class="highlight"><c- n>replace</c-></code> in <a href="https://eel.is/c++draft/alg.replace">[<strong>alg.replace</strong>]</a></span><a class="self-link" href="#modify_replace"></a></h3>
+   <h3 class="heading settled" data-level="7.23" id="modify_replace"><span class="secno">7.23. </span><span class="content">Modify <code class="highlight"><c- n>replace</c-></code> in <a href="https://eel.is/c++draft/alg.replace">[<strong>alg.replace</strong>]</a></span><a class="self-link" href="#modify_replace"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>input_iterator</c-> <c- n>I</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>S</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c->
          <c- k>class</c-> <c- nc>T1</c-> <c- o>=</c-> <c- n>projected_value_t</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Proj</c-><c- o>></c-><c- p>,</c-> <c- k>class</c-> <c- nc>T2</c-> <c- o>=</c-> <c- n>T1</c-><c- o>></c->
   <c- k>requires</c-> <c- n>indirectly_writable</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- k>const</c-> <c- n>T2</c-><c- o>&amp;></c-> <c- o>&amp;&amp;</c->
@@ -3644,7 +3706,7 @@ accumulation. — <em>end note</em>]</p>
                             <c- n>Pred</c-> <c- n>pred</c-><c- p>,</c-> <c- k>const</c-> <c- n>T</c-><c- o>&amp;</c-> <c- n>new_value</c-><c- p>,</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.22" id="modify_fill"><span class="secno">7.22. </span><span class="content">Modify <code class="highlight"><c- n>fill</c-></code> in <a href="https://eel.is/c++draft/alg.fill">[<strong>alg.fill</strong>]</a></span><a class="self-link" href="#modify_fill"></a></h3>
+   <h3 class="heading settled" data-level="7.24" id="modify_fill"><span class="secno">7.24. </span><span class="content">Modify <code class="highlight"><c- n>fill</c-></code> in <a href="https://eel.is/c++draft/alg.fill">[<strong>alg.fill</strong>]</a></span><a class="self-link" href="#modify_fill"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- k>class</c-> <c- nc>O</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>O</c-><c- o>></c-> <c- n>S</c-><c- p>,</c-> <c- k>class</c-> <c- nc>T</c-> <c- o>=</c-> <c- n>iter_value_t</c-><c- o>&lt;</c-><c- n>O</c-><c- o>>></c->
   <c- k>requires</c-> <c- n>output_iterator</c-><c- o>&lt;</c-><c- n>O</c-><c- p>,</c-> <c- k>const</c-> <c- n>T</c-><c- o>&amp;></c->
   <c- k>constexpr</c-> <c- n>O</c-> <c- n>ranges</c-><c- o>::</c-><c- n>fill</c-><c- p>(</c-><c- n>O</c-> <c- n>first</c-><c- p>,</c-> <c- n>S</c-> <c- n>last</c-><c- p>,</c-> <c- k>const</c-> <c- n>T</c-><c- o>&amp;</c-> <c- n>value</c-><c- p>);</c->
@@ -3668,7 +3730,7 @@ accumulation. — <em>end note</em>]</p>
   <c- n>O</c-> <c- n>ranges</c-><c- o>::</c-><c- n>fill_n</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>O</c-> <c- n>first</c-><c- p>,</c-> <c- n>iter_difference_t</c-><c- o>&lt;</c-><c- n>O</c-><c- o>></c-> <c- n>n</c-><c- p>,</c-> <c- k>const</c-> <c- n>T</c-><c- o>&amp;</c-> <c- n>value</c-><c- p>);</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.23" id="modify_generate"><span class="secno">7.23. </span><span class="content">Modify <code class="highlight"><c- n>generate</c-></code> in <a href="https://eel.is/c++draft/alg.generate">[<strong>alg.generate</strong>]</a></span><a class="self-link" href="#modify_generate"></a></h3>
+   <h3 class="heading settled" data-level="7.25" id="modify_generate"><span class="secno">7.25. </span><span class="content">Modify <code class="highlight"><c- n>generate</c-></code> in <a href="https://eel.is/c++draft/alg.generate">[<strong>alg.generate</strong>]</a></span><a class="self-link" href="#modify_generate"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>input_or_output_iterator</c-> <c- n>O</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>O</c-><c- o>></c-> <c- n>S</c-><c- p>,</c-> <c- n>copy_constructible</c-> <c- n>F</c-><c- o>></c->
   <c- k>requires</c-> <c- n>invocable</c-><c- o>&lt;</c-><c- n>F</c-><c- o>&amp;></c-> <c- o>&amp;&amp;</c-> <c- n>indirectly_writable</c-><c- o>&lt;</c-><c- n>O</c-><c- p>,</c-> <c- n>invoke_result_t</c-><c- o>&lt;</c-><c- n>F</c-><c- o>&amp;>></c->
   <c- k>constexpr</c-> <c- n>O</c-> <c- n>ranges</c-><c- o>::</c-><c- n>generate</c-><c- p>(</c-><c- n>O</c-> <c- n>first</c-><c- p>,</c-> <c- n>S</c-> <c- n>last</c-><c- p>,</c-> <c- n>F</c-> <c- n>gen</c-><c- p>);</c->
@@ -3691,7 +3753,7 @@ accumulation. — <em>end note</em>]</p>
   <c- n>O</c-> <c- n>ranges</c-><c- o>::</c-><c- n>generate_n</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>O</c-> <c- n>first</c-><c- p>,</c-> <c- n>iter_difference_t</c-><c- o>&lt;</c-><c- n>O</c-><c- o>></c-> <c- n>n</c-><c- p>,</c-> <c- n>F</c-> <c- n>gen</c-><c- p>);</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.24" id="modify_remove"><span class="secno">7.24. </span><span class="content">Modify <code class="highlight"><c- n>remove</c-></code> in <a href="https://eel.is/c++draft/alg.remove">[<strong>alg.remove</strong>]</a></span><a class="self-link" href="#modify_remove"></a></h3>
+   <h3 class="heading settled" data-level="7.26" id="modify_remove"><span class="secno">7.26. </span><span class="content">Modify <code class="highlight"><c- n>remove</c-></code> in <a href="https://eel.is/c++draft/alg.remove">[<strong>alg.remove</strong>]</a></span><a class="self-link" href="#modify_remove"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>permutable</c-> <c- n>I</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>S</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c->
          <c- k>class</c-> <c- nc>T</c-> <c- o>=</c-> <c- n>projected_value_t</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Proj</c-><c- o>>></c->
   <c- k>requires</c-> <c- n>indirect_binary_predicate</c-><c- o>&lt;</c-><c- n>ranges</c-><c- o>::</c-><c- n>equal_to</c-><c- p>,</c-> <c- n>projected</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Proj</c-><c- o>></c-><c- p>,</c-> <c- k>const</c-> <c- n>T</c-><c- o>*></c->
@@ -3789,7 +3851,7 @@ accumulation. — <em>end note</em>]</p>
     <c- n>ranges</c-><c- o>::</c-><c- n>remove_copy_if</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>R</c-><c- o>&amp;&amp;</c-> <c- n>r</c-><c- p>,</c-> <c- n>O</c-> <c- n>result</c-><c- p>,</c-> <c- n>Pred</c-> <c- n>pred</c-><c- p>,</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.25" id="modify_unique"><span class="secno">7.25. </span><span class="content">Modify <code class="highlight"><c- n>unique</c-></code> in <a href="https://eel.is/c++draft/alg.unique">[<strong>alg.unique</strong>]</a></span><a class="self-link" href="#modify_unique"></a></h3>
+   <h3 class="heading settled" data-level="7.27" id="modify_unique"><span class="secno">7.27. </span><span class="content">Modify <code class="highlight"><c- n>unique</c-></code> in <a href="https://eel.is/c++draft/alg.unique">[<strong>alg.unique</strong>]</a></span><a class="self-link" href="#modify_unique"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>permutable</c-> <c- n>I</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>S</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c->
          <c- n>indirect_equivalence_relation</c-><c- o>&lt;</c-><c- n>projected</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Proj</c-><c- o>>></c-> <c- n>C</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>equal_to</c-><c- o>></c->
   <c- k>constexpr</c-> <c- n>subrange</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>ranges</c-><c- o>::</c-><c- n>unique</c-><c- p>(</c-><c- n>I</c-> <c- n>first</c-><c- p>,</c-> <c- n>S</c-> <c- n>last</c-><c- p>,</c-> <c- n>C</c-> <c- n>comp</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
@@ -3842,7 +3904,7 @@ accumulation. — <em>end note</em>]</p>
                         <c- n>C</c-> <c- n>comp</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.26" id="modify_reverse"><span class="secno">7.26. </span><span class="content">Modify <code class="highlight"><c- n>reverse</c-></code> in <a href="https://eel.is/c++draft/alg.reverse">[<strong>alg.reverse</strong>]</a></span><a class="self-link" href="#modify_reverse"></a></h3>
+   <h3 class="heading settled" data-level="7.28" id="modify_reverse"><span class="secno">7.28. </span><span class="content">Modify <code class="highlight"><c- n>reverse</c-></code> in <a href="https://eel.is/c++draft/alg.reverse">[<strong>alg.reverse</strong>]</a></span><a class="self-link" href="#modify_reverse"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>bidirectional_iterator</c-> <c- n>I</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>S</c-><c- o>></c->
   <c- k>requires</c-> <c- n>permutable</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c->
   <c- k>constexpr</c-> <c- n>I</c-> <c- n>ranges</c-><c- o>::</c-><c- n>reverse</c-><c- p>(</c-><c- n>I</c-> <c- n>first</c-><c- p>,</c-> <c- n>S</c-> <c- n>last</c-><c- p>);</c->
@@ -3879,7 +3941,7 @@ accumulation. — <em>end note</em>]</p>
     <c- n>ranges</c-><c- o>::</c-><c- n>reverse_copy</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>R</c-><c- o>&amp;&amp;</c-> <c- n>r</c-><c- p>,</c-> <c- n>O</c-> <c- n>result</c-><c- p>);</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.27" id="modify_rotate"><span class="secno">7.27. </span><span class="content">Modify <code class="highlight"><c- n>rotate</c-></code> in <a href="https://eel.is/c++draft/alg.rotate">[<strong>alg.rotate</strong>]</a></span><a class="self-link" href="#modify_rotate"></a></h3>
+   <h3 class="heading settled" data-level="7.29" id="modify_rotate"><span class="secno">7.29. </span><span class="content">Modify <code class="highlight"><c- n>rotate</c-></code> in <a href="https://eel.is/c++draft/alg.rotate">[<strong>alg.rotate</strong>]</a></span><a class="self-link" href="#modify_rotate"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>permutable</c-> <c- n>I</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>S</c-><c- o>></c->
   <c- k>constexpr</c-> <c- n>subrange</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>ranges</c-><c- o>::</c-><c- n>rotate</c-><c- p>(</c-><c- n>I</c-> <c- n>first</c-><c- p>,</c-> <c- n>I</c-> <c- n>middle</c-><c- p>,</c-> <c- n>S</c-> <c- n>last</c-><c- p>);</c->
 </pre>
@@ -3925,7 +3987,7 @@ accumulation. — <em>end note</em>]</p>
 </pre>
     <p><em>Effects</em>: Equivalent to: <code class="highlight"><c- k>return</c-> <c- n>ranges</c-><c- o>::</c-><c- n>rotate_copy</c-><c- p>(</c-><c- n>std</c-><c- o>::</c-><c- n>forward</c-><c- o>&lt;</c-><c- n>ExecutionPolicy</c-><c- o>></c-><c- p>(</c-><c- n>exec</c-><c- p>),</c-> <c- n>ranges</c-><c- o>::</c-><c- n>begin</c-><c- p>(</c-><c- n>r</c-><c- p>),</c-> <c- n>middle</c-><c- p>,</c-> <c- n>ranges</c-><c- o>::</c-><c- n>end</c-><c- p>(</c-><c- n>r</c-><c- p>),</c-> <c- n>std</c-><c- o>::</c-><c- n>move</c-><c- p>(</c-><c- n>result</c-><c- p>));</c-></code></p>
    </ins>
-   <h3 class="heading settled" data-level="7.28" id="modify_shift"><span class="secno">7.28. </span><span class="content">Modify <code class="highlight"><c- n>shift</c-></code> in <a href="https://eel.is/c++draft/alg.shift">[<strong>alg.shift</strong>]</a></span><a class="self-link" href="#modify_shift"></a></h3>
+   <h3 class="heading settled" data-level="7.30" id="modify_shift"><span class="secno">7.30. </span><span class="content">Modify <code class="highlight"><c- n>shift</c-></code> in <a href="https://eel.is/c++draft/alg.shift">[<strong>alg.shift</strong>]</a></span><a class="self-link" href="#modify_shift"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>permutable</c-> <c- n>I</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>S</c-><c- o>></c->
   <c- k>constexpr</c-> <c- n>subrange</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>ranges</c-><c- o>::</c-><c- n>shift_left</c-><c- p>(</c-><c- n>I</c-> <c- n>first</c-><c- p>,</c-> <c- n>S</c-> <c- n>last</c-><c- p>,</c-> <c- n>iter_difference_t</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>n</c-><c- p>);</c->
 <c- k>template</c-><c- o>&lt;</c-><c- n>forward_range</c-> <c- n>R</c-><c- o>></c->
@@ -3956,7 +4018,7 @@ accumulation. — <em>end note</em>]</p>
   <c- n>borrowed_subrange_t</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c-> <c- n>ranges</c-><c- o>::</c-><c- n>shift_right</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>R</c-><c- o>&amp;&amp;</c-> <c- n>r</c-><c- p>,</c-> <c- n>range_difference_t</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c-> <c- n>n</c-><c- p>);</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.29" id="modify_sort"><span class="secno">7.29. </span><span class="content">Modify <code class="highlight"><c- n>sort</c-></code> in <a href="https://eel.is/c++draft/sort">[<strong>sort</strong>]</a></span><a class="self-link" href="#modify_sort"></a></h3>
+   <h3 class="heading settled" data-level="7.31" id="modify_sort"><span class="secno">7.31. </span><span class="content">Modify <code class="highlight"><c- n>sort</c-></code> in <a href="https://eel.is/c++draft/sort">[<strong>sort</strong>]</a></span><a class="self-link" href="#modify_sort"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>random_access_iterator</c-> <c- n>I</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>S</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Comp</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>less</c-><c- p>,</c->
          <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- o>></c->
   <c- k>requires</c-> <c- n>sortable</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Comp</c-><c- p>,</c-> <c- n>Proj</c-><c- o>></c->
@@ -3977,7 +4039,7 @@ accumulation. — <em>end note</em>]</p>
   <c- n>borrowed_iterator_t</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c-> <c- n>ranges</c-><c- o>::</c-><c- n>sort</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>R</c-><c- o>&amp;&amp;</c-> <c- n>r</c-><c- p>,</c-> <c- n>Comp</c-> <c- n>comp</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.30" id="modify_stable_sort"><span class="secno">7.30. </span><span class="content">Modify <code class="highlight"><c- n>stable_sort</c-></code> in <a href="https://eel.is/c++draft/stable.sort">[<strong>stable.sort</strong>]</a></span><a class="self-link" href="#modify_stable_sort"></a></h3>
+   <h3 class="heading settled" data-level="7.32" id="modify_stable_sort"><span class="secno">7.32. </span><span class="content">Modify <code class="highlight"><c- n>stable_sort</c-></code> in <a href="https://eel.is/c++draft/stable.sort">[<strong>stable.sort</strong>]</a></span><a class="self-link" href="#modify_stable_sort"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>random_access_iterator</c-> <c- n>I</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>S</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Comp</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>less</c-><c- p>,</c->
          <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- o>></c->
   <c- k>requires</c-> <c- n>sortable</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Comp</c-><c- p>,</c-> <c- n>Proj</c-><c- o>></c->
@@ -3997,7 +4059,7 @@ accumulation. — <em>end note</em>]</p>
   <c- n>borrowed_iterator_t</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c-> <c- n>ranges</c-><c- o>::</c-><c- n>stable_sort</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>R</c-><c- o>&amp;&amp;</c-> <c- n>r</c-><c- p>,</c-> <c- n>Comp</c-> <c- n>comp</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.31" id="modify_partial_sort"><span class="secno">7.31. </span><span class="content">Modify <code class="highlight"><c- n>partial_sort</c-></code> in <a href="https://eel.is/c++draft/partial.sort">[<strong>partial.sort</strong>]</a></span><a class="self-link" href="#modify_partial_sort"></a></h3>
+   <h3 class="heading settled" data-level="7.33" id="modify_partial_sort"><span class="secno">7.33. </span><span class="content">Modify <code class="highlight"><c- n>partial_sort</c-></code> in <a href="https://eel.is/c++draft/partial.sort">[<strong>partial.sort</strong>]</a></span><a class="self-link" href="#modify_partial_sort"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>random_access_iterator</c-> <c- n>I</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>S</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Comp</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>less</c-><c- p>,</c->
          <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- o>></c->
   <c- k>requires</c-> <c- n>sortable</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Comp</c-><c- p>,</c-> <c- n>Proj</c-><c- o>></c->
@@ -4025,7 +4087,7 @@ accumulation. — <em>end note</em>]</p>
 </pre>
     <p><em>Effects</em>: Equivalent to:<br> <code class="highlight"><c- k>return</c-> <c- n>ranges</c-><c- o>::</c-><c- n>partial_sort</c-><c- p>(</c-><c- n>std</c-><c- o>::</c-><c- n>forward</c-><c- o>&lt;</c-><c- n>ExecutionPolicy</c-><c- o>></c-><c- p>(</c-><c- n>exec</c-><c- p>),</c-> <c- n>ranges</c-><c- o>::</c-><c- n>begin</c-><c- p>(</c-><c- n>r</c-><c- p>),</c-> <c- n>middle</c-><c- p>,</c-> <c- n>ranges</c-><c- o>::</c-><c- n>end</c-><c- p>(</c-><c- n>r</c-><c- p>),</c-> <c- n>comp</c-><c- p>,</c-> <c- n>proj</c-><c- p>);</c-></code></p>
    </ins>
-   <h3 class="heading settled" data-level="7.32" id="modify_partial_sort_copy"><span class="secno">7.32. </span><span class="content">Modify <code class="highlight"><c- n>partial_sort_copy</c-></code> in <a href="https://eel.is/c++draft/partial.sort.copy">[<strong>partial.sort.copy</strong>]</a></span><a class="self-link" href="#modify_partial_sort_copy"></a></h3>
+   <h3 class="heading settled" data-level="7.34" id="modify_partial_sort_copy"><span class="secno">7.34. </span><span class="content">Modify <code class="highlight"><c- n>partial_sort_copy</c-></code> in <a href="https://eel.is/c++draft/partial.sort.copy">[<strong>partial.sort.copy</strong>]</a></span><a class="self-link" href="#modify_partial_sort_copy"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>input_iterator</c-> <c- n>I1</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I1</c-><c- o>></c-> <c- n>S1</c-><c- p>,</c-> <c- n>random_access_iterator</c-> <c- n>I2</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I2</c-><c- o>></c-> <c- n>S2</c-><c- p>,</c->
          <c- k>class</c-> <c- nc>Comp</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>less</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj1</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj2</c-> <c- o>=</c-> <c- n>identity</c-><c- o>></c->
   <c- k>requires</c-> <c- n>indirectly_copyable</c-><c- o>&lt;</c-><c- n>I1</c-><c- p>,</c-> <c- n>I2</c-><c- o>></c-> <c- o>&amp;&amp;</c-> <c- n>sortable</c-><c- o>&lt;</c-><c- n>I2</c-><c- p>,</c-> <c- n>Comp</c-><c- p>,</c-> <c- n>Proj2</c-><c- o>></c-> <c- o>&amp;&amp;</c->
@@ -4064,7 +4126,7 @@ accumulation. — <em>end note</em>]</p>
                               <c- n>Proj1</c-> <c- n>proj1</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj2</c-> <c- n>proj2</c-> <c- o>=</c-> <c- p>{});</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.33" id="modify_is_sorted"><span class="secno">7.33. </span><span class="content">Modify <code class="highlight"><c- n>is_sorted</c-></code> in <a href="https://eel.is/c++draft/is.sorted">[<strong>is.sorted</strong>]</a></span><a class="self-link" href="#modify_is_sorted"></a></h3>
+   <h3 class="heading settled" data-level="7.35" id="modify_is_sorted"><span class="secno">7.35. </span><span class="content">Modify <code class="highlight"><c- n>is_sorted</c-></code> in <a href="https://eel.is/c++draft/is.sorted">[<strong>is.sorted</strong>]</a></span><a class="self-link" href="#modify_is_sorted"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>forward_iterator</c-> <c- n>I</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>S</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c->
          <c- n>indirect_strict_weak_order</c-><c- o>&lt;</c-><c- n>projected</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Proj</c-><c- o>>></c-> <c- n>Comp</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>less</c-><c- o>></c->
   <c- k>constexpr</c-> <c- b>bool</c-> <c- n>ranges</c-><c- o>::</c-><c- n>is_sorted</c-><c- p>(</c-><c- n>I</c-> <c- n>first</c-><c- p>,</c-> <c- n>S</c-> <c- n>last</c-><c- p>,</c-> <c- n>Comp</c-> <c- n>comp</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
@@ -4102,7 +4164,7 @@ accumulation. — <em>end note</em>]</p>
   <c- n>borrowed_iterator_t</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c-> <c- n>ranges</c-><c- o>::</c-><c- n>is_sorted_until</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>R</c-><c- o>&amp;&amp;</c-> <c- n>r</c-><c- p>,</c-> <c- n>Comp</c-> <c- n>comp</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.34" id="modify_nth_element"><span class="secno">7.34. </span><span class="content">Modify <code class="highlight"><c- n>nth_element</c-></code> in <a href="https://eel.is/c++draft/alg.nth.element">[<strong>alg.nth.element</strong>]</a></span><a class="self-link" href="#modify_nth_element"></a></h3>
+   <h3 class="heading settled" data-level="7.36" id="modify_nth_element"><span class="secno">7.36. </span><span class="content">Modify <code class="highlight"><c- n>nth_element</c-></code> in <a href="https://eel.is/c++draft/alg.nth.element">[<strong>alg.nth.element</strong>]</a></span><a class="self-link" href="#modify_nth_element"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>random_access_iterator</c-> <c- n>I</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>S</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Comp</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>less</c-><c- p>,</c->
          <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- o>></c->
   <c- k>requires</c-> <c- n>sortable</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Comp</c-><c- p>,</c-> <c- n>Proj</c-><c- o>></c->
@@ -4130,7 +4192,7 @@ accumulation. — <em>end note</em>]</p>
 </pre>
     <p><em>Effects</em>: Equivalent to: <code class="highlight"><c- k>return</c-> <c- n>ranges</c-><c- o>::</c-><c- n>nth_element</c-><c- p>(</c-><c- n>std</c-><c- o>::</c-><c- n>forward</c-><c- o>&lt;</c-><c- n>ExecutionPolicy</c-><c- o>></c-><c- p>(</c-><c- n>exec</c-><c- p>),</c-> <c- n>ranges</c-><c- o>::</c-><c- n>begin</c-><c- p>(</c-><c- n>r</c-><c- p>),</c-> <c- n>nth</c-><c- p>,</c-> <c- n>ranges</c-><c- o>::</c-><c- n>end</c-><c- p>(</c-><c- n>r</c-><c- p>),</c-> <c- n>comp</c-><c- p>,</c-> <c- n>proj</c-><c- p>);</c-></code></p>
    </ins>
-   <h3 class="heading settled" data-level="7.35" id="modify_partitions"><span class="secno">7.35. </span><span class="content">Modify <code class="highlight"><c- n>partitions</c-></code> in <a href="https://eel.is/c++draft/alg.partitions">[<strong>alg.partitions</strong>]</a></span><a class="self-link" href="#modify_partitions"></a></h3>
+   <h3 class="heading settled" data-level="7.37" id="modify_partitions"><span class="secno">7.37. </span><span class="content">Modify <code class="highlight"><c- n>partitions</c-></code> in <a href="https://eel.is/c++draft/alg.partitions">[<strong>alg.partitions</strong>]</a></span><a class="self-link" href="#modify_partitions"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>input_iterator</c-> <c- n>I</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>S</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c->
          <c- n>indirect_unary_predicate</c-><c- o>&lt;</c-><c- n>projected</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Proj</c-><c- o>>></c-> <c- n>Pred</c-><c- o>></c->
   <c- k>constexpr</c-> <c- b>bool</c-> <c- n>ranges</c-><c- o>::</c-><c- n>is_partitioned</c-><c- p>(</c-><c- n>I</c-> <c- n>first</c-><c- p>,</c-> <c- n>S</c-> <c- n>last</c-><c- p>,</c-> <c- n>Pred</c-> <c- n>pred</c-><c- p>,</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
@@ -4216,7 +4278,7 @@ accumulation. — <em>end note</em>]</p>
     <c- n>ranges</c-><c- o>::</c-><c- n>partition_copy</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>R</c-><c- o>&amp;&amp;</c-> <c- n>r</c-><c- p>,</c-> <c- n>O1</c-> <c- n>out_true</c-><c- p>,</c-> <c- n>O2</c-> <c- n>out_false</c-><c- p>,</c-> <c- n>Pred</c-> <c- n>pred</c-><c- p>,</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.36" id="modify_merge"><span class="secno">7.36. </span><span class="content">Modify <code class="highlight"><c- n>merge</c-></code> in <a href="https://eel.is/c++draft/alg.merge">[<strong>alg.merge</strong>]</a></span><a class="self-link" href="#modify_merge"></a></h3>
+   <h3 class="heading settled" data-level="7.38" id="modify_merge"><span class="secno">7.38. </span><span class="content">Modify <code class="highlight"><c- n>merge</c-></code> in <a href="https://eel.is/c++draft/alg.merge">[<strong>alg.merge</strong>]</a></span><a class="self-link" href="#modify_merge"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>input_iterator</c-> <c- n>I1</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I1</c-><c- o>></c-> <c- n>S1</c-><c- p>,</c-> <c- n>input_iterator</c-> <c- n>I2</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I2</c-><c- o>></c-> <c- n>S2</c-><c- p>,</c->
          <c- n>weakly_incrementable</c-> <c- n>O</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Comp</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>less</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj1</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c->
          <c- k>class</c-> <c- nc>Proj2</c-> <c- o>=</c-> <c- n>identity</c-><c- o>></c->
@@ -4275,7 +4337,7 @@ accumulation. — <em>end note</em>]</p>
 </pre>
     <p><em>Effects</em>: Equivalent to:<br> <code class="highlight"><c- k>return</c-> <c- n>ranges</c-><c- o>::</c-><c- n>inplace_merge</c-><c- p>(</c-><c- n>std</c-><c- o>::</c-><c- n>forward</c-><c- o>&lt;</c-><c- n>ExecutionPolicy</c-><c- o>></c-><c- p>(</c-><c- n>exec</c-><c- p>),</c-> <c- n>ranges</c-><c- o>::</c-><c- n>begin</c-><c- p>(</c-><c- n>r</c-><c- p>),</c-> <c- n>middle</c-><c- p>,</c-> <c- n>ranges</c-><c- o>::</c-><c- n>end</c-><c- p>(</c-><c- n>r</c-><c- p>),</c-> <c- n>comp</c-><c- p>,</c-> <c- n>proj</c-><c- p>);</c-></code></p>
    </ins>
-   <h3 class="heading settled" data-level="7.37" id="modify_includes"><span class="secno">7.37. </span><span class="content">Modify <code class="highlight"><c- n>includes</c-></code> in <a href="https://eel.is/c++draft/includes">[<strong>includes</strong>]</a></span><a class="self-link" href="#modify_includes"></a></h3>
+   <h3 class="heading settled" data-level="7.39" id="modify_includes"><span class="secno">7.39. </span><span class="content">Modify <code class="highlight"><c- n>includes</c-></code> in <a href="https://eel.is/c++draft/includes">[<strong>includes</strong>]</a></span><a class="self-link" href="#modify_includes"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>input_iterator</c-> <c- n>I1</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I1</c-><c- o>></c-> <c- n>S1</c-><c- p>,</c-> <c- n>input_iterator</c-> <c- n>I2</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I2</c-><c- o>></c-> <c- n>S2</c-><c- p>,</c->
          <c- k>class</c-> <c- nc>Proj1</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj2</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c->
          <c- n>indirect_strict_weak_order</c-><c- o>&lt;</c-><c- n>projected</c-><c- o>&lt;</c-><c- n>I1</c-><c- p>,</c-> <c- n>Proj1</c-><c- o>></c-><c- p>,</c->
@@ -4302,7 +4364,7 @@ accumulation. — <em>end note</em>]</p>
                         <c- n>Comp</c-> <c- n>comp</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj1</c-> <c- n>proj1</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj2</c-> <c- n>proj2</c-> <c- o>=</c-> <c- p>{});</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.38" id="modify_set_union"><span class="secno">7.38. </span><span class="content">Modify <code class="highlight"><c- n>set_union</c-></code> in <a href="https://eel.is/c++draft/set.union">[<strong>set.union</strong>]</a></span><a class="self-link" href="#modify_set_union"></a></h3>
+   <h3 class="heading settled" data-level="7.40" id="modify_set_union"><span class="secno">7.40. </span><span class="content">Modify <code class="highlight"><c- n>set_union</c-></code> in <a href="https://eel.is/c++draft/set.union">[<strong>set.union</strong>]</a></span><a class="self-link" href="#modify_set_union"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>input_iterator</c-> <c- n>I1</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I1</c-><c- o>></c-> <c- n>S1</c-><c- p>,</c-> <c- n>input_iterator</c-> <c- n>I2</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I2</c-><c- o>></c-> <c- n>S2</c-><c- p>,</c->
          <c- n>weakly_incrementable</c-> <c- n>O</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Comp</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>less</c-><c- p>,</c->
          <c- k>class</c-> <c- nc>Proj1</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj2</c-> <c- o>=</c-> <c- n>identity</c-><c- o>></c->
@@ -4333,7 +4395,7 @@ accumulation. — <em>end note</em>]</p>
                       <c- n>Comp</c-> <c- n>comp</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj1</c-> <c- n>proj1</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj2</c-> <c- n>proj2</c-> <c- o>=</c-> <c- p>{});</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.39" id="modify_set_intersection"><span class="secno">7.39. </span><span class="content">Modify <code class="highlight"><c- n>set_intersection</c-></code> in <a href="https://eel.is/c++draft/set.intersection">[<strong>set.intersection</strong>]</a></span><a class="self-link" href="#modify_set_intersection"></a></h3>
+   <h3 class="heading settled" data-level="7.41" id="modify_set_intersection"><span class="secno">7.41. </span><span class="content">Modify <code class="highlight"><c- n>set_intersection</c-></code> in <a href="https://eel.is/c++draft/set.intersection">[<strong>set.intersection</strong>]</a></span><a class="self-link" href="#modify_set_intersection"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>input_iterator</c-> <c- n>I1</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I1</c-><c- o>></c-> <c- n>S1</c-><c- p>,</c-> <c- n>input_iterator</c-> <c- n>I2</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I2</c-><c- o>></c-> <c- n>S2</c-><c- p>,</c->
          <c- n>weakly_incrementable</c-> <c- n>O</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Comp</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>less</c-><c- p>,</c->
          <c- k>class</c-> <c- nc>Proj1</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj2</c-> <c- o>=</c-> <c- n>identity</c-><c- o>></c->
@@ -4365,7 +4427,7 @@ accumulation. — <em>end note</em>]</p>
                              <c- n>Comp</c-> <c- n>comp</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj1</c-> <c- n>proj1</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj2</c-> <c- n>proj2</c-> <c- o>=</c-> <c- p>{});</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.40" id="modify_set_difference"><span class="secno">7.40. </span><span class="content">Modify <code class="highlight"><c- n>set_difference</c-></code> in <a href="https://eel.is/c++draft/set.difference">[<strong>set.difference</strong>]</a></span><a class="self-link" href="#modify_set_difference"></a></h3>
+   <h3 class="heading settled" data-level="7.42" id="modify_set_difference"><span class="secno">7.42. </span><span class="content">Modify <code class="highlight"><c- n>set_difference</c-></code> in <a href="https://eel.is/c++draft/set.difference">[<strong>set.difference</strong>]</a></span><a class="self-link" href="#modify_set_difference"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>input_iterator</c-> <c- n>I1</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I1</c-><c- o>></c-> <c- n>S1</c-><c- p>,</c-> <c- n>input_iterator</c-> <c- n>I2</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I2</c-><c- o>></c-> <c- n>S2</c-><c- p>,</c->
          <c- n>weakly_incrementable</c-> <c- n>O</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Comp</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>less</c-><c- p>,</c->
          <c- k>class</c-> <c- nc>Proj1</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj2</c-> <c- o>=</c-> <c- n>identity</c-><c- o>></c->
@@ -4397,7 +4459,7 @@ accumulation. — <em>end note</em>]</p>
                            <c- n>Comp</c-> <c- n>comp</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj1</c-> <c- n>proj1</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj2</c-> <c- n>proj2</c-> <c- o>=</c-> <c- p>{});</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.41" id="modify_set_symmetric_difference"><span class="secno">7.41. </span><span class="content">Modify <code class="highlight"><c- n>set_symmetric_difference</c-></code> in <a href="https://eel.is/c++draft/set.symmetric.difference">[<strong>set.symmetric.difference</strong>]</a></span><a class="self-link" href="#modify_set_symmetric_difference"></a></h3>
+   <h3 class="heading settled" data-level="7.43" id="modify_set_symmetric_difference"><span class="secno">7.43. </span><span class="content">Modify <code class="highlight"><c- n>set_symmetric_difference</c-></code> in <a href="https://eel.is/c++draft/set.symmetric.difference">[<strong>set.symmetric.difference</strong>]</a></span><a class="self-link" href="#modify_set_symmetric_difference"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>input_iterator</c-> <c- n>I1</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I1</c-><c- o>></c-> <c- n>S1</c-><c- p>,</c-> <c- n>input_iterator</c-> <c- n>I2</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I2</c-><c- o>></c-> <c- n>S2</c-><c- p>,</c->
          <c- n>weakly_incrementable</c-> <c- n>O</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Comp</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>less</c-><c- p>,</c->
          <c- k>class</c-> <c- nc>Proj1</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj2</c-> <c- o>=</c-> <c- n>identity</c-><c- o>></c->
@@ -4431,7 +4493,7 @@ accumulation. — <em>end note</em>]</p>
                                      <c- n>Proj1</c-> <c- n>proj1</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj2</c-> <c- n>proj2</c-> <c- o>=</c-> <c- p>{});</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.42" id="modify_is_heap"><span class="secno">7.42. </span><span class="content">Modify <code class="highlight"><c- n>is_heap</c-></code> in <a href="https://eel.is/c++draft/is.heap">[<strong>is.heap</strong>]</a></span><a class="self-link" href="#modify_is_heap"></a></h3>
+   <h3 class="heading settled" data-level="7.44" id="modify_is_heap"><span class="secno">7.44. </span><span class="content">Modify <code class="highlight"><c- n>is_heap</c-></code> in <a href="https://eel.is/c++draft/is.heap">[<strong>is.heap</strong>]</a></span><a class="self-link" href="#modify_is_heap"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>random_access_iterator</c-> <c- n>I</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>S</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c->
          <c- n>indirect_strict_weak_order</c-><c- o>&lt;</c-><c- n>projected</c-><c- o>&lt;</c-><c- n>I</c-><c- p>,</c-> <c- n>Proj</c-><c- o>>></c-> <c- n>Comp</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>less</c-><c- o>></c->
   <c- k>constexpr</c-> <c- b>bool</c-> <c- n>ranges</c-><c- o>::</c-><c- n>is_heap</c-><c- p>(</c-><c- n>I</c-> <c- n>first</c-><c- p>,</c-> <c- n>S</c-> <c- n>last</c-><c- p>,</c-> <c- n>Comp</c-> <c- n>comp</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
@@ -4472,7 +4534,7 @@ accumulation. — <em>end note</em>]</p>
 
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.43" id="modify_alg_min_max"><span class="secno">7.43. </span><span class="content">Modify <code class="highlight"><c- n>min</c-></code>, <code class="highlight"><c- n>max</c-></code>, <code class="highlight"><c- n>minmax</c-></code> in <a href="https://eel.is/c++draft/alg.min.max">[<strong>alg.min.max</strong>]</a></span><a class="self-link" href="#modify_alg_min_max"></a></h3>
+   <h3 class="heading settled" data-level="7.45" id="modify_alg_min_max"><span class="secno">7.45. </span><span class="content">Modify <code class="highlight"><c- n>min</c-></code>, <code class="highlight"><c- n>max</c-></code>, <code class="highlight"><c- n>minmax</c-></code> in <a href="https://eel.is/c++draft/alg.min.max">[<strong>alg.min.max</strong>]</a></span><a class="self-link" href="#modify_alg_min_max"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>input_range</c-> <c- n>R</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c->
          <c- n>indirect_strict_weak_order</c-><c- o>&lt;</c-><c- n>projected</c-><c- o>&lt;</c-><c- n>iterator_t</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c-><c- p>,</c-> <c- n>Proj</c-><c- o>>></c-> <c- n>Comp</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>less</c-><c- o>></c->
   <c- k>requires</c-> <c- n>indirectly_copyable_storable</c-><c- o>&lt;</c-><c- n>iterator_t</c-><c- o>&lt;</c-><c- n>R</c-><c- o>></c-><c- p>,</c-> <c- n>range_value_t</c-><c- o>&lt;</c-><c- n>R</c-><c- o>>*></c->
@@ -4575,7 +4637,7 @@ accumulation. — <em>end note</em>]</p>
     <c- n>ranges</c-><c- o>::</c-><c- n>minmax_element</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>R</c-><c- o>&amp;&amp;</c-> <c- n>r</c-><c- p>,</c-> <c- n>Comp</c-> <c- n>comp</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj</c-> <c- n>proj</c-> <c- o>=</c-> <c- p>{});</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.44" id="modify_alg_lex_comparison"><span class="secno">7.44. </span><span class="content">Modify <code class="highlight"><c- n>lexicographical_compare</c-></code> in <a href="https://eel.is/c++draft/alg.lex.comparison">[<strong>alg.lex.comparison</strong>]</a></span><a class="self-link" href="#modify_alg_lex_comparison"></a></h3>
+   <h3 class="heading settled" data-level="7.46" id="modify_alg_lex_comparison"><span class="secno">7.46. </span><span class="content">Modify <code class="highlight"><c- n>lexicographical_compare</c-></code> in <a href="https://eel.is/c++draft/alg.lex.comparison">[<strong>alg.lex.comparison</strong>]</a></span><a class="self-link" href="#modify_alg_lex_comparison"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- n>input_iterator</c-> <c- n>I1</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I1</c-><c- o>></c-> <c- n>S1</c-><c- p>,</c-> <c- n>input_iterator</c-> <c- n>I2</c-><c- p>,</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>I2</c-><c- o>></c-> <c- n>S2</c-><c- p>,</c->
          <c- k>class</c-> <c- nc>Proj1</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Proj2</c-> <c- o>=</c-> <c- n>identity</c-><c- p>,</c->
          <c- n>indirect_strict_weak_order</c-><c- o>&lt;</c-><c- n>projected</c-><c- o>&lt;</c-><c- n>I1</c-><c- p>,</c-> <c- n>Proj1</c-><c- o>></c-><c- p>,</c->
@@ -4608,7 +4670,7 @@ accumulation. — <em>end note</em>]</p>
                                        <c- n>Proj1</c-> <c- n>proj1</c-> <c- o>=</c-> <c- p>{},</c-> <c- n>Proj2</c-> <c- n>proj2</c-> <c- o>=</c-> <c- p>{});</c->
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.45" id="modify_memory_syn"><span class="secno">7.45. </span><span class="content">Modify <a href="https://eel.is/c++draft/memory.syn">[<strong>memory.syn</strong>]</a></span><a class="self-link" href="#modify_memory_syn"></a></h3>
+   <h3 class="heading settled" data-level="7.47" id="modify_memory_syn"><span class="secno">7.47. </span><span class="content">Modify <a href="https://eel.is/c++draft/memory.syn">[<strong>memory.syn</strong>]</a></span><a class="self-link" href="#modify_memory_syn"></a></h3>
 <pre class="highlight"><i><c- c1>// [specialized.algorithms], specialized algorithms</c-></i>
 <i><c- c1>// [special.mem.concepts], special memory concepts</c-></i>
 <c- k>template</c-><c- o>&lt;</c-><c- k>class</c-> <c- nc>I</c-><c- o>></c->
@@ -4807,7 +4869,7 @@ accumulation. — <em>end note</em>]</p>
     <c- n>I</c-> <c- n>destroy_n</c-><c- p>(</c-><c- n>ExecutionPolicy</c-><c- o>&amp;&amp;</c-> <c- n>exec</c-><c- p>,</c-> <c- n>I</c-> <c- n>first</c-><c- p>,</c-> <c- n>iter_difference_t</c-><c- o>&lt;</c-><c- n>I</c-><c- o>></c-> <c- n>n</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c->         <i><c- c1>// see [algorithms.parallel.overloads]</c-></i>
 </pre>
    </ins>
-   <h3 class="heading settled" data-level="7.46" id="modify_special_mem_concepts"><span class="secno">7.46. </span><span class="content">Add exposition only concepts to <a href="https://eel.is/c++draft/special.mem.concepts">[<strong>special.mem.concepts</strong>]</a></span><a class="self-link" href="#modify_special_mem_concepts"></a></h3>
+   <h3 class="heading settled" data-level="7.48" id="modify_special_mem_concepts"><span class="secno">7.48. </span><span class="content">Add exposition only concepts to <a href="https://eel.is/c++draft/special.mem.concepts">[<strong>special.mem.concepts</strong>]</a></span><a class="self-link" href="#modify_special_mem_concepts"></a></h3>
 <pre class="wordingStyle highlight"><c- k>template</c-><c- o>&lt;</c-><c- k>class</c-> <c- nc>S</c-><c- p>,</c-> <c- k>class</c-> <c- nc>I</c-><c- o>></c->
 <c- k>concept</c-> <i><c- nc>nothrow</c-><c- o>-</c-><c- n>sentinel</c-><c- o>-</c-><c- k>for</c-></i> <c- o>=</c-> <c- n>sentinel_for</c-><c- o>&lt;</c-><c- n>S</c-><c- p>,</c-> <c- n>I</c-><c- o>></c-><c- p>;</c-> <i><c- c1>// exposition only</c-></i>
 </pre>

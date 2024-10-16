@@ -693,16 +693,16 @@ Here are questions we want to answer (potentially not a complete list):
 ## Modify <a href="https://eel.is/c++draft/algorithms.parallel.defns">[**algorithms.parallel.defns**]</a> ## {#modify_alg_parallel_def}
 
 Parallel algorithms access objects indirectly accessible via their arguments by invoking the following functions:
--- All operations of the categories of the iterators<ins>, sentinels</ins> or mdspan types that the algorithm is instantiated with.
--- Operations on those sequence elements that are required by its specification.
--- User-provided <del>function</del><ins>invocable</ins> objects to be applied during the execution of the algorithm, if required by the specification.
--- Operations on those <del>function</del><ins>invocable</ins> objects required by the specification.
+- All operations of the categories of the iterators<ins>, sentinels</ins> or mdspan types that the algorithm is instantiated with.
+- Operations on those sequence elements that are required by its specification.
+- User-provided <del>function</del><ins>invocable</ins> objects to be applied during the execution of the algorithm, if required by the specification.
+- Operations on those <del>function</del><ins>invocable</ins> objects required by the specification.
 
 ## Modify <a href="https://eel.is/c++draft/algorithms.parallel.user">[**algorithms.parallel.user**]</a> ## {#modify_alg_parallel_user}
 
 Unless otherwise specified, <del>function</del><ins>invocable</ins> objects passed into parallel algorithms as objects of type
 `Predicate`, `BinaryPredicate`, `Compare`, `UnaryOperation`, `BinaryOperation`, `BinaryOperation1`, `BinaryOperation2`, `BinaryDivideOp`,
-<ins>`Proj`</ins> and the operators used by the analogous overloads to these parallel algorithms that are formed by an invocation
+<span><ins>`Proj`</ins></span> and the operators used by the analogous overloads to these parallel algorithms that are formed by an invocation
 with the specified default predicate or operation (where applicable) shall not directly or indirectly modify objects via their arguments,
 nor shall they rely on the identity of the provided objects.
 
@@ -869,18 +869,16 @@ and proceeding to `last - 1`.
 <xmp class="wordingStyle">
 template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
          indirectly_unary_invocable<projected<I, Proj>> Fun>
-  ranges::for_each_result<I, Fun>
-    ranges::for_each(ExecutionPolicy&& exec, I first, S last, Fun f, Proj proj = {});
+  I ranges::for_each(ExecutionPolicy&& exec, I first, S last, Fun f, Proj proj = {});
 
 template<class ExecutionPolicy, random_access_range R, class Proj = identity,
          indirectly_unary_invocable<projected<iterator_t<R>, Proj>> Fun>
     requires sized_range<R>
-  ranges::for_each_result<borrowed_iterator_t<R>, Fun>
+  borrowed_iterator_t<R>
     ranges::for_each(ExecutionPolicy&& exec, R&& r, Fun f, Proj proj = {});
 </xmp>
 
-*Effects*: Calls `invoke(f, invoke(proj, *i))` for every iterator `i` in the range `[first, last)`, starting from `first`
-and proceeding to `last - 1`.
+*Effects*: Calls `invoke(f, invoke(proj, *i))` for every iterator `i` in the range `[first, last)`.
 
 [*Note x*: If the result of `invoke(proj, *i)` is a mutable reference, `f` can apply non-constant functions. — *end note*]
 
@@ -894,6 +892,49 @@ and proceeding to `last - 1`.
 [*Note x*: The overloads in namespace `ranges` require `Fun` to model `copy_constructible`. — *end note*]
 
 [*Note x*: Do not return a copy of its `Fun` parameter, since parallelization often does not permit efficient state
+accumulation. — *end note*]
+</ins>
+
+<xmp class="wordingStyle">
+template<input_iterator I, class Proj = identity,
+         indirectly_unary_invocable<projected<I, Proj>> Fun>
+  constexpr ranges::for_each_n_result<I, Fun>
+    ranges::for_each_n(I first, iter_difference_t<I> n, Fun f, Proj proj = {});
+</xmp>
+
+*Preconditions*: `n >= 0` is `true`.
+
+*Effects*: Calls `invoke(f, invoke(proj, *i))` for every iterator `i` in the range `[first, first + n)` in order.
+
+[*Note x*: If the result of `invoke(proj, *i)` is a mutable reference, `f` can apply non-constant functions. — *end note*]
+
+Returns: `{first + n, std​::​move(f)}`.
+
+Remarks: If `f` returns a result, the result is ignored.
+
+[*Note x*: The overload in namespace `ranges` requires `Fun` to model `copy_constructible`. — *end note*]
+
+<ins>
+<xmp class="wordingStyle">
+template<class ExecutionPolicy, random_access_iterator I, class Proj = identity,
+         indirectly_unary_invocable<projected<I, Proj>> Fun>
+  I ranges::for_each_n(ExecutionPolicy&& exec, I first, iter_difference_t<I> n,
+                       Fun f, Proj proj = {});
+</xmp>
+
+*Preconditions*: `n >= 0` is `true`.
+
+*Effects*: Calls `invoke(f, invoke(proj, *i))` for every iterator `i` in the range `[first, first + n)`.
+
+[*Note x*: If the result of `invoke(proj, *i)` is a mutable reference, `f` can apply non-constant functions. — *end note*]
+
+Returns: `first + n`.
+
+Remarks: If `f` returns a result, the result is ignored.
+
+[*Note x*: The overload in namespace `ranges` requires `Fun` to model `copy_constructible`. — *end note*]
+
+[*Note x*: Does not return a copy of its `Fun` parameter, since parallelization often does not permit efficient state
 accumulation. — *end note*]
 </ins>
 
