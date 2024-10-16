@@ -150,7 +150,7 @@ Comparing to the C++20 serial range algorithms, we propose the following modific
 - <s>Parallel range algorithms take `range`, not an iterator, as an output for the overloads with ranges, and additionally take
     an output sentinel for the "iterator and sentinel" overloads. ([[#range_as_output]])</s>
 - Until better parallelism-friendly abstractions are proposed, parallel algorithms require `random_access_{iterator,range}`. ([[#random_access_requirement]])
-- At least one of the input sequences as well as the output sequence must be bounded. ([[#require_bounded_ranges]])
+- At least one of the input sequences <s>as well as the output sequence</s> must be bounded. ([[#require_bounded_ranges]])
 
 ### Differences to C++17 parallel algorithms ### {#design_diff_to_cpp17_par}
 
@@ -158,7 +158,7 @@ In addition to data sequences being passed as either ranges or "iterator and sen
 to the C++17 parallel algorithms are proposed:
 - `for_each` returns an iterator, not `void`.
 - Algorithms require `random_access_{iterator,range}`, and not *LegacyForwardIterator*.
-- At least one of the input sequences as well as the output sequence must be bounded.
+- At least one of the input sequences <s>as well as the output sequence</s> must be bounded.
 
 ### Other design aspects ### {#design_other_aspects}
 
@@ -285,8 +285,7 @@ C++17 parallel algorithms minimally require *LegacyForwardIterator* for data seq
 suitable for an efficient parallel implementation. Therefore for parallel range algorithms we propose to require
 random access ranges and iterators.
 
-Though the feedback we received in Tokyo requested to support forward ranges, we would like this question to be discussed
-in more detail. Using parallel algorithms with forward ranges will in most cases give little to no benefit,
+Using parallel algorithms with forward ranges will in most cases give little to no benefit,
 and may even reduce performance due to extra overheads. We believe that forward ranges and iterators are bad abstractions
 for parallel data processing, and allowing those could result in wrong expectations and unsatisfactory user experience
 with parallel algorithms.
@@ -309,10 +308,10 @@ These very programming models are often used as backends to implement the C++ st
 most implementations fall back to serial processing if data sequences have no random access. Of the GNU libstdc++,
 LLVM libc++, and MSVC's standard library, only the latter attempts to process forward iterator based sequences in parallel,
 for which it first needs to serially iterate over a whole sequence once or even twice.
-oneAPI Data Parallel C++ library (oneDPL) supports forward iterators only for a very few algorithms,
+oneAPI DPC++ library (oneDPL) supports forward iterators only for a very few algorithms,
 only for `par` and only in the implementation based on oneTBB.
 
-Returning to the SG1/SG9 feedback, there seemingly are two main reasons why others do not want to restrict
+According to the SG1/SG9 feedback we have got earlier, there seemingly are two main reasons why others do not want to restrict
 parallel algorithms by only random access ranges:
 
 - That would prevent some useful views, such as `filter_view`, from being used with parallel range algorithms.
@@ -331,7 +330,8 @@ in a source-compatible manner seems to us better than blanket allowance of any `
 
 ## Taking `range` as an output ## {#range_as_output}
 
-In the previous revision we proposed a range as the output for the overloads that take ranges for input. Similarly, we proposed a sentinel for output where input is passed as "iterator and sentinel".
+In the previous revision we proposed a range as the output for the overloads that take ranges for input.
+Similarly, we proposed a sentinel for output where input is passed as "iterator and sentinel".
 
 This topic was discussed on the joint SG1 and SG9 session (St. Louis, 2024) and the feedback was that the extra discussion
 is required and the semantics of some algorithms is not clear with the range-as-an-output. Thus, it requires deeper
@@ -344,7 +344,7 @@ See [[P3179R2]] for more details.
 
 ## Requiring ranges to be bounded ## {#require_bounded_ranges}
 
-One of the requirements we want to put on the parallel range algorithms is to disallow unbounded input and output.
+One of the requirements we want to put on the parallel range algorithms is to disallow unbounded input and, ideally, output.
 The reasons for that are:
 
 - First, for efficient parallel implementation we need to know the iteration space bounds. Otherwise, it's hard to
@@ -353,26 +353,16 @@ The reasons for that are:
     it may result in an endless loop. It's hard to imagine usefulness of that in the case of parallel execution.
     Requiring data sequences to be bounded potentially prevents errors at run-time.
 
-We have evaluated a few options to specify such a requirement, and for now decided to use the `sized_sentinel_for` concept.
-It is sufficient for the purpose and at the same does not require anything that a random access range would not already provide.
-For comparison, the `sized_range` concept adds a requirement of `std::ranges::size(r)` to be well-formed for a range `r`.
-
-In the case of two or more input ranges or sequences, it is sufficient for just one to be bounded.
+In the case of two or more input ranges or sequences, for some algorithms it can be sufficient for just one to be bounded.
 The other input ranges are then assumed to have at least as many elements as the bounded one.
 This enables unbounded ranges such as `views::repeat` in certain useful patterns, for example:
 
 ```cpp
 void normalize_parallel(range auto&& v) {
   auto mx = reduce(execution::par, v, ranges::max{});
-  transform(execution::par, v, views::repeat(mx), v, divides);
+  transform(execution::par, v, views::repeat(mx), v.begin(), divides);
 }
 ```
-
-At the same time, for an output range (that we propose in [[#range_as_output]]) our preference is to have a boundary
-independently on the input range(s). The main motivation is to follow established practices of secure coding, which
-recommend or even require to always specify the size of the output in order to prevent out-of-range data modifications.
-We think this will not impose any practical limitation on which ranges can be used for the output of a parallel algorithm,
-as we could not find or invent an example of a random-access writable range which would also be unbounded.
 
 If several provided ranges or sequences are bounded, an algorithm should stop as soon as the end is reached for the shortest one.
 There are already precedents in the standard that an algorithm takes two sequences with potentially different input sizes
