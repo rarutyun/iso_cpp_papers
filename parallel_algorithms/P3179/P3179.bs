@@ -9,7 +9,7 @@ Editor: Ruslan Arutyunyan, Intel, ruslan.arutyunyan@intel.com
         Alexey Kukanov, Intel, alexey.kukanov@intel.com
         Bryce Adelstein Lelbach (he/him/his), Nvidia, brycelelbach@gmail.com
 Markup Shorthands: markdown yes
-Audience: SG9, SG1
+Audience: SG9, SG1, LEWG
 Abstract: This paper proposes adding parallel algorithms that work together with the C++ Ranges library.
 </pre>
 
