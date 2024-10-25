@@ -16,7 +16,7 @@ toc-depth: 2
 
 This paper elaborates on the question of using a range as the output for parallel range algorithms
 that we proposed in [@P3179R2], addressing the raised concerns. The paper neither proposes
-nor discusses using ranges as the output for serial range algorithms.
+nor discusses in detail using ranges as the output for serial range algorithms.
 
 # Introduction # {#introduction}
 
@@ -44,7 +44,7 @@ as well as in personal communication:
 Consequently, in the [@P3179R3] revision we switched back to a single iterator for representing
 an output sequence. However, with this paper we would like to provide new information and discuss
 the raised concerns one more time, seeking an opportunity to go forward with the original idea,
-which we believe would be a notable improvement.
+which we believe will be a notable improvement.
 
 # Recap and motivation # {#recap_motivation}
 
@@ -52,7 +52,7 @@ As a recap, we would like to propose taking a range as the output for the overlo
 Similarly, we propose a sentinel for output where input is passed as "iterator and sentinel".
 See [Proposed API](#proposed_api) for the examples.
 
-We also propose output ranges to have boundaries set independently of the input range(s). An algorithm should
+We also propose output ranges to have boundaries set independently of the input ranges. An algorithm should
 stop as soon as the end is reached for the shortest range. The main motivation is to follow established practices
 of secure coding, which recommend or even require to always specify the size of the output in order to prevent
 out-of-range data modifications. We think this will not impose any practical limitation on which ranges can be
@@ -66,7 +66,7 @@ which would require random access ranges for the output, same as for the input.
 The benefits of this approach, comparing to taking a single iterator for the output, are:
 
 - It creates a safer API where the modified data sequences have known bounds. Specifically, the `sized_range`
-    and `sized_sentinel_for` concepts would be applied to the output sequences in the same way as [@P3179R3]
+    and `sized_sentinel_for` concepts will be applied to the output sequences in the same way as [@P3179R3]
     applies those to the input sequences.
 - Not for all algorithms the output size is defined by the input size. An example is `copy_if` (and similar
     algorithms with *filtering* semantics), where the output sequence might be shorter than the input one.
@@ -109,7 +109,7 @@ All in all, we think for parallel algorithms taking ranges and sentinels for out
 than only taking an iterator.
 
 Of the 89 parallel range algorithms proposed in [@P3179R3] (as counted by names, not overloads), the changes
-we discuss here would affect only the following 17 algorithms: `copy`, `copy_if`, `move`, `transform`,
+we discuss here will affect only the following 17 algorithms: `copy`, `copy_if`, `move`, `transform`,
 `replace_copy`, `replace_copy_if`, `remove_copy`, `remove_copy_if`, `unique_copy`, `reverse_copy`, `rotate_copy`,
 `partition_copy`, `merge`, `set_union`, `set_intersection`, `set_difference`, `set_symmetric_difference`.
 
@@ -138,12 +138,13 @@ on that parameter, or with an exposition-only `@*range-or-iterator*@` concept th
 by logical disjunction, as its name suggest. We did not explore which makes more sense; at glance, there seems
 to be little practical difference for library implementors.
 
+TODO: Re-evaluate!
 For "iterator and sentinel" overloads we prefer to always require a sentinel for output, despite the mismatch with
 the corresponding serial overloads because we expect those overloads rarer used compared to range ones.
 
 ## Semantical ambiguity for certain algorithms ## {#semantical_ambiguity}
 
-The semantical ambiguity might appear for the following code:
+The potential semantical ambiguity can be illustrated by the following code:
 
 ```cpp
 std::vector<int> vec1;
@@ -154,29 +155,33 @@ std::vector<int> vec2;
 std::ranges::copy(policy, vec1, vec2);
 ```
 
-because there might be uncertainty what the behavior is when `vec2.size() < vec1.size()`. Some might expect that
-`std::ranges::copy` would resize `vec2` and make it an exact copy of `vec1`.
+for which there might be uncertainty what the behavior is when `vec2.size() != vec1.size()`. Some might expect
+that `std::ranges::copy` resizes `vec2` and makes it an exact copy of `vec1`.
 
 However, the standard already has a precedent in serial versions of `std::ranges::uninitialized_copy` and
 `std::ranges::uninitialized_move`, which have the *range-as-the-output* semantics exactly as we propose:
 
-- They use sentinels for both input and output sequences.
+- They use ranges (or sentinels) for both input and output sequences.
 - They don't resize the output sequence.
 - They stop as soon as any of the sequences reaches its end, copying/moving elements to the minimum of two sizes.
 
-Giving another semantics to `std:;ranges::copy` etc. would be inconsistent with these already existing
+Giving another semantics to `std::ranges::copy` etc. would be inconsistent with these already existing
 algorithms. Moreover, it would be generally inconsistent with the current *elementwise* semantics
 of both iterator-based and range algorithms. For example, when `vec2.size()` is greater than `vec1.size()`,
 `std::ranges::copy(vec1, vec2.begin())` does not modify the elements of `vec2` beyond the size of `vec1`,
 and so should not `std::ranges::copy(policy, vec1, vec2)`.
 
-There is another precedent of range-as-an-output case: `std::ranges::partial_sort_copy`, which is also semantically close to
-`std::ranges::uninitialized_copy`.
+Alternatively, potentially ambiguous names can be modified with some prefix, such as `partial_`. It would
+follow `std::ranges::partial_sort_copy`, another range-as-the-output algorithm that already uses the semantics
+we propose. That is, we could keep `copy` with iterator-as-the-output and introduce `partial_copy` with
+range-as-the-output semantics, and similarly for other algorithms. We do not recommend this however,
+as there is no serial algorithms with such names, and also because it would create very sophisticated names:
+`partial_remove_copy_if`, really?
 
-it's also worth noting that there are other range algorithms - `fill`, `generate`, and `iota` - that take a range or an
-"iterator and sentinel" pair for their output. Their specifics is absence of input sequences, so the output sequence needs
-a boundary. Nevertheless, these are precedents of specifying output as a range, and extending it from algorithms with zero
-input sequences to those with one or more seems appropriate.
+Speaking of precedents, it is worth noting that there are more existing range-as-the-output algorithms -
+`fill`, `generate`, and `iota`. Their specifics is absence of input sequences, so the output sequence needs
+a boundary. However, extending this principle from algorithms with zero input sequences to those with one
+or more seems appropriate.
 
 ## Range as an output for serial range algorithms ## {#range_for_serial}
 
