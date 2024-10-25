@@ -20,13 +20,13 @@ nor discusses using ranges as the output for serial range algorithms.
 
 # Introduction # {#introduction}
 
-In [@P3179R2] we proposed to add overloads taking an execution policy to the functions in [algorithms]{.sref}
+In [@P3179R2] we proposed to add overloads taking an execution policy to the functions from [algorithms]{.sref}
 defined in the `std::ranges` namespace. We refer to these overloads as *parallel range algorithms*.
 The proposed design in particular suggested that:
 
 - Parallel range algorithms take a range, not an iterator, as an output for the overloads with ranges,
   and additionally take an output sentinel for the overloads with iterators and sentinels.
-- Parallel range algorithms require random_access_{iterator,range}.
+- Parallel range algorithms require `random_access_{iterator,range}`.
 - At least one of the input sequences as well as the output sequence must be bounded.
 
 The last two of these design decisions were [approved](#sg1_sg9_st_louis_2024) at the joint SG1 and SG9
@@ -39,67 +39,86 @@ as well as in personal communication:
 - There might be a perception of semantical ambiguity when a whole container is used as the output
   for certain algorithms, such as in `std::ranges::copy(policy, vector1, vector2)`.
 - That could complicate improvements on the output of serial range algorithms, which are considered
-  but will not be ready for C++26.
+  for the future but will not be ready for C++26.
 
 Consequently, in the [@P3179R3] revision we switched back to a single iterator for representing
-an output sequence. However, with this paper we would like to discuss the raised concerns one more time, given
-that we have a new information, seeking an opportunity to go forward with the original idea,
-which we believe to be a notable improvement.
+an output sequence. However, with this paper we would like to provide new information and discuss
+the raised concerns one more time, seeking an opportunity to go forward with the original idea,
+which we believe would be a notable improvement.
 
-# Motivation # {#motivation}
+# Recap and motivation # {#recap_motivation}
 
-We would like to propose a range as the output for the overloads that take ranges for input. Similarly, we propose
-a sentinel for output where input is passed as "iterator and sentinel". See [Proposed API](#proposed_api) for the examples.
+As a recap, we would like to propose taking a range as the output for the overloads that take ranges for input.
+Similarly, we propose a sentinel for output where input is passed as "iterator and sentinel".
+See [Proposed API](#proposed_api) for the examples.
 
-The reasons for that are:
+This *range-as-the-output* approach should not be confused with the `output_range` concept already used
+with a few serial range algorithms. `output_range` would not be enough for parallel range algorithms
+which would require random access ranges for the output, similarly to input ranges.
 
-- It creates a safer API where all the data sequences have known limits.
-- Not for all algorithms the output size is defined by the input size. An example is `copy_if`
-    (and similar algorithms with *filtering* semantics), where the output sequence is allowed to be shorter than the input
-    one. Knowing the expected size of the output may open opportunities for more efficient parallel implementations.
-- Passing a range for output makes code a bit simpler in the cases typical for parallel execution.
+The benefits of this approach, comparing to taking a single iterator, are:
 
-It is worth noting that to various degrees these reasons are also applicable to serial algorithms.
+- It creates a safer API where the modified data sequences have known bounds. Specifically, the `sized_range`
+    and `sized_sentinel_for` concepts would be applied to the output sequence in the same way as [@P3179R3]
+    applies those to the input sequences.
+- Not for all algorithms the output size is defined by the input size. An example is `copy_if` (and similar
+    algorithms with *filtering* semantics), where the output sequence might be shorter than the input one.
+    Knowing the expected size of the output may open opportunities for more efficient implementations.
+- Passing a range for the output makes code a bit simpler in the cases typical for parallel execution.
+
+It is worth noting that to various degrees these reasons are also applicable to serial range algorithms.
 
 We think that in practice parallel algorithms mainly write the output data into a container or storage
-with preallocated space, for efficiency reasons. So, typically parallel algorithms receive
-`std::begin(v)` or `v.begin()` or `v.data()` for output, where `v` is an instance of `std::vector` or `std::array`.
-Allowing `v` to be passed directly for output in the same way as for input results in a slightly simpler code. Here is the
-example compared to the current [@P3179R3] approach:
+with preallocated space, for efficiency reasons. So, typically parallel algorithms receive `std::begin(v)`
+or `v.begin()` or `v.data()` for output, where `v` is an instance of `std::vector` or `std::array`.
+Allowing `v` to be passed directly for output in the same way as for input results in a slightly simpler code.
+Here is an example compared to the approach in [@P3179R3]:
 
+::: cmptable
+
+### P3179R3
 ```cpp
-void normalize_parallel(range auto&& v) {
+void normalize_parallel(random_access_range auto&& v) {
   auto mx = reduce(execution::par, v, ranges::max{});
-  transform(execution::par, v, views::repeat(mx), @[`std::ranges::begin`(]{.rm}`v`[`)`]{.rm}@, divides);
+  transform(execution::par, v, views::repeat(mx), ranges::begin(v), divides);
 }
 ```
 
-In addition, using classes such as `std::back_insert_iterator` or `std::ostream_iterator`, which do not have a range underneath,
-is already not possible with C++17 parallel algorithms that require at least forward iterators.
-Migrating such code to use algorithms with execution policies will require modifications in any case.
+### This paper
+```cpp
+void normalize_parallel(random_access_range auto&& v) {
+  auto mx = reduce(execution::par, v, ranges::max{});
+  transform(execution::par, v, views::repeat(mx), v, divides);
+}
+```
 
-All in all, we think for parallel algorithms taking ranges and sentinels for output makes more sense than only taking an
-iterator.
+:::
+
+In addition, classes such as `std::back_insert_iterator` or `std::ostream_iterator`, which have no meaningful
+range interpretation, already cannot be used with C++17 parallel algorithms that require at least forward
+iterators. Codes using these types will in any case require modifications to migrate to parallel algorithms.
+
+All in all, we think for parallel algorithms taking ranges and sentinels for output makes more sense
+than only taking an iterator.
 
 # Addressing concerns # {#addressing_concerns}
 
 ## Parallel vs serial range algorithms mismatch ## {#parallel_serial_mismatch}
 
-The main concern we have heard about this approach is the mismatch between serial and parallel variations.
+The first concern we have heard about this approach is the mismatch between serial and parallel variations.
 That is, if serial range algorithms only take iterators for output and parallel range algorithms only take ranges,
 switching between those will always require code changes. That can be resolved by:
 
-- (A) adding *output-as-range* to serial range algorithms,
-- (B) adding *output-as-iterator* to parallel range algorithms
+- (A) adding *range-as-the-output* to serial range algorithms,
+- (B) adding *iterator-as-the-output* to parallel range algorithms
 
 or both.
 
-The option (A) gives some of the described benefits to serial range algorithms as well; one could argue that it
-would be a useful addition on its own.
-The option (B) does not seem to have benefits besides the aligned semantics, while it has the downside of not enforcing
-the requirements we propose in ["Requiring ranges to be
-bounded"](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2024/p3179r3.html#require_bounded_ranges) section of
-[@P3179R3].
+The option (A) would give some of the described benefits to serial range algorithms as well; one could argue
+that it would be a useful addition on its own. However it is obviously too late to pursue this option for C++26.
+
+The option (B) does not seem to have benefits besides the aligned semantics, while it has the downside of
+some algorithm variations not being strengthened with the requirement for an output sequence to be bounded.
 
 With either (A) or (B), the output parameter for range algorithm overloads could be both a range and an iterator.
 In the formal wording, this could be represented either as two separate overloads with different requirements
