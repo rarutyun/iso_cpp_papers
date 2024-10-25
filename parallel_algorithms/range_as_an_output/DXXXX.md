@@ -52,14 +52,21 @@ As a recap, we would like to propose taking a range as the output for the overlo
 Similarly, we propose a sentinel for output where input is passed as "iterator and sentinel".
 See [Proposed API](#proposed_api) for the examples.
 
+We also propose output ranges to have boundaries set independently of the input range(s). An algorithm should
+stop as soon as the end is reached for the shortest range. The main motivation is to follow established practices
+of secure coding, which recommend or even require to always specify the size of the output in order to prevent
+out-of-range data modifications. We think this will not impose any practical limitation on which ranges can be
+used for the output of a parallel algorithm, as we could not find or invent an example of a random-access writable
+range which would also be unbounded.
+
 This *range-as-the-output* approach should not be confused with the `output_range` concept already used
 with a few serial range algorithms. `output_range` would not be enough for parallel range algorithms
-which would require random access ranges for the output, similarly to input ranges.
+which would require random access ranges for the output, same as for the input.
 
-The benefits of this approach, comparing to taking a single iterator, are:
+The benefits of this approach, comparing to taking a single iterator for the output, are:
 
 - It creates a safer API where the modified data sequences have known bounds. Specifically, the `sized_range`
-    and `sized_sentinel_for` concepts would be applied to the output sequence in the same way as [@P3179R3]
+    and `sized_sentinel_for` concepts would be applied to the output sequences in the same way as [@P3179R3]
     applies those to the input sequences.
 - Not for all algorithms the output size is defined by the input size. An example is `copy_if` (and similar
     algorithms with *filtering* semantics), where the output sequence might be shorter than the input one.
@@ -100,6 +107,11 @@ iterators. Codes using these types will in any case require modifications to mig
 
 All in all, we think for parallel algorithms taking ranges and sentinels for output makes more sense
 than only taking an iterator.
+
+Of the 89 parallel range algorithms proposed in [@P3179R3] (as counted by names, not overloads), the changes
+we discuss here would affect only the following 17 algorithms: `copy`, `copy_if`, `move`, `transform`,
+`replace_copy`, `replace_copy_if`, `remove_copy`, `remove_copy_if`, `unique_copy`, `reverse_copy`, `rotate_copy`,
+`partition_copy`, `merge`, `set_union`, `set_intersection`, `set_difference`, `set_symmetric_difference`.
 
 # Addressing concerns # {#addressing_concerns}
 
@@ -142,15 +154,21 @@ std::vector<int> vec2;
 std::ranges::copy(policy, vec1, vec2);
 ```
 
-because there might be uncertainty what is the behavior if `vec2.size() < vec1.size()`. One might think that
-`std::ranges::copy` would allocate in the described scenario to make `vec2` the exact copy of `vec1`.
+because there might be uncertainty what the behavior is when `vec2.size() < vec1.size()`. Some might expect that
+`std::ranges::copy` would resize `vec2` and make it an exact copy of `vec1`.
 
-However, we already have the precedent in the standard for serial version of `std::ranges::uninitialized_copy` and
-`std::ranges::uninitialized_move`, which have *range-as-an-output* and the exactly same semantics as we propose:
+However, the standard already has a precedent in serial versions of `std::ranges::uninitialized_copy` and
+`std::ranges::uninitialized_move`, which have the *range-as-the-output* semantics exactly as we propose:
 
-- They have sentinel for both input and output sequences
-- They don't allocate
-- They exit as soon as any of their sequences reaches the end copying the minimal elements number of two sizes
+- They use sentinels for both input and output sequences.
+- They don't resize the output sequence.
+- They stop as soon as any of the sequences reaches its end, copying/moving elements to the minimum of two sizes.
+
+Giving another semantics to `std:;ranges::copy` etc. would be inconsistent with these already existing
+algorithms. Moreover, it would be generally inconsistent with the current *elementwise* semantics
+of both iterator-based and range algorithms. For example, when `vec2.size()` is greater than `vec1.size()`,
+`std::ranges::copy(vec1, vec2.begin())` does not modify the elements of `vec2` beyond the size of `vec1`,
+and so should not `std::ranges::copy(policy, vec1, vec2)`.
 
 There is another precedent of range-as-an-output case: `std::ranges::partial_sort_copy`, which is also semantically close to
 `std::ranges::uninitialized_copy`.
@@ -166,8 +184,10 @@ input sequences to those with one or more seems appropriate.
 
 # Proposed API # {#proposed_api}
 
+This is an example of modifications to be made to the wording proposed in [@P3179R3] if this paper is supported.
+The example adjusts the binary `transform` algorithm to use an output range or an output sentinel.
+
 ```cpp
-// binary transform with an output range and an output sentinel
 template<typename ExecutionPolicy,
          random_access_iterator I1, sentinel_for<I1> S1,
          random_access_iterator I2, sentinel_for<I2> S2,
@@ -191,8 +211,7 @@ requires indirectly_writable<@[`O`]{.rm}[`ranges::iterator_t<OR>`]{.add}@,
              indirect_result_t<F&,
                  projected<ranges::iterator_t<R1>, Proj1>,
                  projected<ranges::iterator_t<R2>, Proj2>>>
-         && (sized_range<R1> || sized_range<R2>)
-         @[`&& sized_range<OR>`]{.add}@
+         && (sized_range<R1> || sized_range<R2>) @[`&& sized_range<OR>`]{.add}@
 constexpr binary_transform_result<ranges::borrowed_iterator_t<R1>,
                                   ranges::borrowed_iterator_t<R2>,
                                   @[`O`]{.rm}[`ranges::borrowed_iterator_t<OR>`]{.add}@>
@@ -207,8 +226,8 @@ constexpr binary_transform_result<ranges::borrowed_iterator_t<R1>,
 **Poll**: Continue work on P3179R2 for IS'26 with these notes:
 
 1. RandomAccess for inputs and outputs
-1. Iterators for outputs
-1. We believe the overloads are worth it
+2. Iterators for outputs
+3. We believe the overloads are worth it
 
 +----+----+----+----+----+
 | SF |  F |  N |  A | SA |
