@@ -86,7 +86,7 @@ Here is an example compared to the approach in [@P3179R3]:
 ### P3179R3
 ```cpp
 void normalize_parallel(random_access_range auto&& v) {
-  auto mx = reduce(execution::par, v, ranges::max{});
+  auto mx = max(execution::par, v);
   transform(execution::par, v, views::repeat(mx), ranges::begin(v), divides);
 }
 ```
@@ -94,7 +94,7 @@ void normalize_parallel(random_access_range auto&& v) {
 ### This paper
 ```cpp
 void normalize_parallel(random_access_range auto&& v) {
-  auto mx = reduce(execution::par, v, ranges::max{});
+  auto mx = max(execution::par, v);
   transform(execution::par, v, views::repeat(mx), v, divides);
 }
 ```
