@@ -209,20 +209,40 @@ constexpr binary_transform_result<I1, I2, O>
 template<typename ExecutionPolicy,
          ranges::random_access_range R1,
          ranges::random_access_range R2,
-         @[`random_access_iterator O`, ]{.rm}[`ranges::random_access_range OR`]{.add}@,
+         random_access_iterator O,
          copy_constructible F,
          class Proj1 = identity, class Proj2 = identity>
-requires indirectly_writable<@[`O`]{.rm}[`ranges::iterator_t<OR>`]{.add}@,
+requires indirectly_writable<O,
              indirect_result_t<F&,
                  projected<ranges::iterator_t<R1>, Proj1>,
                  projected<ranges::iterator_t<R2>, Proj2>>>
-         && (sized_range<R1> || sized_range<R2>) @[`&& sized_range<OR>`]{.add}@
+         && (sized_range<R1> || sized_range<R2>)
 constexpr binary_transform_result<ranges::borrowed_iterator_t<R1>,
                                   ranges::borrowed_iterator_t<R2>,
-                                  @[`O`]{.rm}[`ranges::borrowed_iterator_t<OR>`]{.add}@>
-    transform(ExecutionPolicy&& policy, R1&& r1, R2&& r2, @[`O`]{.rm}[`OR&&`]{.add}@ result, F binary_op,
+                                  O>
+    transform(ExecutionPolicy&& policy, R1&& r1, R2&& r2, O result, F binary_op,
               Proj1 proj1 = {}, Proj2 proj2 = {});
 ```
+:::add
+```cpp
+template<typename ExecutionPolicy,
+         ranges::random_access_range R1,
+         ranges::random_access_range R2,
+         ranges::random_access_range OutR,
+         copy_constructible F,
+         class Proj1 = identity, class Proj2 = identity>
+requires indirectly_writable<ranges::iterator_t<OutR>,
+             indirect_result_t<F&,
+                 projected<ranges::iterator_t<R1>, Proj1>,
+                 projected<ranges::iterator_t<R2>, Proj2>>>
+         && (sized_range<R1> || sized_range<R2>) && sized_range<OutR>
+constexpr binary_transform_result<ranges::borrowed_iterator_t<R1>,
+                                  ranges::borrowed_iterator_t<R2>,
+                                  ranges::borrowed_iterator_t<OutR>>
+    transform(ExecutionPolicy&& policy, R1&& r1, R2&& r2, OutR&& result, F binary_op,
+              Proj1 proj1 = {}, Proj2 proj2 = {});
+```
+:::
 
 # Polls # {#polls}
 
