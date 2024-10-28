@@ -113,9 +113,9 @@ we discuss here will affect only the following 17 algorithms: `copy`, `copy_if`,
 `replace_copy`, `replace_copy_if`, `remove_copy`, `remove_copy_if`, `unique_copy`, `reverse_copy`, `rotate_copy`,
 `partition_copy`, `merge`, `set_union`, `set_intersection`, `set_difference`, `set_symmetric_difference`.
 
-# Addressing concerns # {#addressing_concerns}
+# Addressing the concerns # {#addressing_concerns}
 
-## Parallel vs serial range algorithms mismatch ## {#parallel_serial_mismatch}
+## Mismatch of parallel and serial range algorithms ## {#parallel_serial_mismatch}
 
 The first concern we have heard about this approach is the mismatch between serial and parallel variations.
 That is, if serial range algorithms only take iterators for output and parallel range algorithms only take ranges,
@@ -131,16 +131,14 @@ that it would be a useful addition on its own. However it is obviously too late 
 
 The option (B) does not seem to have benefits besides the aligned semantics, while it has the downside of
 some algorithm variations not being strengthened with the requirement for an output sequence to be bounded.
+Nevertheless, given that the option (A) is not considered for C++26, we prefer the option (B) to the status quo
+of [@P3179R3].
 
-With either (A) or (B), the output parameter for range algorithm overloads could be both a range and an iterator.
-In the formal wording, this could be represented either as two separate overloads with different requirements
-on that parameter, or with an exposition-only `@*range-or-iterator*@` concept that combines the requirements
-by logical disjunction, as its name suggest. We did not explore which makes more sense; at glance, there seems
-to be little practical difference for library implementors.
-
-TODO: Re-evaluate!
-For "iterator and sentinel" overloads we prefer to always require a sentinel for output, despite the mismatch with
-the corresponding serial overloads because we expect those overloads rarer used compared to range ones.
+For the "iterator and sentinel" overloads we prefer to always require a sentinel for output, despite the mismatch
+with the corresponding serial overloads. We expect those overloads to be rarerly used in general, and in many
+cases existing C++17 parallel algorithms can be used instead. Adding a sentinel for output, on the other hand,
+preserves the existing approach of expressing a range as the "iterator and sentinel" pair in algorithms
+descriptions, as well as allows to specify how the end of sequence is computed for the option (B).
 
 ## Semantical ambiguity for certain algorithms ## {#semantical_ambiguity}
 
@@ -189,8 +187,13 @@ or more seems appropriate.
 
 # Proposed API # {#proposed_api}
 
-This is an example of modifications to be made to the wording proposed in [@P3179R3] if this paper is supported.
-The example adjusts the binary `transform` algorithm to use an output range or an output sentinel.
+Below is an example of modifications to be made to the wording proposed in [@P3179R3]. The example adjusts
+the binary `transform` algorithm to use an output sentinel and adds a new overload taking an output range.
+Similar modifications will be made to all the mentioned 17 algorithms if this paper is supported.
+
+Alternatively, we can use an exposition-only `@*range-or-iterator*@` concept that combines the requirements
+for both a range and an iterator by logical disjunction, as its name suggests. We did not explore which way
+makes more sense; at glance, there seems to be little practical difference for library implementors.
 
 ```cpp
 template<typename ExecutionPolicy,
