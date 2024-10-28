@@ -206,8 +206,8 @@ requires indirectly_writable<O,
              indirect_result_t<F&, projected<I1, Proj1>, projected<I2, Proj2>>>
          && (sized_sentinel_for<S1, I1> || sized_sentinel_for<S2, I2>)
 constexpr binary_transform_result<I1, I2, O>
-    transform(ExecutionPolicy&& policy, I1 first1, S1 last1, I2 first2, S2 last2, O result
-              @[`SO result_last`]{.add}@, F binary_op, Proj1 proj1 = {}, Proj2 proj2 = {});
+    transform(ExecutionPolicy&& policy, I1 first1, S1 last1, I2 first2, S2 last2, O result,
+              @[`SO result_last,`]{.add}@ F binary_op, Proj1 proj1 = {}, Proj2 proj2 = {});
 
 template<typename ExecutionPolicy,
          ranges::random_access_range R1,
