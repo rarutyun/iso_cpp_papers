@@ -157,7 +157,7 @@ for which there might be uncertainty what the behavior is when `vec2.size() != v
 that `std::ranges::copy` resizes `vec2` and makes it an exact copy of `vec1`.
 
 However, the standard already has a precedent in serial versions of `std::ranges::uninitialized_copy` and
-`std::ranges::uninitialized_move`, which have the *range-as-the-output* semantics exactly as we propose:
+`std::ranges::uninitialized_move`, which have the range-as-the-output semantics exactly as we propose:
 
 - They use ranges (or sentinels) for both input and output sequences.
 - They don't resize the output sequence.
@@ -181,9 +181,20 @@ Speaking of precedents, it is worth noting that there are more existing range-as
 a boundary. However, extending this principle from algorithms with zero input sequences to those with one
 or more seems appropriate.
 
-## Range as an output for serial range algorithms ## {#range_for_serial}
+## Impact on potential future improvements ## {#impact_on_serial}
 
-// TODO
+Finally, let's discuss if the proposal could interfere somehow with the anticipated improvements in
+how the serial range algorithms operate with output data.
+
+First and foremost, the range-as-the-output approach will only apply to the new function overloads with
+the first parameter being an execution policy. No modifications to the existing range algorithms are
+proposed, so there is no direct impact that would limit possible design decisions in the future.
+
+TODO: Add more arguments and the links to [@P2550R0], [@P2760R1] and https://brevzin.github.io/c++/2022/02/06/output-iterators/
+
+# Implementation experience
+
+TODO: add links to the oneDPL specification and documentation as well as a short description.
 
 # Proposed API # {#proposed_api}
 
