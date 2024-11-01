@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2024-10-28" />
+  <meta name="dcterms.date" content="2024-11-01" />
   <title>Parallel range algorithms should write to ranges</title>
   <style>
       code{white-space: pre-wrap;}
@@ -424,11 +424,11 @@ should write to ranges</h1>
 <table style="border:none;float:right">
   <tr>
     <td>Document #:</td>
-    <td>DXXXXR0</td>
+    <td>D3490R0</td>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2024-10-28</td>
+    <td>2024-11-01</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -453,34 +453,38 @@ should write to ranges</h1>
 <div id="TOC" role="doc-toc">
 <h1 id="toctitle">Contents</h1>
 <ul>
-<li><a href="#introduction" id="toc-introduction"><span class="toc-section-number">1</span> Introduction</a></li>
-<li><a href="#recap_motivation" id="toc-recap_motivation"><span class="toc-section-number">2</span> Recap and motivation</a></li>
-<li><a href="#addressing_concerns" id="toc-addressing_concerns"><span class="toc-section-number">3</span> Addressing the concerns</a>
+<li><a href="#introduction" id="toc-introduction"><span class="toc-section-number">1</span> Introduction<span></span></a></li>
+<li><a href="#recap_motivation" id="toc-recap_motivation"><span class="toc-section-number">2</span> Recap and
+motivation<span></span></a></li>
+<li><a href="#addressing_concerns" id="toc-addressing_concerns"><span class="toc-section-number">3</span> Addressing the
+concerns<span></span></a>
 <ul>
 <li><a href="#parallel_serial_mismatch" id="toc-parallel_serial_mismatch"><span class="toc-section-number">3.1</span> Mismatch of parallel and serial
-range algorithms</a></li>
+range algorithms<span></span></a></li>
 <li><a href="#semantical_ambiguity" id="toc-semantical_ambiguity"><span class="toc-section-number">3.2</span> Semantical ambiguity for certain
-algorithms</a></li>
-<li><a href="#range_for_serial" id="toc-range_for_serial"><span class="toc-section-number">3.3</span> Range as an output for serial
-range algorithms</a></li>
+algorithms<span></span></a></li>
+<li><a href="#impact_on_serial" id="toc-impact_on_serial"><span class="toc-section-number">3.3</span> Impact on potential future
+improvements<span></span></a></li>
 </ul></li>
-<li><a href="#proposed_api" id="toc-proposed_api"><span class="toc-section-number">4</span> Proposed API</a></li>
-<li><a href="#polls" id="toc-polls"><span class="toc-section-number">5</span> Polls</a>
+<li><a href="#implementation-experience" id="toc-implementation-experience"><span class="toc-section-number">4</span> Implementation
+experience<span></span></a></li>
+<li><a href="#proposed_api" id="toc-proposed_api"><span class="toc-section-number">5</span> Proposed API<span></span></a></li>
+<li><a href="#polls" id="toc-polls"><span class="toc-section-number">6</span> Polls<span></span></a>
 <ul>
-<li><a href="#sg1_sg9_st_louis_2024" id="toc-sg1_sg9_st_louis_2024"><span class="toc-section-number">5.1</span> Joint SG1 + SG9, St. Louis,
-2024</a></li>
+<li><a href="#sg1_sg9_st_louis_2024" id="toc-sg1_sg9_st_louis_2024"><span class="toc-section-number">6.1</span> Joint SG1 + SG9, St. Louis,
+2024<span></span></a></li>
 </ul></li>
-<li><a href="#bibliography" id="toc-bibliography"><span class="toc-section-number">6</span> References</a></li>
+<li><a href="#bibliography" id="toc-bibliography"><span class="toc-section-number">7</span> References<span></span></a></li>
 </ul>
 </div>
 <h1 class="unnumbered unlisted" id="abstract">Abstract<a href="#abstract" class="self-link"></a></h1>
 <p>This paper elaborates on the question of using a range as the output
-for parallel range algorithms that we proposed in <span class="citation" data-cites="P3179R2">[<a href="https://wg21.link/p3179r2" role="doc-biblioref">P3179R2</a>]</span>, addressing the
-raised concerns. The paper neither proposes nor discusses in detail
-using ranges as the output for serial range algorithms.</p>
+for parallel range algorithms that we proposed in <span class="citation" data-cites="P3179R2">[<a href="https://wg21.link/p3179r2" role="doc-biblioref">P3179R2</a>]</span>, addressing the raised
+concerns. The paper neither proposes nor discusses in detail using
+ranges as the output for serial range algorithms.</p>
 <h1 data-number="1" id="introduction"><span class="header-section-number">1</span> Introduction<a href="#introduction" class="self-link"></a></h1>
-<p>In <span class="citation" data-cites="P3179R2">[<a href="https://wg21.link/p3179r2" role="doc-biblioref">P3179R2</a>]</span> we proposed to add
-overloads taking an execution policy to the functions from <span>27
+<p>In <span class="citation" data-cites="P3179R2">[<a href="https://wg21.link/p3179r2" role="doc-biblioref">P3179R2</a>]</span> we proposed to add overloads
+taking an execution policy to the functions from <span>27
 <a href="https://wg21.link/algorithms">[algorithms]</a></span> defined
 in the
 <code class="sourceCode cpp">std<span class="op">::</span>ranges</code>
@@ -509,12 +513,11 @@ container is used as the output for certain algorithms, such as in <code class="
 algorithms, which are considered for the future but will not be ready
 for C++26.</li>
 </ul>
-<p>Consequently, in the <span class="citation" data-cites="P3179R3">[<a href="https://wg21.link/p3179r3" role="doc-biblioref">P3179R3</a>]</span> revision we
-switched back to a single iterator for representing an output sequence.
-However, with this paper we would like to provide new information and
-discuss the raised concerns one more time, seeking an opportunity to go
-forward with the original idea, which we believe will be a notable
-improvement.</p>
+<p>Consequently, in the <span class="citation" data-cites="P3179R3">[<a href="https://wg21.link/p3179r3" role="doc-biblioref">P3179R3</a>]</span> revision we switched back to a
+single iterator for representing an output sequence. However, with this
+paper we would like to provide new information and discuss the raised
+concerns one more time, seeking an opportunity to go forward with the
+original idea, which we believe will be a notable improvement.</p>
 <h1 data-number="2" id="recap_motivation"><span class="header-section-number">2</span> Recap and motivation<a href="#recap_motivation" class="self-link"></a></h1>
 <p>As a recap, we would like to propose taking a range as the output for
 the overloads that take ranges for input. Similarly, we propose a
@@ -542,8 +545,8 @@ for the output, are:</p>
 bounds. Specifically, the
 <code class="sourceCode cpp">sized_range</code> and
 <code class="sourceCode cpp">sized_sentinel_for</code> concepts will be
-applied to the output sequences in the same way as <span class="citation" data-cites="P3179R3">[<a href="https://wg21.link/p3179r3">P3179R3</a>]</span> applies those to
-the input sequences.</li>
+applied to the output sequences in the same way as <span class="citation" data-cites="P3179R3">[<a href="https://wg21.link/p3179r3" role="doc-biblioref">P3179R3</a>]</span> applies those to the input
+sequences.</li>
 <li>Not for all algorithms the output size is defined by the input size.
 An example is <code class="sourceCode cpp">copy_if</code> (and similar
 algorithms with <em>filtering</em> semantics), where the output sequence
@@ -569,7 +572,7 @@ output in the same way as for input results in a slightly simpler code.
 Here is an example compared to the approach in <span class="citation" data-cites="P3179R3">[<a href="https://wg21.link/p3179r3" role="doc-biblioref">P3179R3</a>]</span>:</p>
 <table>
 <thead>
-<tr>
+<tr class="header">
 <th><div style="text-align:center">
 <strong>P3179R3</strong>
 </div></th>
@@ -579,7 +582,7 @@ Here is an example compared to the approach in <span class="citation" data-cites
 </tr>
 </thead>
 <tbody>
-<tr>
+<tr class="odd">
 <td><div>
 
 <div class="sourceCode" id="cb1"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> normalize_parallel<span class="op">(</span>random_access_range <span class="kw">auto</span><span class="op">&amp;&amp;</span> v<span class="op">)</span> <span class="op">{</span></span>
@@ -607,9 +610,9 @@ Codes using these types will in any case require modifications to
 migrate to parallel algorithms.</p>
 <p>All in all, we think for parallel algorithms taking ranges and
 sentinels for output makes more sense than only taking an iterator.</p>
-<p>Of the 89 parallel range algorithms proposed in <span class="citation" data-cites="P3179R3">[<a href="https://wg21.link/p3179r3">P3179R3</a>]</span> (as counted by
-names, not overloads), the changes we discuss here will affect only the
-following 17 algorithms: <code class="sourceCode cpp">copy</code>,
+<p>Of the 89 parallel range algorithms proposed in <span class="citation" data-cites="P3179R3">[<a href="https://wg21.link/p3179r3" role="doc-biblioref">P3179R3</a>]</span> (as counted by names, not
+overloads), the changes we discuss here will affect only the following
+17 algorithms: <code class="sourceCode cpp">copy</code>,
 <code class="sourceCode cpp">copy_if</code>,
 <code class="sourceCode cpp">move</code>,
 <code class="sourceCode cpp">transform</code>,
@@ -678,8 +681,7 @@ copy of <code class="sourceCode cpp">vec1</code>.</p>
 <p>However, the standard already has a precedent in serial versions of
 <code class="sourceCode cpp">std<span class="op">::</span>ranges<span class="op">::</span>uninitialized_copy</code>
 and <code class="sourceCode cpp">std<span class="op">::</span>ranges<span class="op">::</span>uninitialized_move</code>,
-which have the <em>range-as-the-output</em> semantics exactly as we
-propose:</p>
+which have the range-as-the-output semantics exactly as we propose:</p>
 <ul>
 <li>They use ranges (or sentinels) for both input and output
 sequences.</li>
@@ -716,16 +718,28 @@ existing range-as-the-output algorithms -
 input sequences, so the output sequence needs a boundary. However,
 extending this principle from algorithms with zero input sequences to
 those with one or more seems appropriate.</p>
-<h2 data-number="3.3" id="range_for_serial"><span class="header-section-number">3.3</span> Range as an output for serial
-range algorithms<a href="#range_for_serial" class="self-link"></a></h2>
-<p>// TODO</p>
-<h1 data-number="4" id="proposed_api"><span class="header-section-number">4</span> Proposed API<a href="#proposed_api" class="self-link"></a></h1>
+<h2 data-number="3.3" id="impact_on_serial"><span class="header-section-number">3.3</span> Impact on potential future
+improvements<a href="#impact_on_serial" class="self-link"></a></h2>
+<p>Finally, let’s discuss if the proposal could interfere somehow with
+the anticipated improvements in how the serial range algorithms operate
+with output data.</p>
+<p>First and foremost, the range-as-the-output approach will only apply
+to the new function overloads with the first parameter being an
+execution policy. No modifications to the existing range algorithms are
+proposed, so there is no direct impact that would limit possible design
+decisions in the future.</p>
+<p>TODO: Add more arguments and the links to <span class="citation" data-cites="P2550R0">[<a href="https://wg21.link/p2550r0" role="doc-biblioref">P2550R0</a>]</span>, <span class="citation" data-cites="P2760R1">[<a href="https://wg21.link/p2760r1" role="doc-biblioref">P2760R1</a>]</span> and
+https://brevzin.github.io/c++/2022/02/06/output-iterators/</p>
+<h1 data-number="4" id="implementation-experience"><span class="header-section-number">4</span> Implementation experience<a href="#implementation-experience" class="self-link"></a></h1>
+<p>TODO: add links to the oneDPL specification and documentation as well
+as a short description.</p>
+<h1 data-number="5" id="proposed_api"><span class="header-section-number">5</span> Proposed API<a href="#proposed_api" class="self-link"></a></h1>
 <p>Below is an example of modifications to be made to the wording
-proposed in <span class="citation" data-cites="P3179R3">[<a href="https://wg21.link/p3179r3">P3179R3</a>]</span>. The example
-adjusts the binary <code class="sourceCode cpp">transform</code>
-algorithm to use an output sentinel and adds a new overload taking an
-output range. Similar modifications will be made to all the mentioned 17
-algorithms if this paper is supported.</p>
+proposed in <span class="citation" data-cites="P3179R3">[<a href="https://wg21.link/p3179r3" role="doc-biblioref">P3179R3</a>]</span>. The example adjusts the binary
+<code class="sourceCode cpp">transform</code> algorithm to use an output
+sentinel and adds a new overload taking an output range. Similar
+modifications will be made to all the mentioned 17 algorithms if this
+paper is supported.</p>
 <p>Alternatively, we can use an exposition-only
 <code class="sourceCode cpp"><em>range-or-iterator</em></code> concept
 that combines the requirements for both a range and an iterator by
@@ -781,8 +795,8 @@ difference for library implementors.</p>
 <span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>              Proj1 proj1 = {}, Proj2 proj2 = {});</span></code></pre></div>
 
 </div>
-<h1 data-number="5" id="polls"><span class="header-section-number">5</span> Polls<a href="#polls" class="self-link"></a></h1>
-<h2 data-number="5.1" id="sg1_sg9_st_louis_2024"><span class="header-section-number">5.1</span> Joint SG1 + SG9, St. Louis,
+<h1 data-number="6" id="polls"><span class="header-section-number">6</span> Polls<a href="#polls" class="self-link"></a></h1>
+<h2 data-number="6.1" id="sg1_sg9_st_louis_2024"><span class="header-section-number">6.1</span> Joint SG1 + SG9, St. Louis,
 2024<a href="#sg1_sg9_st_louis_2024" class="self-link"></a></h2>
 <p><strong>Poll</strong>: Continue work on P3179R2 for IS’26 with these
 notes:</p>
@@ -828,8 +842,15 @@ notes:</p>
 </tr>
 </tbody>
 </table>
-<h1 data-number="6" id="bibliography"><span class="header-section-number">6</span> References<a href="#bibliography" class="self-link"></a></h1>
+<h1 data-number="7" id="bibliography"><span class="header-section-number">7</span> References<a href="#bibliography" class="self-link"></a></h1>
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="1" role="doc-bibliography">
+<div id="ref-P2550R0" class="csl-entry" role="doc-biblioentry">
+[P2550R0] Barry Revzin. 2022-02-17. ranges::copy should say
+output_iterator somewhere. <a href="https://wg21.link/p2550r0"><div class="csl-block">https://wg21.link/p2550r0</div></a>
+</div>
+<div id="ref-P2760R1" class="csl-entry" role="doc-biblioentry">
+[P2760R1] Barry Revzin. 2023-12-15. A Plan for C++26 Ranges. <a href="https://wg21.link/p2760r1"><div class="csl-block">https://wg21.link/p2760r1</div></a>
+</div>
 <div id="ref-P3179R2" class="csl-entry" role="doc-biblioentry">
 [P3179R2] Ruslan Arutyunyan, Alexey Kukanov, Bryce Adelstein Lelbach.
 2024-06-25. C++ parallel range algorithms. <a href="https://wg21.link/p3179r2"><div class="csl-block">https://wg21.link/p3179r2</div></a>
