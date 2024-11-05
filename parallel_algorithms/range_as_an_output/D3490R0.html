@@ -655,15 +655,18 @@ option for C++26.</p>
 semantics, while it has the downside of some algorithm variations not
 being strengthened with the requirement for an output sequence to be
 bounded. Nevertheless, given that the option (A) is not considered for
-C++26, we prefer the option (B) to the status quo of <span class="citation" data-cites="P3179R3">[<a href="https://wg21.link/p3179r3" role="doc-biblioref">P3179R3</a>]</span>.</p>
+C++26, we prefer the option (B), i.e. supporting both ranges and
+iterators as the output of parallel range algorithms, to the status quo
+of <span class="citation" data-cites="P3179R3">[<a href="https://wg21.link/p3179r3" role="doc-biblioref">P3179R3</a>]</span> that supports only
+iterators.</p>
 <p>For the “iterator and sentinel” overloads we prefer to always require
 a sentinel for output, despite the mismatch with the corresponding
 serial overloads. We expect those overloads to be rarely used in
-general, and in many cases existing C++17 parallel algorithms can be
+general, and in many cases the C++17 parallel algorithms can be
 used instead. Adding a sentinel for output, on the other hand, preserves
 the existing approach of expressing a range as the “iterator and
 sentinel” pair in algorithms descriptions, as well as allows to specify
-how the end of sequence is computed for the option (B).</p>
+how the end of the sequence is computed for the option (B).</p>
 <h2 data-number="3.2" id="semantic_ambiguity"><span class="header-section-number">3.2</span> Semantic ambiguity for certain
 algorithms<a href="#semantic_ambiguity" class="self-link"></a></h2>
 <p>The potential semantic ambiguity can be illustrated by the following
@@ -740,7 +743,7 @@ counterpart be as simple as removal of the execution policy?</p>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <p>The answer, we believe, is “Yes”. The reasoning is that parallel
 range algorithms impose stricter requirements on their parameters,
-<em>narrowing down</em> a possible set of arguments. If a range is
+narrowing down a possible set of arguments. If a range is
 accepted by a parallel range algorithm, it is certainly accepted by a
 serial range algorithm, whether for input or for output. Putting it
 differently, it will be very strange if serial algorithms somehow
@@ -798,17 +801,21 @@ be designed.</li>
 for future improvements related to the output of serial range
 algorithms, and vice versa.</p>
 <h1 data-number="4" id="implementation-experience"><span class="header-section-number">4</span> Implementation experience<a href="#implementation-experience" class="self-link"></a></h1>
-<p>Intel(R) oneAPI DPC++ Library (oneDPL) <a href="https://oneapi-src.github.io/oneDPL/parallel_api/parallel_range_algorithms.html">developer
-guide</a> covers parallel range algorithms we’ve implemented so far. We
-chose range-as-an-output approach where applicable:
+<p>The oneAPI DPC++ Library (oneDPL) <a href="https://oneapi-src.github.io/oneDPL/parallel_api/parallel_range_algorithms.html">developer
+guide</a> covers parallel range algorithms we’ve implemented so far. The
+oneAPI specification provides <a href="https://github.com/uxlfoundation/oneAPI-spec/blob/main/source/elements/oneDPL/source/parallel_api/parallel_range_api.rst">formal
+signatures</a> of these algorithms. The implementation supports
+execution policies for CPUs (semantically aligned with the C++ standard)
+and for SYCL devices, and it works with a subset of the standard C++
+views.</p>
+<p>We use the range-as-the-output approach where applicable: in
 <code class="sourceCode cpp">transform</code>,
 <code class="sourceCode cpp">copy</code>,
 <code class="sourceCode cpp">copy_if</code>, and
-<code class="sourceCode cpp">merge</code>.</p>
-<p>We don’t have overloads with iterator-as-an-output for the mentioned
-algorithms since ranges make more sense for parallelism from our
-standpoint. However, we don’t forsee any issues to add extra overloads
-with iterators later, if necessary.</p>
+<code class="sourceCode cpp">merge</code>. We don’t have
+iterator-as-the-output overloads for these algorithms, as <a href="#parallel_serial_mismatch">the motivation for it</a> applies much
+less to oneDPL. However, we don’t foresee any issues with adding such
+overloads later, if necessary.</p>
 <h1 data-number="5" id="proposed_api"><span class="header-section-number">5</span> Proposed API<a href="#proposed_api" class="self-link"></a></h1>
 <p>Below is an example of modifications to be made to the wording
 proposed in <span class="citation" data-cites="P3179R3">[<a href="https://wg21.link/p3179r3" role="doc-biblioref">P3179R3</a>]</span>. The example adjusts the binary
