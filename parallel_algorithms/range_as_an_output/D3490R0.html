@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2024-11-04" />
+  <meta name="dcterms.date" content="2024-11-05" />
   <title>Parallel range algorithms should write to ranges</title>
   <style>
       code{white-space: pre-wrap;}
@@ -428,7 +428,7 @@ should write to ranges</h1>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2024-11-04</td>
+    <td>2024-11-05</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -461,7 +461,7 @@ concerns<span></span></a>
 <ul>
 <li><a href="#parallel_serial_mismatch" id="toc-parallel_serial_mismatch"><span class="toc-section-number">3.1</span> Mismatch of parallel and serial
 range algorithms<span></span></a></li>
-<li><a href="#semantical_ambiguity" id="toc-semantical_ambiguity"><span class="toc-section-number">3.2</span> Semantical ambiguity for certain
+<li><a href="#semantic_ambiguity" id="toc-semantic_ambiguity"><span class="toc-section-number">3.2</span> Semantic ambiguity for certain
 algorithms<span></span></a></li>
 <li><a href="#impact_on_serial" id="toc-impact_on_serial"><span class="toc-section-number">3.3</span> Impact on potential future
 improvements<span></span></a></li>
@@ -507,7 +507,7 @@ as in personal communication:</p>
 <li>That would introduce a mismatch between serial and parallel range
 algorithms so that switching between those will always require more code
 changes than just adding an execution policy.</li>
-<li>There might be a perception of semantical ambiguity when a whole
+<li>There might be a perception of semantic ambiguity when a whole
 container is used as the output for certain algorithms, such as in <code class="sourceCode cpp">std<span class="op">::</span>ranges<span class="op">::</span>copy<span class="op">(</span>policy, vector1, vector2<span class="op">)</span></code>.</li>
 <li>That could complicate improvements on the output of serial range
 algorithms, which are considered for the future but will not be ready
@@ -530,7 +530,7 @@ practices of secure coding, which recommend or even require to always
 specify the size of the output in order to prevent out-of-range data
 modifications. We think this will not impose any practical limitation on
 which ranges can be used for the output of a parallel algorithm, as we
-could not find or invent an example of a random-access writable range
+could not find or invent an example of a random-access writeable range
 which would also be unbounded.</p>
 <p>This <em>range-as-the-output</em> approach should not be confused
 with the <code class="sourceCode cpp">output_range</code> concept
@@ -658,16 +658,16 @@ bounded. Nevertheless, given that the option (A) is not considered for
 C++26, we prefer the option (B) to the status quo of <span class="citation" data-cites="P3179R3">[<a href="https://wg21.link/p3179r3" role="doc-biblioref">P3179R3</a>]</span>.</p>
 <p>For the “iterator and sentinel” overloads we prefer to always require
 a sentinel for output, despite the mismatch with the corresponding
-serial overloads. We expect those overloads to be rarerly used in
+serial overloads. We expect those overloads to be rarely used in
 general, and in many cases existing C++17 parallel algorithms can be
 used instead. Adding a sentinel for output, on the other hand, preserves
 the existing approach of expressing a range as the “iterator and
 sentinel” pair in algorithms descriptions, as well as allows to specify
 how the end of sequence is computed for the option (B).</p>
-<h2 data-number="3.2" id="semantical_ambiguity"><span class="header-section-number">3.2</span> Semantical ambiguity for
-certain algorithms<a href="#semantical_ambiguity" class="self-link"></a></h2>
-<p>The potential semantical ambiguity can be illustrated by the
-following code:</p>
+<h2 data-number="3.2" id="semantic_ambiguity"><span class="header-section-number">3.2</span> Semantic ambiguity for certain
+algorithms<a href="#semantic_ambiguity" class="self-link"></a></h2>
+<p>The potential semantic ambiguity can be illustrated by the following
+code:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> vec1;</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> vec2;</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -692,7 +692,7 @@ copying/moving elements to the minimum of two sizes.</li>
 <p>Giving another semantics to <code class="sourceCode cpp">std<span class="op">::</span>ranges<span class="op">::</span>copy</code>
 etc. would be inconsistent with these already existing algorithms.
 Moreover, it would be generally inconsistent with the current
-<em>elementwise</em> semantics of both iterator-based and range
+<em>element-wise</em> semantics of both iterator-based and range
 algorithms. For example, when <code class="sourceCode cpp">vec2<span class="op">.</span>size<span class="op">()</span></code>
 is greater than <code class="sourceCode cpp">vec1<span class="op">.</span>size<span class="op">()</span></code>,
 <code class="sourceCode cpp">std<span class="op">::</span>ranges<span class="op">::</span>copy<span class="op">(</span>vec1, vec2<span class="op">.</span>begin<span class="op">())</span></code>
@@ -745,13 +745,12 @@ accepted by a parallel range algorithm, it is certainly accepted by a
 serial range algorithm, whether for input or for output. Putting it
 differently, it will be very strange if serial algorithms somehow
 exclude random access sized ranges, a subset of the much broader set of
-writable ranges that coudl be used as the output.</p>
+writeable ranges that could be used as the output.</p>
 <p>Another question is whether other anticipated improvements on the
 output of serial range algorithms might be applicable for the parallel
 ones, and so should be considered in our design. We have found two WG21
-papers that speak about modifications of the oupput for range
-algorithms. <span class="citation" data-cites="P2550R0">[<a href="https://wg21.link/p2550r0">P2550R0</a>]</span> proposes that,
-citing,</p>
+papers that speak about modifications of the output for range
+algorithms. <span class="citation" data-cites="P2550R0">[<a href="https://wg21.link/p2550r0" role="doc-biblioref">P2550R0</a>]</span> proposes that, citing,</p>
 <blockquote>
 <ul>
 <li>All output algorithms now require
@@ -770,10 +769,9 @@ currently valid code is still valid)</li>
 <p>If that paper is accepted, similar requirement modifications might be
 made for parallel range algorithms, both taking iterators and ranges as
 the output, and likewise it will not introduce breaking changes for what
-we propose in <span class="citation" data-cites="P3179R3">[<a href="https://wg21.link/p3179r3">P3179R3</a>]</span> and in this
-paper.</p>
-<p><span class="citation" data-cites="P2760R1">[<a href="https://wg21.link/p2760r1">P2760R1</a>]</span> discusses
-shortcomings of <em>output-only</em> iterators, such as <code class="sourceCode cpp">std<span class="op">::</span>back_insert_iterator<span class="op">&lt;</span>C<span class="op">&gt;</span></code>.
+we propose in <span class="citation" data-cites="P3179R3">[<a href="https://wg21.link/p3179r3" role="doc-biblioref">P3179R3</a>]</span> and in this paper.</p>
+<p><span class="citation" data-cites="P2760R1">[<a href="https://wg21.link/p2760r1" role="doc-biblioref">P2760R1</a>]</span> discusses shortcomings of
+<em>output-only</em> iterators, such as <code class="sourceCode cpp">std<span class="op">::</span>back_insert_iterator<span class="op">&lt;</span>C<span class="op">&gt;</span></code>.
 While there is no formal proposal yet, the design outlined there uses
 two new customization points, <code class="sourceCode cpp">std<span class="op">::</span>ranges<span class="op">::</span>put</code>
 and <code class="sourceCode cpp">std<span class="op">::</span>ranges<span class="op">::</span>put_range</code>,
@@ -784,14 +782,14 @@ themselves would work with output iterators and output ranges. We think
 that:</p>
 <ul>
 <li>Output-only iterators cannot be used with parallel algorithms, so
-the use cases that <span class="citation" data-cites="P2760R1">[<a href="https://wg21.link/p2760r1">P2760R1</a>]</span> targets, like <code class="sourceCode cpp">std<span class="op">::</span>back_inserter</code>,
+the use cases that <span class="citation" data-cites="P2760R1">[<a href="https://wg21.link/p2760r1" role="doc-biblioref">P2760R1</a>]</span> targets, like <code class="sourceCode cpp">std<span class="op">::</span>back_inserter</code>,
 are already not applicable and filtered out.</li>
 <li>Serial range algorithms implemented with these new CPOs should not
 introduce breaking changes, and therefore could be used as serial blocks
 in the implementation of parallel range algorithms.</li>
 <li>Additional types that the new CPOs would enable for the output of
 range algorithms can in principle be accepted by parallel range
-algorithms if the semantical requirememts imposed by execution policies
+algorithms if the semantic requirements imposed by execution policies
 (such as thread safety) are met. It might be discussed and formalized as
 necessary when these CPOs and possible new concepts based on them will
 be designed.</li>
@@ -800,22 +798,31 @@ be designed.</li>
 for future improvements related to the output of serial range
 algorithms, and vice versa.</p>
 <h1 data-number="4" id="implementation-experience"><span class="header-section-number">4</span> Implementation experience<a href="#implementation-experience" class="self-link"></a></h1>
-<p>TODO: add links to the oneDPL specification and documentation as well
-as a short description.</p>
+<p>Intel(R) oneAPI DPC++ Library (oneDPL) <a href="https://oneapi-src.github.io/oneDPL/parallel_api/parallel_range_algorithms.html">developer
+guide</a> covers parallel range algorithms we’ve implemented so far. We
+chose range-as-an-output approach where applicable:
+<code class="sourceCode cpp">transform</code>,
+<code class="sourceCode cpp">copy</code>,
+<code class="sourceCode cpp">copy_if</code>, and
+<code class="sourceCode cpp">merge</code>.</p>
+<p>We don’t have overloads with iterator-as-an-output for the mentioned
+algorithms since ranges make more sense for parallelism from our
+standpoint. However, we don’t forsee any issues to add extra overloads
+with iterators later, if necessary.</p>
 <h1 data-number="5" id="proposed_api"><span class="header-section-number">5</span> Proposed API<a href="#proposed_api" class="self-link"></a></h1>
 <p>Below is an example of modifications to be made to the wording
-proposed in <span class="citation" data-cites="P3179R3">[<a href="https://wg21.link/p3179r3">P3179R3</a>]</span>. The example
-adjusts the binary <code class="sourceCode cpp">transform</code>
-algorithm to use an output sentinel and adds a new overload taking an
-output range. Underlines are used to highlight the key differences
-introduced by this paper. Similar modifications will be made to all the
-mentioned 17 algorithms if the paper is supported.</p>
+proposed in <span class="citation" data-cites="P3179R3">[<a href="https://wg21.link/p3179r3" role="doc-biblioref">P3179R3</a>]</span>. The example adjusts the binary
+<code class="sourceCode cpp">transform</code> algorithm to use an output
+sentinel and adds a new overload taking an output range. Underlines are
+used to highlight the key differences introduced by this paper. Similar
+modifications will be made to all the mentioned 17 algorithms if the
+paper is supported.</p>
 <p>Alternatively, we can use an exposition-only
 <code class="sourceCode cpp"><em>range-or-iterator</em></code> concept
 that combines the requirements for both a range and an iterator by
 logical disjunction, as its name suggests. We did not explore which way
 makes more sense; at glance, there seems to be little practical
-difference for library implementors.</p>
+difference for library implementers.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">typename</span> ExecutionPolicy,</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>         random_access_iterator I1, sentinel_for<span class="op">&lt;</span>I1<span class="op">&gt;</span> S1,</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>         random_access_iterator I2, sentinel_for<span class="op">&lt;</span>I2<span class="op">&gt;</span> S2,</span>
