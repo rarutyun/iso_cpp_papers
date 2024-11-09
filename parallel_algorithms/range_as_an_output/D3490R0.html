@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2024-11-06" />
+  <meta name="dcterms.date" content="2024-11-08" />
   <title>Parallel range algorithms should write to ranges</title>
   <style>
       code{white-space: pre-wrap;}
@@ -428,7 +428,7 @@ should write to ranges</h1>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2024-11-06</td>
+    <td>2024-11-08</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -468,9 +468,9 @@ improvements<span></span></a></li>
 <li><a href="#what_if_not" id="toc-what_if_not"><span class="toc-section-number">3.4</span> What if not accepted for
 C++26<span></span></a></li>
 </ul></li>
-<li><a href="#impl_experience" id="toc-impl_experience"><span class="toc-section-number">4</span> Implementation
+<li><a href="#proposed_api" id="toc-proposed_api"><span class="toc-section-number">4</span> Proposed API<span></span></a></li>
+<li><a href="#impl_experience" id="toc-impl_experience"><span class="toc-section-number">5</span> Implementation
 experience<span></span></a></li>
-<li><a href="#proposed_api" id="toc-proposed_api"><span class="toc-section-number">5</span> Proposed API<span></span></a></li>
 <li><a href="#polls" id="toc-polls"><span class="toc-section-number">6</span> Polls<span></span></a>
 <ul>
 <li><a href="#sg1_sg9_st_louis_2024" id="toc-sg1_sg9_st_louis_2024"><span class="toc-section-number">6.1</span> Joint SG1 + SG9, St. Louis,
@@ -486,9 +486,8 @@ concerns. The paper neither proposes nor discusses in detail using
 ranges as the output for serial range algorithms.</p>
 <h1 data-number="1" id="introduction"><span class="header-section-number">1</span> Introduction<a href="#introduction" class="self-link"></a></h1>
 <p>In <span class="citation" data-cites="P3179R2">[<a href="https://wg21.link/p3179r2" role="doc-biblioref">P3179R2</a>]</span> we proposed to add overloads
-taking an execution policy to the functions from <span>27
-<a href="https://wg21.link/algorithms">[algorithms]</a></span> defined
-in the
+taking an execution policy to the functions from <span><a href="https://wg21.link/algorithms">[algorithms]</a></span> defined in
+the
 <code class="sourceCode cpp">std<span class="op">::</span>ranges</code>
 namespace. We refer to these overloads as <em>parallel range
 algorithms</em>. The proposed design in particular suggested that:</p>
@@ -523,8 +522,9 @@ original idea, which we believe will be a notable improvement.</p>
 <h1 data-number="2" id="recap_motivation"><span class="header-section-number">2</span> Recap and motivation<a href="#recap_motivation" class="self-link"></a></h1>
 <p>As a recap, we would like to propose taking a range as the output for
 the overloads that take ranges for input. Similarly, we propose a
-sentinel for output where input is passed as “iterator and sentinel”.
-See <a href="#proposed_api">Proposed API</a> for the examples.</p>
+sentinel for output where input is passed as
+“<code class="sourceCode cpp">Iterator</code> and
+<code class="sourceCode cpp">Sentinel</code>”. See <a href="#proposed_api">Proposed API</a> for the examples.</p>
 <p>We also propose output ranges to have boundaries set independently of
 the input ranges. An algorithm should stop as soon as the end is reached
 for the shortest range. The main motivation is to follow established
@@ -539,7 +539,7 @@ with the <code class="sourceCode cpp">output_range</code> concept
 already used with a few serial range algorithms.
 <code class="sourceCode cpp">output_range</code> would not be enough for
 parallel range algorithms which would require random access ranges for
-the output, same as for the input.</p>
+the output parameter, same as for the input one.</p>
 <p>The benefits of this approach, comparing to taking a single iterator
 for the output, are:</p>
 <ul>
@@ -608,7 +608,7 @@ Here is an example compared to the approach in <span class="citation" data-cites
 or <code class="sourceCode cpp">std<span class="op">::</span>ostream_iterator</code>,
 which have no meaningful range interpretation, already cannot be used
 with C++17 parallel algorithms that require at least forward iterators.
-Codes using these types will in any case require modifications to
+Code using these types will, in any case, require modifications to
 migrate to parallel algorithms.</p>
 <p>All in all, we think for parallel algorithms taking ranges and
 sentinels for output makes more sense than only taking an iterator.</p>
@@ -658,17 +658,20 @@ semantics, while it has the downside of some algorithm variations not
 being strengthened with the requirement for an output sequence to be
 bounded. Nevertheless, given that the option (A) is not considered for
 C++26, we prefer the option (B), i.e. supporting both ranges and
-iterators as the output of parallel range algorithms, to the status quo
-of <span class="citation" data-cites="P3179R3">[<a href="https://wg21.link/p3179r3" role="doc-biblioref">P3179R3</a>]</span> that supports only
+iterators as the output of parallel range algorithms, compared to the
+status quo of <span class="citation" data-cites="P3179R3">[<a href="https://wg21.link/p3179r3" role="doc-biblioref">P3179R3</a>]</span> that supports only
 iterators.</p>
-<p>For the “iterator and sentinel” overloads we prefer to always require
-a sentinel for output, despite the mismatch with the corresponding
-serial overloads. We expect those overloads to be rarely used in
-general, and in many cases the C++17 parallel algorithms can be used
-instead. Adding a sentinel for output, on the other hand, preserves the
-existing approach of expressing a range as the “iterator and sentinel”
-pair in algorithms descriptions, as well as allows to specify how the
-end of the sequence is computed for the option (B).</p>
+<p>For the “<code class="sourceCode cpp">Iterator</code> and
+<code class="sourceCode cpp">Sentinel</code>” overloads we prefer to
+always require a sentinel for output, despite the mismatch with the
+corresponding serial overloads. We expect those overloads to be rarely
+used in general, and in many cases the C++17 parallel algorithms can be
+used instead. Adding a sentinel for output, on the other hand, preserves
+the existing approach of expressing a range as the
+“<code class="sourceCode cpp">Iterator</code> and
+<code class="sourceCode cpp">Sentinel</code>” pair in algorithms
+descriptions, as well as allows to specify how the end of the sequence
+is computed for the option (B).</p>
 <h2 data-number="3.2" id="semantic_ambiguity"><span class="header-section-number">3.2</span> Semantic ambiguity for certain
 algorithms<a href="#semantic_ambiguity" class="self-link"></a></h2>
 <p>The potential semantic ambiguity can be illustrated by the following
@@ -807,20 +810,45 @@ C++26<a href="#what_if_not" class="self-link"></a></h2>
 <p>Since that authors preferred option is to have both overload with
 iterator-as-an-output and overload with range-as-an-output for each
 relevant algorithm it looks like overloads with range-as-an-output could
-be added later. While this is true there is a one caveat, though.</p>
-<p>Not adding the range-as-an-output overloads has a direct impact
-<code class="sourceCode cpp">Iterator</code> +
-<code class="sourceCode cpp">Sentinel</code> overloads because we cannot
-define a bounded version of this overload that range overload would map
-to.</p>
-<p>So, the signature would look like the serial range algorithm
-counterpart. Taking <code class="sourceCode cpp">transform</code>
-algorithm as the example the difference to what is proposed in the paper
-would look like the following:</p>
+be added later. While this is true there is a caveat, though. If we
+don’t add range-as-an-output overload now that means that we don’t add
+the “<code class="sourceCode cpp">Iterator</code> and
+<code class="sourceCode cpp">Sentinel</code>” counterpart with output
+sentinel in C++26.</p>
+<p>Given the C++ committee’s concerns about the growing number of
+algorithm overloads, we will likely end up with just unbound output for
+parallel range algorithms “<code class="sourceCode cpp">Iterator</code>
+and <code class="sourceCode cpp">Sentinel</code>”.</p>
+<p>That leads to the following conclusions:</p>
+<ul>
+<li>For the “<code class="sourceCode cpp">Iterator</code> and
+<code class="sourceCode cpp">Sentinel</code>” overload we will likely
+not have a bounded version. Having only unbounded one is bad in parallel
+code, in our opinion.</li>
+<li>We will likely not have a signature to express the range overload
+with.</li>
+</ul>
+<p>Please look at “<code class="sourceCode cpp">Iterator</code> and
+<code class="sourceCode cpp">Sentinel</code>” overload in the <a href="#proposed_api">Proposed API</a> to see what API we likely lose in
+the standard.</p>
+<h1 data-number="4" id="proposed_api"><span class="header-section-number">4</span> Proposed API<a href="#proposed_api" class="self-link"></a></h1>
+<p>Below is an example of modifications to be made to the wording
+proposed in <span class="citation" data-cites="P3179R3">[<a href="https://wg21.link/p3179r3" role="doc-biblioref">P3179R3</a>]</span>. The example adjusts the binary
+<code class="sourceCode cpp">transform</code> algorithm to use an output
+sentinel and adds a new overload taking an output range. Underlines are
+used to highlight the key differences introduced by this paper. Similar
+modifications will be made to all the mentioned 17 algorithms if the
+paper is supported.</p>
+<p>Alternatively, we can use an exposition-only
+<code class="sourceCode cpp"><em>range-or-iterator</em></code> concept
+that combines the requirements for both a range and an iterator by
+logical disjunction, as its name suggests. We did not explore which way
+makes more sense; at glance, there seems to be little practical
+difference for library implementers.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">typename</span> ExecutionPolicy,</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>         random_access_iterator I1, sentinel_for<span class="op">&lt;</span>I1<span class="op">&gt;</span> S1,</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>         random_access_iterator I2, sentinel_for<span class="op">&lt;</span>I2<span class="op">&gt;</span> S2,</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>         random_access_iterator O, <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">sized_sentinel_for&lt;O&gt; SO,</code></span></del></span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>         random_access_iterator O, <span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">sized_sentinel_for&lt;O&gt; SO,</code></span></ins></span></span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>         copy_constructible F,</span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>         <span class="kw">class</span> Proj1 <span class="op">=</span> identity, <span class="kw">class</span> Proj2 <span class="op">=</span> identity<span class="op">&gt;</span></span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="kw">requires</span> indirectly_writable<span class="op">&lt;</span>O,</span>
@@ -828,14 +856,45 @@ would look like the following:</p>
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>         <span class="op">&amp;&amp;</span> <span class="op">(</span>sized_sentinel_for<span class="op">&lt;</span>S1, I1<span class="op">&gt;</span> <span class="op">||</span> sized_sentinel_for<span class="op">&lt;</span>S2, I2<span class="op">&gt;)</span></span>
 <span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="kw">constexpr</span> binary_transform_result<span class="op">&lt;</span>I1, I2, O<span class="op">&gt;</span></span>
 <span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    transform<span class="op">(</span>ExecutionPolicy<span class="op">&amp;&amp;</span> policy, I1 first1, S1 last1, I2 first2, S2 last2, O result,</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>              <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">SO result_last,</code></span></del></span> F binary_op, Proj1 proj1 <span class="op">=</span> <span class="op">{}</span>, Proj2 proj2 <span class="op">=</span> <span class="op">{})</span>;</span></code></pre></div>
-<p>Given that the committee already has concerns about the amount of
-algorithm overloads we will likely end up with having just unbound
-version for parallel range overloads for
-<code class="sourceCode cpp">Iterator</code> and
-<code class="sourceCode cpp">Sentinel</code>, the one that is shown
-above.</p>
-<h1 data-number="4" id="impl_experience"><span class="header-section-number">4</span> Implementation experience<a href="#impl_experience" class="self-link"></a></h1>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>              <span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">SO result_last,</code></span></ins></span> F binary_op, Proj1 proj1 <span class="op">=</span> <span class="op">{}</span>, Proj2 proj2 <span class="op">=</span> <span class="op">{})</span>;</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">typename</span> ExecutionPolicy,</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>         ranges<span class="op">::</span>random_access_range R1,</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>         ranges<span class="op">::</span>random_access_range R2,</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>         <u><code class="sourceCode cpp">random_access_iterator O</code></u>,</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>         copy_constructible F,</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>         <span class="kw">class</span> Proj1 <span class="op">=</span> identity, <span class="kw">class</span> Proj2 <span class="op">=</span> identity<span class="op">&gt;</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="kw">requires</span> indirectly_writable<span class="op">&lt;</span>O,</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>             indirect_result_t<span class="op">&lt;</span>F<span class="op">&amp;</span>,</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>                 projected<span class="op">&lt;</span>ranges<span class="op">::</span>iterator_t<span class="op">&lt;</span>R1<span class="op">&gt;</span>, Proj1<span class="op">&gt;</span>,</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>                 projected<span class="op">&lt;</span>ranges<span class="op">::</span>iterator_t<span class="op">&lt;</span>R2<span class="op">&gt;</span>, Proj2<span class="op">&gt;&gt;&gt;</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>         <span class="op">&amp;&amp;</span> <span class="op">(</span>sized_range<span class="op">&lt;</span>R1<span class="op">&gt;</span> <span class="op">||</span> sized_range<span class="op">&lt;</span>R2<span class="op">&gt;)</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a><span class="kw">constexpr</span> binary_transform_result<span class="op">&lt;</span>ranges<span class="op">::</span>borrowed_iterator_t<span class="op">&lt;</span>R1<span class="op">&gt;</span>,</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>                                  ranges<span class="op">::</span>borrowed_iterator_t<span class="op">&lt;</span>R2<span class="op">&gt;</span>,</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>                                  O<span class="op">&gt;</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    transform<span class="op">(</span>ExecutionPolicy<span class="op">&amp;&amp;</span> policy, R1<span class="op">&amp;&amp;</span> r1, R2<span class="op">&amp;&amp;</span> r2, O result, F binary_op,</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>              Proj1 proj1 <span class="op">=</span> <span class="op">{}</span>, Proj2 proj2 <span class="op">=</span> <span class="op">{})</span>;</span></code></pre></div>
+<div class="add" style="color: #006e28">
+
+<div class="sourceCode" id="cb6"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>template&lt;typename ExecutionPolicy,</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>         ranges::random_access_range R1,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>         ranges::random_access_range R2,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>         <u><code class="sourceCode cpp">ranges<span class="op">::</span>random_access_range OutR</code></u>,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>         copy_constructible F,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>         class Proj1 = identity, class Proj2 = identity&gt;</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>requires indirectly_writable&lt;<u><code class="sourceCode cpp">ranges<span class="op">::</span>iterator_t<span class="op">&lt;</span>OutR<span class="op">&gt;</span></code></u>,</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>             indirect_result_t&lt;F&amp;,</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>                 projected&lt;ranges::iterator_t&lt;R1&gt;, Proj1&gt;,</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>                 projected&lt;ranges::iterator_t&lt;R2&gt;, Proj2&gt;&gt;&gt;</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>         &amp;&amp; (sized_range&lt;R1&gt; || sized_range&lt;R2&gt;) <u><code class="sourceCode cpp"><span class="op">&amp;&amp;</span> sized_range<span class="op">&lt;</span>OutR<span class="op">&gt;</span></code></u></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>constexpr binary_transform_result&lt;ranges::borrowed_iterator_t&lt;R1&gt;,</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>                                  ranges::borrowed_iterator_t&lt;R2&gt;,</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>                                  <u><code class="sourceCode cpp">ranges<span class="op">::</span>borrowed_iterator_t<span class="op">&lt;</span>OutR<span class="op">&gt;</span></code></u>&gt;</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    transform(ExecutionPolicy&amp;&amp; policy, R1&amp;&amp; r1, R2&amp;&amp; r2, <u><code class="sourceCode cpp">OutR<span class="op">&amp;&amp;</span></code></u> result, F binary_op,</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>              Proj1 proj1 = {}, Proj2 proj2 = {});</span></code></pre></div>
+
+</div>
+<h1 data-number="5" id="impl_experience"><span class="header-section-number">5</span> Implementation experience<a href="#impl_experience" class="self-link"></a></h1>
 <p>The oneAPI DPC++ Library (oneDPL) <a href="https://oneapi-src.github.io/oneDPL/parallel_api/parallel_range_algorithms.html">developer
 guide</a> covers parallel range algorithms we’ve implemented so far. The
 oneAPI specification provides <a href="https://github.com/uxlfoundation/oneAPI-spec/blob/main/source/elements/oneDPL/source/parallel_api/parallel_range_api.rst">formal
@@ -851,69 +910,6 @@ views.</p>
 iterator-as-the-output overloads for these algorithms, as <a href="#parallel_serial_mismatch">the motivation for it</a> applies much
 less to oneDPL. However, we don’t foresee any issues with adding such
 overloads later, if necessary.</p>
-<h1 data-number="5" id="proposed_api"><span class="header-section-number">5</span> Proposed API<a href="#proposed_api" class="self-link"></a></h1>
-<p>Below is an example of modifications to be made to the wording
-proposed in <span class="citation" data-cites="P3179R3">[<a href="https://wg21.link/p3179r3" role="doc-biblioref">P3179R3</a>]</span>. The example adjusts the binary
-<code class="sourceCode cpp">transform</code> algorithm to use an output
-sentinel and adds a new overload taking an output range. Underlines are
-used to highlight the key differences introduced by this paper. Similar
-modifications will be made to all the mentioned 17 algorithms if the
-paper is supported.</p>
-<p>Alternatively, we can use an exposition-only
-<code class="sourceCode cpp"><em>range-or-iterator</em></code> concept
-that combines the requirements for both a range and an iterator by
-logical disjunction, as its name suggests. We did not explore which way
-makes more sense; at glance, there seems to be little practical
-difference for library implementers.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">typename</span> ExecutionPolicy,</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>         random_access_iterator I1, sentinel_for<span class="op">&lt;</span>I1<span class="op">&gt;</span> S1,</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>         random_access_iterator I2, sentinel_for<span class="op">&lt;</span>I2<span class="op">&gt;</span> S2,</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>         random_access_iterator O, <span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">sized_sentinel_for&lt;O&gt; SO,</code></span></ins></span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>         copy_constructible F,</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>         <span class="kw">class</span> Proj1 <span class="op">=</span> identity, <span class="kw">class</span> Proj2 <span class="op">=</span> identity<span class="op">&gt;</span></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="kw">requires</span> indirectly_writable<span class="op">&lt;</span>O,</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>             indirect_result_t<span class="op">&lt;</span>F<span class="op">&amp;</span>, projected<span class="op">&lt;</span>I1, Proj1<span class="op">&gt;</span>, projected<span class="op">&lt;</span>I2, Proj2<span class="op">&gt;&gt;&gt;</span></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>         <span class="op">&amp;&amp;</span> <span class="op">(</span>sized_sentinel_for<span class="op">&lt;</span>S1, I1<span class="op">&gt;</span> <span class="op">||</span> sized_sentinel_for<span class="op">&lt;</span>S2, I2<span class="op">&gt;)</span></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="kw">constexpr</span> binary_transform_result<span class="op">&lt;</span>I1, I2, O<span class="op">&gt;</span></span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    transform<span class="op">(</span>ExecutionPolicy<span class="op">&amp;&amp;</span> policy, I1 first1, S1 last1, I2 first2, S2 last2, O result,</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>              <span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">SO result_last,</code></span></ins></span> F binary_op, Proj1 proj1 <span class="op">=</span> <span class="op">{}</span>, Proj2 proj2 <span class="op">=</span> <span class="op">{})</span>;</span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">typename</span> ExecutionPolicy,</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>         ranges<span class="op">::</span>random_access_range R1,</span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>         ranges<span class="op">::</span>random_access_range R2,</span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>         <u><code class="sourceCode cpp">random_access_iterator O</code></u>,</span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>         copy_constructible F,</span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>         <span class="kw">class</span> Proj1 <span class="op">=</span> identity, <span class="kw">class</span> Proj2 <span class="op">=</span> identity<span class="op">&gt;</span></span>
-<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="kw">requires</span> indirectly_writable<span class="op">&lt;</span>O,</span>
-<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>             indirect_result_t<span class="op">&lt;</span>F<span class="op">&amp;</span>,</span>
-<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>                 projected<span class="op">&lt;</span>ranges<span class="op">::</span>iterator_t<span class="op">&lt;</span>R1<span class="op">&gt;</span>, Proj1<span class="op">&gt;</span>,</span>
-<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>                 projected<span class="op">&lt;</span>ranges<span class="op">::</span>iterator_t<span class="op">&lt;</span>R2<span class="op">&gt;</span>, Proj2<span class="op">&gt;&gt;&gt;</span></span>
-<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>         <span class="op">&amp;&amp;</span> <span class="op">(</span>sized_range<span class="op">&lt;</span>R1<span class="op">&gt;</span> <span class="op">||</span> sized_range<span class="op">&lt;</span>R2<span class="op">&gt;)</span></span>
-<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="kw">constexpr</span> binary_transform_result<span class="op">&lt;</span>ranges<span class="op">::</span>borrowed_iterator_t<span class="op">&lt;</span>R1<span class="op">&gt;</span>,</span>
-<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>                                  ranges<span class="op">::</span>borrowed_iterator_t<span class="op">&lt;</span>R2<span class="op">&gt;</span>,</span>
-<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>                                  O<span class="op">&gt;</span></span>
-<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    transform<span class="op">(</span>ExecutionPolicy<span class="op">&amp;&amp;</span> policy, R1<span class="op">&amp;&amp;</span> r1, R2<span class="op">&amp;&amp;</span> r2, O result, F binary_op,</span>
-<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>              Proj1 proj1 <span class="op">=</span> <span class="op">{}</span>, Proj2 proj2 <span class="op">=</span> <span class="op">{})</span>;</span></code></pre></div>
-<div class="add" style="color: #006e28">
-
-<div class="sourceCode" id="cb7"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>template&lt;typename ExecutionPolicy,</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>         ranges::random_access_range R1,</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>         ranges::random_access_range R2,</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>         <u><code class="sourceCode cpp">ranges<span class="op">::</span>random_access_range OutR</code></u>,</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>         copy_constructible F,</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>         class Proj1 = identity, class Proj2 = identity&gt;</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>requires indirectly_writable&lt;<u><code class="sourceCode cpp">ranges<span class="op">::</span>iterator_t<span class="op">&lt;</span>OutR<span class="op">&gt;</span></code></u>,</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>             indirect_result_t&lt;F&amp;,</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>                 projected&lt;ranges::iterator_t&lt;R1&gt;, Proj1&gt;,</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>                 projected&lt;ranges::iterator_t&lt;R2&gt;, Proj2&gt;&gt;&gt;</span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>         &amp;&amp; (sized_range&lt;R1&gt; || sized_range&lt;R2&gt;) <u><code class="sourceCode cpp"><span class="op">&amp;&amp;</span> sized_range<span class="op">&lt;</span>OutR<span class="op">&gt;</span></code></u></span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>constexpr binary_transform_result&lt;ranges::borrowed_iterator_t&lt;R1&gt;,</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>                                  ranges::borrowed_iterator_t&lt;R2&gt;,</span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>                                  <u><code class="sourceCode cpp">ranges<span class="op">::</span>borrowed_iterator_t<span class="op">&lt;</span>OutR<span class="op">&gt;</span></code></u>&gt;</span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    transform(ExecutionPolicy&amp;&amp; policy, R1&amp;&amp; r1, R2&amp;&amp; r2, <u><code class="sourceCode cpp">OutR<span class="op">&amp;&amp;</span></code></u> result, F binary_op,</span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>              Proj1 proj1 = {}, Proj2 proj2 = {});</span></code></pre></div>
-
-</div>
 <h1 data-number="6" id="polls"><span class="header-section-number">6</span> Polls<a href="#polls" class="self-link"></a></h1>
 <h2 data-number="6.1" id="sg1_sg9_st_louis_2024"><span class="header-section-number">6.1</span> Joint SG1 + SG9, St. Louis,
 2024<a href="#sg1_sg9_st_louis_2024" class="self-link"></a></h2>
