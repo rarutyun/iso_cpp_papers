@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2024-11-08" />
-  <title>*Range-as-an-output* for parallel algorithms</title>
+  <meta name="dcterms.date" content="2024-11-13" />
+  <title>Justification for ranges as the output of parallel range algorithms</title>
   <style>
       code{white-space: pre-wrap;}
       span.smallcaps{font-variant: small-caps;}
@@ -419,8 +419,8 @@ code.sourceCode > span { display: inline; }
 <body>
 <div class="wrapper">
 <header id="title-block-header">
-<h1 class="title" style="text-align:center"><em>Range-as-an-output</em>
-for parallel algorithms</h1>
+<h1 class="title" style="text-align:center">Justification for ranges as
+the output of parallel range algorithms</h1>
 <table style="border:none;float:right">
   <tr>
     <td>Document #:</td>
@@ -428,7 +428,7 @@ for parallel algorithms</h1>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2024-11-08</td>
+    <td>2024-11-13</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -480,7 +480,7 @@ experience<span></span></a></li>
 </ul>
 </div>
 <h1 class="unnumbered unlisted" id="abstract">Abstract<a href="#abstract" class="self-link"></a></h1>
-<p>This paper elaborates on the question of using a range as the output
+<p>This paper elaborates on the question of using ranges as the output
 for parallel range algorithms that we proposed in <span class="citation" data-cites="P3179R2">[<a href="https://wg21.link/p3179r2" role="doc-biblioref">P3179R2</a>]</span>, addressing the raised
 concerns. The paper neither proposes nor discusses in detail using
 ranges as the output for serial range algorithms.</p>
@@ -492,7 +492,7 @@ the
 namespace. We refer to these overloads as <em>parallel range
 algorithms</em>. The proposed design in particular suggested that:</p>
 <ul>
-<li>Parallel range algorithms take a range, not an iterator, as an
+<li>Parallel range algorithms take a range, not an iterator, as the
 output for the overloads with ranges, and additionally take an output
 sentinel for the overloads with iterators and sentinels.</li>
 <li>Parallel range algorithms require <code class="sourceCode cpp">random_access_<span class="op">{</span>iterator,range<span class="op">}</span></code>.</li>
@@ -509,7 +509,7 @@ as in personal communication:</p>
 algorithms so that switching between those will always require more code
 changes than just adding an execution policy.</li>
 <li>There might be a perception of semantic ambiguity when a whole
-container is used as the output for certain algorithms, such as in <code class="sourceCode cpp">std<span class="op">::</span>ranges<span class="op">::</span>copy<span class="op">(</span>policy, vector1, vector2<span class="op">)</span></code>.</li>
+container is used as the output for certain algorithms, such as in <code class="sourceCode cpp">std<span class="op">::</span>ranges<span class="op">::</span>copy<span class="op">(</span>policy, vec1, vec2<span class="op">)</span></code>.</li>
 <li>That could complicate improvements on the output of serial range
 algorithms, which are considered for the future but will not be ready
 for C++26.</li>
@@ -520,11 +520,10 @@ paper we would like to provide new information and discuss the raised
 concerns one more time, seeking an opportunity to go forward with the
 original idea, which we believe will be a notable improvement.</p>
 <h1 data-number="2" id="recap_motivation"><span class="header-section-number">2</span> Recap and motivation<a href="#recap_motivation" class="self-link"></a></h1>
-<p>As a recap, we would like to propose taking a range as the output for
-the overloads that take ranges for input. Similarly, we propose a
-sentinel for output where input is passed as
-“<code class="sourceCode cpp">Iterator</code> and
-<code class="sourceCode cpp">Sentinel</code>”. See <a href="#proposed_api">Proposed API</a> section for the examples.</p>
+<p>As a recap, we would like to propose parallel algorithms taking a
+range as the output for the overloads that take ranges for input.
+Similarly, we propose adding a sentinel for the output where the input
+is passed as “iterator and sentinel”. See the <a href="#proposed_api">Proposed API</a> section for the examples.</p>
 <p>We also propose output ranges to have boundaries set independently of
 the input ranges. An algorithm should stop as soon as the end is reached
 for the shortest range. The main motivation is to follow established
@@ -538,8 +537,8 @@ which would also be unbounded.</p>
 with the <code class="sourceCode cpp">output_range</code> concept
 already used with a few serial range algorithms.
 <code class="sourceCode cpp">output_range</code> would not be enough for
-parallel range algorithms which would require random access ranges for
-the output parameter, same as for the input one.</p>
+parallel range algorithms, which require random access ranges for the
+output parameter, same as for the input one.</p>
 <p>The benefits of this approach, comparing to taking a single iterator
 for the output, are:</p>
 <ul>
@@ -649,29 +648,25 @@ algorithms</li>
 </ol></li>
 </ul>
 <p>or both.</p>
-<p>The option (A) would give some of the described benefits to serial
+<p>The option A would give some of the described benefits to serial
 range algorithms as well; one could argue that it would be a useful
 addition on its own. However it is obviously too late to pursue this
 option for C++26.</p>
-<p>The option (B) does not seem to have benefits besides the aligned
+<p>The option B does not seem to have benefits besides the aligned
 semantics, while it has the downside of some algorithm variations not
-being strengthened with the requirement for an output sequence to be
-bounded. Nevertheless, given that the option (A) is not considered for
-C++26, we prefer the option (B), i.e. supporting both ranges and
-iterators as the output of parallel range algorithms, compared to the
-status quo of <span class="citation" data-cites="P3179R3">[<a href="https://wg21.link/p3179r3" role="doc-biblioref">P3179R3</a>]</span> that supports only
+being strengthened with the requirement for the output sequence to be
+bounded. Nevertheless, given that the option A is not considered for
+C++26, we prefer the option B, i.e. supporting both ranges and iterators
+as the output of parallel range algorithms, to the status quo of <span class="citation" data-cites="P3179R3">[<a href="https://wg21.link/p3179r3" role="doc-biblioref">P3179R3</a>]</span> that supports only
 iterators.</p>
-<p>For the “<code class="sourceCode cpp">Iterator</code> and
-<code class="sourceCode cpp">Sentinel</code>” overloads we prefer to
-always require a sentinel for output, despite the mismatch with the
-corresponding serial overloads. We expect those overloads to be rarely
-used in general, and in many cases the C++17 parallel algorithms can be
-used instead. Adding a sentinel for output, on the other hand, preserves
-the existing approach of expressing a range as the
-“<code class="sourceCode cpp">Iterator</code> and
-<code class="sourceCode cpp">Sentinel</code>” pair in algorithms
-descriptions, as well as allows to specify how the end of the sequence
-is computed for the option (B).</p>
+<p>For the “iterator and sentinel” overloads we prefer to always require
+a sentinel for output, despite the mismatch with the corresponding
+serial overloads. We expect those overloads to be rarely used in
+general, and in many cases the C++17 parallel algorithms can be used
+instead. Adding a sentinel for output, on the other hand, preserves the
+existing approach of expressing a range as the “iterator and sentinel”
+pair in algorithm descriptions, as well as allows to specify how the end
+of the output sequence is computed for the option B.</p>
 <h2 data-number="3.2" id="semantic_ambiguity"><span class="header-section-number">3.2</span> Semantic ambiguity for certain
 algorithms<a href="#semantic_ambiguity" class="self-link"></a></h2>
 <p>The potential semantic ambiguity can be illustrated by the following
@@ -686,7 +681,7 @@ code:</p>
 Some might expect that <code class="sourceCode cpp">std<span class="op">::</span>ranges<span class="op">::</span>copy</code>
 resizes <code class="sourceCode cpp">vec2</code> and makes it an exact
 copy of <code class="sourceCode cpp">vec1</code>.</p>
-<p>However, the standard already has a precedent in serial versions of
+<p>However, the standard already has a precedent in serial variations of
 <code class="sourceCode cpp">std<span class="op">::</span>ranges<span class="op">::</span>uninitialized_copy</code>
 and <code class="sourceCode cpp">std<span class="op">::</span>ranges<span class="op">::</span>uninitialized_move</code>,
 which have the range-as-the-output semantics exactly as we propose:</p>
@@ -732,10 +727,10 @@ improvements<a href="#impact_on_serial" class="self-link"></a></h2>
 the anticipated improvements in how the serial range algorithms operate
 with output data.</p>
 <p>First and foremost, the range-as-the-output approach will for now
-only apply to the new function overloads with the first parameter being
-an execution policy. No modifications to the existing range algorithms
-are proposed, so there is no direct impact that would limit possible
-design decisions in the future.</p>
+only apply to the new function overloads which first parameter is an
+execution policy. No modifications to the existing range algorithms are
+proposed, so there is no direct impact that would limit possible design
+decisions in the future.</p>
 <p>But even though the functions for serial and parallel execution have
 independent constraints, there is more to consider. If/when the support
 for ranges as the output of serial algorithms is added later, will it be
@@ -807,30 +802,25 @@ for future improvements related to the output of serial range
 algorithms, and vice versa.</p>
 <h2 data-number="3.4" id="what_if_not"><span class="header-section-number">3.4</span> What if not accepted for
 C++26<a href="#what_if_not" class="self-link"></a></h2>
-<p>Since that authors preferred option is to have both overload with
-iterator-as-an-output and overload with range-as-an-output for each
-relevant algorithm it looks like overloads with range-as-an-output could
-be added later. While this is true there is a caveat, though. If we
-don’t add range-as-an-output overload now that means that we don’t add
-the “<code class="sourceCode cpp">Iterator</code> and
-<code class="sourceCode cpp">Sentinel</code>” counterpart with output
-sentinel in C++26.</p>
-<p>Given the C++ committee’s concerns about the growing number of
-algorithm overloads, we will likely end up with just unbound output for
-parallel range algorithms “<code class="sourceCode cpp">Iterator</code>
-and <code class="sourceCode cpp">Sentinel</code>”.</p>
-<p>That leads to the following conclusions:</p>
+<p>Since we propose to have both an overload with iterator-as-the-output
+and an overload with range-as-the-output for each relevant algorithm, it
+appears that overloads with range-as-the-output could be added later.
+This is true, though there is a caveat.</p>
+<p>If we don’t add the range-as-the-output overload in C++26 that likely
+means that we don’t add the output sentinel to the “iterator and
+sentinel” counterpart as well. Given the C++ committee’s concerns about
+the growing number of algorithm overloads, we are afraid that adding
+another one with the output sentinel later will be opposed.</p>
+<p>That will have the following consequences:</p>
 <ul>
-<li>For the “<code class="sourceCode cpp">Iterator</code> and
-<code class="sourceCode cpp">Sentinel</code>” overload we will likely
-not have a bounded version. Having only unbounded one is bad in parallel
-code, in our opinion.</li>
-<li>We will likely not have a signature to express the range overload
-with.</li>
+<li>For the “iterator and sentinel” overloads we will not have a bounded
+output variation. Having only unbounded one is bad for parallel code, in
+our opinion.</li>
+<li>There will be no “iterator and sentinel” output pair to fully
+express the range overload with.</li>
 </ul>
-<p>Please look at “<code class="sourceCode cpp">Iterator</code> and
-<code class="sourceCode cpp">Sentinel</code>” overload in the <a href="#proposed_api">Proposed API</a> to see what API we likely lose in
-the standard.</p>
+<p>Please look at the “iterator and sentinel” overload in the <a href="#proposed_api">Proposed API</a> to see what API we likely lose in
+the standard if the proposal is not accepted.</p>
 <h1 data-number="4" id="proposed_api"><span class="header-section-number">4</span> Proposed API<a href="#proposed_api" class="self-link"></a></h1>
 <p>Below is an example of modifications to be made to the wording
 proposed in <span class="citation" data-cites="P3179R3">[<a href="https://wg21.link/p3179r3" role="doc-biblioref">P3179R3</a>]</span>. The example adjusts the binary
