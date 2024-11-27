@@ -661,7 +661,27 @@ operations <a href="https://eel.is/c++draft/numeric.ops">[numeric.ops]</a>. The 
 adding overloads with `ExecutionPolicy`  to the existing algorithms in `std::ranges` namespace. Any follow-up paper that
 adds `<numeric>` algorithms to `std::ranges` should also consider adding dedicated overloads with `ExecutionPolicy`.
 
-# Further exploration # {#further_work}
+# Further work # {#further_work}
+
+## Issues to address ## {#issues_to_address}
+
+Based on the feedback from SG1 and SG9, the plan of work prior to the next committee F2F meeting in 2025 is:
+- Return range-as-the-output back to the design with a short description, referring to P3490R0 for details.
+- Require all input ranges to be sized (no more ||); update the design notes accordingly.
+- Change the formal wording to reflect these design decisions.
+- Make a change to nothrow-random-access-iterator to subsume nothrow-bidirectional-iterator, and add the latter
+  as exposition-only concept.
+- Fix bugs in the signatures.
+- Update the synopsis of <algorithm>.
+- Add the algorithm descriptions to the wording, even if no changes are made.
+- Add or update feature macro(s).
+- Add the necessary poll results.
+- Add implementation experience (copy from 3490) and thoughts on implementability.
+- Update [[#non_adl_discoverable]] to reflect that [[P3136R0]] has been accepted.
+- Decide on constraining the execution policy template parameter.
+- Add "The intention is that algorithms call begin/end only once, in serial code" to the design notes.
+- List all the algorithms that are being given execution policy overloads with a brief justification.
+- List range algorithms that are being excluded, with a brief justification.
 
 ## Thread-safe views examination ## {#thread_safe_views}
 
@@ -3251,6 +3271,8 @@ concept <i>nothrow-random-access-range</i> = <i>// exposition only</i>
 </ins>
 
 # Revision history # {#revision_history}
+
+## R3 => R4 ## {#r3_r4}
 
 ## R2 => R3 ## {#r2_r3}
 
