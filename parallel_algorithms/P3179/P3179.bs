@@ -164,7 +164,7 @@ to the C++17 parallel algorithms are proposed:
 
 - The parallel range algorithms support all standard and implementation-defined execution policies. ([[#supported_policies]])
 - Except as mentioned above, the parallel range algorithms should return the same type as the corresponding serial range algorithms. ([[#return_type]])
-- The proposed algorithms should follow the design of serial range algorithms with regard to name lookup. ([[#non_adl_discoverable]])
+- The proposed algorithms extend the overload set of algorithm function objects defined in `std::ranges`. ([[#algorithm_func_objects]])
 - The proposed algorithms should require callable object passed to an algorithm to be `regular_invocable` where possible. ([[#callable_parameters]])
 - The proposed algorithms should follow the design of C++17 parallel algorithms with regard to `constexpr` support. ([[#constexpr_support]])
 
@@ -182,7 +182,7 @@ and just assume that the same rules apply to the range algorithms with execution
 ## Supported execution policies ## {#supported_policies}
 
 Parallel range algorithms should operate with the same set of execution policies as the existing parallel algorithms,
-that is, `seq`, `unseq`, `par`, and `par_unseq` in the namespace `std::execution`, as well as any implementation-defined
+that is, `seq`, `unseq`, `par`, and `par_unseq` in the `std::execution` namespace, as well as any implementation-defined
 execution policies.
 
 We do not propose the parallel range algorithms to be customizable for application-defined execution policies.
@@ -277,17 +277,21 @@ for parallel variants of `std::ranges::for_each` and `std::ranges::for_each_n` s
 </table>
 
 
-## Non ADL-discoverable functions ## {#non_adl_discoverable}
+## Extending the overload sets of algorithm function objects ## {#algorithm_func_objects}
 
-We believe the proposed functionality should have the same behavior as serial range algorithms regarding the name lookup.
-For now, the new overloads are supposed to be special functions that are not discoverable by ADL (the status quo of the
-standard for serial range algorithms).
+We believe the proposed functionality should have the same properties and general behavior as serial range algorithms,
+particularly regarding the name lookup.
 
-[[P3136R0]] suggests to respecify range algorithms to be actual function objects. If adopted, that proposal will
-apply to all algorithms in the `std::ranges` namespace, thus automatically covering the parallel algorithms we propose.
+With the adoption of [[P3136R0]], function templates in the `std::ranges` namespace have been respecified as
+*algorithm function objects*. These objects are defined as sets of one or more overloaded function templates,
+which names designate the objects.
 
-Either way, adding parallel versions of the range algorithms should not be a problem.
-Please see [[#possible_impl]] for more information.
+The parallel range algorithms we propose will extend the overload sets for the respective algorithm function objects.
+The name lookup rules for such objects will apply automatically. It is covered by the wording proposed in [[P3136R0]];
+additional changes are not needed.
+
+From the implementation standpoint, adding parallel versions of the range algorithms to the overload set should not be
+a problem. Please see [[#possible_impl]] for more information.
 
 ## Requiring `random_access_iterator` or `random_access_range` ## {#random_access_requirement}
 
@@ -667,8 +671,8 @@ inline constexpr __detail::__for_each_fn for_each;
 
 We understand that some useful algorithms do not yet exist in `std::ranges`, for example, most of generalized numeric
 operations <a href="https://eel.is/c++draft/numeric.ops">[numeric.ops]</a>. The goal of this paper is however limited to
-adding overloads with `ExecutionPolicy`  to the existing algorithms in `std::ranges` namespace. Any follow-up paper that
-adds `<numeric>` algorithms to `std::ranges` should also consider adding dedicated overloads with `ExecutionPolicy`.
+adding overloads with `ExecutionPolicy`  to the existing algorithms in the `std::ranges` namespace. Any follow-up paper
+that adds `<numeric>` algorithms to `std::ranges` should also consider adding dedicated overloads with `ExecutionPolicy`.
 
 # Further work # {#further_work}
 
@@ -685,7 +689,6 @@ Based on the feedback from SG1 and SG9, the plan of work prior to the next commi
 - Add or update feature macro(s).
 - Add the necessary poll results.
 - Add implementation experience (copy from 3490) and thoughts on implementability.
-- Update [[#non_adl_discoverable]] to reflect that [[P3136R0]] has been accepted.
 - Decide on constraining the execution policy template parameter.
 - Add "The intention is that algorithms call begin/end only once, in serial code" to the design notes.
 - List all the algorithms that are being given execution policy overloads with a brief justification.
@@ -3284,6 +3287,7 @@ concept <i>nothrow-random-access-range</i> = <i>// exposition only</i>
 
 - Revert back to requiring all ranges to be sized (`&&` instead of `||`)
 - Clarify which execution policies are supported
+- Clarify that new APIs extend algorithm function objects in `std::ranges`
 
 ## R2 => R3 ## {#r2_r3}
 
