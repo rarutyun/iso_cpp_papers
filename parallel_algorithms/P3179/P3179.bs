@@ -135,8 +135,8 @@ algorithms with schedulers. We have decided to split those parts to separate pap
 # Design overview # {#design_overview}
 
 This paper proposes execution policy support for C++ range-based algorithms. In the nutshell, the proposal extends C++
-range algorithms with overloads taking any standard C++ execution policy as a function parameter. These overloads are
-further referred to as *parallel range algorithms*.
+range algorithms with overloads taking any standard or implementation defined C++ execution policy as a function parameter.
+These overloads are further referred to as *parallel range algorithms*.
 
 The proposal is targeted to C++26.
 
@@ -162,10 +162,10 @@ to the C++17 parallel algorithms are proposed:
 
 ### Other design aspects ### {#design_other_aspects}
 
+- The parallel range algorithms support all standard and implementation-defined execution policies. ([[#supported_policies]])
 - Except as mentioned above, the parallel range algorithms should return the same type as the corresponding serial range algorithms. ([[#return_type]])
 - The proposed algorithms should follow the design of serial range algorithms with regard to name lookup. ([[#non_adl_discoverable]])
 - The proposed algorithms should require callable object passed to an algorithm to be `regular_invocable` where possible. ([[#callable_parameters]])
-- The proposed APIs are not customization points. ([[#not_customization_point]])
 - The proposed algorithms should follow the design of C++17 parallel algorithms with regard to `constexpr` support. ([[#constexpr_support]])
 
 ## Coexistence with schedulers ## {#coexistence_with_schedulers}
@@ -178,6 +178,16 @@ At this point we do not, however, discuss how the appearance of schedulers
 may or should impact the execution rules for parallel algorithms specified in
 <a href="https://eel.is/c++draft/algorithms.parallel.exec">[algorithms.parallel.exec]</a>,
 and just assume that the same rules apply to the range algorithms with execution policies.
+
+## Supported execution policies ## {#supported_policies}
+
+Parallel range algorithms should operate with the same set of execution policies as the existing parallel algorithms,
+that is, `seq`, `unseq`, `par`, and `par_unseq` in the namespace `std::execution`, as well as any implementation-defined
+execution policies.
+
+We do not propose the parallel range algorithms to be customizable for application-defined execution policies.
+We expect such custom policies to become unnecessary once the standard algorithms are capable of working with
+schedulers/senders/receivers.
 
 ## Algorithm return types ## {#return_type}
 
@@ -450,12 +460,6 @@ std::ranges::for_each(std::execution::par, v.begin(), v.end(), std::ref(c));
 
 Our conclusion is that it's user responsibility to provide such a callable that avoids data races, same as for C++17 parallel
 algorithms.
-
-## Parallel range algorithms are not customization points ## {#not_customization_point}
-
-We do not propose the parallel range algorithms to be customization points because it's unclear which parameter
-to customize for. One could argue that customizations may exist for execution policies, but we expect custom execution
-policies to become unnecessary once the C++ algorithms will work with schedulers/senders/receivers.
 
 ## `constexpr` parallel range algorithms ## {#constexpr_support}
 
@@ -3279,6 +3283,7 @@ concept <i>nothrow-random-access-range</i> = <i>// exposition only</i>
 ## R3 => R4 ## {#r3_r4}
 
 - Revert back to requiring all ranges to be sized (`&&` instead of `||`)
+- Clarify which execution policies are supported
 
 ## R2 => R3 ## {#r2_r3}
 
