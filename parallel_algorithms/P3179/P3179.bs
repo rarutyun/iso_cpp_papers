@@ -344,18 +344,26 @@ See [[P3179R2]] for more details.
 
 ## Requiring ranges to be bounded ## {#require_bounded_ranges}
 
-One of the requirements we want to put on the parallel range algorithms is to disallow unbounded input and, ideally, output.
+One of the requirements we want to put on the parallel range algorithms is to disallow unbounded input and output.
 The reasons for that are:
 
-- First, for efficient parallel implementation we need to know the iteration space bounds. Otherwise, it's hard to
+- For efficient parallel implementation we need to know the iteration space bounds. Otherwise, it's hard to
     apply the "divide and conquer" strategy for creating work for multiple execution threads.
-- Second, while serial range algorithms allow passing an "infinite" range like `std::ranges::views::iota(0)`,
+- While serial range algorithms allow passing an "infinite" range like `std::ranges::views::iota(0)`,
     it may result in an endless loop. It's hard to imagine usefulness of that in the case of parallel execution.
     Requiring data sequences to be bounded potentially prevents errors at run-time.
+- Using explicitly bounded output ranges follows established practices of secure coding, which recommend or even
+    require to always specify the size of the output in order to prevent out-of-range data modifications.
 
-In the case of two or more input ranges or sequences, for some algorithms it can be sufficient for just one to be bounded.
-The other input ranges are then assumed to have at least as many elements as the bounded one.
-This enables unbounded ranges such as `views::repeat` in certain useful patterns, for example:
+If several provided ranges or sequences are bounded, an algorithm should stop as soon as the end is reached for the shortest one.
+There are already precedents in the standard that an algorithm takes two sequences with potentially different input sizes
+and chooses the smaller size as the number of iterations it is going to make, such as `std::ranges::transform`
+and `std::ranges::mismatch`. For the record, `std::transform` (including the overload with execution policy) doesn't support
+different input sizes, while `std::mismatch` does.
+
+In the case of two input ranges or sequences, for a few algorithms - namely, `mismatch`, `equal`, and `transform`, -
+it could be sufficient for just one range to be bounded, and the other being assumed to have at least as many elements
+as the bounded one. This enables unbounded ranges such as `views::repeat` in certain useful patterns, for example:
 
 ```cpp
 void normalize_parallel(range auto&& v) {
@@ -364,11 +372,9 @@ void normalize_parallel(range auto&& v) {
 }
 ```
 
-If several provided ranges or sequences are bounded, an algorithm should stop as soon as the end is reached for the shortest one.
-There are already precedents in the standard that an algorithm takes two sequences with potentially different input sizes
-and chooses the smaller size as the number of iterations it is going to make, such as `std::ranges::transform`
-and `std::ranges::mismatch`. For the record, `std::transform` (including the overload with execution policy) doesn't support
-different input sizes, while `std::mismatch` does.
+However, SG9 [decided](#sg9_wroclaw_2024) to require `sized_range` for all inputs, with the plan to relax these constraints
+for `transform` once there is a way to statically detect infinite ranges like `views::repeat` (as opposed to finite unsized
+ranges, such as null terminated strings).
 
 ## Requirements for callable parameters ## {#callable_parameters}
 
@@ -582,7 +588,7 @@ template< typename ExecutionPolicy,
           class Proj1 = identity, class Proj2 = identity >
   requires indirectly_writable<O,
              indirect_result_t<F&, projected<I1, Proj1>, projected<I2, Proj2>>>
-         && (sized_sentinel_for<S1, I1> || sized_sentinel_for<S2, I2>)
+           && sized_sentinel_for<S1, I1> && sized_sentinel_for<S2, I2>
   ranges::binary_transform_result<I1, I2, O>
     transform( ExecutionPolicy&& policy, I1 first1, S1 last1, I2 first2, S2 last2, O result,
                F binary_op, Proj1 proj1 = {}, Proj2 proj2 = {} );
@@ -597,8 +603,7 @@ requires indirectly_writable<O,
              indirect_result_t<F&,
                  projected<ranges::iterator_t<R1>, Proj1>,
                  projected<ranges::iterator_t<R2>, Proj2>>>
-         && (ranges::sized_range<R1>
-             || ranges::sized_range<R2>)
+         && ranges::sized_range<R1> && ranges::sized_range<R2>
 ranges::binary_transform_result<ranges::borrowed_iterator_t<R1>,
                                   ranges::borrowed_iterator_t<R2>,
                                   O>
@@ -667,7 +672,6 @@ adds `<numeric>` algorithms to `std::ranges` should also consider adding dedicat
 
 Based on the feedback from SG1 and SG9, the plan of work prior to the next committee F2F meeting in 2025 is:
 - Return range-as-the-output back to the design with a short description, referring to P3490R0 for details.
-- Require all input ranges to be sized (no more ||); update the design notes accordingly.
 - Change the formal wording to reflect these design decisions.
 - Make a change to nothrow-random-access-iterator to subsume nothrow-bidirectional-iterator, and add the latter
   as exposition-only concept.
@@ -1254,13 +1258,13 @@ template<input_range R1, input_range R2,
 <xmp class="wordingStyle">
 template<class ExecutionPolicy, random_access_iterator I1, sentinel_for<I1> S1, random_access_iterator I2, sentinel_for<I2> S2,
          class Pred = ranges::equal_to, class Proj1 = identity, class Proj2 = identity>
-  requires indirectly_comparable<I1, I2, Pred, Proj1, Proj2> && (sized_sentinel_for<S1, I1> || sized_sentinel_for<S2, I2>)
+  requires indirectly_comparable<I1, I2, Pred, Proj1, Proj2> && sized_sentinel_for<S1, I1> && sized_sentinel_for<S2, I2>
   ranges::mismatch_result<I1, I2>
     ranges::mismatch(ExecutionPolicy&& exec, I1 first1, S1 last1, I2 first2,S2 last2,
                      Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
 template<class ExecutionPolicy, random_access_range R1, random_access_range R2,
          class Pred = ranges::equal_to, class Proj1 = identity, class Proj2 = identity>
-  requires indirectly_comparable<iterator_t<R1>, iterator_t<R2>, Pred, Proj1, Proj2> && (sized_range<R1> || sized_range<R2>)
+  requires indirectly_comparable<iterator_t<R1>, iterator_t<R2>, Pred, Proj1, Proj2> && sized_range<R1> && sized_range<R2>
   ranges::mismatch_result<borrowed_iterator_t<R1>, borrowed_iterator_t<R2>>
     ranges::mismatch(ExecutionPolicy&& exec, R1&& r1, R2&& r2, Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
 </xmp>
@@ -1288,13 +1292,13 @@ template<class ExecutionPolicy, random_access_iterator I1, sentinel_for<I1> S1,
          random_access_iterator I2, sentinel_for<I2> S2,
          class Pred = ranges::equal_to, class Proj1 = identity, class Proj2 = identity>
   requires indirectly_comparable<I1, I2, Pred, Proj1, Proj2> &&
-    (sized_sentinel_for<S1, I1> || sized_sentinel_for<S2, I2>)
+    sized_sentinel_for<S1, I1> && sized_sentinel_for<S2, I2>
   bool ranges::equal(ExecutionPolicy&& exec, I1 first1, S1 last1, I2 first2, S2 last2,
                      Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
 template<class ExecutionPolicy, random_access_range R1, random_access_range R2, class Pred = ranges::equal_to,
          class Proj1 = identity, class Proj2 = identity>
   requires indirectly_comparable<iterator_t<R1>, iterator_t<R2>, Pred, Proj1, Proj2> &&
-    (sized_range<R1> || sized_range<R2>)
+    sized_range<R1> && sized_range<R2>
   bool ranges::equal(ExecutionPolicy&& exec, R1&& r1, R2&& r2,
                      Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
 </xmp>
@@ -1641,14 +1645,14 @@ template<input_range R1, input_range R2, weakly_incrementable O,
 template<class ExecutionPolicy, random_access_iterator I1, sentinel_for<I1> S1, random_access_iterator I2, sentinel_for<I2> S2,
          random_access_iterator O, copy_constructible F, class Proj1 = identity, class Proj2 = identity>
   requires indirectly_writable<O, indirect_result_t<F&, projected<I1, Proj1>, projected<I2, Proj2>>> &&
-    (sized_sentinel_for<S1, I1> || sized_sentinel_for<S2, I2>)
+    sized_sentinel_for<S1, I1> && sized_sentinel_for<S2, I2>
   ranges::binary_transform_result<I1, I2, O>
     ranges::transform(ExecutionPolicy&& exec, I1 first1, S1 last1, I2 first2, S2 last2, O result,
                       F binary_op, Proj1 proj1 = {}, Proj2 proj2 = {});
 template<class ExecutionPolicy, random_access_range R1, random_access_range R2, random_access_iterator O,
          copy_constructible F, class Proj1 = identity, class Proj2 = identity>
   requires indirectly_writable<O, indirect_result_t<F&, projected<iterator_t<R1>, Proj1>,
-    projected<iterator_t<R2>, Proj2>>> && (sized_range<R1> || sized_range<R2>)
+    projected<iterator_t<R2>, Proj2>>> && sized_range<R1> && sized_range<R2>
   ranges::binary_transform_result<borrowed_iterator_t<R1>, borrowed_iterator_t<R2>, O>
     ranges::transform(ExecutionPolicy&& exec, R1&& r1, R2&& r2, O result,
                       F binary_op, Proj1 proj1 = {}, Proj2 proj2 = {});
@@ -3274,6 +3278,8 @@ concept <i>nothrow-random-access-range</i> = <i>// exposition only</i>
 
 ## R3 => R4 ## {#r3_r4}
 
+- Revert back to requiring all ranges to be sized (`&&` instead of `||`)
+
 ## R2 => R3 ## {#r2_r3}
 
 - Use `iterator` as an output.
@@ -3296,6 +3302,45 @@ concept <i>nothrow-random-access-range</i> = <i>// exposition only</i>
 - Require ranges to be bounded
 
 # Polls # {#polls}
+
+## SG9, Wroclaw, 2024 ## {#sg9_wroclaw_2024}
+
+**Poll 1**: Change `mismatch` and `equal` to require `sized_range` for both inputs ("`&&` instead of `||`").
+<table>
+  <tr>
+    <th>SF</th>
+    <th>F</th>
+    <th>N</th>
+    <th>A</th>
+    <th>SA</th>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td>3</td>
+    <td>1</td>
+    <td>0</td>
+    <td>0</td>
+  </tr>
+</table>
+
+**Poll 2**: Change `transform` to require `sized_range` for both inputs ("`&&` instead of `||`"),
+with the plan to relax these constraints once we have a way to statically detect infinite ranges.
+<table>
+  <tr>
+    <th>SF</th>
+    <th>F</th>
+    <th>N</th>
+    <th>A</th>
+    <th>SA</th>
+  </tr>
+  <tr>
+    <td>3</td>
+    <td>3</td>
+    <td>0</td>
+    <td>1</td>
+    <td>1</td>
+  </tr>
+</table>
 
 ## Joint SG1 + SG9, St. Louis, 2024 ## {#sg1_sg9_st_louis_2024}
 
@@ -3321,7 +3366,7 @@ concept <i>nothrow-random-access-range</i> = <i>// exposition only</i>
   </tr>
 </table>
 
-## SG9, Tokyo 2024 ## {#sg9_tokyo_2024}
+## SG9, Tokyo, 2024 ## {#sg9_tokyo_2024}
 
 **Poll 1**: `for_each` shouldn't return the callable
 <table>
