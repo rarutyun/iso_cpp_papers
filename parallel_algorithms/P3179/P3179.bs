@@ -652,8 +652,6 @@ that adds `<numeric>` algorithms to `std::ranges` should also consider adding de
 Based on the feedback from SG1 and SG9, the plan of work prior to the next committee F2F meeting in 2025 is:
 - Return range-as-the-output back to the design with a short description, referring to P3490R0 for details.
 - Change the formal wording to reflect these design decisions.
-- Make a change to nothrow-random-access-iterator to subsume nothrow-bidirectional-iterator, and add the latter
-  as exposition-only concept.
 - Fix bugs in the signatures.
 - Update the synopsis of <algorithm>.
 - Add the algorithm descriptions to the wording, even if no changes are made.
@@ -2980,7 +2978,9 @@ template&lt;class I>
   concept <i>nothrow-forward-iterator</i> = <i>see below</i>;     <i>// exposition only</i>
 <ins>
 template&lt;class I>
-  concept <i>nothrow-random-access-iterator</i> = <i>see below</i>;     <i>// exposition only</i>
+  concept <i>nothrow-bidirectional-iterator</i> = <i>see below</i>;  <i>// exposition only</i>
+template&lt;class I>
+  concept <i>nothrow-random-access-iterator</i> = <i>see below</i>;  <i>// exposition only</i>
 </ins>
 template&lt;class S, class I>
   concept <i>nothrow-sentinel-for</i> = <i>see below</i>;         <i>// exposition only</i>
@@ -2993,6 +2993,8 @@ template&lt;class R>
 template&lt;class R>
   concept <i>nothrow-forward-range</i> = <i>see below</i>;        <i>// exposition only</i>
 <ins>
+template&lt;class I>
+  concept <i>nothrow-bidirectional-range</i> = <i>see below</i>;     <i>// exposition only</i>
 template&lt;class I>
   concept <i>nothrow-random-access-range</i> = <i>see below</i>;     <i>// exposition only</i>
 </ins>
@@ -3210,11 +3212,13 @@ move construction, copy assignment, move assignment, or comparisons between vali
 <ins>
 <pre class="wordingStyle">
 template&lt;class S, class I>
-concept <i>nothrow-sized-sentinel-for</i> = sized_sentinel_for&lt;S, I>; <i>// exposition only</i>
+concept <i>nothrow-sized-sentinel-for</i> = <i>// exposition only</i>
+  <i>nothrow-sentinel-for</i>&lt;S, I> &&
+  sized_sentinel_for&lt;S, I>; 
 </pre>
 
-Types `S` and `I` model <code><i>nothrow-sized-sentinel-for</i></code> only if no exceptions are thrown from copy construction,
-move construction, copy assignment, move assignment, or comparisons between valid values of type `I` and `S`.
+Types `S` and `I` model <code><i>nothrow-sized-sentinel-for</i></code> only if no exceptions are thrown from the <code>-</code> operator
+for valid values of type `I` and `S`.
 
 [*Note X*: This concept allows some `sized_sentinel_for` ([iterator.concept.sizedsentinel]) operations to throw exceptions. — *end note*]
 </ins>
@@ -3229,18 +3233,6 @@ concept <i>nothrow-forward-iterator</i> = <i>// exposition only</i>
 
 [*Note X*: This concept allows some `forward_iterator` ([iterator.concept.forward]) operations to throw exceptions. — *end note*]
 
-<ins>
-<pre class="wordingStyle">
-template&lt;class I>
-concept <i>nothrow-random-access-iterator</i> = <i>// exposition only</i>
-  <i>nothrow-forward-iterator</i>&lt;I> &&
-  random_access_iterator&lt;I> &&
-  <i>nothrow-sentinel-for</i>&lt;I, I>;
-</pre>
-
-[*Note X*: This concept allows some `random_access_iterator` ([iterator.concept.random.access]) operations to throw exceptions. — *end note*]
-</ins>
-
 <pre class="wordingStyle">
 template&lt;class R>
 concept <i>nothrow-forward-range</i> = <i>// exposition only</i>
@@ -3248,12 +3240,41 @@ concept <i>nothrow-forward-range</i> = <i>// exposition only</i>
   <i>nothrow-forward-iterator</i>&lt;iterator_t&lt;R>>;
 </pre>
 
-
 <ins>
+<pre class="wordingStyle">
+template&lt;class I>
+concept <i>nothrow-bidirectional-iterator</i> = <i>// exposition only</i>
+  <i>nothrow-forward-iterator</i>&lt;I> &&
+  bidirectional_iterator&lt;I>;
+</pre>
+
+A type `I` models <code><i>nothrow-bidirectional-iterator</i></code> only if no exceptions are thrown from decrementing valid iterators.
+
+[*Note X*: This concept allows some `bidirectional_iterator` ([iterator.concept.bidir]) operations to throw exceptions. — *end note*]
+
+<pre class="wordingStyle">
+template&lt;class R>
+concept <i>nothrow-bidirectional-range</i> = <i>// exposition only</i>
+  <i>nothrow-forward-range</i>&lt;R> &&
+  <i>nothrow-bidirectional-iterator</i>&lt;iterator_t&lt;R>>;
+</pre>
+<pre class="wordingStyle">
+template&lt;class I>
+concept <i>nothrow-random-access-iterator</i> = <i>// exposition only</i>
+  <i>nothrow-bidirectional-iterator</i>&lt;I> &&
+  random_access_iterator&lt;I> &&
+  <i>nothrow-sized-sentinel-for</i>&lt;I, I>;
+</pre>
+
+A type `I` models <code><i>nothrow-random-access-iterator</i></code> only if no exceptions are thrown from advancement
+with `+=`, `+`, `-=`, and `-`, comparisons, or applying the `[]` subscript operator to valid iterators.
+
+[*Note X*: This concept allows some `random_access_iterator` ([iterator.concept.random.access]) operations to throw exceptions. — *end note*]
+
 <pre class="wordingStyle">
 template&lt;class R>
 concept <i>nothrow-random-access-range</i> = <i>// exposition only</i>
-  <i>nothrow-forward-range</i>&lt;R> &&
+  <i>nothrow-bidirectional-range</i>&lt;R> &&
   <i>nothrow-random-access-iterator</i>&lt;iterator_t&lt;R>>;
 </pre>
 </ins>
@@ -3266,6 +3287,7 @@ concept <i>nothrow-random-access-range</i> = <i>// exposition only</i>
 - Clarify which execution policies are supported
 - Clarify that new APIs extend algorithm function objects in `std::ranges`
 - Add the feature test macro
+- Address other feedback from SG1 and SG9
 
 ## R2 => R3 ## {#r2_r3}
 
