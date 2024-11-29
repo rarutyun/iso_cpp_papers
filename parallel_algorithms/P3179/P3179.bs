@@ -168,6 +168,25 @@ to the C++17 parallel algorithms are proposed:
 - The proposed algorithms should require callable object passed to an algorithm to be `regular_invocable` where possible. ([[#callable_parameters]])
 - The proposed algorithms should follow the design of C++17 parallel algorithms with regard to `constexpr` support. ([[#constexpr_support]])
 
+### An example of the proposed API ### {#design_api example}
+
+```cpp
+template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S,
+         random_access_iterator O, sized_sentinel_for<O> OutS,
+         copy_constructible F, class Proj = identity>
+  requires indirectly_writable<O, indirect_result_t<F&, projected<I, Proj>>>
+  ranges::unary_transform_result<I, O>
+    ranges::transform(ExecutionPolicy&& exec, I first, S last, O result, OutS result_last,
+                      F op, Proj proj = {});
+
+template<class ExecutionPolicy, ranges::random_access_range R, ranges::random_access_range OutR,
+         copy_constructible F, class Proj = identity>
+  requires indirectly_writable<ranges::iterator_t<OutR>, indirect_result_t<F&, projected<ranges::iterator_t<R>, Proj>>>
+           && ranges::sized_range<R> && ranges::sized_range<OutR>
+  ranges::unary_transform_result<ranges::borrowed_iterator_t<R>, ranges::borrowed_iterator_t<OutR>>
+    ranges::transform(ExecutionPolicy&& exec, R&& r, OutR&& result, F op, Proj proj = {});
+```
+
 ## Coexistence with schedulers ## {#coexistence_with_schedulers}
 
 We believe that adding parallel range algorithms does not have the risk of conflict with anticipated scheduler-based
@@ -569,58 +588,10 @@ The example above lacks the drawbacks described for the previous variations:
 - There is no room for the lambda type mistake;
 - The readability is much better compared to the second variation and not worse than in the first one.
 
-# Proposed API # {#proposed_api}
+# Possible implementation of a parallel range algorithm # {#possible_impl}
 
-Note: ``std::ranges::for_each`` and ``std::ranges::transform`` are used as reference points.
-When the design is ratified, it will be spread across other algorithms.
-
-```cpp
-// for_each
-template <class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S,
-          class Proj = identity, indirectly_unary_invocable<projected<I, Proj>> Fun>
-  I
-    for_each(ExecutionPolicy&& policy, I first, S last, Fun f, Proj proj = {});
-
-template <class ExecutionPolicy, ranges::random_access_range R, class Proj = identity,
-         indirectly_unary_invocable<projected<ranges::iterator_t<R>, Proj>> Fun>
-requires ranges::sized_range<R>
-  ranges::borrowed_iterator_t<R>
-    for_each(ExecutionPolicy&& policy, R&& r, Fun f, Proj proj = {});
-
-// binary transform with an output range and an output sentinel
-template< typename ExecutionPolicy,
-          random_access_iterator I1, sentinel_for<I1> S1,
-          random_access_iterator I2, sentinel_for<I2> S2,
-          random_access_iterator O,
-          copy_constructible F,
-          class Proj1 = identity, class Proj2 = identity >
-  requires indirectly_writable<O,
-             indirect_result_t<F&, projected<I1, Proj1>, projected<I2, Proj2>>>
-           && sized_sentinel_for<S1, I1> && sized_sentinel_for<S2, I2>
-  ranges::binary_transform_result<I1, I2, O>
-    transform( ExecutionPolicy&& policy, I1 first1, S1 last1, I2 first2, S2 last2, O result,
-               F binary_op, Proj1 proj1 = {}, Proj2 proj2 = {} );
-
-template< typename ExecutionPolicy,
-          ranges::random_access_range R1,
-          ranges::random_access_range R2,
-          random_access_iterator O,
-          copy_constructible F,
-          class Proj1 = identity, class Proj2 = identity >
-requires indirectly_writable<O,
-             indirect_result_t<F&,
-                 projected<ranges::iterator_t<R1>, Proj1>,
-                 projected<ranges::iterator_t<R2>, Proj2>>>
-         && ranges::sized_range<R1> && ranges::sized_range<R2>
-ranges::binary_transform_result<ranges::borrowed_iterator_t<R1>,
-                                  ranges::borrowed_iterator_t<R2>,
-                                  O>
-    transform( ExecutionPolicy&& policy, R1&& r1, R2&& r2, O result, F binary_op,
-               Proj1 proj1 = {}, Proj2 proj2 = {} );
-
-```
-
-## Possible implementation of a parallel range algorithm ## {#possible_impl}
+Here we show a possible implementation of `std::ranges::for_each` with the new overloads
+proposed in [[#modify_alg_foreach]]:
 
 ```cpp
 // A possible implementation of std::ranges::for_each
