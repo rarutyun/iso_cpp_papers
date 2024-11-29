@@ -657,7 +657,6 @@ Based on the feedback from SG1 and SG9, the plan of work prior to the next commi
 - Fix bugs in the signatures.
 - Update the synopsis of <algorithm>.
 - Add the algorithm descriptions to the wording, even if no changes are made.
-- Add or update feature macro(s).
 - Add the necessary poll results.
 - Add implementation experience (copy from 3490) and thoughts on implementability.
 - Decide on constraining the execution policy template parameter.
@@ -681,6 +680,13 @@ Here are questions we want to answer (potentially not a complete list):
 - Do we need to add extra requirements towards thread safety to the standard views?
 
 # Formal wording # {#formal_wording}
+
+## Add the feature test macro to <a href="http://eel.is/c++draft/version.syn">[**version.syn**]</a> ## {#modify_version_syn}
+
+<xmp class="wordingStyle">#define __cpp_lib_parallel_algorithm                201603L // also in <algorithm>, <numeric></xmp>
+<ins><xmp class="wordingStyle">#define __cpp_lib_parallel_range_algorithms         20����L // also in <algorithm>, <memory></xmp></ins>
+<xmp class="wordingStyle">#define __cpp_lib_philox_engine                     202406L // also in <random></xmp>
+
 
 ## Modify <a href="https://eel.is/c++draft/algorithms.parallel.defns">[**algorithms.parallel.defns**]</a> ## {#modify_alg_parallel_def}
 
@@ -3259,6 +3265,7 @@ concept <i>nothrow-random-access-range</i> = <i>// exposition only</i>
 - Revert back to requiring all ranges to be sized (`&&` instead of `||`)
 - Clarify which execution policies are supported
 - Clarify that new APIs extend algorithm function objects in `std::ranges`
+- Add the feature test macro
 
 ## R2 => R3 ## {#r2_r3}
 
