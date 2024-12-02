@@ -1,3 +1,0 @@
-[submodule "parallel_algorithms/wg21"]
-	path = parallel_algorithms/wg21
-	url = https://github.com/mpark/wg21.git
