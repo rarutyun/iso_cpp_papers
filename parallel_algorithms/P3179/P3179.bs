@@ -147,7 +147,7 @@ The proposal is targeted to C++26.
 Comparing to the C++20 serial range algorithms, we propose the following modifications:
 - The execution policy parameter is added.
 - `for_each` and `for_each_n` return only an iterator but not the function.
-- Parallel range algorithms take `range`, not an iterator, as the output for the overloads with ranges, and additionally take
+- Parallel range algorithms take a range, not an iterator, as the output for the overloads with ranges, and additionally take
     an output sentinel for the "iterator and sentinel" overloads. ([[#range_as_the_output]])
 - Until better parallelism-friendly abstractions are proposed, parallel algorithms require `random_access_{iterator,range}`. ([[#random_access_requirement]])
 - All input and output data sequences must be bounded. ([[#require_bounded_ranges]])
@@ -168,7 +168,7 @@ to the C++17 parallel algorithms are proposed:
 - The proposed algorithms should require callable object passed to an algorithm to be `regular_invocable` where possible. ([[#callable_parameters]])
 - The proposed algorithms should follow the design of C++17 parallel algorithms with regard to `constexpr` support. ([[#constexpr_support]])
 
-### An example of the proposed API ### {#design_api example}
+### An example of the proposed API ### {#design_api_example}
 
 ```cpp
 template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S,
@@ -404,8 +404,8 @@ and chooses the smaller size as the number of iterations it is going to make, su
 and `std::ranges::mismatch`. For the record, `std::transform` (including the overload with execution policy) doesn't support
 different input sizes, while `std::mismatch` does.
 
-In the case of two input ranges or sequences, for a few algorithms - namely, `mismatch`, `equal`, and `transform`, -
-it could be sufficient for just one range to be bounded, and the other being assumed to have at least as many elements
+In the case of two input ranges or sequences, for a few algorithms - namely, `mismatch`, `equal`, and `transform` -
+it could be sufficient for just one range to be bounded and the other assumed to have at least as many elements
 as the bounded one. This enables unbounded ranges such as `views::repeat` in certain useful patterns, for example:
 
 ```cpp
@@ -618,7 +618,7 @@ struct __for_each_fn
     // The overload for unsequenced and parallel policies. Requires random_access_iterator
     template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S,
              class Proj = identity, indirectly_unary_invocable<projected<I, Proj>> Fun>
-                 requires is_execution_policy_v<std::remove_cvref_t<ExecutionPolicy>>
+    requires is_execution_policy_v<std::remove_cvref_t<ExecutionPolicy>>
     I
     operator()(ExecutionPolicy&& exec, I first, S last, Fun f, Proj proj = {}) const
     {
@@ -633,6 +633,7 @@ struct __for_each_fn
 
     template<class ExecutionPolicy, random_access_range R, class Proj = identity,
              indirectly_unary_invocable<projected<iterator_t<R>, Proj>> Fun>
+    requires sized_range<R>
     ranges::borrowed_iterator_t<R>
     operator()(ExecutionPolicy&& exec, R&& r, Fun f, Proj proj = {}) const
     {
@@ -1246,9 +1247,10 @@ template<input_range R1, input_range R2,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I1, sentinel_for<I1> S1, random_access_iterator I2, sentinel_for<I2> S2,
+template<class ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1,
+         random_access_iterator I2, sized_sentinel_for<I2> S2,
          class Pred = ranges::equal_to, class Proj1 = identity, class Proj2 = identity>
-  requires indirectly_comparable<I1, I2, Pred, Proj1, Proj2> && sized_sentinel_for<S1, I1> && sized_sentinel_for<S2, I2>
+  requires indirectly_comparable<I1, I2, Pred, Proj1, Proj2>
   ranges::mismatch_result<I1, I2>
     ranges::mismatch(ExecutionPolicy&& exec, I1 first1, S1 last1, I2 first2,S2 last2,
                      Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
@@ -1278,11 +1280,10 @@ template<input_range R1, input_range R2, class Pred = ranges::equal_to,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I1, sentinel_for<I1> S1,
-         random_access_iterator I2, sentinel_for<I2> S2,
+template<class ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1,
+         random_access_iterator I2, sized_sentinel_for<I2> S2,
          class Pred = ranges::equal_to, class Proj1 = identity, class Proj2 = identity>
-  requires indirectly_comparable<I1, I2, Pred, Proj1, Proj2> &&
-    sized_sentinel_for<S1, I1> && sized_sentinel_for<S2, I2>
+  requires indirectly_comparable<I1, I2, Pred, Proj1, Proj2>
   bool ranges::equal(ExecutionPolicy&& exec, I1 first1, S1 last1, I2 first2, S2 last2,
                      Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
 template<class ExecutionPolicy, random_access_range R1, random_access_range R2, class Pred = ranges::equal_to,
