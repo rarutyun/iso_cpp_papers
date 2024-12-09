@@ -158,7 +158,7 @@ In addition to data sequences being passed as either ranges or "iterator and sen
 to the C++17 parallel algorithms are proposed:
 - `for_each` returns an iterator, not `void`.
 - Algorithms require `random_access_{iterator,range}`, and not *LegacyForwardIterator*.
-- All input and output data sequences must be bounded. 
+- All input and output data sequences must be bounded.
 
 ### Other design aspects ### {#design_other_aspects}
 
@@ -649,19 +649,188 @@ inline constexpr __detail::__for_each_fn for_each;
 } // namespace ranges
 ```
 
-# Absence of some serial range-based algorithms # {#serial_range_based_absence}
+# The proposal scope # {#proposal_scope}
+
+## In-scope ## {#in_scope}
+
+### The counterparts of C++17 parallel aglorithms in `std::ranges` namespace ### {#cpp17_counterpart}
+
+<table>
+  <tr>
+    <td>`all_of`
+    <td>`search{_n}`
+    <td>`remove_copy`
+    <td>`is_sorted`
+    <td>`is_heap`
+  </tr>
+  <tr>
+    <td>`any_of`
+    <td>`copy{_n}`
+    <td>`remove_copy_if`
+    <td>`is_sorted_until`
+    <td>`is_heap_until`
+  </tr>
+  <tr>
+    <td>`none_of`
+    <td>`copy_if`
+    <td>`unique`
+    <td>`nth_element`
+    <td>`min_element`
+  </tr>
+  <tr>
+    <td>`for_each{_n}`
+    <td>`move`
+    <td>`unique_copy`
+    <td>`is_partitioned`
+    <td>`max_element`
+  </tr>
+  <tr>
+    <td>`find`
+    <td>`swap_ranges`
+    <td>`reverse`
+    <td>`partition`
+    <td>`minmax_element`
+  </tr>
+  <tr>
+    <td>`find_if`
+    <td>`transform`
+    <td>`reverse_copy`
+    <td>`stable_partition`
+    <td>`lexicographical_compare`
+  </tr>
+  <tr>
+    <td>`find_if_not`
+    <td>`replace`
+    <td>`rotate`
+    <td>`partition_copy`
+    <td>`uninitialized_default_construct{_n}`
+  </tr>
+  <tr>
+    <td>`find_end`
+    <td>`replace_if`
+    <td>`rotate_copy`
+    <td>`merge`
+    <td>`uninitialized_value_construct{_n}`
+  </tr>
+  <tr>
+    <td>`find_first_of`
+    <td>`replace_copy`
+    <td>`shift_left`
+    <td>`inplace_merge`
+    <td>`uninitialized_copy{_n}`
+  </tr>
+  <tr>
+    <td>`adjacent_find`
+    <td>`replace_copy_if`
+    <td>`shift_right`
+    <td>`includes`
+    <td>`uninitialized_move{_n}`
+  </tr>
+  <tr>
+    <td>`count`
+    <td>`fill{_n}`
+    <td>`sort`
+    <td>`set_union`
+    <td>`uninitialized_fill{_n}`
+  </tr>
+  <tr>
+    <td>`count_if`
+    <td>`generate{_n}`
+    <td>`stable_sort`
+    <td>`set_intersection`
+    <td>`destroy{_n}`
+  </tr>
+  <tr>
+    <td>`mismatch`
+    <td>`remove`
+    <td>`partial_sort`
+    <td>`set_difference`
+    <td>
+  </tr>
+  <tr>
+    <td>`equal`
+    <td>`remove_if`
+    <td>`partial_sort_copy`
+    <td>`set_symmetric_difference`
+    <td>
+  </tr>
+</table>
+
+### Algoirhtms in `std::ranges` namespace only ### {#only_in_std_ranges}
+
+The algorithms below are easy to add because they are either expressable via existing parallel algorithms or
+an analog with very close semantics exists:
+
+<table>
+  <tr>
+    <th>`std::ranges` algorithms to add
+    <th>`std` algorithms used as the guidance
+  </tr>
+  <tr>
+    <td>`contains`
+    <td>`find`
+  </tr>
+  <tr>
+    <td>`contains_subrange`
+    <td>`search`
+  </tr>
+  <tr>
+    <td>`find_last`
+    <td>`find`
+  </tr>
+  <tr>
+    <td>`find_last_if`
+    <td>`find_if`
+  </tr>
+  <tr>
+    <td>`find_last_if_not`
+    <td>`find_if_not`
+  </tr>
+  <tr>
+    <td>`starts_with`
+    <td>`mismatch`
+  </tr>
+  <tr>
+    <td>`ends_with`
+    <td>`equal`
+  </tr>
+  <tr>
+    <td>`min`
+    <td>`min_element`
+  </tr>
+  <tr>
+    <td>`max`
+    <td>`max_element`
+  </tr>
+  <tr>
+    <td>`minmax`
+    <td>`minmax_element`
+  </tr>
+</table>
+
+## Out-of-scope ## {#out_of_scope}
+
+### The counterparts of exiting algorithms without `ExecutionPolicy` ### {#without_exec_policy_counterpart}
+
+// TODO: Add a full list
+
+### Absence of some serial range-based algorithms ### {#serial_range_based_absence}
 
 We understand that some useful algorithms do not yet exist in `std::ranges`, for example, most of generalized numeric
 operations <a href="https://eel.is/c++draft/numeric.ops">[numeric.ops]</a>. The goal of this paper is however limited to
 adding overloads with `ExecutionPolicy`  to the existing algorithms in the `std::ranges` namespace. Any follow-up paper
 that adds `<numeric>` algorithms to `std::ranges` should also consider adding dedicated overloads with `ExecutionPolicy`.
 
+### The rest of `std::ranges` only algorithms ### {#rest_std_ranges_algorithms}
+
+// TODO: Add a full list
+
 # Further work # {#further_work}
 
 ## Issues to address ## {#issues_to_address}
 
 Based on the feedback from SG1 and SG9, the plan of work prior to the next committee F2F meeting in 2025 is:
-- Fix bugs in the signatures.
+- <s>Fix bugs in the signatures.</s>
 - Update the synopsis of <algorithm>.
 - Add the algorithm descriptions to the wording, even if no changes are made.
 - Add the necessary poll results.
@@ -710,6 +879,19 @@ Unless otherwise specified, <del>function</del><ins>invocable</ins> objects pass
 <span><ins>`Proj`</ins></span> and the operators used by the analogous overloads to these parallel algorithms that are formed by an invocation
 with the specified default predicate or operation (where applicable) shall not directly or indirectly modify objects via their arguments,
 nor shall they rely on the identity of the provided objects.
+
+## Modify <a href="https://eel.is/c++draft/algorithms.parallel.overloads">[**algorithms.parallel.overloads**]</a> ## {#modify_alg_parallel_overloads}
+
+Parallel algorithms shall not participate in overload resolution unless
+`is_execution_policy_v<remove_cvref_t<ExecutionPolicy>>` is `true`.
+
+<ins>
+<pre class="wordingStyle">
+template &lt;class T>
+concept <i>execution_policy</i> = <i>// exposition only</i>
+    is_execution_policy_v&lt;remove_cvref_t&lt;ExecutionPolicy>>
+</pre>
+</ins>
 
 ## Modify `all_of` in <a href="https://eel.is/c++draft/alg.all.of">[**alg.all.of**]</a> ## {#modify_alg_all_of}
 
