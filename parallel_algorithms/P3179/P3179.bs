@@ -1,10 +1,10 @@
 <pre class='metadata'>
 Title: C++ parallel range algorithms
-Shortname: P3179
+Shortname: D3179
 Level: 4
 Status: P
 Group: wg21
-URL: https://wg21.link/P3179R4
+URL: https://wg21.link/D3179R4
 Editor: Ruslan Arutyunyan, Intel, ruslan.arutyunyan@intel.com
         Alexey Kukanov, Intel, alexey.kukanov@intel.com
         Bryce Adelstein Lelbach (he/him/his), Nvidia, brycelelbach@gmail.com
@@ -3541,8 +3541,7 @@ concept <i>nothrow-bidirectional-range</i> = <i>// exposition only</i>
 template&lt;class I>
 concept <i>nothrow-random-access-iterator</i> = <i>// exposition only</i>
   <i>nothrow-bidirectional-iterator</i>&lt;I> &&
-  random_access_iterator&lt;I> &&
-  <i>nothrow-sized-sentinel-for</i>&lt;I, I>;
+  random_access_iterator&lt;I>;
 </pre>
 
 A type `I` models <code><i>nothrow-random-access-iterator</i></code> only if no exceptions are thrown from advancement
