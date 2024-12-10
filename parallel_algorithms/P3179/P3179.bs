@@ -429,7 +429,7 @@ SG1 preferred to keep the behavior consistent with C++17 parallel algorithms, wh
 We did extra investigation and decided that requiring `const`-qualified operator at compile-time is not strictly necessary
 because:
 - The vast majority of the serial range algorithms requires function objects to be `regular_invocable` (or its derivatives),
-    which already has the semantical requirement of not modifying either the function object or its arguments.
+    which already has the semantic requirement of not modifying either the function object or its arguments.
     While not enforced at compile-time, it seems good enough for our purpose because it demands having the same function
     object state between invocations (independently of `const` qualifier), and it is consistent with serial range algorithms.
 - Remaining algorithms should be considered individually. For example, `for_each` using a mutable `operator()` is of less
@@ -653,7 +653,7 @@ inline constexpr __detail::__for_each_fn for_each;
 
 ## In-scope ## {#in_scope}
 
-### The counterparts of C++17 parallel aglorithms in `std::ranges` namespace ### {#cpp17_counterpart}
+### The counterparts of C++17 parallel algorithms in `std::ranges` namespace ### {#cpp17_counterpart}
 
 <table>
   <tr>
@@ -756,10 +756,10 @@ inline constexpr __detail::__for_each_fn for_each;
   </tr>
 </table>
 
-### Algoirhtms in `std::ranges` namespace only ### {#only_in_std_ranges}
+### Algorithms in `std::ranges` namespace only ### {#only_in_std_ranges}
 
-The algorithms below are easy to add because they are either expressable via existing parallel algorithms or
-an analog with very close semantics exists:
+The algorithms below are easy to add because they are either expressible via existing parallel algorithms or
+an analogue with very close semantics exists:
 
 <table>
   <tr>
@@ -863,15 +863,15 @@ and for SYCL devices, and it works with a subset of the standard C++ views.
 
 We use the range-as-the-output approach where applicable: in `transform`, `copy`, `copy_if`, and `merge`.
 
-We don't forsee any issues with implentability for the rest of the proposed parallel algorithms because all of them were
-already implemented in C++17 and new APIs that we propose are expressable via the existing ones.
+We don't foresee any issues with implementability for the rest of the proposed parallel algorithms because all of them were
+already implemented in C++17 and new APIs that we propose are expressible via the existing ones.
 
 # Further work # {#further_work}
 
 ## Issues to address ## {#issues_to_address}
 
 Having known bugs and feedback from SG1 and SG9, the plan of work prior to the next committee F2F meeting in
-Austia, 2025 is the following:
+Austria, 2025 is the following:
 - <s>Fix known bugs in the signatures wording.</s>
 - <s>Decide on constraining the execution policy template parameter.</s>
 - <s>List all the algorithms that are being given execution policy overloads.</s>
