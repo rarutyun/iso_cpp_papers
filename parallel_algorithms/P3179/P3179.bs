@@ -1,10 +1,10 @@
 <pre class='metadata'>
 Title: C++ parallel range algorithms
-Shortname: D3179
+Shortname: P3179
 Level: 4
 Status: P
 Group: wg21
-URL: https://wg21.link/D3179R4
+URL: https://wg21.link/P3179R4
 Editor: Ruslan Arutyunyan, Intel, ruslan.arutyunyan@intel.com
         Alexey Kukanov, Intel, alexey.kukanov@intel.com
         Bryce Adelstein Lelbach (he/him/his), Nvidia, brycelelbach@gmail.com
@@ -825,8 +825,6 @@ to add value:
 - `equal_range`
 - `binary_search`
 - `partition_point`
-- `sample` (RNG specific)
-- `shuffle` (RNG specific)
 
 Below we list the algorithms below without `ExecutionPolicy` in C++17, where `ExecutionPolicy` parameter might make sense
 but requires deeper investigation:
@@ -834,6 +832,10 @@ but requires deeper investigation:
 - `iota`
 - `make_heap`
 - `is_permutation`
+- `copy_backward`
+- `move_backward`
+- `sample` (RNG specific)
+- `shuffle` (RNG specific)
 
 Below we list `std::ranges` only algorithms where we don't add the `ExecutionPolicy` parameter:
 
@@ -844,7 +846,6 @@ Below we list `std::ranges` only algorithms where we don't add the `ExecutionPol
 - `fold_left_with_iter`
 - `fold_left_first_with_iter`
 - `generate_random` (RNG specific, `ExecutionPolicy` parameter was already discussed during [[P1068R11]] review)
-
 
 ### Absence of some serial range-based algorithms ### {#serial_range_based_absence}
 
@@ -872,11 +873,6 @@ already implemented in C++17 and new APIs that we propose are expressible via th
 
 Having known bugs and feedback from SG1 and SG9, the plan of work prior to the next committee F2F meeting in
 Austria, 2025 is the following:
-- <s>Fix known bugs in the signatures wording.</s>
-- <s>Decide on constraining the execution policy template parameter.</s>
-- <s>List all the algorithms that are being given execution policy overloads.</s>
-- <s>List range algorithms that are being excluded.</s>
-- <s>Add implementation experience and thoughts on implementability.</s>
 - Update <a href="https://eel.is/c++draft/algorithm.syn">[algorithm.syn]</a>.
 - Consider adding the algorithm descriptions to the wording, even if no changes are made.
 
@@ -3545,7 +3541,8 @@ concept <i>nothrow-bidirectional-range</i> = <i>// exposition only</i>
 template&lt;class I>
 concept <i>nothrow-random-access-iterator</i> = <i>// exposition only</i>
   <i>nothrow-bidirectional-iterator</i>&lt;I> &&
-  random_access_iterator&lt;I>;
+  random_access_iterator&lt;I> &&
+  <i>nothrow-sized-sentinel-for</i>&lt;I, I>;
 </pre>
 
 A type `I` models <code><i>nothrow-random-access-iterator</i></code> only if no exceptions are thrown from advancement
@@ -3570,7 +3567,12 @@ concept <i>nothrow-random-access-range</i> = <i>// exposition only</i>
 - Clarify which execution policies are supported
 - Clarify that new APIs extend algorithm function objects in `std::ranges`
 - Add the feature test macro
-- Address other feedback from SG1 and SG9 and fix known bugs (see [[#issues_to_address]])
+- Add implementation experience and thoughts on implementability
+- Fix known bugs in the signatures wording
+- Address other feedback from SG1 and SG9 and fix known bugs (see [[#issues_to_address]]):
+    - Decide on constraining the execution policy template parameter
+    - List all the algorithms that are being given execution policy overloads
+    - List range algorithms that are being excluded
 
 ## R2 => R3 ## {#r2_r3}
 
