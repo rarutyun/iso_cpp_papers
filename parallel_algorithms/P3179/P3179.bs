@@ -1,15 +1,15 @@
 <pre class='metadata'>
 Title: C++ parallel range algorithms
 Shortname: P3179
-Level: 3
+Level: 4
 Status: P
 Group: wg21
-URL: https://wg21.link/P3179R3
+URL: https://wg21.link/P3179R4
 Editor: Ruslan Arutyunyan, Intel, ruslan.arutyunyan@intel.com
         Alexey Kukanov, Intel, alexey.kukanov@intel.com
         Bryce Adelstein Lelbach (he/him/his), Nvidia, brycelelbach@gmail.com
 Markup Shorthands: markdown yes
-Audience: SG9, SG1, LEWG
+Audience: LEWG
 Abstract: This paper proposes adding parallel algorithms that work together with the C++ Ranges library.
 </pre>
 
@@ -135,8 +135,8 @@ algorithms with schedulers. We have decided to split those parts to separate pap
 # Design overview # {#design_overview}
 
 This paper proposes execution policy support for C++ range-based algorithms. In the nutshell, the proposal extends C++
-range algorithms with overloads taking any standard C++ execution policy as a function parameter. These overloads are
-further referred to as *parallel range algorithms*.
+range algorithms with overloads taking any standard or implementation defined C++ execution policy as a function parameter.
+These overloads are further referred to as *parallel range algorithms*.
 
 The proposal is targeted to C++26.
 
@@ -147,10 +147,10 @@ The proposal is targeted to C++26.
 Comparing to the C++20 serial range algorithms, we propose the following modifications:
 - The execution policy parameter is added.
 - `for_each` and `for_each_n` return only an iterator but not the function.
-- <s>Parallel range algorithms take `range`, not an iterator, as an output for the overloads with ranges, and additionally take
-    an output sentinel for the "iterator and sentinel" overloads. ([[#range_as_output]])</s>
+- Parallel range algorithms take a range, not an iterator, as the output for the overloads with ranges, and additionally take
+    an output sentinel for the "iterator and sentinel" overloads. ([[#range_as_the_output]])
 - Until better parallelism-friendly abstractions are proposed, parallel algorithms require `random_access_{iterator,range}`. ([[#random_access_requirement]])
-- At least one of the input sequences <s>as well as the output sequence</s> must be bounded. ([[#require_bounded_ranges]])
+- All input and output data sequences must be bounded. ([[#require_bounded_ranges]])
 
 ### Differences to C++17 parallel algorithms ### {#design_diff_to_cpp17_par}
 
@@ -158,15 +158,34 @@ In addition to data sequences being passed as either ranges or "iterator and sen
 to the C++17 parallel algorithms are proposed:
 - `for_each` returns an iterator, not `void`.
 - Algorithms require `random_access_{iterator,range}`, and not *LegacyForwardIterator*.
-- At least one of the input sequences <s>as well as the output sequence</s> must be bounded.
+- All input and output data sequences must be bounded.
 
 ### Other design aspects ### {#design_other_aspects}
 
+- The parallel range algorithms support all standard and implementation-defined execution policies. ([[#supported_policies]])
 - Except as mentioned above, the parallel range algorithms should return the same type as the corresponding serial range algorithms. ([[#return_type]])
-- The proposed algorithms should follow the design of serial range algorithms with regard to name lookup. ([[#non_adl_discoverable]])
+- The proposed algorithms extend the overload set of algorithm function objects defined in `std::ranges`. ([[#algorithm_func_objects]])
 - The proposed algorithms should require callable object passed to an algorithm to be `regular_invocable` where possible. ([[#callable_parameters]])
-- The proposed APIs are not customization points. ([[#not_customization_point]])
 - The proposed algorithms should follow the design of C++17 parallel algorithms with regard to `constexpr` support. ([[#constexpr_support]])
+
+### An example of the proposed API ### {#design_api_example}
+
+```cpp
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S,
+         random_access_iterator O, sized_sentinel_for<O> OutS,
+         copy_constructible F, class Proj = identity>
+  requires indirectly_writable<O, indirect_result_t<F&, projected<I, Proj>>>
+  ranges::unary_transform_result<I, O>
+    ranges::transform(ExecutionPolicy&& exec, I first, S last, O result, OutS result_last,
+                      F op, Proj proj = {});
+
+template<execution-policy ExecutionPolicy, ranges::random_access_range R, ranges::random_access_range OutR,
+         copy_constructible F, class Proj = identity>
+  requires indirectly_writable<ranges::iterator_t<OutR>, indirect_result_t<F&, projected<ranges::iterator_t<R>, Proj>>>
+           && sized_range<R> && sized_range<OutR>
+  ranges::unary_transform_result<ranges::borrowed_iterator_t<R>, ranges::borrowed_iterator_t<OutR>>
+    ranges::transform(ExecutionPolicy&& exec, R&& r, OutR&& result, F op, Proj proj = {});
+```
 
 ## Coexistence with schedulers ## {#coexistence_with_schedulers}
 
@@ -178,6 +197,16 @@ At this point we do not, however, discuss how the appearance of schedulers
 may or should impact the execution rules for parallel algorithms specified in
 <a href="https://eel.is/c++draft/algorithms.parallel.exec">[algorithms.parallel.exec]</a>,
 and just assume that the same rules apply to the range algorithms with execution policies.
+
+## Supported execution policies ## {#supported_policies}
+
+Parallel range algorithms should operate with the same set of execution policies as the existing parallel algorithms,
+that is, `seq`, `unseq`, `par`, and `par_unseq` in the `std::execution` namespace, as well as any implementation-defined
+execution policies.
+
+We do not propose the parallel range algorithms to be customizable for application-defined execution policies.
+We expect such custom policies to become unnecessary once the standard algorithms are capable of working with
+schedulers/senders/receivers.
 
 ## Algorithm return types ## {#return_type}
 
@@ -267,17 +296,21 @@ for parallel variants of `std::ranges::for_each` and `std::ranges::for_each_n` s
 </table>
 
 
-## Non ADL-discoverable functions ## {#non_adl_discoverable}
+## Extending the overload sets of algorithm function objects ## {#algorithm_func_objects}
 
-We believe the proposed functionality should have the same behavior as serial range algorithms regarding the name lookup.
-For now, the new overloads are supposed to be special functions that are not discoverable by ADL (the status quo of the
-standard for serial range algorithms).
+We believe the proposed functionality should have the same properties and general behavior as serial range algorithms,
+particularly regarding the name lookup.
 
-[[P3136R0]] suggests to respecify range algorithms to be actual function objects. If adopted, that proposal will
-apply to all algorithms in the `std::ranges` namespace, thus automatically covering the parallel algorithms we propose.
+With the adoption of [[P3136R0]], function templates in the `std::ranges` namespace have been respecified as
+*algorithm function objects*. These objects are defined as sets of one or more overloaded function templates,
+which names designate the objects.
 
-Either way, adding parallel versions of the range algorithms should not be a problem.
-Please see [[#possible_impl]] for more information.
+The parallel range algorithms we propose will extend the overload sets for the respective algorithm function objects.
+The name lookup rules for such objects will apply automatically. It is covered by the wording proposed in [[P3136R0]];
+additional changes are not needed.
+
+From the implementation standpoint, adding parallel versions of the range algorithms to the overload set should not be
+a problem. Please see [[#possible_impl]] for more information.
 
 ## Requiring `random_access_iterator` or `random_access_range` ## {#random_access_requirement}
 
@@ -328,34 +361,52 @@ For now, random access ranges with known bounds (see [[#require_bounded_ranges]]
 that exists in the standard. Starting from that and gradually enabling other types of iteration spaces
 in a source-compatible manner seems to us better than blanket allowance of any `forward_range`.
 
-## Taking `range` as an output ## {#range_as_output}
+## Taking range as the output ## {#range_as_the_output}
 
-In the previous revision we proposed a range as the output for the overloads that take ranges for input.
-Similarly, we proposed a sentinel for output where input is passed as "iterator and sentinel".
+We propose taking a range as the output for the overloads that take ranges for input.
+Similarly, we propose requiring a sentinel for the output where the input is passed as "iterator and sentinel".
 
-This topic was discussed on the joint SG1 and SG9 session (St. Louis, 2024) and the feedback was that the extra discussion
-is required and the semantics of some algorithms is not clear with the range-as-an-output. Thus, it requires deeper
-investigation.
+The benefits of this *range-as-the-output* approach, comparing to taking a single iterator for the output, are:
 
-We do **not** push for this design aspect as a part of this proposal. Instead, we are going to write a separate paper to cover
-this topic.
+- It creates a safer API where all data sequences have known bounds. Specifically, the `sized_range`
+    and `sized_sentinel_for` concepts will be applied to the output sequences in the same way as to the input sequences.
+- Not for all algorithms the output size is defined by the input size. An example is `copy_if` (and similar
+    algorithms with *filtering* semantics), where the output sequence might be shorter than the input one.
+    Knowing the expected size of the output may open opportunities for more efficient implementations.
+- Passing a range for the output makes code a bit simpler in the cases typical for parallel execution.
 
-See [[P3179R2]] for more details.
+On the joint SG1 and SG9 discussion of [[P3179R2]] the audience expressed several concerns about the idea and
+[requested to stay with iterators for the output](#sg1_sg9_st_louis_2024) until deeper investigation is made.
+
+To address the concerns, we wrote a separate paper [[P3490R0]] with the detailed investigation of the topic,
+suggesting there a compromise solution with adding separate function template overloads for both *iterator-as-the-output*
+and *range-as-the-output*. See [[P3490R0]] for more details.
+
+Eventually SG9 [accepted](#sg9_wroclaw_2024) our original proposal to use ranges for the output, without extra overloads
+for legacy convenience.
 
 ## Requiring ranges to be bounded ## {#require_bounded_ranges}
 
-One of the requirements we want to put on the parallel range algorithms is to disallow unbounded input and, ideally, output.
+One of the requirements we want to put on the parallel range algorithms is to disallow unbounded input and output.
 The reasons for that are:
 
-- First, for efficient parallel implementation we need to know the iteration space bounds. Otherwise, it's hard to
+- For efficient parallel implementation we need to know the iteration space bounds. Otherwise, it's hard to
     apply the "divide and conquer" strategy for creating work for multiple execution threads.
-- Second, while serial range algorithms allow passing an "infinite" range like `std::ranges::views::iota(0)`,
+- While serial range algorithms allow passing an "infinite" range like `std::ranges::views::iota(0)`,
     it may result in an endless loop. It's hard to imagine usefulness of that in the case of parallel execution.
     Requiring data sequences to be bounded potentially prevents errors at run-time.
+- Using explicitly bounded output ranges follows established practices of secure coding, which recommend or even
+    require to always specify the size of the output in order to prevent out-of-range data modifications.
 
-In the case of two or more input ranges or sequences, for some algorithms it can be sufficient for just one to be bounded.
-The other input ranges are then assumed to have at least as many elements as the bounded one.
-This enables unbounded ranges such as `views::repeat` in certain useful patterns, for example:
+If several provided ranges or sequences are bounded, an algorithm should stop as soon as the end is reached for the shortest one.
+There are already precedents in the standard that an algorithm takes two sequences with potentially different input sizes
+and chooses the smaller size as the number of iterations it is going to make, such as `std::ranges::transform`
+and `std::ranges::mismatch`. For the record, `std::transform` (including the overload with execution policy) doesn't support
+different input sizes, while `std::mismatch` does.
+
+In the case of two input ranges or sequences, for a few algorithms - namely, `mismatch`, `equal`, and `transform` -
+it could be sufficient for just one range to be bounded and the other assumed to have at least as many elements
+as the bounded one. This enables unbounded ranges such as `views::repeat` in certain useful patterns, for example:
 
 ```cpp
 void normalize_parallel(range auto&& v) {
@@ -364,11 +415,9 @@ void normalize_parallel(range auto&& v) {
 }
 ```
 
-If several provided ranges or sequences are bounded, an algorithm should stop as soon as the end is reached for the shortest one.
-There are already precedents in the standard that an algorithm takes two sequences with potentially different input sizes
-and chooses the smaller size as the number of iterations it is going to make, such as `std::ranges::transform`
-and `std::ranges::mismatch`. For the record, `std::transform` (including the overload with execution policy) doesn't support
-different input sizes, while `std::mismatch` does.
+However, SG9 [decided](#sg9_wroclaw_2024) to require `sized_range` for all inputs, with the plan to relax these constraints
+for `transform` once there is a way to statically detect infinite ranges like `views::repeat` (as opposed to finite unsized
+ranges, such as null terminated strings).
 
 ## Requirements for callable parameters ## {#callable_parameters}
 
@@ -380,7 +429,7 @@ SG1 preferred to keep the behavior consistent with C++17 parallel algorithms, wh
 We did extra investigation and decided that requiring `const`-qualified operator at compile-time is not strictly necessary
 because:
 - The vast majority of the serial range algorithms requires function objects to be `regular_invocable` (or its derivatives),
-    which already has the semantical requirement of not modifying either the function object or its arguments.
+    which already has the semantic requirement of not modifying either the function object or its arguments.
     While not enforced at compile-time, it seems good enough for our purpose because it demands having the same function
     object state between invocations (independently of `const` qualifier), and it is consistent with serial range algorithms.
 - Remaining algorithms should be considered individually. For example, `for_each` using a mutable `operator()` is of less
@@ -445,12 +494,6 @@ std::ranges::for_each(std::execution::par, v.begin(), v.end(), std::ref(c));
 Our conclusion is that it's user responsibility to provide such a callable that avoids data races, same as for C++17 parallel
 algorithms.
 
-## Parallel range algorithms are not customization points ## {#not_customization_point}
-
-We do not propose the parallel range algorithms to be customization points because it's unclear which parameter
-to customize for. One could argue that customizations may exist for execution policies, but we expect custom execution
-policies to become unnecessary once the C++ algorithms will work with schedulers/senders/receivers.
-
 ## `constexpr` parallel range algorithms ## {#constexpr_support}
 
 [[P2902R0]] suggests allowing algorithms with execution policies to be used in constant expressions.
@@ -509,7 +552,7 @@ Let's consider the following example:
 ```cpp
 reverse(policy, begin(data), end(data));
 transform(policy, begin(data), end(data), begin(result), [](auto i){ return i * i; });
-auto res = any_of(policy, begin(result), end(result), pred);
+auto res = find_if(policy, begin(result), end(result), pred);
 ```
 
 It has three stages and eventually tries to answer the question if the input sequence contains an element after reversing
@@ -523,7 +566,7 @@ Let's make it better:
 
 ```cpp
 // With fancy iterators
-auto res = any_of(policy,
+auto res = find_if(policy,
                   make_transform_iterator(make_reverse_iterator(end(data)),
                                           [](auto i){ return i * i; }),
                   make_transform_iterator(make_reverse_iterator(begin(data)),
@@ -545,7 +588,7 @@ Let's improve the example further with the proposed API:
 
 ```cpp
 // With ranges
-auto res = any_of(policy, data | views::reverse | views::transform([](auto i){ return i * i; }),
+auto res = find_if(policy, data | views::reverse | views::transform([](auto i){ return i * i; }),
                   pred);
 ```
 
@@ -555,59 +598,10 @@ The example above lacks the drawbacks described for the previous variations:
 - There is no room for the lambda type mistake;
 - The readability is much better compared to the second variation and not worse than in the first one.
 
-# Proposed API # {#proposed_api}
+# Possible implementation of a parallel range algorithm # {#possible_impl}
 
-Note: ``std::ranges::for_each`` and ``std::ranges::transform`` are used as reference points.
-When the design is ratified, it will be spread across other algorithms.
-
-```cpp
-// for_each
-template <class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S,
-          class Proj = identity, indirectly_unary_invocable<projected<I, Proj>> Fun>
-  I
-    for_each(ExecutionPolicy&& policy, I first, S last, Fun f, Proj proj = {});
-
-template <class ExecutionPolicy, ranges::random_access_range R, class Proj = identity,
-         indirectly_unary_invocable<projected<ranges::iterator_t<R>, Proj>> Fun>
-requires ranges::sized_range<R>
-  ranges::borrowed_iterator_t<R>
-    for_each(ExecutionPolicy&& policy, R&& r, Fun f, Proj proj = {});
-
-// binary transform with an output range and an output sentinel
-template< typename ExecutionPolicy,
-          random_access_iterator I1, sentinel_for<I1> S1,
-          random_access_iterator I2, sentinel_for<I2> S2,
-          random_access_iterator O,
-          copy_constructible F,
-          class Proj1 = identity, class Proj2 = identity >
-  requires indirectly_writable<O,
-             indirect_result_t<F&, projected<I1, Proj1>, projected<I2, Proj2>>>
-         && (sized_sentinel_for<S1, I1> || sized_sentinel_for<S2, I2>)
-  ranges::binary_transform_result<I1, I2, O>
-    transform( ExecutionPolicy&& policy, I1 first1, S1 last1, I2 first2, S2 last2, O result,
-               F binary_op, Proj1 proj1 = {}, Proj2 proj2 = {} );
-
-template< typename ExecutionPolicy,
-          ranges::random_access_range R1,
-          ranges::random_access_range R2,
-          random_access_iterator O,
-          copy_constructible F,
-          class Proj1 = identity, class Proj2 = identity >
-requires indirectly_writable<O,
-             indirect_result_t<F&,
-                 projected<ranges::iterator_t<R1>, Proj1>,
-                 projected<ranges::iterator_t<R2>, Proj2>>>
-         && (ranges::sized_range<R1>
-             || ranges::sized_range<R2>)
-ranges::binary_transform_result<ranges::borrowed_iterator_t<R1>,
-                                  ranges::borrowed_iterator_t<R2>,
-                                  O>
-    transform( ExecutionPolicy&& policy, R1&& r1, R2&& r2, O result, F binary_op,
-               Proj1 proj1 = {}, Proj2 proj2 = {} );
-
-```
-
-## Possible implementation of a parallel range algorithm ## {#possible_impl}
+Here we show a possible implementation of `std::ranges::for_each` with the new overloads
+proposed in [[#modify_alg_foreach]]:
 
 ```cpp
 // A possible implementation of std::ranges::for_each
@@ -624,7 +618,7 @@ struct __for_each_fn
     // The overload for unsequenced and parallel policies. Requires random_access_iterator
     template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S,
              class Proj = identity, indirectly_unary_invocable<projected<I, Proj>> Fun>
-                 requires is_execution_policy_v<std::remove_cvref_t<ExecutionPolicy>>
+    requires is_execution_policy_v<std::remove_cvref_t<ExecutionPolicy>>
     I
     operator()(ExecutionPolicy&& exec, I first, S last, Fun f, Proj proj = {}) const
     {
@@ -639,6 +633,7 @@ struct __for_each_fn
 
     template<class ExecutionPolicy, random_access_range R, class Proj = identity,
              indirectly_unary_invocable<projected<iterator_t<R>, Proj>> Fun>
+    requires sized_range<R>
     ranges::borrowed_iterator_t<R>
     operator()(ExecutionPolicy&& exec, R&& r, Fun f, Proj proj = {}) const
     {
@@ -654,14 +649,234 @@ inline constexpr __detail::__for_each_fn for_each;
 } // namespace ranges
 ```
 
-# Absence of some serial range-based algorithms # {#serial_range_based_absence}
+# The proposal scope # {#proposal_scope}
+
+## In-scope ## {#in_scope}
+
+### The counterparts of C++17 parallel algorithms in `std::ranges` namespace ### {#cpp17_counterpart}
+
+<table>
+  <tr>
+    <td>`all_of`
+    <td>`search{_n}`
+    <td>`remove_copy`
+    <td>`is_sorted`
+    <td>`is_heap`
+  </tr>
+  <tr>
+    <td>`any_of`
+    <td>`copy{_n}`
+    <td>`remove_copy_if`
+    <td>`is_sorted_until`
+    <td>`is_heap_until`
+  </tr>
+  <tr>
+    <td>`none_of`
+    <td>`copy_if`
+    <td>`unique`
+    <td>`nth_element`
+    <td>`min_element`
+  </tr>
+  <tr>
+    <td>`for_each{_n}`
+    <td>`move`
+    <td>`unique_copy`
+    <td>`is_partitioned`
+    <td>`max_element`
+  </tr>
+  <tr>
+    <td>`find`
+    <td>`swap_ranges`
+    <td>`reverse`
+    <td>`partition`
+    <td>`minmax_element`
+  </tr>
+  <tr>
+    <td>`find_if`
+    <td>`transform`
+    <td>`reverse_copy`
+    <td>`stable_partition`
+    <td>`lexicographical_compare`
+  </tr>
+  <tr>
+    <td>`find_if_not`
+    <td>`replace`
+    <td>`rotate`
+    <td>`partition_copy`
+    <td>`uninitialized_default_construct{_n}`
+  </tr>
+  <tr>
+    <td>`find_end`
+    <td>`replace_if`
+    <td>`rotate_copy`
+    <td>`merge`
+    <td>`uninitialized_value_construct{_n}`
+  </tr>
+  <tr>
+    <td>`find_first_of`
+    <td>`replace_copy`
+    <td>`shift_left`
+    <td>`inplace_merge`
+    <td>`uninitialized_copy{_n}`
+  </tr>
+  <tr>
+    <td>`adjacent_find`
+    <td>`replace_copy_if`
+    <td>`shift_right`
+    <td>`includes`
+    <td>`uninitialized_move{_n}`
+  </tr>
+  <tr>
+    <td>`count`
+    <td>`fill{_n}`
+    <td>`sort`
+    <td>`set_union`
+    <td>`uninitialized_fill{_n}`
+  </tr>
+  <tr>
+    <td>`count_if`
+    <td>`generate{_n}`
+    <td>`stable_sort`
+    <td>`set_intersection`
+    <td>`destroy{_n}`
+  </tr>
+  <tr>
+    <td>`mismatch`
+    <td>`remove`
+    <td>`partial_sort`
+    <td>`set_difference`
+    <td>
+  </tr>
+  <tr>
+    <td>`equal`
+    <td>`remove_if`
+    <td>`partial_sort_copy`
+    <td>`set_symmetric_difference`
+    <td>
+  </tr>
+</table>
+
+### Algorithms in `std::ranges` namespace only ### {#only_in_std_ranges}
+
+The algorithms below are easy to add because they are either expressible via existing parallel algorithms or
+an analogue with very close semantics exists:
+
+<table>
+  <tr>
+    <th>`std::ranges` algorithms to add
+    <th>`std` algorithms used as the guidance
+  </tr>
+  <tr>
+    <td>`contains`
+    <td>`find`
+  </tr>
+  <tr>
+    <td>`contains_subrange`
+    <td>`search`
+  </tr>
+  <tr>
+    <td>`find_last`
+    <td>`find`
+  </tr>
+  <tr>
+    <td>`find_last_if`
+    <td>`find_if`
+  </tr>
+  <tr>
+    <td>`find_last_if_not`
+    <td>`find_if_not`
+  </tr>
+  <tr>
+    <td>`starts_with`
+    <td>`mismatch`
+  </tr>
+  <tr>
+    <td>`ends_with`
+    <td>`equal`
+  </tr>
+  <tr>
+    <td>`min`
+    <td>`min_element`
+  </tr>
+  <tr>
+    <td>`max`
+    <td>`max_element`
+  </tr>
+  <tr>
+    <td>`minmax`
+    <td>`minmax_element`
+  </tr>
+</table>
+
+## Out-of-scope ## {#out_of_scope}
+
+### The counterparts of exiting algorithms without `ExecutionPolicy` ### {#without_exec_policy_counterpart}
+
+Below we list the algorithms below without `ExecutionPolicy` in C++17 and where `ExecutionPolicy` parameter doesn't seem
+to add value:
+
+- `push_heap`
+- `pop_heap`
+- `sort_heap`
+- `next_permutation`
+- `prev_permutation`
+- `lower_bound`
+- `upper_bound`
+- `equal_range`
+- `binary_search`
+- `partition_point`
+
+Below we list the algorithms below without `ExecutionPolicy` in C++17, where `ExecutionPolicy` parameter might make sense
+but requires deeper investigation:
+
+- `iota`
+- `make_heap`
+- `is_permutation`
+- `copy_backward`
+- `move_backward`
+- `sample` (RNG specific)
+- `shuffle` (RNG specific)
+
+Below we list `std::ranges` only algorithms where we don't add the `ExecutionPolicy` parameter:
+
+- `fold_left`
+- `fold_left_first`
+- `fold_right`
+- `fold_right_last`
+- `fold_left_with_iter`
+- `fold_left_first_with_iter`
+- `generate_random` (RNG specific, `ExecutionPolicy` parameter was already discussed during [[P1068R11]] review)
+
+### Absence of some serial range-based algorithms ### {#serial_range_based_absence}
 
 We understand that some useful algorithms do not yet exist in `std::ranges`, for example, most of generalized numeric
 operations <a href="https://eel.is/c++draft/numeric.ops">[numeric.ops]</a>. The goal of this paper is however limited to
-adding overloads with `ExecutionPolicy`  to the existing algorithms in `std::ranges` namespace. Any follow-up paper that
-adds `<numeric>` algorithms to `std::ranges` should also consider adding dedicated overloads with `ExecutionPolicy`.
+adding overloads with `ExecutionPolicy`  to the existing algorithms in the `std::ranges` namespace. Any follow-up paper
+that adds `<numeric>` algorithms to `std::ranges` should also consider adding dedicated overloads with `ExecutionPolicy`.
 
-# Further exploration # {#further_work}
+# Implementation experience # {#impl_exp}
+
+The oneAPI DPC++ Library (oneDPL) [developer guide](https://oneapi-src.github.io/oneDPL/parallel_api/parallel_range_algorithms.html)
+covers parallel range algorithms we’ve implemented so far. The oneAPI specification provides
+[formal signatures](https://github.com/uxlfoundation/oneAPI-spec/blob/main/source/elements/oneDPL/source/parallel_api/parallel_range_api.rst)
+of these algorithms. The implementation supports execution policies for CPUs (semantically aligned with the C++ standard)
+and for SYCL devices, and it works with a subset of the standard C++ views.
+
+We use the range-as-the-output approach where applicable: in `transform`, `copy`, `copy_if`, and `merge`.
+
+We don't foresee any issues with implementability for the rest of the proposed parallel algorithms because all of them were
+already implemented in C++17 and new APIs that we propose are expressible via the existing ones.
+
+# Further work # {#further_work}
+
+## Issues to address ## {#issues_to_address}
+
+Having known bugs and feedback from SG1 and SG9, the plan of work prior to the next committee F2F meeting in
+Austria, 2025 is the following:
+- Update <a href="https://eel.is/c++draft/algorithm.syn">[algorithm.syn]</a>.
+- Consider adding the algorithm descriptions to the wording, even if no changes are made.
+
+<!-- Add "The intention is that algorithms call begin/end only once, in serial code" to the design notes. -->
 
 ## Thread-safe views examination ## {#thread_safe_views}
 
@@ -680,6 +895,13 @@ Here are questions we want to answer (potentially not a complete list):
 
 # Formal wording # {#formal_wording}
 
+## Add the feature test macro to <a href="http://eel.is/c++draft/version.syn">[**version.syn**]</a> ## {#modify_version_syn}
+
+<xmp class="wordingStyle">#define __cpp_lib_parallel_algorithm                201603L // also in <algorithm>, <numeric></xmp>
+<ins><xmp class="wordingStyle">#define __cpp_lib_parallel_range_algorithms         20����L // also in <algorithm>, <memory></xmp></ins>
+<xmp class="wordingStyle">#define __cpp_lib_philox_engine                     202406L // also in <random></xmp>
+
+
 ## Modify <a href="https://eel.is/c++draft/algorithms.parallel.defns">[**algorithms.parallel.defns**]</a> ## {#modify_alg_parallel_def}
 
 Parallel algorithms access objects indirectly accessible via their arguments by invoking the following functions:
@@ -696,6 +918,19 @@ Unless otherwise specified, <del>function</del><ins>invocable</ins> objects pass
 with the specified default predicate or operation (where applicable) shall not directly or indirectly modify objects via their arguments,
 nor shall they rely on the identity of the provided objects.
 
+## Modify <a href="https://eel.is/c++draft/algorithms.parallel.overloads">[**algorithms.parallel.overloads**]</a> ## {#modify_alg_parallel_overloads}
+
+Parallel algorithms shall not participate in overload resolution unless
+`is_execution_policy_v<remove_cvref_t<ExecutionPolicy>>` is `true`.
+
+<ins>
+<pre class="wordingStyle">
+template &lt;class T>
+concept <i>execution-policy</i> = <i>// exposition only</i>
+    is_execution_policy_v&lt;remove_cvref_t&lt;ExecutionPolicy>>
+</pre>
+</ins>
+
 ## Modify `all_of` in <a href="https://eel.is/c++draft/alg.all.of">[**alg.all.of**]</a> ## {#modify_alg_all_of}
 
 <xmp class="wordingStyle">
@@ -709,13 +944,13 @@ template<input_range R, class Proj = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
          indirect_unary_predicate<projected<I, Proj>> Pred>
-  constexpr bool ranges::all_of(ExecutionPolicy&& exec, I first, S last, Pred pred, Proj proj = {});
-template<class ExecutionPolicy, random_access_range R, class Proj = identity,
+  bool ranges::all_of(ExecutionPolicy&& exec, I first, S last, Pred pred, Proj proj = {});
+template<execution-policy ExecutionPolicy, random_access_range R, class Proj = identity,
          indirect_unary_predicate<projected<iterator_t<R>, Proj>> Pred>
-  requires ranges::sized_range<R>
-  constexpr bool ranges::all_of(ExecutionPolicy&& exec, R&& r, Pred pred, Proj proj = {});
+  requires sized_range<R>
+  bool ranges::all_of(ExecutionPolicy&& exec, R&& r, Pred pred, Proj proj = {});
 </xmp>
 </ins>
 
@@ -732,12 +967,12 @@ template<input_range R, class Proj = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
          indirect_unary_predicate<projected<I, Proj>> Pred>
   bool ranges::any_of(ExecutionPolicy&& exec, I first, S last, Pred pred, Proj proj = {});
-template<class ExecutionPolicy, random_access_range R, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_range R, class Proj = identity,
          indirect_unary_predicate<projected<iterator_t<R>, Proj>> Pred>
-  requires ranges::sized_range<R>
+  requires sized_range<R>
   bool ranges::any_of(ExecutionPolicy&& exec, R&& r, Pred pred, Proj proj = {});
 </xmp>
 </ins>
@@ -755,12 +990,12 @@ template<input_range R, class Proj = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
          indirect_unary_predicate<projected<I, Proj>> Pred>
   bool ranges::none_of(ExecutionPolicy&& exec, I first, S last, Pred pred, Proj proj = {});
-template<class ExecutionPolicy, random_access_range R, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_range R, class Proj = identity,
          indirect_unary_predicate<projected<iterator_t<R>, Proj>> Pred>
-  requires ranges::sized_range<R>
+  requires sized_range<R>
   bool ranges::none_of(ExecutionPolicy&& exec, R&& r, Pred pred, Proj proj = {});
 </xmp>
 </ins>
@@ -781,13 +1016,13 @@ template<input_range R, class Proj = identity, class T = projected_value_t<itera
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
          class T = projected_value_t<I, Proj>>
   requires indirect_binary_predicate<ranges::equal_to, projected<I, Proj>, const T*>
   bool ranges::contains(ExecutionPolicy&& exec, I first, S last, const T& value, Proj proj = {});
-template<class ExecutionPolicy, random_access_range R, class Proj = identity, class T = projected_value_t<iterator_t<R>, Proj>>
+template<execution-policy ExecutionPolicy, random_access_range R, class Proj = identity, class T = projected_value_t<iterator_t<R>, Proj>>
   requires indirect_binary_predicate<ranges::equal_to, projected<iterator_t<R>, Proj>, const T*> &&
-    ranges::sized_range<R>
+    sized_range<R>
   bool ranges::contains(ExecutionPolicy&& exec, R&& r, const T& value, Proj proj = {});
 </xmp>
 
@@ -812,16 +1047,16 @@ template<forward_range R1, forward_range R2,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1,
+template<execution-policy ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1,
          random_access_iterator I2, sized_sentinel_for<I2> S2,
          class Pred = ranges::equal_to, class Proj1 = identity, class Proj2 = identity>
   requires indirectly_comparable<I1, I2, Pred, Proj1, Proj2>
   bool ranges::contains_subrange(ExecutionPolicy&& exec, I1 first1, S1 last1, I2 first2, S2 last2,
                                  Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
-template<class ExecutionPolicy, random_access_range R1, random_access_range R2,
+template<execution-policy ExecutionPolicy, random_access_range R1, random_access_range R2,
          class Pred = ranges::equal_to, class Proj1 = identity, class Proj2 = identity>
   requires indirectly_comparable<iterator_t<R1>, iterator_t<R2>, Pred, Proj1, Proj2> &&
-    ranges::sized_range<R1> && ranges::sized_range<R2>
+    sized_range<R1> && sized_range<R2>
   bool ranges::contains_subrange(ExecutionPolicy&& exec, R1&& r1, R2&& r2, Pred pred = {},
                                  Proj1 proj1 = {}, Proj2 proj2 = {});
 </xmp>
@@ -857,11 +1092,11 @@ and proceeding to `last - 1`.
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
          indirectly_unary_invocable<projected<I, Proj>> Fun>
   I ranges::for_each(ExecutionPolicy&& exec, I first, S last, Fun f, Proj proj = {});
 
-template<class ExecutionPolicy, random_access_range R, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_range R, class Proj = identity,
          indirectly_unary_invocable<projected<iterator_t<R>, Proj>> Fun>
     requires sized_range<R>
   borrowed_iterator_t<R>
@@ -906,7 +1141,7 @@ Remarks: If `f` returns a result, the result is ignored.
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_iterator I, class Proj = identity,
          indirectly_unary_invocable<projected<I, Proj>> Fun>
   I ranges::for_each_n(ExecutionPolicy&& exec, I first, iter_difference_t<I> n,
                        Fun f, Proj proj = {});
@@ -943,11 +1178,11 @@ template<input_range R, class Proj = identity, class T = projected_value_t<itera
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
          class T = projected_value_t<I, Proj>>
   requires indirect_binary_predicate<ranges::equal_to, projected<I, Proj>, const T*>
   I ranges::find(ExecutionPolicy&& exec, I first, S last, const T& value, Proj proj = {});
-template<class ExecutionPolicy, random_access_range R, class Proj = identity, class T = projected_value_t<iterator_t<R>, Proj>>
+template<execution-policy ExecutionPolicy, random_access_range R, class Proj = identity, class T = projected_value_t<iterator_t<R>, Proj>>
   requires indirect_binary_predicate<ranges::equal_to, projected<iterator_t<R>, Proj>, const T*> && sized_range<R>
   borrowed_iterator_t<R> ranges::find(ExecutionPolicy&& exec, R&& r, const T& value, Proj proj = {});
 </xmp>
@@ -966,10 +1201,10 @@ template<input_range R, class Proj = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
          indirect_unary_predicate<projected<I, Proj>> Pred>
   I ranges::find_if(ExecutionPolicy&& exec, I first, S last, Pred pred, Proj proj = {});
-template<class ExecutionPolicy, random_access_range R, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_range R, class Proj = identity,
          indirect_unary_predicate<projected<iterator_t<R>, Proj>> Pred>
   requires sized_range<R>
   borrowed_iterator_t<R> ranges::find_if(ExecutionPolicy&& exec, R&& r, Pred pred, Proj proj = {});
@@ -988,10 +1223,10 @@ template<input_range R, class Proj = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
          indirect_unary_predicate<projected<I, Proj>> Pred>
   I ranges::find_if_not(ExecutionPolicy&& exec, I first, S last, Pred pred, Proj proj = {});
-template<class ExecutionPolicy, random_access_range R, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_range R, class Proj = identity,
          indirect_unary_predicate<projected<iterator_t<R>, Proj>> Pred>
   requires sized_range<R>
   borrowed_iterator_t<R> ranges::find_if_not(ExecutionPolicy&& exec, R&& r, Pred pred, Proj proj = {});
@@ -1014,11 +1249,11 @@ template<forward_range R, class Proj = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
          class T = projected_value_t<I, Proj>>
   requires indirect_binary_predicate<ranges::equal_to, projected<I, Proj>, const T*>
   subrange<I> ranges::find_last(ExecutionPolicy&& exec, I first, S last, const T& value, Proj proj = {});
-template<class ExecutionPolicy, random_access_range R, class Proj = identity, class T = projected_value_t<iterator_t<R>, Proj>>
+template<execution-policy ExecutionPolicy, random_access_range R, class Proj = identity, class T = projected_value_t<iterator_t<R>, Proj>>
   requires indirect_binary_predicate<ranges::equal_to, projected<iterator_t<R>, Proj>, const T*> && sized_range<R>
   borrowed_subrange_t<R> ranges::find_last(ExecutionPolicy&& exec, R&& r, const T& value, Proj proj = {});
 </xmp>
@@ -1035,10 +1270,10 @@ template<forward_range R, class Proj = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
          indirect_unary_predicate<projected<I, Proj>> Pred>
   subrange<I> ranges::find_last_if(ExecutionPolicy&& exec, I first, S last, Pred pred, Proj proj = {});
-template<class ExecutionPolicy, random_access_range R, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_range R, class Proj = identity,
          indirect_unary_predicate<projected<iterator_t<R>, Proj>> Pred>
   requires sized_range<R>
   borrowed_subrange_t<R> ranges::find_last_if(ExecutionPolicy&& exec, R&& r, Pred pred, Proj proj = {});
@@ -1056,11 +1291,11 @@ template<forward_range R, class Proj = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
          indirect_unary_predicate<projected<I, Proj>> Pred>
   subrange<I> ranges::find_last_if_not(ExecutionPolicy&& exec, I first, S last, Pred pred, Proj proj = {});
 
-template<class ExecutionPolicy, random_access_range R, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_range R, class Proj = identity,
          indirect_unary_predicate<projected<iterator_t<R>, Proj>> Pred>
   requires sized_range<R>
   borrowed_subrange_t<R> ranges::find_last_if_not(ExecutionPolicy&& exec, R&& r, Pred pred, Proj proj = {});
@@ -1086,13 +1321,13 @@ template<forward_range R1, forward_range R2,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1, random_access_iterator I2,
+template<execution-policy ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1, random_access_iterator I2,
          sized_sentinel_for<I2> S2, class Pred = ranges::equal_to, class Proj1 = identity, class Proj2 = identity>
   requires indirectly_comparable<I1, I2, Pred, Proj1, Proj2>
   subrange<I1> ranges::find_end(ExecutionPolicy&& exec, I1 first1, S1 last1, I2 first2, S2 last2,
                                 Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
 
-template<class ExecutionPolicy, random_access_range R1, random_access_range R2,
+template<execution-policy ExecutionPolicy, random_access_range R1, random_access_range R2,
          class Pred = ranges::equal_to, class Proj1 = identity, class Proj2 = identity>
   requires indirectly_comparable<iterator_t<R1>, iterator_t<R2>, Pred, Proj1, Proj2>
              && sized_range<R1> && sized_range<R2>
@@ -1121,14 +1356,14 @@ template<input_range R1, forward_range R2,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1,
+template<execution-policy ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1,
          random_access_iterator I2, sized_sentinel_for<I2> S2,
          class Pred = ranges::equal_to, class Proj1 = identity, class Proj2 = identity>
   requires indirectly_comparable<I1, I2, Pred, Proj1, Proj2>
   I1 ranges::find_first_of(ExecutionPolicy&& exec, I1 first1, S1 last1, I2 first2, S2 last2,
                            Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
 
-template<class ExecutionPolicy, random_access_range R1, random_access_range R2,
+template<execution-policy ExecutionPolicy, random_access_range R1, random_access_range R2,
          class Pred = ranges::equal_to, class Proj1 = identity, class Proj2 = identity>
   requires indirectly_comparable<iterator_t<R1>, iterator_t<R2>, Pred, Proj1, Proj2>
              && sized_range<R1> && sized_range<R2>
@@ -1152,10 +1387,10 @@ template<forward_range R, class Proj = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
          indirect_binary_predicate<projected<I, Proj>, projected<I, Proj>> Pred = ranges::equal_to>
   I ranges::adjacent_find(ExecutionPolicy&& exec, I first, S last, Pred pred = {}, Proj proj = {});
-template<class ExecutionPolicy, random_access_range R, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_range R, class Proj = identity,
          indirect_binary_predicate<projected<iterator_t<R>, Proj>, projected<iterator_t<R>, Proj>> Pred
            = ranges::equal_to>
   requires sized_range<R>
@@ -1180,11 +1415,11 @@ template<input_range R, class Proj = identity, class T = projected_value_t<itera
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
          class T = projected_value_t<I, Proj>>
   requires indirect_binary_predicate<ranges::equal_to, projected<I, Proj>, const T*>
   iter_difference_t<I> ranges::count(ExecutionPolicy&& exec, I first, S last, const T& value, Proj proj = {});
-template<class ExecutionPolicy, random_access_range R, class Proj = identity, class T = projected_value_t<iterator_t<R>, Proj>>
+template<execution-policy ExecutionPolicy, random_access_range R, class Proj = identity, class T = projected_value_t<iterator_t<R>, Proj>>
   requires indirect_binary_predicate<ranges::equal_to, projected<iterator_t<R>, Proj>, const T*> && sized_range<R>
   range_difference_t<R> ranges::count(ExecutionPolicy&& exec, R&& r, const T& value, Proj proj = {});
 </xmp>
@@ -1203,10 +1438,10 @@ template<input_range R, class Proj = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
          indirect_unary_predicate<projected<I, Proj>> Pred>
   iter_difference_t<I> ranges::count_if(ExecutionPolicy&& exec, I first, S last, Pred pred, Proj proj = {});
-template<class ExecutionPolicy, random_access_range R, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_range R, class Proj = identity,
          indirect_unary_predicate<projected<iterator_t<R>, Proj>> Pred>
   requires sized_range<R>
   range_difference_t<R> ranges::count_if(ExecutionPolicy&& exec, R&& r, Pred pred, Proj proj = {});
@@ -1232,15 +1467,16 @@ template<input_range R1, input_range R2,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I1, sentinel_for<I1> S1, random_access_iterator I2, sentinel_for<I2> S2,
+template<execution-policy ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1,
+         random_access_iterator I2, sized_sentinel_for<I2> S2,
          class Pred = ranges::equal_to, class Proj1 = identity, class Proj2 = identity>
-  requires indirectly_comparable<I1, I2, Pred, Proj1, Proj2> && (sized_sentinel_for<S1, I1> || sized_sentinel_for<S2, I2>)
+  requires indirectly_comparable<I1, I2, Pred, Proj1, Proj2>
   ranges::mismatch_result<I1, I2>
     ranges::mismatch(ExecutionPolicy&& exec, I1 first1, S1 last1, I2 first2,S2 last2,
                      Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
-template<class ExecutionPolicy, random_access_range R1, random_access_range R2,
+template<execution-policy ExecutionPolicy, random_access_range R1, random_access_range R2,
          class Pred = ranges::equal_to, class Proj1 = identity, class Proj2 = identity>
-  requires indirectly_comparable<iterator_t<R1>, iterator_t<R2>, Pred, Proj1, Proj2> && (sized_range<R1> || sized_range<R2>)
+  requires indirectly_comparable<iterator_t<R1>, iterator_t<R2>, Pred, Proj1, Proj2> && sized_range<R1> && sized_range<R2>
   ranges::mismatch_result<borrowed_iterator_t<R1>, borrowed_iterator_t<R2>>
     ranges::mismatch(ExecutionPolicy&& exec, R1&& r1, R2&& r2, Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
 </xmp>
@@ -1264,17 +1500,16 @@ template<input_range R1, input_range R2, class Pred = ranges::equal_to,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I1, sentinel_for<I1> S1,
-         random_access_iterator I2, sentinel_for<I2> S2,
+template<execution-policy ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1,
+         random_access_iterator I2, sized_sentinel_for<I2> S2,
          class Pred = ranges::equal_to, class Proj1 = identity, class Proj2 = identity>
-  requires indirectly_comparable<I1, I2, Pred, Proj1, Proj2> &&
-    (sized_sentinel_for<S1, I1> || sized_sentinel_for<S2, I2>)
+  requires indirectly_comparable<I1, I2, Pred, Proj1, Proj2>
   bool ranges::equal(ExecutionPolicy&& exec, I1 first1, S1 last1, I2 first2, S2 last2,
                      Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
-template<class ExecutionPolicy, random_access_range R1, random_access_range R2, class Pred = ranges::equal_to,
+template<execution-policy ExecutionPolicy, random_access_range R1, random_access_range R2, class Pred = ranges::equal_to,
          class Proj1 = identity, class Proj2 = identity>
   requires indirectly_comparable<iterator_t<R1>, iterator_t<R2>, Pred, Proj1, Proj2> &&
-    (sized_range<R1> || sized_range<R2>)
+    sized_range<R1> && sized_range<R2>
   bool ranges::equal(ExecutionPolicy&& exec, R1&& r1, R2&& r2,
                      Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
 </xmp>
@@ -1300,7 +1535,7 @@ template<forward_range R1, forward_range R2, class Pred = ranges::equal_to,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1,
+template<execution-policy ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1,
          random_access_iterator I2, sized_sentinel_for<I2> S2,
          class Pred = ranges::equal_to, class Proj1 = identity, class Proj2 = identity>
   requires indirectly_comparable<I1, I2, Pred, Proj1, Proj2>
@@ -1308,7 +1543,7 @@ template<class ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1
       ranges::search(ExecutionPolicy&& exec, I1 first1, S1 last1, I2 first2, S2 last2,
                      Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
 
-template<class ExecutionPolicy, random_access_range R1, random_access_range R2,
+template<execution-policy ExecutionPolicy, random_access_range R1, random_access_range R2,
          class Pred = ranges::equal_to, class Proj1 = identity, class Proj2 = identity>
   requires indirectly_comparable<iterator_t<R1>, iterator_t<R2>, Pred, Proj1, Proj2>
            && sized_range<R1> && sized_range<R2>
@@ -1336,7 +1571,7 @@ template<forward_range R, class Pred = ranges::equal_to,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S,
          class Pred = ranges::equal_to, class Proj = identity,
          class T = projected_value_t<I, Proj>>
   requires indirectly_comparable<I, const T*, Pred, Proj>
@@ -1344,7 +1579,7 @@ template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> 
       ranges::search_n(ExecutionPolicy&& exec, I first, S last, iter_difference_t<I> count,
                        const T& value, Pred pred = {}, Proj proj = {});
 
-template<class ExecutionPolicy, random_access_range R, class Pred = ranges::equal_to,
+template<execution-policy ExecutionPolicy, random_access_range R, class Pred = ranges::equal_to,
          class Proj = identity, class T = projected_value_t<iterator_t<R>, Proj>>
   requires indirectly_comparable<iterator_t<R>, const T*, Pred, Proj>
            && sized_range<R>
@@ -1374,13 +1609,13 @@ template<input_range R1, input_range R2, class Pred = ranges::equal_to, class Pr
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1,
+template<execution-policy ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1,
          random_access_iterator I2, sized_sentinel_for<I2> S2,
          class Pred = ranges::equal_to, class Proj1 = identity, class Proj2 = identity>
   requires indirectly_comparable<I1, I2, Pred, Proj1, Proj2>
   bool ranges::starts_with(ExecutionPolicy&& exec, I1 first1, S1 last1, I2 first2, S2 last2,
                            Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
-template<class ExecutionPolicy, random_access_range R1, random_access_range R2, class Pred = ranges::equal_to,
+template<execution-policy ExecutionPolicy, random_access_range R1, random_access_range R2, class Pred = ranges::equal_to,
          class Proj1 = identity, class Proj2 = identity>
   requires indirectly_comparable<iterator_t<R1>, iterator_t<R2>, Pred, Proj1, Proj2> &&
     sized_range<R1> && sized_range<R2>
@@ -1411,7 +1646,7 @@ Let `N1` be `last1 - first1` and `N2` be `last2 - first2`.
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1, random_access_iterator I2, sized_sentinel_for<I2> S2,
+template<execution-policy ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1, random_access_iterator I2, sized_sentinel_for<I2> S2,
          class Pred = ranges::equal_to, class Proj1 = identity, class Proj2 = identity>
   requires indirectly_comparable<I1, I2, Pred, Proj1, Proj2>
   bool ranges::ends_with(ExecutionPolicy&& exec, I1 first1, S1 last1, I2 first2, S2 last2,
@@ -1440,7 +1675,7 @@ Let `N1` be `ranges​::​distance(r1)` and `N2` be `ranges​::​distance(r2)
                r2, pred, proj1, proj2)`
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_range R1, random_access_range R2,
+template<execution-policy ExecutionPolicy, random_access_range R1, random_access_range R2,
          class Pred = ranges::equal_to, class Proj1 = identity, class Proj2 = identity>
   requires (sized_range<R1> && sized_range<R2>) &&
            indirectly_comparable<iterator_t<R1>, iterator_t<R2>, Pred, Proj1, Proj2>
@@ -1458,7 +1693,7 @@ Let `N1` be `ranges​::​distance(r1)` and `N2` be `ranges​::​distance(r2)
 ## Modify `copy` in <a href="https://eel.is/c++draft/alg.copy">[**alg.copy**]</a> ## {#modify_copy}
 
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, class ForwardIterator1, class ForwardIterator2>
+template<execution-policy ExecutionPolicy, class ForwardIterator1, class ForwardIterator2>
   ForwardIterator2 copy(ExecutionPolicy&& policy,
                         ForwardIterator1 first, ForwardIterator1 last,
                         ForwardIterator2 result);
@@ -1466,12 +1701,14 @@ template<class ExecutionPolicy, class ForwardIterator1, class ForwardIterator2>
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, random_access_iterator O>
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S,
+         random_access_iterator O, sized_sentinel_for<O> OutS>
   requires indirectly_copyable<I, O>
-  ranges::copy_result<I, O> ranges::copy(ExecutionPolicy&& exec, I first, S last, O result);
-template<class ExecutionPolicy, random_access_range R, random_access_iterator O>
-  requires indirectly_copyable<iterator_t<R>, O> && sized_range<R>
-  ranges::copy_result<borrowed_iterator_t<R>, O> ranges::copy(ExecutionPolicy&& exec, R&& r, O result);
+  ranges::copy_result<I, O> ranges::copy(ExecutionPolicy&& exec, I first, S last, O result, OutS result_last);
+template<execution-policy ExecutionPolicy, random_access_range R, random_access_range OutR>
+  requires indirectly_copyable<iterator_t<R>, iterator_t<OutR>> && sized_range<R> && sized_range<OutR>
+  ranges::copy_result<borrowed_iterator_t<R>, borrowed_iterator_t<OutR>>
+    ranges::copy(ExecutionPolicy&& exec, R&& r, OutR&& result);
 </xmp>
 </ins>
 
@@ -1484,7 +1721,7 @@ template<input_iterator I, weakly_incrementable O>
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, random_access_iterator O>
+template<execution-policy ExecutionPolicy, random_access_iterator I, random_access_iterator O>
   requires indirectly_copyable<I, O>
   ranges::copy_n_result<I, O>
     ranges::copy_n(ExecutionPolicy&& exec, I first, iter_difference_t<I> n, O result);
@@ -1506,24 +1743,25 @@ template<input_range R, weakly_incrementable O, class Proj = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, random_access_iterator O,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S,
+         random_access_iterator O, sized_sentinel_for<O> OutS,
          class Proj = identity, indirect_unary_predicate<projected<I, Proj>> Pred>
   requires indirectly_copyable<I, O>
   ranges::copy_if_result<I, O>
-    ranges::copy_if(ExecutionPolicy&& exec, I first, S last, O result,
+    ranges::copy_if(ExecutionPolicy&& exec, I first, S last, O result, OutS result_last,
                     Pred pred, Proj proj = {});
-template<class ExecutionPolicy, random_access_range R, random_access_iterator O,
+template<execution-policy ExecutionPolicy, random_access_range R, random_access_iterator OutR,
          class Proj = identity, indirect_unary_predicate<projected<iterator_t<R>, Proj>> Pred>
-  requires indirectly_copyable<iterator_t<R>, O> && sized_range<R>
-  ranges::copy_if_result<borrowed_iterator_t<R>, O>
-    ranges::copy_if(ExecutionPolicy&& exec, R&& r, O result, Pred pred, Proj proj = {});
+  requires indirectly_copyable<iterator_t<R>, iterator_t<OutR>> && sized_range<R> && sized_range<OutR>
+  ranges::copy_if_result<borrowed_iterator_t<R>, borrowed_iterator_t<OutR>>
+    ranges::copy_if(ExecutionPolicy&& exec, R&& r, OutR&& result, Pred pred, Proj proj = {});
 </xmp>
 </ins>
 
 ## Modify `move` in <a href="https://eel.is/c++draft/alg.move">[**alg.move**]</a> ## {#modify_move}
 
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, class ForwardIterator1, class ForwardIterator2>
+template<execution-policy ExecutionPolicy, class ForwardIterator1, class ForwardIterator2>
   ForwardIterator2 move(ExecutionPolicy&& policy,
                         ForwardIterator1 first, ForwardIterator1 last,
                         ForwardIterator2 result);
@@ -1531,12 +1769,14 @@ template<class ExecutionPolicy, class ForwardIterator1, class ForwardIterator2>
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, random_access_iterator O>
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S,
+         random_access_iterator O, sized_sentinel_for<O> OutS>
   requires indirectly_movable<I, O>
-  ranges::move_result<I, O> ranges::move(ExecutionPolicy&& exec, I first, S last, O result);
-template<class ExecutionPolicy, random_access_range R, random_access_iterator O>
-  requires indirectly_movable<iterator_t<R>, O> && sized_range<R>
-  ranges::move_result<borrowed_iterator_t<R>, O> ranges::move(ExecutionPolicy&& exec, R&& r, O result);
+  ranges::move_result<I, O> ranges::move(ExecutionPolicy&& exec, I first, S last, O result, OutS result_last);
+template<execution-policy ExecutionPolicy, random_access_range R, random_access_range OutR>
+  requires indirectly_movable<iterator_t<R>, iterator_t<OutR>> && sized_range<R> && sized_range<OutR>
+  ranges::move_result<borrowed_iterator_t<R>, borrowed_iterator_t<OutR>>
+    ranges::move(ExecutionPolicy&& exec, R&& r, OutR&& result);
 </xmp>
 </ins>
 
@@ -1556,11 +1796,11 @@ template<input_range R1, input_range R2>
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1, random_access_iterator I2, sized_sentinel_for<I2> S2>
+template<execution-policy ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1, random_access_iterator I2, sized_sentinel_for<I2> S2>
   requires indirectly_swappable<I1, I2>
   ranges::swap_ranges_result<I1, I2>
     ranges::swap_ranges(ExecutionPolicy&& exec, I1 first1, S1 last1, I2 first2, S2 last2);
-template<class ExecutionPolicy, random_access_range R1, random_access_range R2>
+template<execution-policy ExecutionPolicy, random_access_range R1, random_access_range R2>
   requires indirectly_swappable<iterator_t<R1>, iterator_t<R2>> && sized_range<R1> && sized_range<R2>
   ranges::swap_ranges_result<borrowed_iterator_t<R1>, borrowed_iterator_t<R2>>
     ranges::swap_ranges(ExecutionPolicy&& exec, R1&& r1, R2&& r2);
@@ -1584,17 +1824,20 @@ template<input_range R, weakly_incrementable O, copy_constructible F,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, random_access_iterator O,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S,
+         random_access_iterator O, sized_sentinel_for<O> OutS,
          copy_constructible F, class Proj = identity>
   requires indirectly_writable<O, indirect_result_t<F&, projected<I, Proj>>>
   ranges::unary_transform_result<I, O>
-    ranges::transform(ExecutionPolicy&& exec, I first, S last, O result,
+    ranges::transform(ExecutionPolicy&& exec, I first, S last, O result, OutS result_last,
                       F op, Proj proj = {});
-template<class ExecutionPolicy, random_access_range R, random_access_iterator O,
+
+template<execution-policy ExecutionPolicy, random_access_range R, random_access_range OutR,
          copy_constructible F, class Proj = identity>
-  requires indirectly_writable<O, indirect_result_t<F&, projected<iterator_t<R>, Proj>>> && sized_range<R>
-  ranges::unary_transform_result<borrowed_iterator_t<R>, O>
-    ranges::transform(ExecutionPolicy&& exec, R&& r, O result, F op, Proj proj = {});
+  requires indirectly_writable<iterator_t<OutR>, indirect_result_t<F&, projected<iterator_t<R>, Proj>>>
+           && sized_range<R> && sized_range<OutR>
+  ranges::unary_transform_result<borrowed_iterator_t<R>, borrowed_iterator_t<OutR>>
+    ranges::transform(ExecutionPolicy&& exec, R&& r, OutR&& result, F op, Proj proj = {});
 </xmp>
 </ins>
 
@@ -1618,19 +1861,22 @@ template<input_range R1, input_range R2, weakly_incrementable O,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I1, sentinel_for<I1> S1, random_access_iterator I2, sentinel_for<I2> S2,
-         random_access_iterator O, copy_constructible F, class Proj1 = identity, class Proj2 = identity>
-  requires indirectly_writable<O, indirect_result_t<F&, projected<I1, Proj1>, projected<I2, Proj2>>> &&
-    (sized_sentinel_for<S1, I1> || sized_sentinel_for<S2, I2>)
+template<execution-policy ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1,
+         random_access_iterator I2, sized_sentinel_for<I2> S2,
+         random_access_iterator O,  sized_sentinel_for<O> OutS,
+         copy_constructible F, class Proj1 = identity, class Proj2 = identity>
+  requires indirectly_writable<O, indirect_result_t<F&, projected<I1, Proj1>, projected<I2, Proj2>>>
   ranges::binary_transform_result<I1, I2, O>
     ranges::transform(ExecutionPolicy&& exec, I1 first1, S1 last1, I2 first2, S2 last2, O result,
-                      F binary_op, Proj1 proj1 = {}, Proj2 proj2 = {});
-template<class ExecutionPolicy, random_access_range R1, random_access_range R2, random_access_iterator O,
+                      OutS result_last, F binary_op, Proj1 proj1 = {}, Proj2 proj2 = {});
+
+template<execution-policy ExecutionPolicy, random_access_range R1, random_access_range R2, random_access_range OutR,
          copy_constructible F, class Proj1 = identity, class Proj2 = identity>
-  requires indirectly_writable<O, indirect_result_t<F&, projected<iterator_t<R1>, Proj1>,
-    projected<iterator_t<R2>, Proj2>>> && (sized_range<R1> || sized_range<R2>)
-  ranges::binary_transform_result<borrowed_iterator_t<R1>, borrowed_iterator_t<R2>, O>
-    ranges::transform(ExecutionPolicy&& exec, R1&& r1, R2&& r2, O result,
+  requires indirectly_writable<iterator_t<OutR>,
+             indirect_result_t<F&, projected<iterator_t<R1>, Proj1>, projected<iterator_t<R2>, Proj2>>> &&
+           sized_range<R1> && sized_range<R2> && sized_range<OutR>
+  ranges::binary_transform_result<borrowed_iterator_t<R1>, borrowed_iterator_t<R2>, borrowed_iterator_t<OutR>>
+    ranges::transform(ExecutionPolicy&& exec, R1&& r1, R2&& r2, OutR&& result,
                       F binary_op, Proj1 proj1 = {}, Proj2 proj2 = {});
 </xmp>
 </ins>
@@ -1654,13 +1900,13 @@ template<input_range R, class Proj = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
          class T1 = projected_value_t<I, Proj>, class T2 = T1>
   requires indirectly_writable<I, const T2&> &&
            indirect_binary_predicate<ranges::equal_to, projected<I, Proj>, const T1*>
   I ranges::replace(ExecutionPolicy&& exec, I first, S last,
                     const T1& old_value, const T2& new_value, Proj proj = {});
-template<class ExecutionPolicy, random_access_range R, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_range R, class Proj = identity,
          class T1 = projected_value_t<iterator_t<R>, Proj>, class T2 = T1>
   requires indirectly_writable<iterator_t<R>, const T2&> &&
            indirect_binary_predicate<ranges::equal_to, projected<iterator_t<R>, Proj>, const T1*> &&
@@ -1686,13 +1932,13 @@ template<input_range R, class Proj = identity, class T = projected_value_t<itera
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
          class T = projected_value_t<I, Proj>,
          indirect_unary_predicate<projected<I, Proj>> Pred>
   requires indirectly_writable<I, const T&>
   I ranges::replace_if(ExecutionPolicy&& exec, I first, S last, Pred pred,
                        const T& new_value, Proj proj = {});
-template<class ExecutionPolicy, random_access_range R, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_range R, class Proj = identity,
          class T = projected_value_t<iterator_t<R>, Proj>,
          indirect_unary_predicate<projected<iterator_t<R>, Proj>> Pred>
   requires indirectly_writable<iterator_t<R>, const T&> && sized_range<R>
@@ -1723,23 +1969,24 @@ template<input_range R, class O, class Proj = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, random_access_iterator O,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S,
+         random_access_iterator O, sized_sentinel_for<O> OutS>, 
          class Proj = identity, class T1 = projected_value_t<I, Proj>, class T2 = iter_value_t<O>>
   requires indirectly_copyable<I, O> &&
            indirect_binary_predicate<ranges::equal_to, projected<I, Proj>, const T1*> &&
            indirectly_writable<O, const T2&>
   ranges::replace_copy_result<I, O>
-    ranges::replace_copy(ExecutionPolicy&& exec, I first, S last, O result,
+    ranges::replace_copy(ExecutionPolicy&& exec, I first, S last, O result, OutS result_last,
                          const T1& old_value, const T2& new_value, Proj proj = {});
 
-template<class ExecutionPolicy, random_access_range R, random_access_iterator O,
+template<execution-policy ExecutionPolicy, random_access_range R, random_access_range OutR,
          class Proj = identity, class T1 = projected_value_t<iterator_t<R>, Proj>,
-         class T2 = iter_value_t<O>>
-  requires indirectly_copyable<iterator_t<R>, O> &&
+         class T2 = range_value_t<OutR>>
+  requires indirectly_copyable<iterator_t<R>, iterator_t<OutR>> &&
            indirect_binary_predicate<ranges::equal_to, projected<iterator_t<R>, Proj>, const T1*> &&
-           indirectly_writable<O, const T2&> && sized_range<R>
-  ranges::replace_copy_result<borrowed_iterator_t<R>, O>
-    ranges::replace_copy(ExecutionPolicy&& exec, R&& r, O result,
+           indirectly_writable<iterator_t<OutR>, const T2&> && sized_range<R> && sized_range<OutR>
+  ranges::replace_copy_result<borrowed_iterator_t<R>, borrowed_iterator_t<OutR>>
+    ranges::replace_copy(ExecutionPolicy&& exec, R&& r, OutR&& result,
                          const T1& old_value, const T2& new_value, Proj proj = {});
 </xmp>
 </ins>
@@ -1761,19 +2008,21 @@ template<input_range R, class O, class T = iter_value_t<O>, class Proj = identit
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, random_access_iterator O,
-         class T = iter_value_t<O>, class Proj = identity, indirect_unary_predicate<projected<I, Proj>> Pred>
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S,
+         random_access_iterator O, sized_sentinel_for<O> OutS>, class T = iter_value_t<O>,
+         class Proj = identity, indirect_unary_predicate<projected<I, Proj>> Pred>
   requires indirectly_copyable<I, O> && indirectly_writable<O, const T&>
   ranges::replace_copy_if_result<I, O>
-    ranges::replace_copy_if(ExecutionPolicy&& exec, I first, S last, O result,
-                              Pred pred, const T& new_value, Proj proj = {});
+    ranges::replace_copy_if(ExecutionPolicy&& exec, I first, S last, O result, OutS result_last,
+                            Pred pred, const T& new_value, Proj proj = {});
 
-template<class ExecutionPolicy, random_access_range R, random_access_iterator O,
-         class T = iter_value_t<O>, class Proj = identity, indirect_unary_predicate<projected<iterator_t<R>, Proj>> Pred>
-  requires indirectly_copyable<iterator_t<R>, O> && indirectly_writable<O, const T&>&&
-           sized_range<R>
-  ranges::replace_copy_if_result<borrowed_iterator_t<R>, O>
-    ranges::replace_copy_if(ExecutionPolicy&& exec, R&& r, O result,
+template<execution-policy ExecutionPolicy, random_access_range R, random_access_range OutR,
+         class T = range_value_t<OutR>, class Proj = identity,
+         indirect_unary_predicate<projected<iterator_t<R>, Proj>> Pred>
+  requires indirectly_copyable<iterator_t<R>, iterator_t<OutR>> &&
+           indirectly_writable<iterator_t<OutR>, const T&> && sized_range<R> && sized_range<OutR>
+  ranges::replace_copy_if_result<borrowed_iterator_t<R>, borrowed_iterator_t<OutR>>
+    ranges::replace_copy_if(ExecutionPolicy&& exec, R&& r, OutR&& result,
                             Pred pred, const T& new_value, Proj proj = {});
 </xmp>
 </ins>
@@ -1794,14 +2043,14 @@ template<class O, class T = iter_value_t<O>>
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator O, sized_sentinel_for<O> S,
+template<execution-policy ExecutionPolicy, random_access_iterator O, sized_sentinel_for<O> S,
          class T = iter_value_t<O>>
   requires output_iterator<O, const T&>
   O ranges::fill(ExecutionPolicy&& exec, O first, S last, const T& value);
-template<class ExecutionPolicy, random_access_range R, class T = range_value_t<R>>
+template<execution-policy ExecutionPolicy, random_access_range R, class T = range_value_t<R>>
   requires output_range<R, const T&> && sized_range<R>
   borrowed_iterator_t<R> ranges::fill(ExecutionPolicy&& exec, R&& r, const T& value);
-template<class ExecutionPolicy, random_access_iterator O, class T = iter_value_t<O>>
+template<execution-policy ExecutionPolicy, random_access_iterator O, class T = iter_value_t<O>>
     requires indirectly_writable<O, const T&>
   O ranges::fill_n(ExecutionPolicy&& exec, O first, iter_difference_t<O> n, const T& value);
 </xmp>
@@ -1823,13 +2072,13 @@ template<input_or_output_iterator O, copy_constructible F>
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator O, sized_sentinel_for<O> S, copy_constructible F>
+template<execution-policy ExecutionPolicy, random_access_iterator O, sized_sentinel_for<O> S, copy_constructible F>
   requires invocable<F&> && indirectly_writable<O, invoke_result_t<F&>>
   O ranges::generate(ExecutionPolicy&& exec, O first, S last, F gen);
-template<class ExecutionPolicy, random_access_range R, copy_constructible F>
+template<execution-policy ExecutionPolicy, random_access_range R, copy_constructible F>
   requires invocable<F&> && output_range<R, invoke_result_t<F&>> && sized_range<R>
   borrowed_iterator_t<R> ranges::generate(ExecutionPolicy&& exec, R&& r, F gen);
-template<class ExecutionPolicy, random_access_iterator O, copy_constructible F>
+template<execution-policy ExecutionPolicy, random_access_iterator O, copy_constructible F>
   requires invocable<F&> && indirectly_writable<O, invoke_result_t<F&>>
   O ranges::generate_n(ExecutionPolicy&& exec, O first, iter_difference_t<O> n, F gen);
 </xmp>
@@ -1852,11 +2101,11 @@ template<forward_range R, class Proj = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
          class T = projected_value_t<I, Proj>>
   requires indirect_binary_predicate<ranges::equal_to, projected<I, Proj>, const T*>
   subrange<I> ranges::remove(ExecutionPolicy&& exec, I first, S last, const T& value, Proj proj = {});
-template<class ExecutionPolicy, random_access_range R, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_range R, class Proj = identity,
          class T = projected_value_t<iterator_t<R>, Proj>>
   requires permutable<iterator_t<R>> &&
            indirect_binary_predicate<ranges::equal_to, projected<iterator_t<R>, Proj>, const T*> &&
@@ -1878,10 +2127,10 @@ template<forward_range R, class Proj = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
          indirect_unary_predicate<projected<I, Proj>> Pred>
   subrange<I> ranges::remove_if(ExecutionPolicy&& exec, I first, S last, Pred pred, Proj proj = {});
-template<class ExecutionPolicy, random_access_range R, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_range R, class Proj = identity,
          indirect_unary_predicate<projected<iterator_t<R>, Proj>> Pred>
   requires permutable<iterator_t<R>> && sized_range<R>
   borrowed_subrange_t<R> ranges::remove_if(ExecutionPolicy&& exec, R&& r, Pred pred, Proj proj = {});
@@ -1905,19 +2154,22 @@ template<input_range R, weakly_incrementable O, class Proj = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, random_access_iterator O,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S,
+         random_access_iterator O, sized_sentinel_for<O> OutS>,
          class Proj = identity, class T = projected_value_t<I, Proj>>
   requires indirectly_copyable<I, O> &&
            indirect_binary_predicate<ranges::equal_to, projected<I, Proj>, const T*>
   ranges::remove_copy_result<I, O>
-    ranges::remove_copy(ExecutionPolicy&& exec, I first, S last, O result, const T& value, Proj proj = {});
+    ranges::remove_copy(ExecutionPolicy&& exec, I first, S last, O result,  OutS result_last,
+                        const T& value, Proj proj = {});
 
-template<class ExecutionPolicy, random_access_range R, random_access_iterator O, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_range R, random_access_range OutR, class Proj = identity,
          class T = projected_value_t<iterator_t<R>, Proj>>
-  requires indirectly_copyable<iterator_t<R>, O> &&
-           indirect_binary_predicate<ranges::equal_to, projected<iterator_t<R>, Proj>, const T*> && sized_range<R>
-  ranges::remove_copy_result<borrowed_iterator_t<R>, O>
-    ranges::remove_copy(ExecutionPolicy&& exec, R&& r, O result, const T& value, Proj proj = {});
+  requires indirectly_copyable<iterator_t<R>, iterator_t<OutR>> &&
+           indirect_binary_predicate<ranges::equal_to, projected<iterator_t<R>, Proj>, const T*> &&
+           sized_range<R> && sized_range<OutR>
+  ranges::remove_copy_result<borrowed_iterator_t<R>, borrowed_iterator_t<OutR>>
+    ranges::remove_copy(ExecutionPolicy&& exec, R&& r, OutR&& result, const T& value, Proj proj = {});
 </xmp>
 </ins>
 
@@ -1936,17 +2188,19 @@ template<input_range R, weakly_incrementable O, class Proj = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, random_access_iterator O,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S,
+         random_access_iterator O, sized_sentinel_for<O> OutS>,
          class Proj = identity, indirect_unary_predicate<projected<I, Proj>> Pred>
   requires indirectly_copyable<I, O>
   ranges::remove_copy_if_result<I, O>
-    ranges::remove_copy_if(ExecutionPolicy&& exec, I first, S last, O result, Pred pred, Proj proj = {});
+    ranges::remove_copy_if(ExecutionPolicy&& exec, I first, S last, O result, OutS result_last,
+                           Pred pred, Proj proj = {});
 
-template<class ExecutionPolicy, random_access_range R, random_access_iterator O, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_range R, random_access_range OutR, class Proj = identity,
          indirect_unary_predicate<projected<iterator_t<R>, Proj>> Pred>
-  requires indirectly_copyable<iterator_t<R>, O> && sized_range<R>
-  ranges::remove_copy_if_result<borrowed_iterator_t<R>, O>
-    ranges::remove_copy_if(ExecutionPolicy&& exec, R&& r, O result, Pred pred, Proj proj = {});
+  requires indirectly_copyable<iterator_t<R>, iterator_t<OutR>> && sized_range<R> && sized_range<OutR>
+  ranges::remove_copy_if_result<borrowed_iterator_t<R>, borrowed_iterator_t<OutR>>
+    ranges::remove_copy_if(ExecutionPolicy&& exec, R&& r, OutR&& result, Pred pred, Proj proj = {});
 </xmp>
 </ins>
 
@@ -1964,11 +2218,11 @@ template<forward_range R, class Proj = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
          indirect_equivalence_relation<projected<I, Proj>> C = ranges::equal_to>
   requires permutable<I>
   subrange<I> ranges::unique(ExecutionPolicy&& exec, I first, S last, C comp = {}, Proj proj = {});
-template<class ExecutionPolicy, random_access_range R, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_range R, class Proj = identity,
          indirect_equivalence_relation<projected<iterator_t<R>, Proj>> C = ranges::equal_to>
   requires permutable<iterator_t<R>> && sized_range<R>
   borrowed_subrange_t<R> ranges::unique(ExecutionPolicy&& exec, R&& r, C comp = {}, Proj proj = {});
@@ -1996,17 +2250,19 @@ template<input_range R, weakly_incrementable O, class Proj = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, random_access_iterator O,
-         class Proj = identity, indirect_equivalence_relation<projected<I, Proj>> C = ranges::equal_to>
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S,
+         random_access_iterator O, sized_sentinel_for<O> OutS>, class Proj = identity,
+         indirect_equivalence_relation<projected<I, Proj>> C = ranges::equal_to>
   requires indirectly_copyable<I, O>
   ranges::unique_copy_result<I, O>
-    ranges::unique_copy(ExecutionPolicy&& exec, I first, S last, O result,
+    ranges::unique_copy(ExecutionPolicy&& exec, I first, S last, O result, OutS result_last,
                         C comp = {}, Proj proj = {});
-template<class ExecutionPolicy, random_access_range R, random_access_iterator O, class Proj = identity,
+
+template<execution-policy ExecutionPolicy, random_access_range R, random_access_range OutR, class Proj = identity,
          indirect_equivalence_relation<projected<iterator_t<R>, Proj>> C = ranges::equal_to>
-  requires indirectly_copyable<iterator_t<R>, O> && sized_range<R>
-  ranges::unique_copy_result<borrowed_iterator_t<R>, O>
-    ranges::unique_copy(ExecutionPolicy&& exec, R&& r, O result,
+  requires indirectly_copyable<iterator_t<R>, iterator_t<OutR>> && sized_range<R> && sized_range<OutR>
+  ranges::unique_copy_result<borrowed_iterator_t<R>, borrowed_iterator_t<OutR>>
+    ranges::unique_copy(ExecutionPolicy&& exec, R&& r, OutR&& result,
                         C comp = {}, Proj proj = {});
 </xmp>
 </ins>
@@ -2024,10 +2280,10 @@ template<bidirectional_range R>
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S>
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S>
   requires permutable<I>
   I ranges::reverse(ExecutionPolicy&& exec, I first, S last);
-template<class ExecutionPolicy, random_access_range R>
+template<execution-policy ExecutionPolicy, random_access_range R>
   requires permutable<iterator_t<R>> && sized_range<R>
   borrowed_iterator_t<R> ranges::reverse(ExecutionPolicy&& exec, R&& r);
 </xmp>
@@ -2046,14 +2302,16 @@ template<bidirectional_range R, weakly_incrementable O>
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, random_access_iterator O>
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S,
+         random_access_iterator O, sized_sentinel_for<O> OutS>
   requires indirectly_copyable<I, O>
   ranges::reverse_copy_result<I, O>
-    ranges::reverse_copy(ExecutionPolicy&& exec, I first, S last, O result);
-template<class ExecutionPolicy, random_access_range R, random_access_iterator O>
-  requires indirectly_copyable<iterator_t<R>, O> && sized_range<R>
-  ranges::reverse_copy_result<borrowed_iterator_t<R>, O>
-    ranges::reverse_copy(ExecutionPolicy&& exec, R&& r, O result);
+    ranges::reverse_copy(ExecutionPolicy&& exec, I first, S last, O result, OutS result_last);
+
+template<execution-policy ExecutionPolicy, random_access_range R, random_access_range OutR>
+  requires indirectly_copyable<iterator_t<R>, iterator_t<OutR>> && sized_range<R> && sized_range<OutR>
+  ranges::reverse_copy_result<borrowed_iterator_t<R>, borrowed_iterator_t<OutR>>
+    ranges::reverse_copy(ExecutionPolicy&& exec, R&& r, OutR&& result);
 </xmp>
 </ins>
 
@@ -2066,7 +2324,7 @@ template<permutable I, sentinel_for<I> S>
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S>
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S>
   requires permutable<I>
   subrange<I> ranges::rotate(ExecutionPolicy&& exec, I first, I middle, S last);
 </xmp>
@@ -2081,7 +2339,7 @@ template<forward_range R>
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_range R>
+template<execution-policy ExecutionPolicy, random_access_range R>
   requires permutable<iterator_t<R>> && sized_range<R>
   borrowed_subrange_t<R> ranges::rotate(ExecutionPolicy&& exec, R&& r, iterator_t<R> middle);
 </xmp>
@@ -2098,9 +2356,11 @@ template<forward_iterator I, sentinel_for<I> S, weakly_incrementable O>
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, random_access_iterator O>
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S,
+         random_access_iterator O, sized_sentinel_for<O> OutS>
   requires indirectly_copyable<I, O>
-  ranges::rotate_copy_result<I, O> ranges::rotate_copy(ExecutionPolicy&& exec, I first, I middle, S last, O result);
+  ranges::rotate_copy_result<I, O>
+    ranges::rotate_copy(ExecutionPolicy&& exec, I first, I middle, S last, O result, OutS result_last);
 </xmp>
 </ins>
 
@@ -2116,13 +2376,14 @@ template<forward_range R, weakly_incrementable O>
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_range R, random_access_iterator O>
-  requires indirectly_copyable<iterator_t<R>, O> && sized_range<R>
-  ranges::rotate_copy_result<borrowed_iterator_t<R>, O> ranges::rotate_copy(ExecutionPolicy&& exec, R&& r, iterator_t<R> middle, O result);
+template<execution-policy ExecutionPolicy, random_access_range R, random_access_range OutR>
+  requires indirectly_copyable<iterator_t<R>, iterator_t<OutR>> && sized_range<R> && sized_range<OutR>
+  ranges::rotate_copy_result<borrowed_iterator_t<R>, borrowed_iterator_t<OutR>>
+    ranges::rotate_copy(ExecutionPolicy&& exec, R&& r, iterator_t<R> middle, OutR&& result);
 </xmp>
 *Effects*: Equivalent to:
 `return ranges::rotate_copy(std::forward<ExecutionPolicy>(exec), ranges::begin(r), middle, ranges::end(r),
-std::move(result));`
+ranges::begin(result), ranges::end(result));`
 </ins>
 
 
@@ -2138,10 +2399,10 @@ template<forward_range R>
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S>
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S>
   requires permutable<I>
   subrange<I> ranges::shift_left(ExecutionPolicy&& exec, I first, S last, iter_difference_t<I> n);
-template<class ExecutionPolicy, random_access_range R>
+template<execution-policy ExecutionPolicy, random_access_range R>
   requires permutable<iterator_t<R>> && sized_range<R>
   borrowed_subrange_t<R> ranges::shift_left(ExecutionPolicy&& exec, R&& r, range_difference_t<R> n);
 </xmp>
@@ -2157,10 +2418,10 @@ template<forward_range R>
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S>
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S>
   requires permutable<I>
   subrange<I> ranges::shift_right(ExecutionPolicy&& exec, I first, S last, iter_difference_t<I> n);
-template<class ExecutionPolicy, random_access_range R>
+template<execution-policy ExecutionPolicy, random_access_range R>
   requires permutable<iterator_t<R>> && sized_range<R>
   borrowed_subrange_t<R> ranges::shift_right(ExecutionPolicy&& exec, R&& r, range_difference_t<R> n);
 </xmp>
@@ -2182,11 +2443,11 @@ template<random_access_range R, class Comp = ranges::less, class Proj = identity
 
 <ins>
 <xmp class="wordingStyle">
-template<ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Comp = ranges::less,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Comp = ranges::less,
          class Proj = identity>
   requires sortable<I, Comp, Proj>
   I ranges::sort(ExecutionPolicy&& exec, I first, S last, Comp comp = {}, Proj proj = {});
-template<ExecutionPolicy, random_access_range R, class Comp = ranges::less, class Proj = identity>
+template<execution-policy ExecutionPolicy, random_access_range R, class Comp = ranges::less, class Proj = identity>
   requires sortable<iterator_t<R>, Comp, Proj> && sized_range<R>
   borrowed_iterator_t<R> ranges::sort(ExecutionPolicy&& exec, R&& r, Comp comp = {}, Proj proj = {});
 </xmp>
@@ -2207,11 +2468,11 @@ template<random_access_range R, class Comp = ranges::less, class Proj = identity
 
 <ins>
 <xmp class="wordingStyle">
-template<ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Comp = ranges::less,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Comp = ranges::less,
          class Proj = identity>
   requires sortable<I, Comp, Proj>
   I ranges::stable_sort(ExecutionPolicy&& exec, I first, S last, Comp comp = {}, Proj proj = {});
-template<ExecutionPolicy, random_access_range R, class Comp = ranges::less, class Proj = identity>
+template<execution-policy ExecutionPolicy, random_access_range R, class Comp = ranges::less, class Proj = identity>
   requires sortable<iterator_t<R>, Comp, Proj> && sized_range<R>
   borrowed_iterator_t<R> ranges::stable_sort(ExecutionPolicy&& exec, R&& r, Comp comp = {}, Proj proj = {});
 </xmp>
@@ -2229,7 +2490,7 @@ template<random_access_iterator I, sentinel_for<I> S, class Comp = ranges::less,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Comp = ranges::less,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Comp = ranges::less,
          class Proj = identity>
   requires sortable<I, Comp, Proj>
   I ranges::partial_sort(ExecutionPolicy&& exec, I first, I middle, S last, Comp comp = {}, Proj proj = {});
@@ -2247,7 +2508,7 @@ template<random_access_range R, class Comp = ranges::less, class Proj = identity
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_range R, class Comp = ranges::less, class Proj = identity>
+template<execution-policy ExecutionPolicy, random_access_range R, class Comp = ranges::less, class Proj = identity>
   requires sortable<iterator_t<R>, Comp, Proj> && sized_range<R>
   borrowed_iterator_t<R> ranges::partial_sort(ExecutionPolicy&& exec, R&& r, iterator_t<R> middle,
                                               Comp comp = {}, Proj proj = {});
@@ -2279,7 +2540,7 @@ template<input_range R1, random_access_range R2, class Comp = ranges::less,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_range I1, sized_sentinel_for<I1> S1,
+template<execution-policy ExecutionPolicy, random_access_range I1, sized_sentinel_for<I1> S1,
          random_access_iterator I2, sized_sentinel_for<I2> S2,
          class Comp = ranges::less, class Proj1 = identity, class Proj2 = identity>
   requires indirectly_copyable<I1, I2> && sortable<I2, Comp, Proj2> &&
@@ -2287,7 +2548,7 @@ template<class ExecutionPolicy, random_access_range I1, sized_sentinel_for<I1> S
   ranges::partial_sort_copy_result<I1, I2>
     ranges::partial_sort_copy(ExecutionPolicy&& exec, I1 first, S1 last, I2 result_first, S2 result_last,
                               Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
-template<class ExecutionPolicy, random_access_range R1, random_access_range R2, class Comp = ranges::less,
+template<execution-policy ExecutionPolicy, random_access_range R1, random_access_range R2, class Comp = ranges::less,
          class Proj1 = identity, class Proj2 = identity>
   requires indirectly_copyable<iterator_t<R1>, iterator_t<R2>> &&
            sortable<iterator_t<R2>, Comp, Proj2> &&
@@ -2314,10 +2575,10 @@ template<forward_range R, class Proj = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
          indirect_strict_weak_order<projected<I, Proj>> Comp = ranges::less>
   bool ranges::is_sorted(ExecutionPolicy&& exec, I first, S last, Comp comp = {}, Proj proj = {});
-template<ExecutionPolicy, random_access_range R, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_range R, class Proj = identity,
          indirect_strict_weak_order<projected<iterator_t<R>, Proj>> Comp = ranges::less>
   requires sized_range<R>
   bool ranges::is_sorted(ExecutionPolicy&& exec, R&& r, Comp comp = {}, Proj proj = {});
@@ -2338,10 +2599,10 @@ template<forward_range R, class Proj = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
          indirect_strict_weak_order<projected<I, Proj>> Comp = ranges::less>
   I ranges::is_sorted_until(ExecutionPolicy&& exec, I first, S last, Comp comp = {}, Proj proj = {});
-template<ExecutionPolicy, random_access_range R, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_range R, class Proj = identity,
          indirect_strict_weak_order<projected<iterator_t<R>, Proj>> Comp = ranges::less>
   requires sized_range<R>
   borrowed_iterator_t<R> ranges::is_sorted_until(ExecutionPolicy&& exec, R&& r, Comp comp = {}, Proj proj = {});
@@ -2360,7 +2621,7 @@ template<random_access_iterator I, sentinel_for<I> S, class Comp = ranges::less,
 
 <ins>
 <xmp class="wordingStyle">
-template<ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Comp = ranges::less,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Comp = ranges::less,
          class Proj = identity>
   requires sortable<I, Comp, Proj>
   I ranges::nth_element(ExecutionPolicy&& exec, I first, I nth, S last, Comp comp = {}, Proj proj = {});
@@ -2378,7 +2639,7 @@ template<random_access_range R, class Comp = ranges::less, class Proj = identity
 
 <ins>
 <xmp class="wordingStyle">
-template<ExecutionPolicy, random_access_range R, class Comp = ranges::less, class Proj = identity>
+template<execution-policy ExecutionPolicy, random_access_range R, class Comp = ranges::less, class Proj = identity>
   requires sortable<iterator_t<R>, Comp, Proj> && sized_range<R>
   borrowed_iterator_t<R> ranges::nth_element(ExecutionPolicy&& exec, R&& r, iterator_t<R> nth,
                                              Comp comp = {}, Proj proj = {});
@@ -2400,10 +2661,10 @@ template<input_range R, class Proj = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
          indirect_unary_predicate<projected<I, Proj>> Pred>
   bool ranges::is_partitioned(ExecutionPolicy&& exec, I first, S last, Pred pred, Proj proj = {});
-template<class ExecutionPolicy, random_access_range R, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_range R, class Proj = identity,
          indirect_unary_predicate<projected<iterator_t<R>, Proj>> Pred>
   requires sized_range<R>
   bool ranges::is_partitioned(ExecutionPolicy&& exec, R&& r, Pred pred, Proj proj = {});
@@ -2424,10 +2685,10 @@ template<forward_range R, class Proj = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
          indirect_unary_predicate<projected<I, Proj>> Pred>
   subrange<I> ranges::partition(ExecutionPolicy&& exec, I first, S last, Pred pred, Proj proj = {});
-template<class ExecutionPolicy, random_access_range R, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_range R, class Proj = identity,
          indirect_unary_predicate<projected<iterator_t<R>, Proj>> Pred>
   requires permutable<iterator_t<R>> && sized_range<R>
   borrowed_subrange_t<R> ranges::partition(ExecutionPolicy&& exec, R&& r, Pred pred, Proj proj = {});
@@ -2447,12 +2708,12 @@ template<bidirectional_range R, class Proj = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
          indirect_unary_predicate<projected<I, Proj>> Pred>
   requires permutable<I>
   subrange<I> ranges::stable_partition(ExecutionPolicy&& exec, I first, S last, Pred pred, Proj proj = {});
 
-template<class ExecutionPolicy, random_access_range R, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_range R, class Proj = identity,
          indirect_unary_predicate<projected<iterator_t<R>, Proj>> Pred>
   requires permutable<iterator_t<R>> && sized_range<R>
   borrowed_subrange_t<R> ranges::stable_partition(ExecutionPolicy&& exec, R&& r, Pred pred, Proj proj = {});
@@ -2477,16 +2738,24 @@ template<input_range R, weakly_incrementable O1, weakly_incrementable O2,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, random_access_iterator O1, random_access_iterator O2,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S,
+         random_access_iterator O1, sized_sentinel_for<O1> OutS1,
+         random_access_iterator O2, sized_sentinel_for<O2> OutS2,
          class Proj = identity, indirect_unary_predicate<projected<I, Proj>> Pred>
   requires indirectly_copyable<I, O1> && indirectly_copyable<I, O2>
   ranges::partition_copy_result<I, O1, O2>
-    ranges::partition_copy(ExecutionPolicy&& exec, I first, S last, O1 out_true, O2 out_false, Pred pred, Proj proj = {});
-template<class ExecutionPolicy, random_access_range R, random_access_iterator O1, random_access_iterator O2,
-         class Proj = identity, indirect_unary_predicate<projected<iterator_t<R>, Proj>> Pred>
-  requires indirectly_copyable<iterator_t<R>, O1> && indirectly_copyable<iterator_t<R>, O2> && sized_range<R>
-  ranges::partition_copy_result<borrowed_iterator_t<R>, O1, O2>
-    ranges::partition_copy(ExecutionPolicy&& exec, R&& r, O1 out_true, O2 out_false, Pred pred, Proj proj = {});
+    ranges::partition_copy(ExecutionPolicy&& exec, I first, S last, O1 out_true, OutS1 last_true,
+                           O2 out_false, OutS2 last_false, Pred pred, Proj proj = {});
+
+template<execution-policy ExecutionPolicy, random_access_range R, random_access_range OutR1,
+         random_access_range OutR2, class Proj = identity,
+         indirect_unary_predicate<projected<iterator_t<R>, Proj>> Pred>
+  requires indirectly_copyable<iterator_t<R>, iterator_t<OutR1>> &&
+           indirectly_copyable<iterator_t<R>, iterator_t<OutR2>> &&
+           sized_range<R> && sized_range<OutR1> && sized_range<OutR2>
+  ranges::partition_copy_result<borrowed_iterator_t<R>, borrowed_iterator_t<OutR1>, borrowed_iterator_t<OutR2>>
+    ranges::partition_copy(ExecutionPolicy&& exec, R&& r, OutR1&& out_true, OutR2&& out_false,
+                           Pred pred, Proj proj = {});
 </xmp>
 </ins>
 
@@ -2510,20 +2779,23 @@ template<input_range R1, input_range R2, weakly_incrementable O, class Comp = ra
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1,
+template<execution-policy ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1,
          random_access_iterator I2, sized_sentinel_for<I2> S2,
-         random_access_iterator O, class Comp = ranges::less, class Proj1 = identity,
-         class Proj2 = identity>
+         random_access_iterator O, sized_sentinel_for<O> OutS, class Comp = ranges::less,
+         class Proj1 = identity, class Proj2 = identity>
   requires mergeable<I1, I2, O, Comp, Proj1, Proj2>
   ranges::merge_result<I1, I2, O>
-    ranges::merge(ExecutionPolicy&& exec, I1 first1, S1 last1, I2 first2, S2 last2, O result,
+    ranges::merge(ExecutionPolicy&& exec, I1 first1, S1 last1,
+                  I2 first2, S2 last2, O result, OutS result_last,
                   Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
-template<class ExecutionPolicy, random_access_range R1, random_access_range R2,
-         random_access_iterator O, class Comp = ranges::less,
+
+template<execution-policy ExecutionPolicy, random_access_range R1, random_access_range R2,
+         random_access_range OutR, class Comp = ranges::less,
          class Proj1 = identity, class Proj2 = identity>
-  requires mergeable<iterator_t<R1>, iterator_t<R2>, O, Comp, Proj1, Proj2> && sized_range<R1> && sized_range<R2>
-  ranges::merge_result<borrowed_iterator_t<R1>, borrowed_iterator_t<R2>, O>
-    ranges::merge(ExecutionPolicy&& exec, R1&& r1, R2&& r2, O result,
+  requires mergeable<iterator_t<R1>, iterator_t<R2>, iterator_t<OutR>, Comp, Proj1, Proj2> &&
+           sized_range<R1> && sized_range<R2> && sized_range<OutR>
+  ranges::merge_result<borrowed_iterator_t<R1>, borrowed_iterator_t<R2>, borrowed_iterator_t<OutR>>
+    ranges::merge(ExecutionPolicy&& exec, R1&& r1, R2&& r2, OutR&& result,
                   Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
 </xmp>
 </ins>
@@ -2537,7 +2809,7 @@ template<bidirectional_iterator I, sentinel_for<I> S, class Comp = ranges::less,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Comp = ranges::less,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Comp = ranges::less,
          class Proj = identity>
   requires sortable<I, Comp, Proj>
   I ranges::inplace_merge(ExecutionPolicy&& exec, I first, I middle, S last, Comp comp = {}, Proj proj = {});
@@ -2555,7 +2827,7 @@ template<bidirectional_range R, class Comp = ranges::less, class Proj = identity
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_range R, class Comp = ranges::less, class Proj = identity>
+template<execution-policy ExecutionPolicy, random_access_range R, class Comp = ranges::less, class Proj = identity>
   requires sortable<iterator_t<R>, Comp, Proj> && sized_range<R>
   borrowed_iterator_t<R> ranges::inplace_merge(ExecutionPolicy&& exec, R&& r, iterator_t<R> middle,
                                                Comp comp = {}, Proj proj = {});
@@ -2583,12 +2855,12 @@ template<input_range R1, input_range R2, class Proj1 = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1, random_access_iterator I2, sized_sentinel_for<I2> S2,
+template<execution-policy ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1, random_access_iterator I2, sized_sentinel_for<I2> S2,
          class Proj1 = identity, class Proj2 = identity,
          indirect_strict_weak_order<projected<I1, Proj1>, projected<I2, Proj2>> Comp = ranges::less>
   bool ranges::includes(ExecutionPolicy&& exec, I1 first1, S1 last1, I2 first2, S2 last2,
                         Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
-template<class ExecutionPolicy, random_access_range R1, random_access_range R2, class Proj1 = identity, class Proj2 = identity,
+template<execution-policy ExecutionPolicy, random_access_range R1, random_access_range R2, class Proj1 = identity, class Proj2 = identity,
          indirect_strict_weak_order<projected<iterator_t<R1>, Proj1>, projected<iterator_t<R2>, Proj2>> Comp = ranges::less>
   requires sized_range<R1> && sized_range<R2>
   bool ranges::includes(ExecutionPolicy&& exec, R1&& r1, R2&& r2,
@@ -2616,18 +2888,22 @@ template<input_range R1, input_range R2, weakly_incrementable O,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1, random_access_iterator I2, sized_sentinel_for<I2> S2,
-         random_access_iterator O, class Comp = ranges::less,
+template<execution-policy ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1,
+         random_access_iterator I2, sized_sentinel_for<I2> S2,
+         random_access_iterator O, sized_sentinel_for<O> OutS, class Comp = ranges::less,
          class Proj1 = identity, class Proj2 = identity>
   requires mergeable<I1, I2, O, Comp, Proj1, Proj2>
   ranges::set_union_result<I1, I2, O>
-    ranges::set_union(ExecutionPolicy&& exec, I1 first1, S1 last1, I2 first2, S2 last2, O result,
+    ranges::set_union(ExecutionPolicy&& exec, I1 first1, S1 last1,
+                      I2 first2, S2 last2, O result, OutS result_last,
                       Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
-template<class ExecutionPolicy, random_access_range R1, random_access_range R2, random_access_iterator O,
+
+template<execution-policy ExecutionPolicy, random_access_range R1, random_access_range R2, random_access_range OutR,
          class Comp = ranges::less, class Proj1 = identity, class Proj2 = identity>
-  requires mergeable<iterator_t<R1>, iterator_t<R2>, O, Comp, Proj1, Proj2> && sized_range<R1> && sized_range<R2>
-  ranges::set_union_result<borrowed_iterator_t<R1>, borrowed_iterator_t<R2>, O>
-    ranges::set_union(ExecutionPolicy&& exec, R1&& r1, R2&& r2, O result,
+  requires mergeable<iterator_t<R1>, iterator_t<R2>, iterator_t<OutR>, Comp, Proj1, Proj2> &&
+           sized_range<R1> && sized_range<R2> && sized_range<OutR>
+  ranges::set_union_result<borrowed_iterator_t<R1>, borrowed_iterator_t<R2>, borrowed_iterator_t<OutR>>
+    ranges::set_union(ExecutionPolicy&& exec, R1&& r1, R2&& r2, OutR&& result,
                       Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
 </xmp>
 </ins>
@@ -2652,19 +2928,22 @@ template<input_range R1, input_range R2, weakly_incrementable O,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1, random_access_iterator I2, sized_sentinel_for<I2> S2,
-         random_access_iterator O, class Comp = ranges::less,
+template<execution-policy ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1,
+         random_access_iterator I2, sized_sentinel_for<I2> S2,
+         random_access_iterator O, sized_sentinel_for<O> OutS, class Comp = ranges::less,
          class Proj1 = identity, class Proj2 = identity>
   requires mergeable<I1, I2, O, Comp, Proj1, Proj2>
   ranges::set_intersection_result<I1, I2, O>
-    ranges::set_intersection(ExecutionPolicy&& exec, I1 first1, S1 last1, I2 first2, S2 last2, O result,
+    ranges::set_intersection(ExecutionPolicy&& exec, I1 first1, S1 last1,
+                             I2 first2, S2 last2, O result, OutS result_last,
                              Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
 
-template<class ExecutionPolicy, random_access_range R1, random_access_range R2, random_access_iterator O,
+template<execution-policy ExecutionPolicy, random_access_range R1, random_access_range R2, random_access_range OutR,
          class Comp = ranges::less, class Proj1 = identity, class Proj2 = identity>
-  requires mergeable<iterator_t<R1>, iterator_t<R2>, O, Comp, Proj1, Proj2> && sized_range<R1> && sized_range<R2>
-  ranges::set_intersection_result<borrowed_iterator_t<R1>, borrowed_iterator_t<R2>, O>
-    ranges::set_intersection(ExecutionPolicy&& exec, R1&& r1, R2&& r2, O result,
+  requires mergeable<iterator_t<R1>, iterator_t<R2>, iterator_t<OutR>, Comp, Proj1, Proj2> &&
+           sized_range<R1> && sized_range<R2> && sized_range<OutR>
+  ranges::set_intersection_result<borrowed_iterator_t<R1>, borrowed_iterator_t<R2>, borrowed_iterator_t<OutR>>
+    ranges::set_intersection(ExecutionPolicy&& exec, R1&& r1, R2&& r2, OutR&& result,
                              Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
 </xmp>
 </ins>
@@ -2689,19 +2968,22 @@ template<input_range R1, input_range R2, weakly_incrementable O,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1, random_access_iterator I2, sized_sentinel_for<I2> S2,
-         random_access_iterator O, class Comp = ranges::less,
+template<execution-policy ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1,
+         random_access_iterator I2, sized_sentinel_for<I2> S2,
+         random_access_iterator O, sized_sentinel_for<O> OutS, class Comp = ranges::less,
          class Proj1 = identity, class Proj2 = identity>
   requires mergeable<I1, I2, O, Comp, Proj1, Proj2>
   ranges::set_difference_result<I1, O>
-    ranges::set_difference(ExecutionPolicy&& exec, I1 first1, S1 last1, I2 first2, S2 last2, O result,
+    ranges::set_difference(ExecutionPolicy&& exec, I1 first1, S1 last1,
+                           I2 first2, S2 last2, O result, OutS result_last,
                            Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
 
-template<class ExecutionPolicy, random_access_range R1, random_access_range R2, random_access_iterator O,
+template<execution-policy ExecutionPolicy, random_access_range R1, random_access_range R2, random_access_range OutR,
          class Comp = ranges::less, class Proj1 = identity, class Proj2 = identity>
-  requires mergeable<iterator_t<R1>, iterator_t<R2>, O, Comp, Proj1, Proj2> && sized_range<R1> && sized_range<R2>
-  ranges::set_difference_result<borrowed_iterator_t<R1>, O>
-    ranges::set_difference(ExecutionPolicy&& exec, R1&& r1, R2&& r2, O result,
+  requires mergeable<iterator_t<R1>, iterator_t<R2>, iterator_t<OutR>, Comp, Proj1, Proj2> &&
+           sized_range<R1> && sized_range<R2> && sized_range<OutR>
+  ranges::set_difference_result<borrowed_iterator_t<R1>, borrowed_iterator_t<OutR>>
+    ranges::set_difference(ExecutionPolicy&& exec, R1&& r1, R2&& r2, OutR&& result,
                            Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
 </xmp>
 </ins>
@@ -2728,20 +3010,23 @@ template<input_range R1, input_range R2, weakly_incrementable O,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1, random_access_iterator I2, sized_sentinel_for<I2> S2,
-         random_access_iterator O, class Comp = ranges::less,
+template<execution-policy ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1,
+         random_access_iterator I2, sized_sentinel_for<I2> S2,
+         random_access_iterator O, sized_sentinel_for<O> OutS, class Comp = ranges::less,
          class Proj1 = identity, class Proj2 = identity>
   requires mergeable<I1, I2, O, Comp, Proj1, Proj2>
   ranges::set_symmetric_difference_result<I1, I2, O>
-    ranges::set_symmetric_difference(ExecutionPolicy&& exec, I1 first1, S1 last1, I2 first2, S2 last2, O result,
+    ranges::set_symmetric_difference(ExecutionPolicy&& exec, I1 first1, S1 last1,
+                                     I2 first2, S2 last2, O result, OutS result_last,
                                      Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
 
-template<class ExecutionPolicy, random_access_range R1, random_access_range R2, random_access_iterator O,
+template<execution-policy ExecutionPolicy, random_access_range R1, random_access_range R2, random_access_range OutR,
          class Comp = ranges::less, class Proj1 = identity, class Proj2 = identity>
-  requires mergeable<iterator_t<R1>, iterator_t<R2>, O, Comp, Proj1, Proj2> && sized_range<R1> && sized_range<R2>
-  ranges::set_symmetric_difference_result<borrowed_iterator_t<R1>, borrowed_iterator_t<R2>, O>
-    ranges::set_symmetric_difference(ExecutionPolicy&& exec, R1&& r1, R2&& r2, O result, Comp comp = {},
-                                     Proj1 proj1 = {}, Proj2 proj2 = {});
+  requires mergeable<iterator_t<R1>, iterator_t<R2>, iterator_t<OutR>, Comp, Proj1, Proj2> &&
+           sized_range<R1> && sized_range<R2> && sized_range<OutR>
+  ranges::set_symmetric_difference_result<borrowed_iterator_t<R1>, borrowed_iterator_t<R2>, borrowed_iterator_t<OutR>>
+    ranges::set_symmetric_difference(ExecutionPolicy&& exec, R1&& r1, R2&& r2, OutR&& result,
+                                      Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
 </xmp>
 </ins>
 
@@ -2759,11 +3044,11 @@ template<random_access_range R, class Proj = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
          indirect_strict_weak_order<projected<I, Proj>> Comp = ranges::less>
   bool ranges::is_heap(ExecutionPolicy&& exec, I first, S last, Comp comp = {}, Proj proj = {});
 
-template<class ExecutionPolicy, random_access_range R, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_range R, class Proj = identity,
          indirect_strict_weak_order<projected<iterator_t<R>, Proj>> Comp = ranges::less>
   requires sized_range<R>
   bool ranges::is_heap(ExecutionPolicy&& exec, R&& r, Comp comp = {}, Proj proj = {});
@@ -2783,10 +3068,10 @@ template<random_access_range R, class Proj = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
          indirect_strict_weak_order<projected<I, Proj>> Comp = ranges::less>
   I ranges::is_heap_until(ExecutionPolicy&& exec, I first, S last, Comp comp = {}, Proj proj = {});
-template<class ExecutionPolicy, random_access_range R, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_range R, class Proj = identity,
          indirect_strict_weak_order<projected<iterator_t<R>, Proj>> Comp = ranges::less>
   requires sized_range<R>
   borrowed_iterator_t<R>
@@ -2807,7 +3092,7 @@ template<input_range R, class Proj = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_range R, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_range R, class Proj = identity,
          indirect_strict_weak_order<projected<iterator_t<R>, Proj>> Comp = ranges::less>
   requires sized_range<R> && indirectly_copyable_storable<iterator_t<R>, range_value_t<R>*>
   range_value_t<R>
@@ -2825,7 +3110,7 @@ template<input_range R, class Proj = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_range R, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_range R, class Proj = identity,
          indirect_strict_weak_order<projected<iterator_t<R>, Proj>> Comp = ranges::less>
   requires sized_range<R> && indirectly_copyable_storable<iterator_t<R>, range_value_t<R>*>
   range_value_t<R>
@@ -2843,7 +3128,7 @@ template<input_range R, class Proj = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_range R, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_range R, class Proj = identity,
          indirect_strict_weak_order<projected<iterator_t<R>, Proj>> Comp = ranges::less>
   requires indirectly_copyable_storable<iterator_t<R>, range_value_t<R>*> && sized_range<R>
   ranges::minmax_result<range_value_t<R>>
@@ -2863,10 +3148,10 @@ template<forward_range R, class Proj = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
          indirect_strict_weak_order<projected<I, Proj>> Comp = ranges::less>
   I ranges::min_element(ExecutionPolicy&& exec, I first, S last, Comp comp = {}, Proj proj = {});
-template<class ExecutionPolicy, random_access_range R, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_range R, class Proj = identity,
          indirect_strict_weak_order<projected<iterator_t<R>, Proj>> Comp = ranges::less>
   requires sized_range<R>
   borrowed_iterator_t<R>
@@ -2886,10 +3171,10 @@ template<forward_range R, class Proj = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
          indirect_strict_weak_order<projected<I, Proj>> Comp = ranges::less>
   I ranges::max_element(ExecutionPolicy&& exec, I first, S last, Comp comp = {}, Proj proj = {});
-template<class ExecutionPolicy, random_access_range R, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_range R, class Proj = identity,
          indirect_strict_weak_order<projected<iterator_t<R>, Proj>> Comp = ranges::less>
   requires sized_range<R>
   borrowed_iterator_t<R>
@@ -2910,12 +3195,12 @@ template<forward_range R, class Proj = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for<I> S, class Proj = identity,
          indirect_strict_weak_order<projected<I, Proj>> Comp = ranges::less>
   ranges::minmax_element_result<I>
     ranges::minmax_element(ExecutionPolicy&& exec, I first, S last, Comp comp = {}, Proj proj = {});
 
-template<class ExecutionPolicy, random_access_range R, class Proj = identity,
+template<execution-policy ExecutionPolicy, random_access_range R, class Proj = identity,
          indirect_strict_weak_order<projected<iterator_t<R>, Proj>> Comp = ranges::less>
   requires sized_range<R>
   ranges::minmax_element_result<borrowed_iterator_t<R>>
@@ -2944,14 +3229,14 @@ template<input_range R1, input_range R2, class Proj1 = identity,
 
 <ins>
 <xmp class="wordingStyle">
-template<class ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1,
+template<execution-policy ExecutionPolicy, random_access_iterator I1, sized_sentinel_for<I1> S1,
          random_access_iterator I2, sized_sentinel_for<I2> S2,
          class Proj1 = identity, class Proj2 = identity,
          indirect_strict_weak_order<projected<I1, Proj1>, projected<I2, Proj2>> Comp = ranges::less>
   bool ranges::lexicographical_compare(ExecutionPolicy&& exec, I1 first1, S1 last1, I2 first2, S2 last2,
                                        Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {});
 
-template<class ExecutionPolicy, random_access_range R1, random_access_range R2, class Proj1 = identity,
+template<execution-policy ExecutionPolicy, random_access_range R1, random_access_range R2, class Proj1 = identity,
          class Proj2 = identity,
          indirect_strict_weak_order<projected<iterator_t<R1>, Proj1>,
                                     projected<iterator_t<R2>, Proj2>> Comp = ranges::less>
@@ -2972,7 +3257,9 @@ template&lt;class I>
   concept <i>nothrow-forward-iterator</i> = <i>see below</i>;     <i>// exposition only</i>
 <ins>
 template&lt;class I>
-  concept <i>nothrow-random-access-iterator</i> = <i>see below</i>;     <i>// exposition only</i>
+  concept <i>nothrow-bidirectional-iterator</i> = <i>see below</i>;  <i>// exposition only</i>
+template&lt;class I>
+  concept <i>nothrow-random-access-iterator</i> = <i>see below</i>;  <i>// exposition only</i>
 </ins>
 template&lt;class S, class I>
   concept <i>nothrow-sentinel-for</i> = <i>see below</i>;         <i>// exposition only</i>
@@ -2985,6 +3272,8 @@ template&lt;class R>
 template&lt;class R>
   concept <i>nothrow-forward-range</i> = <i>see below</i>;        <i>// exposition only</i>
 <ins>
+template&lt;class I>
+  concept <i>nothrow-bidirectional-range</i> = <i>see below</i>;     <i>// exposition only</i>
 template&lt;class I>
   concept <i>nothrow-random-access-range</i> = <i>see below</i>;     <i>// exposition only</i>
 </ins>
@@ -3005,15 +3294,15 @@ template&lt;<i>nothrow-forward-iterator</i> I>
 
 <ins>
 <pre class="wordingStyle">
-template&lt;class ExecutionPolicy, <i>nothrow-random-access-iterator</i> I, <i>nothrow-sized-sentinel-for</i>&lt;I> S>
+template&lt;execution-policy ExecutionPolicy, <i>nothrow-random-access-iterator</i> I, <i>nothrow-sized-sentinel-for</i>&lt;I> S>
   requires default_initializable&lt;iter_value_t&lt;I>>
   I uninitialized_default_construct(ExecutionPolicy&& exec, I first, S last); <i>// see [algorithms.parallel.overloads]</i>
 
-template&lt;class ExecutionPolicy, <i>nothrow-random-access-range</i> R>
+template&lt;execution-policy ExecutionPolicy, <i>nothrow-random-access-range</i> R>
   requires default_initializable&lt;range_value_t&lt;R>> && sized_range&lt;R>
   borrowed_iterator_t&lt;R> uninitialized_default_construct(ExecutionPolicy&& exec, R&& r); <i>// see [algorithms.parallel.overloads]</i>
 
-template&lt;class ExecutionPolicy, <i>nothrow-random-access-iterator</i> I>
+template&lt;execution-policy ExecutionPolicy, <i>nothrow-random-access-iterator</i> I>
   requires default_initializable&lt;iter_value_t&lt;I>>
   I uninitialized_default_construct_n(ExecutionPolicy&& exec, I first, iter_difference_t&lt;I> n); <i>// see [algorithms.parallel.overloads]</i>
 </pre>
@@ -3034,15 +3323,15 @@ template&lt;<i>nothrow-forward-iterator</i> I>
 
 <ins>
 <pre class="wordingStyle">
-template&lt;class ExecutionPolicy, <i>nothrow-random-access-iterator</i> I, <i>nothrow-sized-sentinel-for&lt;</i>I> S>
+template&lt;execution-policy ExecutionPolicy, <i>nothrow-random-access-iterator</i> I, <i>nothrow-sized-sentinel-for&lt;</i>I> S>
   requires default_initializable&lt;iter_value_t&lt;I>>
   I uninitialized_value_construct(ExecutionPolicy&& exec, I first, S last); <i>// see [algorithms.parallel.overloads]</i>
 
-template&lt;class ExecutionPolicy, <i>nothrow-random-access-range</i> R>
+template&lt;execution-policy ExecutionPolicy, <i>nothrow-random-access-range</i> R>
   requires default_initializable&lt;range_value_t&lt;R>> && sized_range&lt;R>
   borrowed_iterator_t&lt;R> uninitialized_value_construct(ExecutionPolicy&& exec, R&& r); <i>// see [algorithms.parallel.overloads]</i>
 
-template&lt;class ExecutionPolicy, <i>nothrow-random-access-iterator</i> I>
+template&lt;execution-policy ExecutionPolicy, <i>nothrow-random-access-iterator</i> I>
   requires default_initializable&lt;iter_value_t&lt;I>>
   I uninitialized_value_construct_n(ExecutionPolicy&& exec, I first, iter_difference_t&lt;I> n); <i>// see [algorithms.parallel.overloads]</i>
 </pre>
@@ -3070,17 +3359,17 @@ template&lt;input_iterator I, <i>nothrow-forward-iterator</i> O, <i>nothrow-sent
 
 <ins>
 <pre class="wordingStyle">
-template&lt;class ExecutionPolicy, random_access_iterator I, sized_sentinel_for&lt;I> S1,
+template&lt;execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for&lt;I> S1,
          <i>nothrow-random-access-iterator</i> O, <i>nothrow-sized-sentinel-for</i>&lt;O> S2>
   requires constructible_from&lt;iter_value_t&lt;O>, iter_reference_t&lt;I>>
     uninitialized_copy_result&lt;I, O>
       uninitialized_copy(ExecutionPolicy&& exec, I ifirst, S1 ilast, O ofirst, S2 olast); <i>// see [algorithms.parallel.overloads]</i>
-template&lt;class ExecutionPolicy, random_access_range IR, <i>nothrow-random-access-range</i> OR>
+template&lt;execution-policy ExecutionPolicy, random_access_range IR, <i>nothrow-random-access-range</i> OR>
   requires constructible_from&lt;range_value_t&lt;OR>, range_reference_t&lt;IR>> && sized_range&lt;IR> && sized_range&lt;OR>
     uninitialized_copy_result&lt;borrowed_iterator_t&lt;IR>, borrowed_iterator_t&lt;OR>>
       uninitialized_copy(ExecutionPolicy&& exec, IR&& in_range, OR&& out_range); <i>// see [algorithms.parallel.overloads]</i>
 
-template&lt;class ExecutionPolicy, random_access_iterator I, <i>nothrow-random-access-iterator</i> O,
+template&lt;execution-policy ExecutionPolicy, random_access_iterator I, <i>nothrow-random-access-iterator</i> O,
          <i>nothrow-sized-sentinel-for</i>&lt;O> S>
   requires constructible_from&lt;iter_value_t&lt;O>, iter_reference_t&lt;I>>
     uninitialized_copy_n_result&lt;I, O>
@@ -3110,18 +3399,18 @@ template&lt;input_iterator I,
 
 <ins>
 <pre class="wordingStyle">
-template&lt;class ExecutionPolicy, random_access_iterator I, sized_sentinel_for&lt;I> S1,
+template&lt;execution-policy ExecutionPolicy, random_access_iterator I, sized_sentinel_for&lt;I> S1,
          <i>nothrow-random-access-iterator</i> O, <i>nothrow-sized-sentinel-for</i>&lt;O> S2>
   requires constructible_from&lt;iter_value_t&lt;O>, iter_rvalue_reference_t&lt;I>>
     uninitialized_move_result&lt;I, O>
       uninitialized_move(ExecutionPolicy&& exec, I ifirst, S1 ilast, O ofirst, S2 olast); <i>// see [algorithms.parallel.overloads]</i>
 
-template&lt;class ExecutionPolicy, random_access_range IR, <i>nothrow-random-access-range</i> OR>
+template&lt;execution-policy ExecutionPolicy, random_access_range IR, <i>nothrow-random-access-range</i> OR>
   requires constructible_from&lt;range_value_t&lt;OR>, range_rvalue_reference_t&lt;IR>> && sized_range&lt;IR> && sized_range&lt;OR>
     uninitialized_move_result&lt;borrowed_iterator_t&lt;IR>, borrowed_iterator_t&lt;OR>>
       uninitialized_move(ExecutionPolicy&& exec, IR&& in_range, OR&& out_range);        <i>// see [algorithms.parallel.overloads]</i>
 
-template&lt;class ExecutionPolicy, random_access_iterator I,
+template&lt;execution-policy ExecutionPolicy, random_access_iterator I,
     <i>nothrow-random-access-iterator</i> O, <i>nothrow-sized-sentinel-for</i>&lt;O> S>
   requires constructible_from&lt;iter_value_t&lt;O>, iter_rvalue_reference_t&lt;I>>
     uninitialized_move_n_result&lt;I, O>
@@ -3145,14 +3434,14 @@ template&lt;<i>nothrow-forward-iterator</i> I, class T>
 
 <ins>
 <pre class="wordingStyle">
-template&lt;class ExecutionPolicy, <i>nothrow-random-access-iterator</i> I, <i>nothrow-sized-sentinel-for</i>&lt;I> S, class T>
+template&lt;execution-policy ExecutionPolicy, <i>nothrow-random-access-iterator</i> I, <i>nothrow-sized-sentinel-for</i>&lt;I> S, class T>
   requires constructible_from&lt;iter_value_t&lt;I>, const T&>
     I uninitialized_fill(ExecutionPolicy&& exec, I first, S last, const T& x);                <i>// see [algorithms.parallel.overloads]</i>
-template&lt;class ExecutionPolicy, <i>nothrow-random-access-range</i> R, class T>
+template&lt;execution-policy ExecutionPolicy, <i>nothrow-random-access-range</i> R, class T>
   requires constructible_from&lt;range_value_t&lt;R>, const T&> && sized_range&lt;R>
     borrowed_iterator_t&lt;R> uninitialized_fill(ExecutionPolicy&& exec, R&& r, const T& x);     <i>// see [algorithms.parallel.overloads]</i>
 
-template&lt;class ExecutionPolicy, <i>nothrow-random-access-iterator</i> I, class T>
+template&lt;execution-policy ExecutionPolicy, <i>nothrow-random-access-iterator</i> I, class T>
   requires constructible_from&lt;iter_value_t&lt;I>, const T&>
     I uninitialized_fill_n(ExecutionPolicy&& exec, I first, iter_difference_t&lt;I> n, const T& x); <i>// see [algorithms.parallel.overloads]</i>
 </pre>
@@ -3173,15 +3462,15 @@ template&lt;<i>nothrow-input-iterator</i> I>
 
 <ins>
 <pre class="wordingStyle">
-template&lt;class ExecutionPolicy, <i>nothrow-random-access-iterator</i> I, <i>nothrow-sized-sentinel-for</i>&lt;I> S>
+template&lt;execution-policy ExecutionPolicy, <i>nothrow-random-access-iterator</i> I, <i>nothrow-sized-sentinel-for</i>&lt;I> S>
   requires destructible&lt;iter_value_t&lt;I>>
     I destroy(ExecutionPolicy&& exec, I first, S last) noexcept;                           <i>// see [algorithms.parallel.overloads]</i>
 
-template&lt;class ExecutionPolicy, <i>nothrow-random-access-range</i> R>
+template&lt;execution-policy ExecutionPolicy, <i>nothrow-random-access-range</i> R>
   requires destructible&lt;range_value_t&lt;R>> && sized_range&lt;R>
     borrowed_iterator_t&lt;R> destroy(ExecutionPolicy&& exec, R&& r) noexcept;                <i>// see [algorithms.parallel.overloads]</i>
 
-template&lt;class ExecutionPolicy, <i>nothrow-random-access-iterator</i> I>
+template&lt;execution-policy ExecutionPolicy, <i>nothrow-random-access-iterator</i> I>
   requires destructible&lt;iter_value_t&lt;I>>
     I destroy_n(ExecutionPolicy&& exec, I first, iter_difference_t&lt;I> n) noexcept;         <i>// see [algorithms.parallel.overloads]</i>
 </pre>
@@ -3202,11 +3491,13 @@ move construction, copy assignment, move assignment, or comparisons between vali
 <ins>
 <pre class="wordingStyle">
 template&lt;class S, class I>
-concept <i>nothrow-sized-sentinel-for</i> = sized_sentinel_for&lt;S, I>; <i>// exposition only</i>
+concept <i>nothrow-sized-sentinel-for</i> = <i>// exposition only</i>
+  <i>nothrow-sentinel-for</i>&lt;S, I> &&
+  sized_sentinel_for&lt;S, I>; 
 </pre>
 
-Types `S` and `I` model <code><i>nothrow-sized-sentinel-for</i></code> only if no exceptions are thrown from copy construction,
-move construction, copy assignment, move assignment, or comparisons between valid values of type `I` and `S`.
+Types `S` and `I` model <code><i>nothrow-sized-sentinel-for</i></code> only if no exceptions are thrown from the <code>-</code> operator
+for valid values of type `I` and `S`.
 
 [*Note X*: This concept allows some `sized_sentinel_for` ([iterator.concept.sizedsentinel]) operations to throw exceptions. — *end note*]
 </ins>
@@ -3221,18 +3512,6 @@ concept <i>nothrow-forward-iterator</i> = <i>// exposition only</i>
 
 [*Note X*: This concept allows some `forward_iterator` ([iterator.concept.forward]) operations to throw exceptions. — *end note*]
 
-<ins>
-<pre class="wordingStyle">
-template&lt;class I>
-concept <i>nothrow-random-access-iterator</i> = <i>// exposition only</i>
-  <i>nothrow-forward-iterator</i>&lt;I> &&
-  random_access_iterator&lt;I> &&
-  <i>nothrow-sentinel-for</i>&lt;I, I>;
-</pre>
-
-[*Note X*: This concept allows some `random_access_iterator` ([iterator.concept.random.access]) operations to throw exceptions. — *end note*]
-</ins>
-
 <pre class="wordingStyle">
 template&lt;class R>
 concept <i>nothrow-forward-range</i> = <i>// exposition only</i>
@@ -3240,21 +3519,64 @@ concept <i>nothrow-forward-range</i> = <i>// exposition only</i>
   <i>nothrow-forward-iterator</i>&lt;iterator_t&lt;R>>;
 </pre>
 
-
 <ins>
+<pre class="wordingStyle">
+template&lt;class I>
+concept <i>nothrow-bidirectional-iterator</i> = <i>// exposition only</i>
+  <i>nothrow-forward-iterator</i>&lt;I> &&
+  bidirectional_iterator&lt;I>;
+</pre>
+
+A type `I` models <code><i>nothrow-bidirectional-iterator</i></code> only if no exceptions are thrown from decrementing valid iterators.
+
+[*Note X*: This concept allows some `bidirectional_iterator` ([iterator.concept.bidir]) operations to throw exceptions. — *end note*]
+
+<pre class="wordingStyle">
+template&lt;class R>
+concept <i>nothrow-bidirectional-range</i> = <i>// exposition only</i>
+  <i>nothrow-forward-range</i>&lt;R> &&
+  <i>nothrow-bidirectional-iterator</i>&lt;iterator_t&lt;R>>;
+</pre>
+<pre class="wordingStyle">
+template&lt;class I>
+concept <i>nothrow-random-access-iterator</i> = <i>// exposition only</i>
+  <i>nothrow-bidirectional-iterator</i>&lt;I> &&
+  random_access_iterator&lt;I> &&
+  <i>nothrow-sized-sentinel-for</i>&lt;I, I>;
+</pre>
+
+A type `I` models <code><i>nothrow-random-access-iterator</i></code> only if no exceptions are thrown from advancement
+with `+=`, `+`, `-=`, and `-`, comparisons, or applying the `[]` subscript operator to valid iterators.
+
+[*Note X*: This concept allows some `random_access_iterator` ([iterator.concept.random.access]) operations to throw exceptions. — *end note*]
+
 <pre class="wordingStyle">
 template&lt;class R>
 concept <i>nothrow-random-access-range</i> = <i>// exposition only</i>
-  <i>nothrow-forward-range</i>&lt;R> &&
+  <i>nothrow-bidirectional-range</i>&lt;R> &&
   <i>nothrow-random-access-iterator</i>&lt;iterator_t&lt;R>>;
 </pre>
 </ins>
 
 # Revision history # {#revision_history}
 
+## R3 => R4 ## {#r3_r4}
+
+- Revert back to range-as-the-output design aspect, change the formal wording accordingly
+- Revert back to requiring all ranges to be sized (`&&` instead of `||`)
+- Clarify which execution policies are supported
+- Clarify that new APIs extend algorithm function objects in `std::ranges`
+- Add the feature test macro
+- Add implementation experience and thoughts on implementability
+- Fix known bugs in the signatures wording
+- Address other feedback from SG1 and SG9 and fix known bugs (see [[#issues_to_address]]):
+    - Decide on constraining the execution policy template parameter
+    - List all the algorithms that are being given execution policy overloads
+    - List range algorithms that are being excluded
+
 ## R2 => R3 ## {#r2_r3}
 
-- Use `iterator` as an output.
+- Use `iterator` as an output
 - Add wording
 
 ## R1 => R2 ## {#r1_r2}
@@ -3274,6 +3596,108 @@ concept <i>nothrow-random-access-range</i> = <i>// exposition only</i>
 - Require ranges to be bounded
 
 # Polls # {#polls}
+
+## SG9, Wroclaw, 2024 ## {#sg9_wroclaw_2024}
+
+**Poll 1**: Change `mismatch` and `equal` to require `sized_range` for both inputs ("`&&` instead of `||`").
+<table>
+  <tr>
+    <th>SF</th>
+    <th>F</th>
+    <th>N</th>
+    <th>A</th>
+    <th>SA</th>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td>3</td>
+    <td>1</td>
+    <td>0</td>
+    <td>0</td>
+  </tr>
+</table>
+
+**Poll 2**: Change `transform` to require `sized_range` for both inputs ("`&&` instead of `||`"),
+with the plan to relax these constraints once we have a way to statically detect infinite ranges.
+<table>
+  <tr>
+    <th>SF</th>
+    <th>F</th>
+    <th>N</th>
+    <th>A</th>
+    <th>SA</th>
+  </tr>
+  <tr>
+    <td>3</td>
+    <td>3</td>
+    <td>0</td>
+    <td>1</td>
+    <td>1</td>
+  </tr>
+</table>
+
+**Poll 3**: We want to remove the "legacy" overload that includes only an iterator as output for convenience, because we know it's unsafe.
+<table>
+  <tr>
+    <th>SF</th>
+    <th>F</th>
+    <th>N</th>
+    <th>A</th>
+    <th>SA</th>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td>4</td>
+    <td>0</td>
+    <td>0</td>
+    <td>0</td>
+  </tr>
+</table>
+
+**Poll 4** Forward P3179R3 with the changes in P3490R0 (as updated above) to LEWG for inclusion in C++26 with these changes polled above.
+
+<table>
+  <tr>
+    <th>SF
+    <th>F
+    <th>N
+    <th>A
+    <th>SA
+  </tr>
+  <tr>
+    <td>4
+    <td>5
+    <td>0
+    <td>0
+    <td>0
+  </tr>
+</table>
+
+## SG1, Wroclaw, 2024 ## {#sg1_wroclaw_2024}
+
+Forward P3179R3 to LEWG with the following notes:
+
+1. The intention is that algorithms call `begin`/`end` only once, in serial code
+     (we do not think any new words are needed)
+2. The intention is that `mismatch`, `transform` and `equal` assume the unsized range
+     is at least as large as the sized one (UB / precondition) or require && sized
+
+<table>
+  <tr>
+    <th>SF
+    <th>F
+    <th>N
+    <th>A
+    <th>SA
+  </tr>
+  <tr>
+    <td>4
+    <td>8
+    <td>0
+    <td>0
+    <td>0
+  </tr>
+</table>
 
 ## Joint SG1 + SG9, St. Louis, 2024 ## {#sg1_sg9_st_louis_2024}
 
@@ -3299,7 +3723,7 @@ concept <i>nothrow-random-access-range</i> = <i>// exposition only</i>
   </tr>
 </table>
 
-## SG9, Tokyo 2024 ## {#sg9_tokyo_2024}
+## SG9, Tokyo, 2024 ## {#sg9_tokyo_2024}
 
 **Poll 1**: `for_each` shouldn't return the callable
 <table>
@@ -3364,3 +3788,16 @@ concept <i>nothrow-random-access-range</i> = <i>// exposition only</i>
     <td>0</td>
   </tr>
 </table>
+
+<pre class="biblio">
+{
+  "P3490R0": {
+    "authors": [
+      "Alexey Kukanov",
+      "Ruslan Arutyunyan"
+    ],
+    "href": "http://www.wg21.link/P3490R0",
+    "title": "Justification for range-as-an-output for parallel range algorithms"
+  }
+}
+</pre>
