@@ -525,13 +525,16 @@ experience<span></span></a></li>
 <ul>
 <li><a href="#issues_to_address" id="toc-issues_to_address"><span class="toc-section-number">7.1</span> Issues to
 address<span></span></a></li>
-<li><a href="#thread_safe_views" id="toc-thread_safe_views"><span class="toc-section-number">7.2</span> Thread-safe views
+<li><a href="#lwg_questions" id="toc-lwg_questions"><span class="toc-section-number">7.2</span> LWG
+questions<span></span></a></li>
+<li><a href="#thread_safe_views" id="toc-thread_safe_views"><span class="toc-section-number">7.3</span> Thread-safe views
 examination<span></span></a></li>
 </ul></li>
 <li><a href="#formal_wording" id="toc-formal_wording"><span class="toc-section-number">8</span> Formal wording<span></span></a>
 <ul>
-<li><a href="#modify_version_syn" id="toc-modify_version_syn"><span class="toc-section-number">8.1</span> Add the feature test macro to
-<span><span>[version.syn]</span></span><span></span></a></li>
+<li><a href="#modify_version_syn" id="toc-modify_version_syn"><span class="toc-section-number">8.1</span> Bump the
+<code class="sourceCode cpp">__cpp_lib_parallel_algorithm</code> macro
+in <span><span>[version.syn]</span></span><span></span></a></li>
 <li><a href="#modify_alg_parallel_def" id="toc-modify_alg_parallel_def"><span class="toc-section-number">8.2</span> Modify
 <span><span>[algorithms.parallel.defns]</span></span><span></span></a></li>
 <li><a href="#modify_alg_parallel_user" id="toc-modify_alg_parallel_user"><span class="toc-section-number">8.3</span> Modify
@@ -1447,37 +1450,34 @@ with the new overloads proposed in [[#modify_alg_foreach]]:</p>
 <span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ...</span></span>
 <span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// The overload for unsequenced and parallel policies. Requires random_access_iterator</span></span>
-<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> ExecutionPolicy, random_access_iterator I, sized_sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S,</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">template</span><span class="op">&lt;</span><em>execution-policy</em> Ep, random_access_iterator I, sized_sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S,</span>
 <span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>             <span class="kw">class</span> Proj <span class="op">=</span> identity, indirectly_unary_invocable<span class="op">&lt;</span>projected<span class="op">&lt;</span>I, Proj<span class="op">&gt;&gt;</span> Fun<span class="op">&gt;</span></span>
-<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> is_execution_policy_v<span class="op">&lt;</span>std<span class="op">::</span>remove_cvref_t<span class="op">&lt;</span>ExecutionPolicy<span class="op">&gt;&gt;</span></span>
-<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>    I</span>
-<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">operator</span><span class="op">()(</span>ExecutionPolicy<span class="op">&amp;&amp;</span> exec, I first, S last, Fun f, Proj proj <span class="op">=</span> <span class="op">{})</span> <span class="kw">const</span></span>
-<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
-<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>        <span class="co">// properly handle the execution policy;</span></span>
-<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>        <span class="co">// for the reference, a serial implementation is provided</span></span>
-<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> <span class="op">(</span>; first <span class="op">!=</span> last; <span class="op">++</span>first<span class="op">)</span></span>
-<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span></span>
-<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>            std<span class="op">::</span>invoke<span class="op">(</span>f, std<span class="op">::</span>invoke<span class="op">(</span>proj, <span class="op">*</span>first<span class="op">))</span>;</span>
-<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
-<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> first;</span>
-<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a>    <span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> ExecutionPolicy, random_access_range R, <span class="kw">class</span> Proj <span class="op">=</span> identity,</span>
-<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a>             indirectly_unary_invocable<span class="op">&lt;</span>projected<span class="op">&lt;</span>iterator_t<span class="op">&lt;</span>R<span class="op">&gt;</span>, Proj<span class="op">&gt;&gt;</span> Fun<span class="op">&gt;</span></span>
-<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> sized_range<span class="op">&lt;</span>R<span class="op">&gt;</span></span>
-<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>    ranges<span class="op">::</span>borrowed_iterator_t<span class="op">&lt;</span>R<span class="op">&gt;</span></span>
-<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a>    <span class="kw">operator</span><span class="op">()(</span>ExecutionPolicy<span class="op">&amp;&amp;</span> exec, R<span class="op">&amp;&amp;</span> r, Fun f, Proj proj <span class="op">=</span> <span class="op">{})</span> <span class="kw">const</span></span>
-<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
-<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">(*</span><span class="kw">this</span><span class="op">)(</span>std<span class="op">::</span>forward<span class="op">&lt;</span>ExecutionPolicy<span class="op">&gt;(</span>exec<span class="op">)</span>, std<span class="op">::</span>ranges<span class="op">::</span>begin<span class="op">(</span>r<span class="op">)</span>,</span>
-<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a>                       std<span class="op">::</span>ranges<span class="op">::</span>end<span class="op">(</span>r<span class="op">)</span>, f, proj<span class="op">)</span>;</span>
-<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>; <span class="co">// struct for_each</span></span>
-<span id="cb19-38"><a href="#cb19-38" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="co">// namespace __detail</span></span>
-<span id="cb19-39"><a href="#cb19-39" aria-hidden="true" tabindex="-1"></a><span class="kw">inline</span> <span class="kw">namespace</span> __for_each_fn_namespace</span>
-<span id="cb19-40"><a href="#cb19-40" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
-<span id="cb19-41"><a href="#cb19-41" aria-hidden="true" tabindex="-1"></a><span class="kw">inline</span> <span class="kw">constexpr</span> __detail<span class="op">::</span>__for_each_fn for_each;</span>
-<span id="cb19-42"><a href="#cb19-42" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="co">// __for_each_fn_namespace</span></span>
-<span id="cb19-43"><a href="#cb19-43" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="co">// namespace ranges</span></span></code></pre></div>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>    I <span class="kw">operator</span><span class="op">()(</span>Ep<span class="op">&amp;&amp;</span> exec, I first, S last, Fun f, Proj proj <span class="op">=</span> <span class="op">{})</span> <span class="kw">const</span></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>        <span class="co">// properly handle the execution policy;</span></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>        <span class="co">// for the reference, a serial implementation is provided</span></span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> <span class="op">(</span>; first <span class="op">!=</span> last; <span class="op">++</span>first<span class="op">)</span></span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span></span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>            std<span class="op">::</span>invoke<span class="op">(</span>f, std<span class="op">::</span>invoke<span class="op">(</span>proj, <span class="op">*</span>first<span class="op">))</span>;</span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> first;</span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>    <span class="kw">template</span><span class="op">&lt;</span><em>execution-policy</em> Ep, <em>random-access-sized-range</em> R, <span class="kw">class</span> Proj <span class="op">=</span> identity,</span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a>             indirectly_unary_invocable<span class="op">&lt;</span>projected<span class="op">&lt;</span>iterator_t<span class="op">&lt;</span>R<span class="op">&gt;</span>, Proj<span class="op">&gt;&gt;</span> Fun<span class="op">&gt;</span></span>
+<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a>    ranges<span class="op">::</span>borrowed_iterator_t<span class="op">&lt;</span>R<span class="op">&gt;</span></span>
+<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a>    <span class="kw">operator</span><span class="op">()(</span>Ep<span class="op">&amp;&amp;</span> exec, R<span class="op">&amp;&amp;</span> r, Fun f, Proj proj <span class="op">=</span> <span class="op">{})</span> <span class="kw">const</span></span>
+<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">(*</span><span class="kw">this</span><span class="op">)(</span>std<span class="op">::</span>forward<span class="op">&lt;</span>Ep<span class="op">&gt;(</span>exec<span class="op">)</span>, std<span class="op">::</span>ranges<span class="op">::</span>begin<span class="op">(</span>r<span class="op">)</span>,</span>
+<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a>                       std<span class="op">::</span>ranges<span class="op">::</span>end<span class="op">(</span>r<span class="op">)</span>, f, proj<span class="op">)</span>;</span>
+<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>; <span class="co">// struct for_each</span></span>
+<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="co">// namespace __detail</span></span>
+<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a><span class="kw">inline</span> <span class="kw">namespace</span> __for_each_fn_namespace</span>
+<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb19-38"><a href="#cb19-38" aria-hidden="true" tabindex="-1"></a><span class="kw">inline</span> <span class="kw">constexpr</span> __detail<span class="op">::</span>__for_each_fn for_each;</span>
+<span id="cb19-39"><a href="#cb19-39" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="co">// __for_each_fn_namespace</span></span>
+<span id="cb19-40"><a href="#cb19-40" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="co">// namespace ranges</span></span></code></pre></div>
 <h1 data-number="5" id="proposal_scope"><span class="header-section-number">5</span> The proposal scope<a href="#proposal_scope" class="self-link"></a></h1>
 <h2 data-number="5.1" id="in_scope"><span class="header-section-number">5.1</span> In-scope<a href="#in_scope" class="self-link"></a></h2>
 <h3 data-number="5.1.1" id="cpp17_counterpart"><span class="header-section-number">5.1.1</span> The counterparts of C++17
@@ -1814,14 +1814,11 @@ following:</p>
 <li>Update <span><a href="https://wg21.link/algorithm.syn">[algorithm.syn]</a></span>.</li>
 <li>Consider adding the algorithm descriptions to the wording, even if
 no changes are made.</li>
-<li>Add <em>random-access-sized-range</em> as an exposition-only
-concept</li>
-<li>Use the old feature testing macro</li>
+<li><del>Add random-access-sized-range as an exposition-only
+concept</del></li>
+<li><del>Use the old feature testing macro</del></li>
 <li><del>Shorten the exec policy parameter + italicize the exposition
 only context</del></li>
-<li>LWG question: synopsis for memory</li>
-<li>LWG question: rules for using the ranges namespace in
-signatures</li>
 <li>Clarify that views can be copied by parallel algorithms</li>
 <li>The thread safety rules for <code class="sourceCode cpp">begin<span class="op">()/</span>end<span class="op">()</span></code>
 should be like for element access function</li>
@@ -1833,7 +1830,22 @@ policies</a> and maybe mention it as a difference to C++17</li>
 to also refer to algorithm function objects (requires <span class="citation" data-cites="P3136R0">[<a href="https://wg21.link/p3136r0" role="doc-biblioref">P3136R0</a>]</span>), and maybe Mention “ranges”
 next to iterators etc.</li>
 </ul>
-<h2 data-number="7.2" id="thread_safe_views"><span class="header-section-number">7.2</span> Thread-safe views examination<a href="#thread_safe_views" class="self-link"></a></h2>
+<h2 data-number="7.2" id="lwg_questions"><span class="header-section-number">7.2</span> LWG questions<a href="#lwg_questions" class="self-link"></a></h2>
+<ul>
+<li>C++17 <code class="sourceCode cpp"><span class="op">&lt;</span>memory<span class="op">&gt;</span></code>
+Parallel Algorithms exist in the <code class="sourceCode cpp"><span class="op">&lt;</span>memory<span class="op">&gt;</span></code>
+synopsis only. Should it be fixed?</li>
+<li>namespace <code class="sourceCode cpp">ranges</code> is used (or not
+used) inconsistently, in our opinion. Need an advice.</li>
+<li><code class="sourceCode cpp">ExecutionPolicy</code> function
+parameter is named <code class="sourceCode cpp">exec</code> everywhere,
+except two places where the name is
+<code class="sourceCode cpp">policy</code>. Should it be fixed?</li>
+<li><code class="sourceCode cpp">starts_with</code>,
+<code class="sourceCode cpp">ends_with</code> misses dot at the end of
+<em>Returns</em>. It should be fixed, right?</li>
+</ul>
+<h2 data-number="7.3" id="thread_safe_views"><span class="header-section-number">7.3</span> Thread-safe views examination<a href="#thread_safe_views" class="self-link"></a></h2>
 <p>We need to understand better whether using some
 <code class="sourceCode cpp">views</code> with parallel algorithms might
 result in data races. While some investigation was done by other authors
@@ -1857,11 +1869,11 @@ standard libraries?</li>
 standard views?</li>
 </ul>
 <h1 data-number="8" id="formal_wording"><span class="header-section-number">8</span> Formal wording<a href="#formal_wording" class="self-link"></a></h1>
-<h2 data-number="8.1" id="modify_version_syn"><span class="header-section-number">8.1</span> Add the feature test macro to
-<span><a href="https://wg21.link/version.syn">[version.syn]</a></span><a href="#modify_version_syn" class="self-link"></a></h2>
-<div class="sourceCode" id="cb20"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#define __cpp_lib_parallel_algorithm                </span><span class="dv">201603</span><span class="bu">L</span><span class="pp"> </span><span class="co">// also in &lt;algorithm&gt;, &lt;numeric&gt;</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">#define __cpp_lib_parallel_range_algorithms         20����L // also in &lt;algorithm&gt;, &lt;memory&gt;</code></span></ins></span></span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="pp">#define __cpp_lib_philox_engine                     </span><span class="dv">202406</span><span class="bu">L</span><span class="pp"> </span><span class="co">// also in &lt;random&gt;</span></span></code></pre></div>
+<h2 data-number="8.1" id="modify_version_syn"><span class="header-section-number">8.1</span> Bump the
+<code class="sourceCode cpp">__cpp_lib_parallel_algorithm</code> macro
+in <span><a href="https://wg21.link/version.syn">[version.syn]</a></span><a href="#modify_version_syn" class="self-link"></a></h2>
+<div class="sourceCode" id="cb20"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#define __cpp_lib_parallel_algorithm                </span><span class="dv">20</span><span class="rm" style="color: #bf0303"><del>1603</del></span><span class="add" style="color: #006e28"><ins>XXXX</ins></span>L<span class="pp"> </span><span class="co">// also in &lt;algorithm&gt;, &lt;numeric&gt;</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#define __cpp_lib_philox_engine                     </span><span class="dv">202406</span><span class="bu">L</span><span class="pp"> </span><span class="co">// also in &lt;random&gt;</span></span></code></pre></div>
 <h2 data-number="8.2" id="modify_alg_parallel_def"><span class="header-section-number">8.2</span> Modify <span><a href="https://wg21.link/algorithms.parallel.defns">[algorithms.parallel.defns]</a></span><a href="#modify_alg_parallel_def" class="self-link"></a></h2>
 <p>Parallel algorithms access objects indirectly accessible via their
 arguments by invoking the following functions:</p>
@@ -2413,7 +2425,7 @@ parallelization often does not permit efficient state accumulation. —
 <span id="cb61-6"><a href="#cb61-6" aria-hidden="true" tabindex="-1"></a>                     Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});</span>
 <span id="cb61-7"><a href="#cb61-7" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, <em>random-access-sized-range</em> R1, <em>random-access-sized-range</em> R2, class Pred = ranges::equal_to,</span>
 <span id="cb61-8"><a href="#cb61-8" aria-hidden="true" tabindex="-1"></a>         class Proj1 = identity, class Proj2 = identity&gt;</span>
-<span id="cb61-9"><a href="#cb61-9" aria-hidden="true" tabindex="-1"></a>  requires indirectly_comparable&lt;iterator_t&lt;R1&gt;, iterator_t&lt;R2&gt;, Pred, Proj1, Proj2&gt; &amp;&amp;</span>
+<span id="cb61-9"><a href="#cb61-9" aria-hidden="true" tabindex="-1"></a>  requires indirectly_comparable&lt;iterator_t&lt;R1&gt;, iterator_t&lt;R2&gt;, Pred, Proj1, Proj2&gt;</span>
 <span id="cb61-10"><a href="#cb61-10" aria-hidden="true" tabindex="-1"></a>  bool ranges::equal(Ep&amp;&amp; exec, R1&amp;&amp; r1, R2&amp;&amp; r2,</span>
 <span id="cb61-11"><a href="#cb61-11" aria-hidden="true" tabindex="-1"></a>                     Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});</span></code></pre></div>
 
@@ -2505,7 +2517,7 @@ parallelization often does not permit efficient state accumulation. —
 <span id="cb67-6"><a href="#cb67-6" aria-hidden="true" tabindex="-1"></a>                           Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});</span>
 <span id="cb67-7"><a href="#cb67-7" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, <em>random-access-sized-range</em> R1, <em>random-access-sized-range</em> R2, class Pred = ranges::equal_to,</span>
 <span id="cb67-8"><a href="#cb67-8" aria-hidden="true" tabindex="-1"></a>         class Proj1 = identity, class Proj2 = identity&gt;</span>
-<span id="cb67-9"><a href="#cb67-9" aria-hidden="true" tabindex="-1"></a>  requires indirectly_comparable&lt;iterator_t&lt;R1&gt;, iterator_t&lt;R2&gt;, Pred, Proj1, Proj2&gt; &amp;&amp;</span>
+<span id="cb67-9"><a href="#cb67-9" aria-hidden="true" tabindex="-1"></a>  requires indirectly_comparable&lt;iterator_t&lt;R1&gt;, iterator_t&lt;R2&gt;, Pred, Proj1, Proj2&gt;</span>
 <span id="cb67-10"><a href="#cb67-10" aria-hidden="true" tabindex="-1"></a>  bool ranges::starts_with(Ep&amp;&amp; exec, R1&amp;&amp; r1, R2&amp;&amp; r2, Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});</span></code></pre></div>
 <p><em>Returns</em>: <code class="sourceCode default">ranges::mismatch(std::forward&lt;Ep&gt;(exec), std::move(first1), last1, std::move(first2), last2, pred, proj1, proj2).in2 == last2</code></p>
 </div>
@@ -2719,7 +2731,7 @@ otherwise <code class="sourceCode cpp">ranges<span class="op">::</span>equal<spa
 <span id="cb85-10"><a href="#cb85-10" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, <em>random-access-sized-range</em> R1, <em>random-access-sized-range</em> R2, <em>random-access-sized-range</em> OutR,</span>
 <span id="cb85-11"><a href="#cb85-11" aria-hidden="true" tabindex="-1"></a>         copy_constructible F, class Proj1 = identity, class Proj2 = identity&gt;</span>
 <span id="cb85-12"><a href="#cb85-12" aria-hidden="true" tabindex="-1"></a>  requires indirectly_writable&lt;iterator_t&lt;OutR&gt;,</span>
-<span id="cb85-13"><a href="#cb85-13" aria-hidden="true" tabindex="-1"></a>             indirect_result_t&lt;F&amp;, projected&lt;iterator_t&lt;R1&gt;, Proj1&gt;, projected&lt;iterator_t&lt;R2&gt;, Proj2&gt;&gt;&gt; &amp;&amp;</span>
+<span id="cb85-13"><a href="#cb85-13" aria-hidden="true" tabindex="-1"></a>             indirect_result_t&lt;F&amp;, projected&lt;iterator_t&lt;R1&gt;, Proj1&gt;, projected&lt;iterator_t&lt;R2&gt;, Proj2&gt;&gt;&gt;</span>
 <span id="cb85-14"><a href="#cb85-14" aria-hidden="true" tabindex="-1"></a>  ranges::binary_transform_result&lt;borrowed_iterator_t&lt;R1&gt;, borrowed_iterator_t&lt;R2&gt;, borrowed_iterator_t&lt;OutR&gt;&gt;</span>
 <span id="cb85-15"><a href="#cb85-15" aria-hidden="true" tabindex="-1"></a>    ranges::transform(Ep&amp;&amp; exec, R1&amp;&amp; r1, R2&amp;&amp; r2, OutR&amp;&amp; result,</span>
 <span id="cb85-16"><a href="#cb85-16" aria-hidden="true" tabindex="-1"></a>                      F binary_op, Proj1 proj1 = {}, Proj2 proj2 = {});</span></code></pre></div>
@@ -2750,7 +2762,7 @@ otherwise <code class="sourceCode cpp">ranges<span class="op">::</span>equal<spa
 <span id="cb87-7"><a href="#cb87-7" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, <em>random-access-sized-range</em> R, class Proj = identity,</span>
 <span id="cb87-8"><a href="#cb87-8" aria-hidden="true" tabindex="-1"></a>         class T1 = projected_value_t&lt;iterator_t&lt;R&gt;, Proj&gt;, class T2 = T1&gt;</span>
 <span id="cb87-9"><a href="#cb87-9" aria-hidden="true" tabindex="-1"></a>  requires indirectly_writable&lt;iterator_t&lt;R&gt;, const T2&amp;&gt; &amp;&amp;</span>
-<span id="cb87-10"><a href="#cb87-10" aria-hidden="true" tabindex="-1"></a>           indirect_binary_predicate&lt;ranges::equal_to, projected&lt;iterator_t&lt;R&gt;, Proj&gt;, const T1*&gt; &amp;&amp;</span>
+<span id="cb87-10"><a href="#cb87-10" aria-hidden="true" tabindex="-1"></a>           indirect_binary_predicate&lt;ranges::equal_to, projected&lt;iterator_t&lt;R&gt;, Proj&gt;, const T1*&gt;</span>
 <span id="cb87-11"><a href="#cb87-11" aria-hidden="true" tabindex="-1"></a>  borrowed_iterator_t&lt;R&gt;</span>
 <span id="cb87-12"><a href="#cb87-12" aria-hidden="true" tabindex="-1"></a>    ranges::replace(Ep&amp;&amp; exec, R&amp;&amp; r,</span>
 <span id="cb87-13"><a href="#cb87-13" aria-hidden="true" tabindex="-1"></a>                    const T1&amp; old_value, const T2&amp; new_value, Proj proj = {});</span></code></pre></div>
