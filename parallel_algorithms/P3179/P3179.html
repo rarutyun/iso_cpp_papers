@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2024-12-16" />
+  <meta name="dcterms.date" content="2024-12-17" />
   <title>C++ parallel range algorithms</title>
   <style>
       code{white-space: pre-wrap;}
@@ -428,7 +428,7 @@ algorithms</h1>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2024-12-16</td>
+    <td>2024-12-17</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -1823,7 +1823,7 @@ the existing ones.</p>
 prior to the next committee F2F meeting in Austria, 2025 is the
 following:</p>
 <ul>
-<li>Update <span><a href="https://wg21.link/algorithm.syn">[algorithm.syn]</a></span>.</li>
+<li><del>Update <span><a href="https://wg21.link/algorithm.syn">[algorithm.syn]</a></span>.</del></li>
 <li>Consider adding the algorithm descriptions to the wording, even if
 no changes are made.</li>
 <li><del>Add random-access-sized-range as an exposition-only
@@ -1837,6 +1837,7 @@ should be like for element access function</li>
 <li>Add testing experience of thread safe access to the views</li>
 <li><del>Add short descriptions of the new exposition-only concepts to
 the design overview.</del></li>
+<li>Fix cross-references</li>
 <li>Extend <span><a href="https://wg21.link/algorithms.parallel.defns">[algorithms.parallel.defns]</a></span>
 to also refer to algorithm function objects (requires <span class="citation" data-cites="P3136R0">[<a href="https://wg21.link/p3136r0" role="doc-biblioref">P3136R0</a>]</span>), and maybe Mention “ranges”
 next to iterators etc.</li>
@@ -3843,6 +3844,30 @@ concept:</ins></span></p>
 <span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>  bool ranges::all_of(Ep&amp;&amp; exec, R&amp;&amp; r, Pred pred, Proj proj = {});</span></code></pre></div>
 
 </div>
+<p><span class="marginalizedparent"><a class="marginalized">1</a></span>
+Let <em><code class="sourceCode cpp">E</code></em> be:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(1.1)</a></span>
+<code class="sourceCode cpp">pred<span class="op">(*</span>i<span class="op">)</span></code>
+for the overloads in namespace
+<code class="sourceCode cpp">std</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(1.2)</a></span>
+<code class="sourceCode cpp">invoke<span class="op">(</span>pred, invoke<span class="op">(</span>proj, <span class="op">*</span>i<span class="op">))</span></code>
+for the overloads in namespace
+<code class="sourceCode cpp">ranges</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
+<em>Returns</em>:
+<code class="sourceCode cpp"><span class="kw">false</span></code> if
+<em><code class="sourceCode cpp">E</code></em> is
+<code class="sourceCode cpp"><span class="kw">false</span></code> for
+some iterator <code class="sourceCode cpp">i</code> in the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>,
+and <code class="sourceCode cpp"><span class="kw">true</span></code>
+otherwise.</p>
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
+<em>Complexity</em>: At most
+<code class="sourceCode cpp">last <span class="op">-</span> first</code>
+applications of the predicate and any projection.</p>
 <h2 data-number="8.11" id="modify_alg_any_of"><span class="header-section-number">8.11</span> Modify
 <code class="sourceCode cpp">any_of</code> in <span><a href="https://wg21.link/alg.any.of">[alg.any.of]</a></span><a href="#modify_alg_any_of" class="self-link"></a></h2>
 <div class="sourceCode" id="cb30"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>input_iterator I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S, <span class="kw">class</span> Proj <span class="op">=</span> identity,</span>
@@ -3861,6 +3886,30 @@ concept:</ins></span></p>
 <span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>  bool ranges::any_of(Ep&amp;&amp; exec, R&amp;&amp; r, Pred pred, Proj proj = {});</span></code></pre></div>
 
 </div>
+<p><span class="marginalizedparent"><a class="marginalized">1</a></span>
+Let <em><code class="sourceCode cpp">E</code></em> be:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(1.1)</a></span>
+<code class="sourceCode cpp">pred<span class="op">(*</span>i<span class="op">)</span></code>
+for the overloads in namespace
+<code class="sourceCode cpp">std</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(1.2)</a></span>
+<code class="sourceCode cpp">invoke<span class="op">(</span>pred, invoke<span class="op">(</span>proj, <span class="op">*</span>i<span class="op">))</span></code>
+for the overloads in namespace
+<code class="sourceCode cpp">ranges</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
+<em>Returns</em>:
+<code class="sourceCode cpp"><span class="kw">true</span></code> if
+<em><code class="sourceCode cpp">E</code></em> is
+<code class="sourceCode cpp"><span class="kw">true</span></code> for
+some iterator <code class="sourceCode cpp">i</code> in the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>,
+and <code class="sourceCode cpp"><span class="kw">false</span></code>
+otherwise.</p>
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
+<em>Complexity</em>: At most
+<code class="sourceCode cpp">last <span class="op">-</span> first</code>
+applications of the predicate and any projection.</p>
 <h2 data-number="8.12" id="modify_alg_none_of"><span class="header-section-number">8.12</span> Modify
 <code class="sourceCode cpp">none_of</code> in <span><a href="https://wg21.link/alg.none.of">[alg.none.of]</a></span><a href="#modify_alg_none_of" class="self-link"></a></h2>
 <div class="sourceCode" id="cb32"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>input_iterator I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S, <span class="kw">class</span> Proj <span class="op">=</span> identity,</span>
@@ -3879,6 +3928,30 @@ concept:</ins></span></p>
 <span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>  bool ranges::none_of(Ep&amp;&amp; exec, R&amp;&amp; r, Pred pred, Proj proj = {});</span></code></pre></div>
 
 </div>
+<p><span class="marginalizedparent"><a class="marginalized">1</a></span>
+Let <em><code class="sourceCode cpp">E</code></em> be:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(1.1)</a></span>
+<code class="sourceCode cpp">pred<span class="op">(*</span>i<span class="op">)</span></code>
+for the overloads in namespace
+<code class="sourceCode cpp">std</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(1.2)</a></span>
+<code class="sourceCode cpp">invoke<span class="op">(</span>pred, invoke<span class="op">(</span>proj, <span class="op">*</span>i<span class="op">))</span></code>
+for the overloads in namespace
+<code class="sourceCode cpp">ranges</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
+<em>Returns</em>:
+<code class="sourceCode cpp"><span class="kw">false</span></code> if
+<em><code class="sourceCode cpp">E</code></em> is
+<code class="sourceCode cpp"><span class="kw">true</span></code> for
+some iterator <code class="sourceCode cpp">i</code> in the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>,
+and <code class="sourceCode cpp"><span class="kw">true</span></code>
+otherwise.</p>
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
+<em>Complexity</em>: At most
+<code class="sourceCode cpp">last <span class="op">-</span> first</code>
+applications of the predicate and any projection.</p>
 <h2 data-number="8.13" id="modify_alg_contains"><span class="header-section-number">8.13</span> Modify
 <code class="sourceCode cpp">contains</code> in <span><a href="https://wg21.link/alg.contains">[alg.contains]</a></span><a href="#modify_alg_contains" class="self-link"></a></h2>
 <div class="sourceCode" id="cb34"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>input_iterator I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S, <span class="kw">class</span> Proj <span class="op">=</span> identity,</span>
@@ -4100,6 +4173,39 @@ parallelization often does not permit efficient state accumulation. —
 <span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>  borrowed_iterator_t&lt;R&gt; ranges::find_if_not(Ep&amp;&amp; exec, R&amp;&amp; r, Pred pred, Proj proj = {});</span></code></pre></div>
 
 </div>
+<p><span class="marginalizedparent"><a class="marginalized">1</a></span>
+Let <em><code class="sourceCode cpp">E</code></em> be:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(1.1)</a></span>
+<code class="sourceCode cpp"><span class="op">*</span>i <span class="op">==</span> value</code>
+for <code class="sourceCode cpp">find</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(1.2)</a></span>
+<code class="sourceCode cpp">pred<span class="op">(*</span>i<span class="op">)</span> <span class="op">!=</span> <span class="kw">false</span></code>
+for <code class="sourceCode cpp">find_if</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(1.3)</a></span>
+<code class="sourceCode cpp">pred<span class="op">(*</span>i<span class="op">)</span> <span class="op">==</span> <span class="kw">false</span></code>
+for <code class="sourceCode cpp">find_if_not</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(1.4)</a></span>
+<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(</span>invoke<span class="op">(</span>proj, <span class="op">*</span>i<span class="op">)</span> <span class="op">==</span> value<span class="op">)</span></code>
+for <code class="sourceCode cpp">ranges​<span class="op">::</span>​find;</code></li>
+<li><span class="marginalizedparent"><a class="marginalized">(1.5)</a></span>
+<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(</span>invoke<span class="op">(</span>pred, invoke<span class="op">(</span>proj, <span class="op">*</span>i<span class="op">)))</span></code>
+for <code class="sourceCode cpp">ranges​<span class="op">::</span>​find_if</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(1.6)</a></span>
+<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(!</span>invoke<span class="op">(</span>pred, invoke<span class="op">(</span>proj, <span class="op">*</span>i<span class="op">)))</span></code>
+for <code class="sourceCode cpp">ranges​<span class="op">::</span>​find_if_not</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
+<em>Returns</em>: The first iterator
+<code class="sourceCode cpp">i</code> in the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+for which <em><code class="sourceCode cpp">E</code></em> is
+<code class="sourceCode cpp"><span class="kw">true</span></code>.
+Returns <code class="sourceCode cpp">last</code> if no such iterator is
+found.</p>
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
+<em>Complexity</em>: At most
+<code class="sourceCode cpp">last <span class="op">-</span> first</code>
+applications of the corresponding predicate and any projection.</p>
 <h2 data-number="8.16" id="modify_alg_find_last"><span class="header-section-number">8.16</span> Modify
 <code class="sourceCode cpp">find_last</code> in <span><a href="https://wg21.link/alg.find.last">[alg.find.last]</a></span><a href="#modify_alg_find_last" class="self-link"></a></h2>
 <div class="sourceCode" id="cb48"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>forward_iterator I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S, <span class="kw">class</span> Proj <span class="op">=</span> identity,</span>
@@ -4153,6 +4259,31 @@ parallelization often does not permit efficient state accumulation. —
 <span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>  borrowed_subrange_t&lt;R&gt; ranges::find_last_if_not(Ep&amp;&amp; exec, R&amp;&amp; r, Pred pred, Proj proj = {});</span></code></pre></div>
 
 </div>
+<p><span class="marginalizedparent"><a class="marginalized">1</a></span>
+Let <em><code class="sourceCode cpp">E</code></em> be:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(1.1)</a></span>
+<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(</span>invoke<span class="op">(</span>proj, <span class="op">*</span>i<span class="op">)</span> <span class="op">==</span> value<span class="op">)</span></code>
+for <code class="sourceCode cpp">ranges​<span class="op">::</span>​find_last</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(1.2)</a></span>
+<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(</span>invoke<span class="op">(</span>pred, invoke<span class="op">(</span>proj, <span class="op">*</span>i<span class="op">)))</span></code>
+for <code class="sourceCode cpp">ranges​<span class="op">::</span>​find_last_if</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(1.3)</a></span>
+<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(!</span>invoke<span class="op">(</span>pred, invoke<span class="op">(</span>proj, <span class="op">*</span>i<span class="op">)))</span></code>
+for <code class="sourceCode cpp">ranges​<span class="op">::</span>​find_last_if_not</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
+<em>Returns</em>: Let <code class="sourceCode cpp">i</code> be the last
+iterator in the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+for which <em><code class="sourceCode cpp">E</code></em> is
+<code class="sourceCode cpp"><span class="kw">true</span></code>.
+Returns <code class="sourceCode cpp"><span class="op">{</span>i, last<span class="op">}</span></code>,
+or <code class="sourceCode cpp"><span class="op">{</span>last, last<span class="op">}</span></code>
+if no such iterator is found.</p>
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
+<em>Complexity</em>: At most
+<code class="sourceCode cpp">last <span class="op">-</span> first</code>
+applications of the corresponding predicate and projection.</p>
 <h2 data-number="8.17" id="modify_alg_find_end"><span class="header-section-number">8.17</span> Modify
 <code class="sourceCode cpp">find_end</code> in <span><a href="https://wg21.link/alg.find.end">[alg.find.end]</a></span><a href="#modify_alg_find_end" class="self-link"></a></h2>
 <div class="sourceCode" id="cb54"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>forward_iterator I1, sentinel_for<span class="op">&lt;</span>I1<span class="op">&gt;</span> S1, forward_iterator I2, sentinel_for<span class="op">&lt;</span>I2<span class="op">&gt;</span> S2,</span>
@@ -4181,6 +4312,52 @@ parallelization often does not permit efficient state accumulation. —
 <span id="cb55-10"><a href="#cb55-10" aria-hidden="true" tabindex="-1"></a>                                           Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});</span></code></pre></div>
 
 </div>
+<p><span class="marginalizedparent"><a class="marginalized">1</a></span>
+Let:</p>
+<ul>
+<li><p><span class="marginalizedparent"><a class="marginalized">(1.1)</a></span>
+<code class="sourceCode cpp">pred</code> be
+<code class="sourceCode cpp">equal_to<span class="op">{}</span></code>
+for the overloads with no parameter
+<code class="sourceCode cpp">pred</code>;</p></li>
+<li><p><span class="marginalizedparent"><a class="marginalized">(1.2)</a></span>
+<em><code class="sourceCode cpp">E</code></em> be:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(1.2.1)</a></span>
+<code class="sourceCode cpp">pred<span class="op">(*(</span>i <span class="op">+</span> n<span class="op">)</span>, <span class="op">*(</span>first2 <span class="op">+</span> n<span class="op">))</span></code>
+for the overloads in namespace
+<code class="sourceCode cpp">std</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(1.2.2)</a></span>
+<code class="sourceCode cpp">invoke<span class="op">(</span>pred, invoke<span class="op">(</span>proj1, <span class="op">*(</span>i <span class="op">+</span> n<span class="op">))</span>, invoke<span class="op">(</span>proj2, <span class="op">*(</span>first2 <span class="op">+</span> n<span class="op">)))</span></code>
+for the overloads in namespace
+<code class="sourceCode cpp">ranges</code>;</li>
+</ul></li>
+<li><p><span class="marginalizedparent"><a class="marginalized">(1.3)</a></span>
+<code class="sourceCode cpp">i</code> be
+<code class="sourceCode cpp">last1</code> if <code class="sourceCode cpp"><span class="op">[</span>first2, last2<span class="op">)</span></code>
+is empty, or if <code class="sourceCode cpp"><span class="op">(</span>last2 <span class="op">-</span> first2<span class="op">)</span> <span class="op">&gt;</span> <span class="op">(</span>last1 <span class="op">-</span> first1<span class="op">)</span></code>
+is <code class="sourceCode cpp"><span class="kw">true</span></code>, or
+if there is no iterator in the range <code class="sourceCode cpp"><span class="op">[</span>first1, last1 <span class="op">-</span> <span class="op">(</span>last2 <span class="op">-</span> first2<span class="op">))</span></code>
+such that for every non-negative integer <code class="sourceCode cpp">n <span class="op">&lt;</span> <span class="op">(</span>last2 <span class="op">-</span> first2<span class="op">)</span></code>,
+<em><code class="sourceCode cpp">E</code></em> is
+<code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
+<p>Otherwise <code class="sourceCode cpp">i</code> is the last such
+iterator in <code class="sourceCode cpp"><span class="op">[</span>first1, last1 <span class="op">-</span> <span class="op">(</span>last2 <span class="op">-</span> first2<span class="op">))</span></code>.</p></li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
+<em>Returns</em>:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(2.1)</a></span>
+<code class="sourceCode cpp">i</code> for the overloads in namespace
+<code class="sourceCode cpp">std</code>.</li>
+<li><span class="marginalizedparent"><a class="marginalized">(2.2)</a></span>
+<code class="sourceCode cpp"><span class="op">{</span>i, i <span class="op">+</span> <span class="op">(</span>i <span class="op">==</span> last1 <span class="op">?</span> <span class="dv">0</span> <span class="op">:</span> last2 <span class="op">-</span> first2<span class="op">)}</span></code>
+for the overloads in namespace
+<code class="sourceCode cpp">ranges</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
+<em>Complexity</em>: At most <code class="sourceCode cpp"><span class="op">(</span>last2 <span class="op">-</span> first2<span class="op">)</span> <span class="op">*</span> <span class="op">(</span>last1 <span class="op">-</span> first1 <span class="op">-</span> <span class="op">(</span>last2 <span class="op">-</span> first2<span class="op">)</span> <span class="op">+</span> <span class="dv">1</span><span class="op">)</span></code>
+applications of the corresponding predicate and any projections.</p>
 <h2 data-number="8.18" id="modify_alg_find_first_of"><span class="header-section-number">8.18</span> Modify
 <code class="sourceCode cpp">find_first_of</code> in <span><a href="https://wg21.link/alg.find.first.of">[alg.find.first.of]</a></span><a href="#modify_alg_find_first_of" class="self-link"></a></h2>
 <div class="sourceCode" id="cb56"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>input_iterator I1, sentinel_for<span class="op">&lt;</span>I1<span class="op">&gt;</span> S1, forward_iterator I2, sentinel_for<span class="op">&lt;</span>I2<span class="op">&gt;</span> S2,</span>
@@ -4210,6 +4387,38 @@ parallelization often does not permit efficient state accumulation. —
 <span id="cb57-11"><a href="#cb57-11" aria-hidden="true" tabindex="-1"></a>                                                Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});</span></code></pre></div>
 
 </div>
+<p><span class="marginalizedparent"><a class="marginalized">1</a></span>
+Let <em><code class="sourceCode cpp">E</code></em> be:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(1.1)</a></span>
+<code class="sourceCode cpp"><span class="op">*</span>i <span class="op">==</span> <span class="op">*</span>j</code>
+for the overloads with no parameter
+<code class="sourceCode cpp">pred</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(1.2)</a></span>
+<code class="sourceCode cpp">pred<span class="op">(*</span>i, <span class="op">*</span>j<span class="op">)</span> <span class="op">!=</span> <span class="kw">false</span></code>
+for the overloads with a parameter
+<code class="sourceCode cpp">pred</code> and no parameter
+<code class="sourceCode cpp">proj1</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(1.3)</a></span>
+<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(</span>invoke<span class="op">(</span>pred, invoke<span class="op">(</span>proj1, <span class="op">*</span>i<span class="op">)</span>, invoke<span class="op">(</span>proj2, <span class="op">*</span>j<span class="op">)))</span></code>
+for the overloads with parameters
+<code class="sourceCode cpp">pred</code> and
+<code class="sourceCode cpp">proj1</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
+<em>Effects</em>: Finds an element that matches one of a set of
+values.</p>
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
+<em>Returns</em>: The first iterator
+<code class="sourceCode cpp">i</code> in the range <code class="sourceCode cpp"><span class="op">[</span>first1, last1<span class="op">)</span></code>
+such that for some iterator <code class="sourceCode cpp">j</code> in the
+range <code class="sourceCode cpp"><span class="op">[</span>first2, last2<span class="op">)</span></code>
+<em><code class="sourceCode cpp">E</code></em> holds. Returns
+<code class="sourceCode cpp">last1</code> if <code class="sourceCode cpp"><span class="op">[</span>first2, last2<span class="op">)</span></code>
+is empty or if no such iterator is found.</p>
+<p><span class="marginalizedparent"><a class="marginalized">4</a></span>
+<em>Complexity</em>: At most <code class="sourceCode cpp"><span class="op">(</span>last1<span class="op">-</span>first1<span class="op">)</span> <span class="op">*</span> <span class="op">(</span>last2<span class="op">-</span>first2<span class="op">)</span></code>
+applications of the corresponding predicate and any projections.</p>
 <h2 data-number="8.19" id="modify_alg_adjacent_find"><span class="header-section-number">8.19</span> Modify
 <code class="sourceCode cpp">adjacent_find</code> in <span><a href="https://wg21.link/alg.adjacent.find">[alg.adjacent.find]</a></span><a href="#modify_alg_adjacent_find" class="self-link"></a></h2>
 <div class="sourceCode" id="cb58"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>forward_iterator I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S, <span class="kw">class</span> Proj <span class="op">=</span> identity,</span>
@@ -4231,6 +4440,42 @@ parallelization often does not permit efficient state accumulation. —
 <span id="cb59-7"><a href="#cb59-7" aria-hidden="true" tabindex="-1"></a>  borrowed_iterator_t&lt;R&gt; ranges::adjacent_find(Ep&amp;&amp; exec, R&amp;&amp; r, Pred pred = {}, Proj proj = {});</span></code></pre></div>
 
 </div>
+<p><span class="marginalizedparent"><a class="marginalized">1</a></span>
+Let <em><code class="sourceCode cpp">E</code></em> be:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(1.1)</a></span>
+<code class="sourceCode cpp"><span class="op">*</span>i <span class="op">==</span> <span class="op">*(</span>i <span class="op">+</span> <span class="dv">1</span><span class="op">)</span></code>
+for the overloads with no parameter
+<code class="sourceCode cpp">pred</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(1.2)</a></span>
+<code class="sourceCode cpp">pred<span class="op">(*</span>i, <span class="op">*(</span>i <span class="op">+</span> <span class="dv">1</span><span class="op">))</span> <span class="op">!=</span> <span class="kw">false</span></code>
+for the overloads with a parameter
+<code class="sourceCode cpp">pred</code> and no parameter
+<code class="sourceCode cpp">proj</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(1.3)</a></span>
+<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(</span>invoke<span class="op">(</span>pred, invoke<span class="op">(</span>proj, <span class="op">*</span>i<span class="op">)</span>, invoke<span class="op">(</span>proj, <span class="op">*(</span>i <span class="op">+</span> <span class="dv">1</span><span class="op">))))</span></code>
+for the overloads with both parameters
+<code class="sourceCode cpp">pred</code> and
+<code class="sourceCode cpp">proj</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
+<em>Returns</em>: The first iterator
+<code class="sourceCode cpp">i</code> such that both
+<code class="sourceCode cpp">i</code> and <code class="sourceCode cpp">i <span class="op">+</span> <span class="dv">1</span></code>
+are in the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+for which <em><code class="sourceCode cpp">E</code></em> holds. Returns
+<code class="sourceCode cpp">last</code> if no such iterator is
+found.</p>
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
+<em>Complexity</em>: For the overloads with no
+<code class="sourceCode cpp">ExecutionPolicy</code>, exactly <code class="sourceCode cpp">min<span class="op">((</span>i <span class="op">-</span> first<span class="op">)</span> <span class="op">+</span> <span class="dv">1</span>,  <span class="op">(</span>last <span class="op">-</span> first<span class="op">)</span> <span class="op">-</span> <span class="dv">1</span><span class="op">)</span></code>
+applications of the corresponding predicate, where
+<code class="sourceCode cpp">i</code> is
+<code class="sourceCode cpp">adjacent_find</code>’s return value. For
+the overloads with an
+<code class="sourceCode cpp">ExecutionPolicy</code>, <em>Θ</em><code class="sourceCode cpp"><span class="op">(</span>last <span class="op">-</span> first<span class="op">)</span></code>
+applications of the corresponding predicate, and no more than twice as
+many applications of any projection.</p>
 <h2 data-number="8.20" id="modify_alg_count"><span class="header-section-number">8.20</span> Modify
 <code class="sourceCode cpp">count</code> in <span><a href="https://wg21.link/alg.count">[alg.count]</a></span><a href="#modify_alg_count" class="self-link"></a></h2>
 <div class="sourceCode" id="cb60"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>input_iterator I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S, <span class="kw">class</span> Proj <span class="op">=</span> identity,</span>
