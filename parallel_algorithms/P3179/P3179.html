@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2024-12-17" />
+  <meta name="dcterms.date" content="2024-12-18" />
   <title>C++ parallel range algorithms</title>
   <style>
       code{white-space: pre-wrap;}
@@ -428,7 +428,7 @@ algorithms</h1>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2024-12-17</td>
+    <td>2024-12-18</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -1860,6 +1860,11 @@ except two places where the name is
 in the synopsis. It must be a bug.</li>
 <li>Serial <code class="sourceCode cpp">replace_copy_if</code> does not
 have indent for the second row of function parameters.</li>
+<li><code class="sourceCode cpp">unique_copy</code> wording uses
+<em><code class="sourceCode cpp">N</code></em> but its never
+defined.</li>
+<li>`shift_left doesn’t have extra ‘Returns’ word in <em>Returns</em>
+section</li>
 </ul>
 <h2 data-number="7.3" id="thread_safe_views"><span class="header-section-number">7.3</span> Thread-safe views examination<a href="#thread_safe_views" class="self-link"></a></h2>
 <p>We need to understand better whether using some
@@ -4516,6 +4521,37 @@ many applications of any projection.</p>
 <span id="cb63-6"><a href="#cb63-6" aria-hidden="true" tabindex="-1"></a>  range_difference_t&lt;R&gt; ranges::count_if(Ep&amp;&amp; exec, R&amp;&amp; r, Pred pred, Proj proj = {});</span></code></pre></div>
 
 </div>
+<p><span class="marginalizedparent"><a class="marginalized">1</a></span>
+Let <em><code class="sourceCode cpp">E</code></em> be:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(1.1)</a></span>
+<code class="sourceCode cpp"><span class="op">*</span>i <span class="op">==</span> value</code>
+for the overloads with no parameter
+<code class="sourceCode cpp">pred</code> or
+<code class="sourceCode cpp">proj</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(1.2)</a></span>
+<code class="sourceCode cpp">pred<span class="op">(*</span>i<span class="op">)</span> <span class="op">!=</span> <span class="kw">false</span></code>
+for the overloads with a parameter
+<code class="sourceCode cpp">pred</code> but no parameter
+<code class="sourceCode cpp">proj</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(1.3)</a></span>
+<code class="sourceCode cpp">invoke<span class="op">(</span>proj, <span class="op">*</span>i<span class="op">)</span> <span class="op">==</span> value</code>
+for the overloads with a parameter
+<code class="sourceCode cpp">proj</code> but no parameter
+<code class="sourceCode cpp">pred</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(1.4)</a></span>
+<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(</span>invoke<span class="op">(</span>pred, invoke<span class="op">(</span>proj, <span class="op">*</span>i<span class="op">)))</span></code>
+for the overloads with both parameters
+<code class="sourceCode cpp">proj</code> and
+<code class="sourceCode cpp">pred</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
+<em>Effects</em>: Returns the number of iterators
+<code class="sourceCode cpp">i</code> in the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+for which <em><code class="sourceCode cpp">E</code></em> holds. <span class="marginalizedparent"><a class="marginalized">3</a></span>
+<em>Complexity</em>: Exactly
+<code class="sourceCode cpp">last <span class="op">-</span> first</code>
+applications of the corresponding predicate and any projection.</p>
 <h2 data-number="8.21" id="modify_alg_mismatch"><span class="header-section-number">8.21</span> Modify
 <code class="sourceCode cpp">mismatch</code> in <span><a href="https://wg21.link/alg.mismatch">[alg.mismatch]</a></span><a href="#modify_alg_mismatch" class="self-link"></a></h2>
 <div class="sourceCode" id="cb64"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>input_iterator I1, sentinel_for<span class="op">&lt;</span>I1<span class="op">&gt;</span> S1, input_iterator I2, sentinel_for<span class="op">&lt;</span>I2<span class="op">&gt;</span> S2,</span>
@@ -4546,6 +4582,41 @@ many applications of any projection.</p>
 <span id="cb65-12"><a href="#cb65-12" aria-hidden="true" tabindex="-1"></a>    ranges::mismatch(Ep&amp;&amp; exec, R1&amp;&amp; r1, R2&amp;&amp; r2, Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});</span></code></pre></div>
 
 </div>
+<p><span class="marginalizedparent"><a class="marginalized">1</a></span>
+Let <code class="sourceCode cpp">last2</code> be <code class="sourceCode cpp">first2 <span class="op">+</span> <span class="op">(</span>last1 <span class="op">-</span> first1<span class="op">)</span></code>
+for the overloads with no parameter
+<code class="sourceCode cpp">last2</code> or
+<code class="sourceCode cpp">r2</code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
+Let <em><code class="sourceCode cpp">E</code></em> be:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(2.1)</a></span>
+<code class="sourceCode cpp"><span class="op">!(*(</span>first1 <span class="op">+</span> n<span class="op">)</span> <span class="op">==</span> <span class="op">*(</span>first2 <span class="op">+</span> n<span class="op">))</span></code>
+for the overloads with no parameter
+<code class="sourceCode cpp">pred</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(2.2)</a></span>
+<code class="sourceCode cpp">pred<span class="op">(*(</span>first1 <span class="op">+</span> n<span class="op">)</span>, <span class="op">*(</span>first2 <span class="op">+</span> n<span class="op">))</span> <span class="op">==</span> <span class="kw">false</span></code>
+for the overloads with a parameter
+<code class="sourceCode cpp">pred</code> and no parameter
+<code class="sourceCode cpp">proj1</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(2.3)</a></span>
+<code class="sourceCode cpp"><span class="op">!</span>invoke<span class="op">(</span>pred, invoke<span class="op">(</span>proj1, <span class="op">*(</span>first1 <span class="op">+</span> n<span class="op">))</span>, invoke<span class="op">(</span>proj2, <span class="op">*(</span>first2 <span class="op">+</span> n<span class="op">)))</span></code>
+for the overloads with both parameters
+<code class="sourceCode cpp">pred</code> and
+<code class="sourceCode cpp">proj1</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
+Let <em><code class="sourceCode cpp">N</code></em> be <code class="sourceCode cpp">min<span class="op">(</span>last1 <span class="op">-</span> first1,  last2 <span class="op">-</span> first2<span class="op">)</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">4</a></span>
+Returns: <code class="sourceCode cpp"><span class="op">{</span> first1 <span class="op">+</span> n, first2 <span class="op">+</span> n <span class="op">}</span></code>,
+where <code class="sourceCode cpp">n</code> is the smallest integer in
+<code class="sourceCode cpp"><span class="op">[</span><span class="dv">0</span>, <em>N</em><span class="op">)</span></code>
+such that <em><code class="sourceCode cpp">E</code></em> holds, or
+<em><code class="sourceCode cpp">N</code></em> if no such integer
+exists.</p>
+<p><span class="marginalizedparent"><a class="marginalized">5</a></span>
+Complexity: At most <em><code class="sourceCode cpp">N</code></em>
+applications of the corresponding predicate and any projections.</p>
 <h2 data-number="8.22" id="modify_alg_equal"><span class="header-section-number">8.22</span> Modify
 <code class="sourceCode cpp">equal</code> in <span><a href="https://wg21.link/alg.equal">[alg.equal]</a></span><a href="#modify_alg_equal" class="self-link"></a></h2>
 <div class="sourceCode" id="cb66"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>input_iterator I1, sentinel_for<span class="op">&lt;</span>I1<span class="op">&gt;</span> S1, input_iterator I2, sentinel_for<span class="op">&lt;</span>I2<span class="op">&gt;</span> S2,</span>
@@ -4574,6 +4645,82 @@ many applications of any projection.</p>
 <span id="cb67-11"><a href="#cb67-11" aria-hidden="true" tabindex="-1"></a>                     Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});</span></code></pre></div>
 
 </div>
+<p><span class="marginalizedparent"><a class="marginalized">1</a></span>
+Let:</p>
+<ul>
+<li><p><span class="marginalizedparent"><a class="marginalized">(1.1)</a></span>
+<code class="sourceCode cpp">last2</code> be <code class="sourceCode cpp">first2 <span class="op">+</span> <span class="op">(</span>last1 <span class="op">-</span> first1<span class="op">)</span></code>
+for the overloads with no parameter
+<code class="sourceCode cpp">last2</code> or
+<code class="sourceCode cpp">r2</code>;</p></li>
+<li><p><span class="marginalizedparent"><a class="marginalized">(1.2)</a></span>
+<code class="sourceCode cpp">pred</code> be
+<code class="sourceCode cpp">equal_to<span class="op">{}</span></code>
+for the overloads with no parameter
+<code class="sourceCode cpp">pred</code>;</p></li>
+<li><p><span class="marginalizedparent"><a class="marginalized">(1.3)</a></span>
+<em><code class="sourceCode cpp">E</code></em> be:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(1.3.1)</a></span>
+<code class="sourceCode cpp">pred<span class="op">(*</span>i, <span class="op">*(</span>first2 <span class="op">+</span> <span class="op">(</span>i <span class="op">-</span> first1<span class="op">)))</span></code>
+for the overloads with no parameter
+<code class="sourceCode cpp">proj1</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(1.3.2)</a></span>
+<code class="sourceCode cpp">invoke<span class="op">(</span>pred, invoke<span class="op">(</span>proj1, <span class="op">*</span>i<span class="op">)</span>, invoke<span class="op">(</span>proj2, <span class="op">*(</span>first2 <span class="op">+</span> <span class="op">(</span>i <span class="op">-</span> first1<span class="op">))))</span></code>
+for the overloads with parameter
+<code class="sourceCode cpp">proj1</code>.</li>
+</ul></li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
+<em>Returns</em>: If <code class="sourceCode cpp">last1 <span class="op">-</span> first1 <span class="op">!=</span> last2 <span class="op">-</span> first2</code>,
+return
+<code class="sourceCode cpp"><span class="kw">false</span></code>.
+Otherwise return
+<code class="sourceCode cpp"><span class="kw">true</span></code> if
+<em><code class="sourceCode cpp">E</code></em> holds for every iterator
+<code class="sourceCode cpp">i</code> in the range <code class="sourceCode cpp"><span class="op">[</span>first1, last1<span class="op">)</span></code>.
+Otherwise, returns
+<code class="sourceCode cpp"><span class="kw">false</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
+<em>Complexity</em>: If</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(3.1)</a></span> the
+types of <code class="sourceCode cpp">first1</code>,
+<code class="sourceCode cpp">last1</code>,
+<code class="sourceCode cpp">first2</code>, and
+<code class="sourceCode cpp">last2</code> meet the
+<em>Cpp17RandomAccessIterator</em> requirements (<span><a href="https://wg21.link/random.access.iterators">[random.access.iterators]</a></span>)
+and <code class="sourceCode cpp">last1 <span class="op">-</span> first1 <span class="op">!=</span> last2 <span class="op">-</span> first2</code>
+for the overloads in namespace
+<code class="sourceCode cpp">std</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(3.2)</a></span> the
+types of <code class="sourceCode cpp">first1</code>,
+<code class="sourceCode cpp">last1</code>,
+<code class="sourceCode cpp">first2</code>, and
+<code class="sourceCode cpp">last2</code> pairwise model
+<code class="sourceCode cpp">sized_sentinel_for</code> (<span><a href="https://wg21.link/iterator.concept.sizedsentinel">[iterator.concept.sizedsentinel]</a></span>)
+and <code class="sourceCode cpp">last1 <span class="op">-</span> first1 <span class="op">!=</span> last2 <span class="op">-</span> first2</code>
+for the first overload in namespace
+<code class="sourceCode cpp">ranges</code>,</li>
+<li><span class="marginalizedparent"><a class="marginalized">(3.3)</a></span>
+<code class="sourceCode cpp">R1</code> and
+<code class="sourceCode cpp">R2</code> each model
+<code class="sourceCode cpp">sized_range</code> and <code class="sourceCode cpp">ranges​<span class="op">::</span>​distance<span class="op">(</span>r1<span class="op">)</span> <span class="op">!=</span> ranges​<span class="op">::</span>​distance<span class="op">(</span>r2<span class="op">)</span></code>
+for the second overload in namespace
+<code class="sourceCode cpp">ranges</code>,</li>
+</ul>
+<p>then no applications of the corresponding predicate and each
+projection; otherwise,</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(3.4)</a></span> For
+the overloads with no
+<code class="sourceCode cpp">ExecutionPolicy</code>, at most <code class="sourceCode cpp">min<span class="op">(</span>last1 <span class="op">-</span> first1,  last2 <span class="op">-</span> first2<span class="op">)</span></code>
+applications of the corresponding predicate and any projections.</li>
+<li><span class="marginalizedparent"><a class="marginalized">(3.5)</a></span> For
+the overloads with an
+<code class="sourceCode cpp">ExecutionPolicy</code>, <em>Θ</em><code class="sourceCode cpp"><span class="op">(</span>min<span class="op">(</span>last1 <span class="op">-</span> first1, last2 <span class="op">-</span> first2<span class="op">))</span></code>
+applications of the corresponding predicate.</li>
+</ul>
 <h2 data-number="8.23" id="modify_alg_search"><span class="header-section-number">8.23</span> Modify
 <code class="sourceCode cpp">search</code> in <span><a href="https://wg21.link/alg.search">[alg.search]</a></span><a href="#modify_alg_search" class="self-link"></a></h2>
 <div class="sourceCode" id="cb68"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>forward_iterator I1, sentinel_for<span class="op">&lt;</span>I1<span class="op">&gt;</span> S1, forward_iterator I2,</span>
@@ -4606,6 +4753,25 @@ many applications of any projection.</p>
 <span id="cb69-13"><a href="#cb69-13" aria-hidden="true" tabindex="-1"></a>                     Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});</span></code></pre></div>
 
 </div>
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
+<em>Returns</em>:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(3.1)</a></span>
+<code class="sourceCode cpp"><span class="op">{</span>i, i <span class="op">+</span> <span class="op">(</span>last2 <span class="op">-</span> first2<span class="op">)}</span></code>,
+where <code class="sourceCode cpp">i</code> is the first iterator in the
+range <code class="sourceCode cpp"><span class="op">[</span>first1, last1 <span class="op">-</span> <span class="op">(</span>last2 <span class="op">-</span> first2<span class="op">))</span></code>
+such that for every non-negative integer
+<code class="sourceCode cpp">n</code> less than <code class="sourceCode cpp">last2 <span class="op">-</span> first2</code> the
+condition <code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(</span>invoke<span class="op">(</span>pred, invoke<span class="op">(</span>proj1, <span class="op">*(</span>i <span class="op">+</span> n<span class="op">))</span>, invoke<span class="op">(</span>proj2, <span class="op">*(</span>first2 <span class="op">+</span> n<span class="op">))))</span></code>
+is
+<code class="sourceCode cpp"><span class="kw">true</span></code>.</li>
+<li><span class="marginalizedparent"><a class="marginalized">(3.2)</a></span>
+Returns <code class="sourceCode cpp"><span class="op">{</span>last1, last1<span class="op">}</span></code>
+if no such iterator exists.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">4</a></span>
+<em>Complexity</em>: At most <code class="sourceCode cpp"><span class="op">(</span>last1 <span class="op">-</span> first1<span class="op">)</span> <span class="op">*</span> <span class="op">(</span>last2 <span class="op">-</span> first2<span class="op">)</span></code>
+applications of the corresponding predicate and projections.</p>
 <div class="sourceCode" id="cb70"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>forward_iterator I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S,</span>
 <span id="cb70-2"><a href="#cb70-2" aria-hidden="true" tabindex="-1"></a>         <span class="kw">class</span> Pred <span class="op">=</span> ranges<span class="op">::</span>equal_to, <span class="kw">class</span> Proj <span class="op">=</span> identity,</span>
 <span id="cb70-3"><a href="#cb70-3" aria-hidden="true" tabindex="-1"></a>         <span class="kw">class</span> T <span class="op">=</span> projected_value_t<span class="op">&lt;</span>I, Proj<span class="op">&gt;&gt;</span></span>
@@ -4636,6 +4802,20 @@ many applications of any projection.</p>
 <span id="cb71-13"><a href="#cb71-13" aria-hidden="true" tabindex="-1"></a>                       const T&amp; value, Pred pred = {}, Proj proj = {});</span></code></pre></div>
 
 </div>
+<p><span class="marginalizedparent"><a class="marginalized">9</a></span>
+<em>Returns</em>: <code class="sourceCode cpp"><span class="op">{</span>i, i <span class="op">+</span> count<span class="op">}</span></code>
+where <code class="sourceCode cpp">i</code> is the first iterator in the
+range <code class="sourceCode cpp"><span class="op">[</span>first, last <span class="op">-</span> count<span class="op">)</span></code>
+such that for every non-negative integer
+<code class="sourceCode cpp">n</code> less than
+<code class="sourceCode cpp">count</code>, the following condition
+holds: <code class="sourceCode cpp">invoke<span class="op">(</span>pred, invoke<span class="op">(</span>proj, <span class="op">*(</span>i <span class="op">+</span> n<span class="op">))</span>, value<span class="op">)</span></code>.
+Returns <code class="sourceCode cpp"><span class="op">{</span>last, last<span class="op">}</span></code>
+if no such iterator is found.</p>
+<p><span class="marginalizedparent"><a class="marginalized">10</a></span>
+<em>Complexity</em>: At most
+<code class="sourceCode cpp">last <span class="op">-</span> first</code>
+applications of the corresponding predicate and projection.</p>
 <h2 data-number="8.24" id="modify_alg_starts_with"><span class="header-section-number">8.24</span> Modify
 <code class="sourceCode cpp">starts_with</code> in <span><a href="https://wg21.link/alg.starts.with">[alg.starts.with]</a></span><a href="#modify_alg_starts_with" class="self-link"></a></h2>
 <div class="sourceCode" id="cb72"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>input_iterator I1, sentinel_for<span class="op">&lt;</span>I1<span class="op">&gt;</span> S1, input_iterator I2, sentinel_for<span class="op">&lt;</span>I2<span class="op">&gt;</span> S2,</span>
@@ -4738,6 +4918,21 @@ otherwise <code class="sourceCode cpp">ranges<span class="op">::</span>equal<spa
 <span id="cb79-8"><a href="#cb79-8" aria-hidden="true" tabindex="-1"></a>    ranges::copy(Ep&amp;&amp; exec, R&amp;&amp; r, OutR&amp;&amp; result);</span></code></pre></div>
 
 </div>
+<p><span class="marginalizedparent"><a class="marginalized">6</a></span>
+<em>Preconditions</em>: The ranges <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+and <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <span class="op">(</span>last <span class="op">-</span> first<span class="op">))</span></code>
+do not overlap.</p>
+<p><span class="marginalizedparent"><a class="marginalized">7</a></span>
+<em>Effects</em>: Copies elements in the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+into the range <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <span class="op">(</span>last <span class="op">-</span> first<span class="op">))</span></code>.
+For each non-negative integer <code class="sourceCode cpp">n <span class="op">&lt;</span> <span class="op">(</span>last <span class="op">-</span> first<span class="op">)</span></code>,
+performs <code class="sourceCode cpp"><span class="op">*(</span>result <span class="op">+</span> n<span class="op">)</span> <span class="op">=</span> <span class="op">*(</span>first <span class="op">+</span> n<span class="op">)</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">8</a></span>
+<em>Returns</em>: <code class="sourceCode cpp">result <span class="op">+</span> <span class="op">(</span>last <span class="op">-</span> first<span class="op">)</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">9</a></span>
+<em>Complexity</em>: Exactly
+<code class="sourceCode cpp">last <span class="op">-</span> first</code>
+assignments.</p>
 <div class="sourceCode" id="cb80"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>input_iterator I, weakly_incrementable O<span class="op">&gt;</span></span>
 <span id="cb80-2"><a href="#cb80-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> indirectly_copyable<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
 <span id="cb80-3"><a href="#cb80-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> ranges<span class="op">::</span>copy_n_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
@@ -4750,6 +4945,31 @@ otherwise <code class="sourceCode cpp">ranges<span class="op">::</span>equal<spa
 <span id="cb81-4"><a href="#cb81-4" aria-hidden="true" tabindex="-1"></a>    ranges::copy_n(Ep&amp;&amp; exec, I first, iter_difference_t&lt;I&gt; n, O result);</span></code></pre></div>
 
 </div>
+<p><span class="marginalizedparent"><a class="marginalized">10</a></span> Let
+<em><code class="sourceCode cpp">N</code></em> be <code class="sourceCode cpp">max<span class="op">(</span><span class="dv">0</span>, n<span class="op">)</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">11</a></span>
+<em>Mandates</em>: The type <code class="sourceCode cpp">Size</code> is
+convertible to an integral type (<span><a href="https://wg21.link/conv.integral">[conv.integral]</a></span>,
+<span><a href="https://wg21.link/class.conv">[class.conv]</a></span>).</p>
+<p><span class="marginalizedparent"><a class="marginalized">12</a></span>
+<em>Effects</em>: For each non-negative integer
+<em><code class="sourceCode cpp">i</code></em> &lt;
+<em><code class="sourceCode cpp">N</code></em>, performs <code class="sourceCode cpp"><span class="op">*(</span>result <span class="op">+</span> <em>i</em><span class="op">)</span> <span class="op">=</span> <span class="op">*(</span>first <span class="op">+</span> <em>i</em><span class="op">)</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">13</a></span>
+<em>Returns</em>:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(13.1)</a></span>
+<code class="sourceCode cpp">result <span class="op">+</span> <em>N</em></code>
+for the overloads in namespace
+<code class="sourceCode cpp">std</code>.</li>
+<li><span class="marginalizedparent"><a class="marginalized">(13.2)</a></span>
+<code class="sourceCode cpp"><span class="op">{</span>first <span class="op">+</span> <em>N</em>, result <span class="op">+</span> <em>N</em><span class="op">}</span></code>
+for the overload in namespace
+<code class="sourceCode cpp">ranges</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">14</a></span>
+<em>Complexity</em>: Exactly
+<em><code class="sourceCode cpp">N</code></em> assignments.</p>
 <div class="sourceCode" id="cb82"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>input_iterator I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S, weakly_incrementable O, <span class="kw">class</span> Proj <span class="op">=</span> identity,</span>
 <span id="cb82-2"><a href="#cb82-2" aria-hidden="true" tabindex="-1"></a>         indirect_unary_predicate<span class="op">&lt;</span>projected<span class="op">&lt;</span>I, Proj<span class="op">&gt;&gt;</span> Pred<span class="op">&gt;</span></span>
 <span id="cb82-3"><a href="#cb82-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> indirectly_copyable<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
@@ -4776,6 +4996,54 @@ otherwise <code class="sourceCode cpp">ranges<span class="op">::</span>equal<spa
 <span id="cb83-12"><a href="#cb83-12" aria-hidden="true" tabindex="-1"></a>    ranges::copy_if(Ep&amp;&amp; exec, R&amp;&amp; r, OutR&amp;&amp; result, Pred pred, Proj proj = {});</span></code></pre></div>
 
 </div>
+<p><span class="marginalizedparent"><a class="marginalized">15</a></span> Let
+<em><code class="sourceCode cpp">E</code></em> be:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(15.1)</a></span>
+<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(</span>pred<span class="op">(*</span>i<span class="op">))</span></code>
+for the overloads in namespace
+<code class="sourceCode cpp">std</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(15.2)</a></span>
+<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(</span>invoke<span class="op">(</span>pred, invoke<span class="op">(</span>proj, <span class="op">*</span>i<span class="op">)))</span></code>
+for the overloads in namespace
+<code class="sourceCode cpp">ranges</code>,</li>
+</ul>
+<p>and <em><code class="sourceCode cpp">N</code></em> be the number of
+iterators <code class="sourceCode cpp">i</code> in the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+for which the condition <em><code class="sourceCode cpp">E</code></em>
+holds.</p>
+<p><span class="marginalizedparent"><a class="marginalized">16</a></span>
+<em>Preconditions</em>: The ranges <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+and <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <span class="op">(</span>last <span class="op">-</span> first<span class="op">))</span></code>
+do not overlap.</p>
+<p>[<em>Note 1</em>: For the overload with an
+<code class="sourceCode cpp">ExecutionPolicy</code>, there might be a
+performance cost if <code class="sourceCode cpp">iterator_traits<span class="op">&lt;</span>ForwardIterator1<span class="op">&gt;</span>​<span class="op">::</span>​value_type</code>
+is not <em>Cpp17MoveConstructible</em> (Table 31). — <em>end
+note</em>]</p>
+<p><span class="marginalizedparent"><a class="marginalized">17</a></span>
+<em>Effects</em>: Copies all of the elements referred to by the iterator
+<code class="sourceCode cpp">i</code> in the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+for which <em><code class="sourceCode cpp">E</code></em> is
+<code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">18</a></span>
+<em>Returns</em>:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(18.1)</a></span>
+<code class="sourceCode cpp">result <span class="op">+</span> <em>N</em></code>
+for the overloads in namespace
+<code class="sourceCode cpp">std</code>.</li>
+<li><span class="marginalizedparent"><a class="marginalized">(18.2)</a></span>
+<code class="sourceCode cpp"><span class="op">{</span>last, result <span class="op">+</span> <em>N</em><span class="op">}</span></code>
+for the overloads in namespace
+<code class="sourceCode cpp">ranges</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">19</a></span>
+<em>Complexity</em>: Exactly
+<code class="sourceCode cpp">last <span class="op">-</span> first</code>
+applications of the corresponding predicate and any projection.</p>
+<p><span class="marginalizedparent"><a class="marginalized">20</a></span>
+<em>Remarks</em>: Stable (<span><a href="https://wg21.link/algorithm.stable">[algorithm.stable]</a></span>).</p>
 <h2 data-number="8.27" id="modify_move"><span class="header-section-number">8.27</span> Modify
 <code class="sourceCode cpp">move</code> in <span><a href="https://wg21.link/alg.move">[alg.move]</a></span><a href="#modify_move" class="self-link"></a></h2>
 <div class="sourceCode" id="cb84"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> ExecutionPolicy, <span class="kw">class</span> ForwardIterator1, <span class="kw">class</span> ForwardIterator2<span class="op">&gt;</span></span>
@@ -4794,6 +5062,23 @@ otherwise <code class="sourceCode cpp">ranges<span class="op">::</span>equal<spa
 <span id="cb85-8"><a href="#cb85-8" aria-hidden="true" tabindex="-1"></a>    ranges::move(Ep&amp;&amp; exec, R&amp;&amp; r, OutR&amp;&amp; result);</span></code></pre></div>
 
 </div>
+<p><span class="marginalizedparent"><a class="marginalized">6</a></span>
+Let <em><code class="sourceCode cpp">N</code></em> be
+<code class="sourceCode cpp">last <span class="op">-</span> first</code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">7</a></span>
+<em>Preconditions</em>: The ranges <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+and <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <em>N</em><span class="op">)</span></code>
+do not overlap.</p>
+<p><span class="marginalizedparent"><a class="marginalized">8</a></span>
+<em>Effects</em>: Moves elements in the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+into the range <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <em>N</em><span class="op">)</span></code>.
+For each non-negative integer <code class="sourceCode cpp"><em>n</em> <span class="op">&lt;</span> <em>N</em></code>,
+performs <code class="sourceCode cpp"><span class="op">*(</span>result <span class="op">+</span> <em>n</em><span class="op">)</span> <span class="op">=</span> std​<span class="op">::</span>​​move<span class="op">(*(</span>first <span class="op">+</span> <em>n</em><span class="op">))</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">9</a></span>
+<em>Returns</em>: <code class="sourceCode cpp">result <span class="op">+</span> <em>N</em></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">10</a></span>
+<em>Complexity</em>: Exactly
+<em><code class="sourceCode cpp">N</code></em> assignments.</p>
 <h2 data-number="8.28" id="modify_swap"><span class="header-section-number">8.28</span> Modify
 <code class="sourceCode cpp">swap</code> in <span><a href="https://wg21.link/alg.swap">[alg.swap]</a></span><a href="#modify_swap" class="self-link"></a></h2>
 <div class="sourceCode" id="cb86"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>input_iterator I1, sentinel_for<span class="op">&lt;</span>I1<span class="op">&gt;</span> S1, input_iterator I2, sentinel_for<span class="op">&lt;</span>I2<span class="op">&gt;</span> S2<span class="op">&gt;</span></span>
@@ -4806,16 +5091,61 @@ otherwise <code class="sourceCode cpp">ranges<span class="op">::</span>equal<spa
 <span id="cb86-8"><a href="#cb86-8" aria-hidden="true" tabindex="-1"></a>    ranges<span class="op">::</span>swap_ranges<span class="op">(</span>R1<span class="op">&amp;&amp;</span> r1, R2<span class="op">&amp;&amp;</span> r2<span class="op">)</span>;</span></code></pre></div>
 <div class="add" style="color: #006e28">
 
-<div class="sourceCode" id="cb87"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, random_access_iterator I1, sized_sentinel_for&lt;I1&gt; S1, random_access_iterator I2, sized_sentinel_for&lt;I2&gt; S2&gt;</span>
-<span id="cb87-2"><a href="#cb87-2" aria-hidden="true" tabindex="-1"></a>  requires indirectly_swappable&lt;I1, I2&gt;</span>
-<span id="cb87-3"><a href="#cb87-3" aria-hidden="true" tabindex="-1"></a>  ranges::swap_ranges_result&lt;I1, I2&gt;</span>
-<span id="cb87-4"><a href="#cb87-4" aria-hidden="true" tabindex="-1"></a>    ranges::swap_ranges(Ep&amp;&amp; exec, I1 first1, S1 last1, I2 first2, S2 last2);</span>
-<span id="cb87-5"><a href="#cb87-5" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, <em>random-access-sized-range</em> R1, <em>random-access-sized-range</em> R2&gt;</span>
-<span id="cb87-6"><a href="#cb87-6" aria-hidden="true" tabindex="-1"></a>  requires indirectly_swappable&lt;iterator_t&lt;R1&gt;, iterator_t&lt;R2&gt;&gt;</span>
-<span id="cb87-7"><a href="#cb87-7" aria-hidden="true" tabindex="-1"></a>  ranges::swap_ranges_result&lt;borrowed_iterator_t&lt;R1&gt;, borrowed_iterator_t&lt;R2&gt;&gt;</span>
-<span id="cb87-8"><a href="#cb87-8" aria-hidden="true" tabindex="-1"></a>    ranges::swap_ranges(Ep&amp;&amp; exec, R1&amp;&amp; r1, R2&amp;&amp; r2);</span></code></pre></div>
+<div class="sourceCode" id="cb87"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, random_access_iterator I1, sized_sentinel_for&lt;I1&gt; S1,</span>
+<span id="cb87-2"><a href="#cb87-2" aria-hidden="true" tabindex="-1"></a>         random_access_iterator I2, sized_sentinel_for&lt;I2&gt; S2&gt;</span>
+<span id="cb87-3"><a href="#cb87-3" aria-hidden="true" tabindex="-1"></a>  requires indirectly_swappable&lt;I1, I2&gt;</span>
+<span id="cb87-4"><a href="#cb87-4" aria-hidden="true" tabindex="-1"></a>  ranges::swap_ranges_result&lt;I1, I2&gt;</span>
+<span id="cb87-5"><a href="#cb87-5" aria-hidden="true" tabindex="-1"></a>    ranges::swap_ranges(Ep&amp;&amp; exec, I1 first1, S1 last1, I2 first2, S2 last2);</span>
+<span id="cb87-6"><a href="#cb87-6" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, <em>random-access-sized-range</em> R1, <em>random-access-sized-range</em> R2&gt;</span>
+<span id="cb87-7"><a href="#cb87-7" aria-hidden="true" tabindex="-1"></a>  requires indirectly_swappable&lt;iterator_t&lt;R1&gt;, iterator_t&lt;R2&gt;&gt;</span>
+<span id="cb87-8"><a href="#cb87-8" aria-hidden="true" tabindex="-1"></a>  ranges::swap_ranges_result&lt;borrowed_iterator_t&lt;R1&gt;, borrowed_iterator_t&lt;R2&gt;&gt;</span>
+<span id="cb87-9"><a href="#cb87-9" aria-hidden="true" tabindex="-1"></a>    ranges::swap_ranges(Ep&amp;&amp; exec, R1&amp;&amp; r1, R2&amp;&amp; r2);</span></code></pre></div>
 
 </div>
+<p><span class="marginalizedparent"><a class="marginalized">1</a></span>
+Let:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(1.1)</a></span>
+<code class="sourceCode cpp">last2</code> be <code class="sourceCode cpp">first2 <span class="op">+</span> <span class="op">(</span>last1 <span class="op">-</span> first1<span class="op">)</span></code>
+for the overloads with no parameter named
+<code class="sourceCode cpp">last2</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(1.2)</a></span>
+<em><code class="sourceCode cpp">M</code></em> be <code class="sourceCode cpp">min<span class="op">(</span>last1 <span class="op">-</span> first1,  last2 <span class="op">-</span> first2<span class="op">)</span></code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
+<em>Preconditions</em>: The two ranges <code class="sourceCode cpp"><span class="op">[</span>first1, last1<span class="op">)</span></code>
+and <code class="sourceCode cpp"><span class="op">[</span>first2, last2<span class="op">)</span></code>
+do not overlap. For the overloads in namespace
+<code class="sourceCode cpp">std</code>, <code class="sourceCode cpp"><span class="op">*(</span>first1 <span class="op">+</span> <em>n</em><span class="op">)</span></code>
+is swappable with (<span><a href="https://wg21.link/swappable.requirements">[swappable.requirements]</a></span>)
+<code class="sourceCode cpp"><span class="op">*(</span>first2 <span class="op">+</span> <em>n</em><span class="op">)</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
+<em>Effects</em>: For each non-negative integer <code class="sourceCode cpp"><em>n</em> <span class="op">&lt;</span> <em>M</em></code>
+performs:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(3.1)</a></span>
+<code class="sourceCode cpp">swap<span class="op">(*(</span>first1 <span class="op">+</span> <em>n</em><span class="op">)</span>, <span class="op">*(</span>first2 <span class="op">+</span> <em>n</em><span class="op">))</span></code>
+for the overloads in namespace
+<code class="sourceCode cpp">std</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(3.2)</a></span>
+<code class="sourceCode cpp">ranges​<span class="op">::</span>​iter_swap<span class="op">(</span>first1 <span class="op">+</span> <em>n</em>, first2 <span class="op">+</span> <em>n</em><span class="op">)</span></code>
+for the overloads in namespace
+<code class="sourceCode cpp">ranges</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">4</a></span>
+<em>Returns</em>:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(4.1)</a></span>
+<code class="sourceCode cpp">last2</code> for the overloads in namespace
+<code class="sourceCode cpp">std</code>.</li>
+<li><span class="marginalizedparent"><a class="marginalized">(4.2)</a></span>
+<code class="sourceCode cpp"><span class="op">{</span>first1 <span class="op">+</span> <em>M</em>, first2 <span class="op">+</span> <em>M</em><span class="op">}</span></code>
+for the overloads in namespace
+<code class="sourceCode cpp">ranges</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">5</a></span>
+<em>Complexity</em>: Exactly
+<em><code class="sourceCode cpp">M</code></em> swaps.</p>
 <h2 data-number="8.29" id="modify_transform"><span class="header-section-number">8.29</span> Modify
 <code class="sourceCode cpp">transform</code> in <span><a href="https://wg21.link/alg.transform">[alg.transform]</a></span><a href="#modify_transform" class="self-link"></a></h2>
 <div class="sourceCode" id="cb88"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>input_iterator I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S, weakly_incrementable O,</span>
@@ -4878,6 +5208,84 @@ otherwise <code class="sourceCode cpp">ranges<span class="op">::</span>equal<spa
 <span id="cb91-15"><a href="#cb91-15" aria-hidden="true" tabindex="-1"></a>                      F binary_op, Proj1 proj1 = {}, Proj2 proj2 = {});</span></code></pre></div>
 
 </div>
+<p><span class="marginalizedparent"><a class="marginalized">1</a></span>
+Let:</p>
+<ul>
+<li><p><span class="marginalizedparent"><a class="marginalized">(1.1)</a></span>
+<code class="sourceCode cpp">last2</code> be <code class="sourceCode cpp">first2 <span class="op">+</span> <span class="op">(</span>last1 <span class="op">-</span> first1<span class="op">)</span></code>
+for the overloads with parameter
+<code class="sourceCode cpp">first2</code> but no parameter
+<code class="sourceCode cpp">last2</code>;</p></li>
+<li><p><span class="marginalizedparent"><a class="marginalized">(1.2)</a></span>
+<em><code class="sourceCode cpp">N</code></em> be <code class="sourceCode cpp">last1 <span class="op">-</span> first1</code> for
+unary transforms, or <code class="sourceCode cpp">min<span class="op">(</span>last1 <span class="op">-</span> first1,  last2 <span class="op">-</span> first2<span class="op">)</span></code>
+for binary transforms;</p></li>
+<li><p><span class="marginalizedparent"><a class="marginalized">(1.3)</a></span>
+<em><code class="sourceCode cpp">E</code></em> be</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(1.3.1)</a></span>
+<code class="sourceCode cpp">op<span class="op">(*(</span>first1 <span class="op">+</span> <span class="op">(</span>i <span class="op">-</span> result<span class="op">)))</span></code>
+for unary transforms defined in namespace
+<code class="sourceCode cpp">std</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(1.3.2)</a></span>
+<code class="sourceCode cpp">binary_op<span class="op">(*(</span>first1 <span class="op">+</span> <span class="op">(</span>i <span class="op">-</span> result<span class="op">))</span>, <span class="op">*(</span>first2 <span class="op">+</span> <span class="op">(</span>i <span class="op">-</span> result<span class="op">)))</span></code>
+for binary transforms defined in namespace
+<code class="sourceCode cpp">std</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(1.3.3)</a></span>
+<code class="sourceCode cpp">invoke<span class="op">(</span>op, invoke<span class="op">(</span>proj, <span class="op">*(</span>first1 <span class="op">+</span> <span class="op">(</span>i <span class="op">-</span> result<span class="op">))))</span></code>
+for unary transforms defined in namespace
+<code class="sourceCode cpp">ranges</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(1.3.4)</a></span>
+<code class="sourceCode cpp">invoke<span class="op">(</span>binary_op, invoke<span class="op">(</span>proj1, <span class="op">*(</span>first1 <span class="op">+</span> <span class="op">(</span>i <span class="op">-</span> result<span class="op">)))</span>, invoke<span class="op">(</span>proj2, <span class="op">*(</span>first2 <span class="op">+</span> <span class="op">(</span>i <span class="op">-</span> result<span class="op">))))</span></code>
+for binary transforms defined in namespace
+<code class="sourceCode cpp">ranges</code>.</li>
+</ul></li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
+<em>Preconditions</em>: <code class="sourceCode cpp">op</code> and
+<code class="sourceCode cpp">binary_op</code> do not invalidate
+iterators or subranges, nor modify elements in the ranges</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(2.1)</a></span>
+<code class="sourceCode cpp"><span class="op">[</span>first1, first1 <span class="op">+</span> <em>N</em><span class="op">]</span></code>,</li>
+<li><span class="marginalizedparent"><a class="marginalized">(2.2)</a></span>
+<code class="sourceCode cpp"><span class="op">[</span>first2, first2 <span class="op">+</span> <em>N</em><span class="op">]</span></code>,
+and</li>
+<li><span class="marginalizedparent"><a class="marginalized">(2.3)</a></span>
+<code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <em>N</em><span class="op">]</span></code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
+<em>Effects</em>: Assigns through every iterator
+<code class="sourceCode cpp">i</code> in the range <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <em>N</em><span class="op">)</span></code>
+a new corresponding value equal to
+<em><code class="sourceCode cpp">E</code></em>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">4</a></span>
+<em>Returns</em>:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(4.1)</a></span>
+<code class="sourceCode cpp">result <span class="op">+</span> <em>N</em></code>
+for the overloads defined in namespace
+<code class="sourceCode cpp">std</code>.</li>
+<li><span class="marginalizedparent"><a class="marginalized">(4.2)</a></span>
+<code class="sourceCode cpp"><span class="op">{</span>first1 <span class="op">+</span> <em>N</em>, result <span class="op">+</span> <em>N</em><span class="op">}</span></code>
+for unary transforms defined in namespace
+<code class="sourceCode cpp">ranges</code>.</li>
+<li><span class="marginalizedparent"><a class="marginalized">(4.3)</a></span>
+<code class="sourceCode cpp"><span class="op">{</span>first1 <span class="op">+</span> <em>N</em>, first2 <span class="op">+</span> <em>N</em>, result <span class="op">+</span> <em>N</em><span class="op">}</span></code>
+for binary transforms defined in namespace
+<code class="sourceCode cpp">ranges</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">5</a></span>
+<em>Complexity</em>: Exactly
+<em><code class="sourceCode cpp">N</code></em> applications of
+<code class="sourceCode cpp">op</code> or
+<code class="sourceCode cpp">binary_op</code>, and any projections. This
+requirement also applies to the overload with an
+<code class="sourceCode cpp">ExecutionPolicy</code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">6</a></span>
+<em>Remarks</em>: <code class="sourceCode cpp">result</code> may be
+equal to <code class="sourceCode cpp">first1</code> or
+<code class="sourceCode cpp">first2</code>.</p>
 <h2 data-number="8.30" id="modify_replace"><span class="header-section-number">8.30</span> Modify
 <code class="sourceCode cpp">replace</code> in <span><a href="https://wg21.link/alg.replace">[alg.replace]</a></span><a href="#modify_replace" class="self-link"></a></h2>
 <div class="sourceCode" id="cb92"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb92-1"><a href="#cb92-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>input_iterator I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S, <span class="kw">class</span> Proj <span class="op">=</span> identity,</span>
@@ -4936,6 +5344,39 @@ otherwise <code class="sourceCode cpp">ranges<span class="op">::</span>equal<spa
 <span id="cb95-13"><a href="#cb95-13" aria-hidden="true" tabindex="-1"></a>                       const T&amp; new_value, Proj proj = {});</span></code></pre></div>
 
 </div>
+<p><span class="marginalizedparent"><a class="marginalized">1</a></span>
+Let <em><code class="sourceCode cpp">E</code></em> be</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(1.1)</a></span>
+<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(*</span>i <span class="op">==</span> old_value<span class="op">)</span></code>
+for <code class="sourceCode cpp">replace</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(1.2)</a></span>
+<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(</span>pred<span class="op">(*</span>i<span class="op">))</span></code>
+for <code class="sourceCode cpp">replace_if</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(1.3)</a></span>
+<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(</span>invoke<span class="op">(</span>proj, <span class="op">*</span>i<span class="op">)</span> <span class="op">==</span> old_value<span class="op">)</span></code>
+for <code class="sourceCode cpp">ranges​<span class="op">::</span>​replace</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(1.4)</a></span>
+<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(</span>invoke<span class="op">(</span>pred, invoke<span class="op">(</span>proj, <span class="op">*</span>i<span class="op">)))</span></code>
+for <code class="sourceCode cpp">ranges​<span class="op">::</span>​replace_if</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
+<em>Mandates</em>: <code class="sourceCode cpp">new_value</code> is
+writable (<span><a href="https://wg21.link/iterator.requirements.general">[iterator.requirements.general]</a></span>)
+to <code class="sourceCode cpp">first</code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
+<em>Effects</em>: Substitutes elements referred by the iterator
+<code class="sourceCode cpp">i</code> in the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+with <code class="sourceCode cpp">new_value</code>, when
+<em><code class="sourceCode cpp">E</code></em> is
+<code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">4</a></span>
+<em>Returns</em>: <code class="sourceCode cpp">last</code> for the
+overloads in namespace <code class="sourceCode cpp">ranges</code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">5</a></span>
+<em>Complexity</em>: Exactly
+<code class="sourceCode cpp">last <span class="op">-</span> first</code>
+applications of the corresponding predicate and any projection.</p>
 <div class="sourceCode" id="cb96"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>input_iterator I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S, <span class="kw">class</span> O,</span>
 <span id="cb96-2"><a href="#cb96-2" aria-hidden="true" tabindex="-1"></a>         <span class="kw">class</span> Proj <span class="op">=</span> identity, <span class="kw">class</span> T1 <span class="op">=</span> projected_value_t<span class="op">&lt;</span>I, Proj<span class="op">&gt;</span>, <span class="kw">class</span> T2 <span class="op">=</span> iter_value_t<span class="op">&lt;</span>O<span class="op">&gt;&gt;</span></span>
 <span id="cb96-3"><a href="#cb96-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> indirectly_copyable<span class="op">&lt;</span>I, O<span class="op">&gt;</span> <span class="op">&amp;&amp;</span></span>
@@ -5005,6 +5446,60 @@ otherwise <code class="sourceCode cpp">ranges<span class="op">::</span>equal<spa
 <span id="cb99-15"><a href="#cb99-15" aria-hidden="true" tabindex="-1"></a>                            Pred pred, const T&amp; new_value, Proj proj = {});</span></code></pre></div>
 
 </div>
+<p><span class="marginalizedparent"><a class="marginalized">6</a></span>
+Let <em><code class="sourceCode cpp">E</code></em> be</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(6.1)</a></span>
+<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(*(</span>first <span class="op">+</span> <span class="op">(</span>i <span class="op">-</span> result<span class="op">))</span> <span class="op">==</span> old_value<span class="op">)</span></code>
+for <code class="sourceCode cpp">replace_copy</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(6.2)</a></span>
+<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(</span>pred<span class="op">(*(</span>first <span class="op">+</span> <span class="op">(</span>i <span class="op">-</span> result<span class="op">))))</span></code>
+for <code class="sourceCode cpp">replace_copy_if</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(6.3)</a></span>
+<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(</span>invoke<span class="op">(</span>proj, <span class="op">*(</span>first <span class="op">+</span> <span class="op">(</span>i <span class="op">-</span> result<span class="op">)))</span> <span class="op">==</span> old_value<span class="op">)</span></code>
+for <code class="sourceCode cpp">ranges​<span class="op">::</span>​replace_copy</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(6.4)</a></span>
+<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(</span>invoke<span class="op">(</span>pred, invoke<span class="op">(</span>proj, <span class="op">*(</span>first <span class="op">+</span> <span class="op">(</span>i <span class="op">-</span> result<span class="op">)))))</span></code>
+for <code class="sourceCode cpp">ranges​<span class="op">::</span>​replace_copy_if</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">7</a></span>
+<em>Mandates</em>: The results of the expressions
+<code class="sourceCode cpp"><span class="op">*</span>first</code> and
+<code class="sourceCode cpp">new_value</code> are writable (<span><a href="https://wg21.link/iterator.requirements.general">[iterator.requirements.general]</a></span>)
+to <code class="sourceCode cpp">result</code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">8</a></span>
+<em>Preconditions</em>: The ranges <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+and <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <span class="op">(</span>last <span class="op">-</span> first<span class="op">))</span></code>
+do not overlap.</p>
+<p><span class="marginalizedparent"><a class="marginalized">9</a></span>
+<em>Effects</em>: Assigns through every iterator
+<code class="sourceCode cpp">i</code> in the range <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <span class="op">(</span>last <span class="op">-</span> first<span class="op">))</span></code>
+a new corresponding value</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(9.1)</a></span>
+<code class="sourceCode cpp">new_value</code> if
+<em><code class="sourceCode cpp">E</code></em> is
+<code class="sourceCode cpp"><span class="kw">true</span></code> or</li>
+<li><span class="marginalizedparent"><a class="marginalized">(9.2)</a></span>
+<code class="sourceCode cpp"><span class="op">*(</span>first <span class="op">+</span> <span class="op">(</span>i <span class="op">-</span> result<span class="op">))</span></code>
+otherwise.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">10</a></span>
+<em>Returns</em>:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(10.1)</a></span>
+<code class="sourceCode cpp">result <span class="op">+</span> <span class="op">(</span>last <span class="op">-</span> first<span class="op">)</span></code>
+for the overloads in namespace
+<code class="sourceCode cpp">std</code>.</li>
+<li><span class="marginalizedparent"><a class="marginalized">(10.2)</a></span>
+<code class="sourceCode cpp"><span class="op">{</span>last, result <span class="op">+</span> <span class="op">(</span>last <span class="op">-</span> first<span class="op">)}</span></code>
+for the overloads in namespace
+<code class="sourceCode cpp">ranges</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">11</a></span>
+<em>Complexity</em>: Exactly
+<code class="sourceCode cpp">last <span class="op">-</span> first</code>
+applications of the corresponding predicate and any projection.</p>
 <h2 data-number="8.31" id="modify_fill"><span class="header-section-number">8.31</span> Modify
 <code class="sourceCode cpp">fill</code> in <span><a href="https://wg21.link/alg.fill">[alg.fill]</a></span><a href="#modify_fill" class="self-link"></a></h2>
 <div class="sourceCode" id="cb100"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb100-1"><a href="#cb100-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> O, sentinel_for<span class="op">&lt;</span>O<span class="op">&gt;</span> S, <span class="kw">class</span> T <span class="op">=</span> iter_value_t<span class="op">&lt;</span>O<span class="op">&gt;&gt;</span></span>
@@ -5030,6 +5525,25 @@ otherwise <code class="sourceCode cpp">ranges<span class="op">::</span>equal<spa
 <span id="cb101-10"><a href="#cb101-10" aria-hidden="true" tabindex="-1"></a>  O ranges::fill_n(Ep&amp;&amp; exec, O first, iter_difference_t&lt;O&gt; n, const T&amp; value);</span></code></pre></div>
 
 </div>
+<p><span class="marginalizedparent"><a class="marginalized">1</a></span>
+Let <em><code class="sourceCode cpp">N</code></em> be <code class="sourceCode cpp">max<span class="op">(</span><span class="dv">0</span>, n<span class="op">)</span></code>
+for the <code class="sourceCode cpp">fill_n</code> algorithms, and
+<code class="sourceCode cpp">last <span class="op">-</span> first</code>
+for the <code class="sourceCode cpp">fill</code> algorithms.</p>
+<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
+<em>Mandates</em>: The expression value is writable (<span><a href="https://wg21.link/iterator.requirements.general">[iterator.requirements.general]</a></span>)
+to the output iterator. The type
+<code class="sourceCode cpp">Size</code> is convertible to an integral
+type (<span><a href="https://wg21.link/conv.integral">[conv.integral]</a></span>,
+<span><a href="https://wg21.link/class.conv">[class.conv]</a></span>).</p>
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
+<em>Effects</em>: Assigns value through all the iterators in the range
+<code class="sourceCode cpp"><span class="op">[</span>first, first <span class="op">+</span> <em>N</em><span class="op">)</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">4</a></span>
+<em>Returns</em>: <code class="sourceCode cpp">first <span class="op">+</span> <em>N</em></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">5</a></span>
+<em>Complexity</em>: Exactly
+<em><code class="sourceCode cpp">N</code></em> assignments.</p>
 <h2 data-number="8.32" id="modify_generate"><span class="header-section-number">8.32</span> Modify
 <code class="sourceCode cpp">generate</code> in <span><a href="https://wg21.link/alg.generate">[alg.generate]</a></span><a href="#modify_generate" class="self-link"></a></h2>
 <div class="sourceCode" id="cb102"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb102-1"><a href="#cb102-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>input_or_output_iterator O, sentinel_for<span class="op">&lt;</span>O<span class="op">&gt;</span> S, copy_constructible F<span class="op">&gt;</span></span>
@@ -5054,6 +5568,26 @@ otherwise <code class="sourceCode cpp">ranges<span class="op">::</span>equal<spa
 <span id="cb103-9"><a href="#cb103-9" aria-hidden="true" tabindex="-1"></a>  O ranges::generate_n(Ep&amp;&amp; exec, O first, iter_difference_t&lt;O&gt; n, F gen);</span></code></pre></div>
 
 </div>
+<p><span class="marginalizedparent"><a class="marginalized">1</a></span>
+Let <em><code class="sourceCode cpp">N</code></em> be <code class="sourceCode cpp">max<span class="op">(</span><span class="dv">0</span>, n<span class="op">)</span></code>
+for the <code class="sourceCode cpp">generate_n</code> algorithms, and
+<code class="sourceCode cpp">last <span class="op">-</span> first</code>
+for the <code class="sourceCode cpp">generate</code> algorithms.</p>
+<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
+<em>Mandates</em>: <code class="sourceCode cpp">Size</code> is
+convertible to an integral type (<span><a href="https://wg21.link/conv.integral">[conv.integral]</a></span>,
+<span><a href="https://wg21.link/class.conv">[class.conv]</a></span>).</p>
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
+<em>Effects</em>: Assigns the result of successive evaluations of
+<code class="sourceCode cpp">gen<span class="op">()</span></code>
+through each iterator in the range <code class="sourceCode cpp"><span class="op">[</span>first, first <span class="op">+</span> <em>N</em><span class="op">)</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">4</a></span>
+<em>Returns</em>: <code class="sourceCode cpp">first <span class="op">+</span> <em>N</em></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">5</a></span>
+<em>Complexity</em>: Exactly
+<em><code class="sourceCode cpp">N</code></em> evaluations of
+<code class="sourceCode cpp">gen<span class="op">()</span></code> and
+assignments.</p>
 <h2 data-number="8.33" id="modify_remove"><span class="header-section-number">8.33</span> Modify
 <code class="sourceCode cpp">remove</code> in <span><a href="https://wg21.link/alg.remove">[alg.remove]</a></span><a href="#modify_remove" class="self-link"></a></h2>
 <div class="sourceCode" id="cb104"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb104-1"><a href="#cb104-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>permutable I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S, <span class="kw">class</span> Proj <span class="op">=</span> identity,</span>
@@ -5098,6 +5632,55 @@ otherwise <code class="sourceCode cpp">ranges<span class="op">::</span>equal<spa
 <span id="cb107-7"><a href="#cb107-7" aria-hidden="true" tabindex="-1"></a>  borrowed_subrange_t&lt;R&gt; ranges::remove_if(Ep&amp;&amp; exec, R&amp;&amp; r, Pred pred, Proj proj = {});</span></code></pre></div>
 
 </div>
+<p><span class="marginalizedparent"><a class="marginalized">1</a></span>
+Let <em><code class="sourceCode cpp">E</code></em> be</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(1.1)</a></span>
+<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(*</span>i <span class="op">==</span> value<span class="op">)</span></code>
+for <code class="sourceCode cpp">remove</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(1.2)</a></span>
+<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(</span>pred<span class="op">(*</span>i<span class="op">))</span></code>
+for <code class="sourceCode cpp">remove_if</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(1.3)</a></span>
+<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(</span>invoke<span class="op">(</span>proj, <span class="op">*</span>i<span class="op">)</span> <span class="op">==</span> value<span class="op">)</span></code>
+for <code class="sourceCode cpp">ranges​<span class="op">::</span>​remove</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(1.4)</a></span>
+<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(</span>invoke<span class="op">(</span>pred, invoke<span class="op">(</span>proj, <span class="op">*</span>i<span class="op">)))</span></code>
+for <code class="sourceCode cpp">ranges​<span class="op">::</span>​remove_if</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
+<em>Preconditions</em>: For the algorithms in namespace
+<code class="sourceCode cpp">std</code>, the type of
+<code class="sourceCode cpp"><span class="op">*</span>first</code> meets
+the <em>Cpp17MoveAssignable</em> requirements (Table 33).</p>
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
+<em>Effects</em>: Eliminates all the elements referred to by iterator
+<code class="sourceCode cpp">i</code> in the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+for which <em><code class="sourceCode cpp">E</code></em> holds.</p>
+<p><span class="marginalizedparent"><a class="marginalized">4</a></span>
+<em>Returns</em>: Let <em><code class="sourceCode cpp">j</code></em> be
+the end of the resulting range. Returns:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(4.1)</a></span>
+<em><code class="sourceCode cpp">j</code></em> for the overloads in
+namespace <code class="sourceCode cpp">std</code>.</li>
+<li><span class="marginalizedparent"><a class="marginalized">(4.2)</a></span>
+<code class="sourceCode cpp"><span class="op">{</span><em>j</em>, last<span class="op">}</span></code>
+for the overloads in namespace
+<code class="sourceCode cpp">ranges</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">5</a></span>
+<em>Complexity</em>: Exactly
+<code class="sourceCode cpp">last <span class="op">-</span> first</code>
+applications of the corresponding predicate and any projection.</p>
+<p><span class="marginalizedparent"><a class="marginalized">6</a></span>
+<em>Remarks</em>: Stable (<span><a href="https://wg21.link/algorithm.stable">[algorithm.stable]</a></span>).</p>
+<p><span class="marginalizedparent"><a class="marginalized">7</a></span>
+[<em>Note 1</em>: Each element in the range <code class="sourceCode cpp"><span class="op">[</span>ret, last<span class="op">)</span></code>,
+where <code class="sourceCode cpp">ret</code> is the returned value, has
+a valid but unspecified state, because the algorithms can eliminate
+elements by moving from elements that were originally in that range. —
+<em>end note</em>]</p>
 <div class="sourceCode" id="cb108"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb108-1"><a href="#cb108-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>input_iterator I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S, weakly_incrementable O,</span>
 <span id="cb108-2"><a href="#cb108-2" aria-hidden="true" tabindex="-1"></a>         <span class="kw">class</span> Proj <span class="op">=</span> identity, <span class="kw">class</span> T <span class="op">=</span> projected_value_t<span class="op">&lt;</span>I, Proj<span class="op">&gt;&gt;</span></span>
 <span id="cb108-3"><a href="#cb108-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> indirectly_copyable<span class="op">&lt;</span>I, O<span class="op">&gt;</span> <span class="op">&amp;&amp;</span></span>
@@ -5154,6 +5737,64 @@ otherwise <code class="sourceCode cpp">ranges<span class="op">::</span>equal<spa
 <span id="cb111-12"><a href="#cb111-12" aria-hidden="true" tabindex="-1"></a>    ranges::remove_copy_if(Ep&amp;&amp; exec, R&amp;&amp; r, OutR&amp;&amp; result, Pred pred, Proj proj = {});</span></code></pre></div>
 
 </div>
+<p><span class="marginalizedparent"><a class="marginalized">8</a></span>
+Let <em><code class="sourceCode cpp">E</code></em> be</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(8.1)</a></span>
+<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(*</span>i <span class="op">==</span> value<span class="op">)</span></code>
+for <code class="sourceCode cpp">remove_copy</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(8.2)</a></span>
+<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(</span>pred<span class="op">(*</span>i<span class="op">))</span></code>
+for <code class="sourceCode cpp">remove_copy_if</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(8.3)</a></span>
+<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(</span>invoke<span class="op">(</span>proj, <span class="op">*</span>i<span class="op">)</span> <span class="op">==</span> value<span class="op">)</span></code>
+for <code class="sourceCode cpp">ranges​<span class="op">::</span>​remove_copy</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(8.4)</a></span>
+<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(</span>invoke<span class="op">(</span>pred, invoke<span class="op">(</span>proj, <span class="op">*</span>i<span class="op">)))</span></code>
+for <code class="sourceCode cpp">ranges​<span class="op">::</span>​remove_copy_if</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">9</a></span>
+Let <em><code class="sourceCode cpp">N</code></em> be the number of
+elements in <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+for which <em><code class="sourceCode cpp">E</code></em> is
+<code class="sourceCode cpp"><span class="kw">false</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">10</a></span>
+<em>Mandates</em>:
+<code class="sourceCode cpp"><span class="op">*</span>first</code> is
+writable (<span><a href="https://wg21.link/iterator.requirements.general">[iterator.requirements.general]</a></span>)
+to <code class="sourceCode cpp">result</code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">11</a></span>
+<em>Preconditions</em>: The ranges <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+and <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <span class="op">(</span>last <span class="op">-</span> first<span class="op">))</span></code>
+do not overlap.</p>
+<p>[<em>Note 2</em>: For the overloads with an
+<code class="sourceCode cpp">ExecutionPolicy</code>, there might be a
+performance cost if <code class="sourceCode cpp">iterator_traits<span class="op">&lt;</span>ForwardIterator1<span class="op">&gt;</span>​<span class="op">::</span>​value_type</code>
+does not meet the <em>Cpp17MoveConstructible</em> (Table 31)
+requirements. — <em>end note</em>]</p>
+<p><span class="marginalizedparent"><a class="marginalized">12</a></span>
+<em>Effects</em>: Copies all the elements referred to by the iterator
+<code class="sourceCode cpp">i</code> in the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+for which <em><code class="sourceCode cpp">E</code></em> is
+<code class="sourceCode cpp"><span class="kw">false</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">13</a></span>
+<em>Returns</em>:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(13.1)</a></span>
+<code class="sourceCode cpp">result <span class="op">+</span> <em>N</em></code>,
+for the algorithms in namespace
+<code class="sourceCode cpp">std</code>.</li>
+<li><span class="marginalizedparent"><a class="marginalized">(13.2)</a></span>
+<code class="sourceCode cpp"><span class="op">{</span>last, result <span class="op">+</span> <em>N</em><span class="op">}</span></code>,
+for the algorithms in namespace
+<code class="sourceCode cpp">ranges</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">14</a></span>
+<em>Complexity</em>: Exactly
+<code class="sourceCode cpp">last <span class="op">-</span> first</code>
+applications of the corresponding predicate and any projection.</p>
+<p><span class="marginalizedparent"><a class="marginalized">15</a></span>
+<em>Remarks</em>: Stable (<span><a href="https://wg21.link/algorithm.stable">[algorithm.stable]</a></span>).</p>
 <h2 data-number="8.34" id="modify_unique"><span class="header-section-number">8.34</span> Modify
 <code class="sourceCode cpp">unique</code> in <span><a href="https://wg21.link/alg.unique">[alg.unique]</a></span><a href="#modify_unique" class="self-link"></a></h2>
 <div class="sourceCode" id="cb112"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb112-1"><a href="#cb112-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>permutable I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S, <span class="kw">class</span> Proj <span class="op">=</span> identity,</span>
@@ -5177,6 +5818,51 @@ otherwise <code class="sourceCode cpp">ranges<span class="op">::</span>equal<spa
 <span id="cb113-9"><a href="#cb113-9" aria-hidden="true" tabindex="-1"></a>  borrowed_subrange_t&lt;R&gt; ranges::unique(Ep&amp;&amp; exec, R&amp;&amp; r, C comp = {}, Proj proj = {});</span></code></pre></div>
 
 </div>
+<p><span class="marginalizedparent"><a class="marginalized">1</a></span>
+Let <code class="sourceCode cpp">pred</code> be
+<code class="sourceCode cpp">equal_to<span class="op">{}</span></code>
+for the overloads with no parameter
+<code class="sourceCode cpp">pred</code>, and let
+<em><code class="sourceCode cpp">E</code></em> be</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(1.1)</a></span>
+<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(</span>pred<span class="op">(*(</span>i <span class="op">-</span> <span class="dv">1</span><span class="op">)</span>, <span class="op">*</span>i<span class="op">))</span></code>
+for the overloads in namespace
+<code class="sourceCode cpp">std</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(1.2)</a></span>
+<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(</span>invoke<span class="op">(</span>comp, invoke<span class="op">(</span>proj, <span class="op">*(</span>i <span class="op">-</span> <span class="dv">1</span><span class="op">))</span>, invoke<span class="op">(</span>proj, <span class="op">*</span>i<span class="op">)))</span></code>
+for the overloads in namespace
+<code class="sourceCode cpp">ranges</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
+<em>Preconditions</em>: For the overloads in namespace
+<code class="sourceCode cpp">std</code>,
+<code class="sourceCode cpp">pred</code> is an equivalence relation and
+the type of
+<code class="sourceCode cpp"><span class="op">*</span>first</code> meets
+the <em>Cpp17MoveAssignable</em> requirements (Table 33).</p>
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
+<em>Effects</em>: For a nonempty range, eliminates all but the first
+element from every consecutive group of equivalent elements referred to
+by the iterator <code class="sourceCode cpp">i</code> in the range <code class="sourceCode cpp"><span class="op">[</span>first <span class="op">+</span> <span class="dv">1</span>, last<span class="op">)</span></code>
+for which <em><code class="sourceCode cpp">E</code></em> is
+<code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">4</a></span>
+<em>Returns</em>: Let <em><code class="sourceCode cpp">j</code></em> be
+the end of the resulting range. Returns:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(4.1)</a></span>
+<em><code class="sourceCode cpp">j</code></em> for the overloads in
+namespace <code class="sourceCode cpp">std</code>.</li>
+<li><span class="marginalizedparent"><a class="marginalized">(4.2)</a></span>
+<code class="sourceCode cpp"><span class="op">{</span><em>j</em>, last<span class="op">}</span></code>
+for the overloads in namespace
+<code class="sourceCode cpp">ranges</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">5</a></span>
+<em>Complexity</em>: For nonempty ranges, exactly <code class="sourceCode cpp"><span class="op">(</span>last <span class="op">-</span> first<span class="op">)</span> <span class="op">-</span> <span class="dv">1</span></code>
+applications of the corresponding predicate and no more than twice as
+many applications of any projection.</p>
 <div class="sourceCode" id="cb114"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb114-1"><a href="#cb114-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>input_iterator I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S, weakly_incrementable O, <span class="kw">class</span> Proj <span class="op">=</span> identity,</span>
 <span id="cb114-2"><a href="#cb114-2" aria-hidden="true" tabindex="-1"></a>         indirect_equivalence_relation<span class="op">&lt;</span>projected<span class="op">&lt;</span>I, Proj<span class="op">&gt;&gt;</span> C <span class="op">=</span> ranges<span class="op">::</span>equal_to<span class="op">&gt;</span></span>
 <span id="cb114-3"><a href="#cb114-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> indirectly_copyable<span class="op">&lt;</span>I, O<span class="op">&gt;</span> <span class="op">&amp;&amp;</span></span>
@@ -5211,6 +5897,85 @@ otherwise <code class="sourceCode cpp">ranges<span class="op">::</span>equal<spa
 <span id="cb115-14"><a href="#cb115-14" aria-hidden="true" tabindex="-1"></a>                        C comp = {}, Proj proj = {});</span></code></pre></div>
 
 </div>
+<p><span class="marginalizedparent"><a class="marginalized">6</a></span>
+Let <code class="sourceCode cpp">pred</code> be
+<code class="sourceCode cpp">equal_to<span class="op">{}</span></code>
+for the overloads in namespace <code class="sourceCode cpp">std</code>
+with no parameter <code class="sourceCode cpp">pred</code>, and let
+<em><code class="sourceCode cpp">E</code></em> be</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(6.1)</a></span>
+<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(</span>pred<span class="op">(*</span>i, <span class="op">*(</span>i <span class="op">-</span> <span class="dv">1</span><span class="op">)))</span></code>
+for the overloads in namespace
+<code class="sourceCode cpp">std</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(6.2)</a></span>
+<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(</span>invoke<span class="op">(</span>comp, invoke<span class="op">(</span>proj, <span class="op">*</span>i<span class="op">)</span>, invoke<span class="op">(</span>proj, <span class="op">*(</span>i <span class="op">-</span> <span class="dv">1</span><span class="op">))))</span></code>
+for the overloads in namespace
+<code class="sourceCode cpp">ranges</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">7</a></span>
+<em>Mandates</em>:
+<code class="sourceCode cpp"><span class="op">*</span>first</code> is
+writable (<span><a href="https://wg21.link/iterator.requirements.general">[iterator.requirements.general]</a></span>)
+to <code class="sourceCode cpp">result</code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">8</a></span>
+<em>Preconditions</em>:</p>
+<ul>
+<li><p><span class="marginalizedparent"><a class="marginalized">(8.1)</a></span> The
+ranges <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+and <code class="sourceCode cpp"><span class="op">[</span>result, result<span class="op">+(</span>last<span class="op">-</span>first<span class="op">))</span></code>
+do not overlap.</p></li>
+<li><p><span class="marginalizedparent"><a class="marginalized">(8.2)</a></span> For
+the overloads in namespace <code class="sourceCode cpp">std</code>:</p>
+<ul>
+<li><p><span class="marginalizedparent"><a class="marginalized">(8.2.1)</a></span>
+The comparison function is an equivalence relation.</p></li>
+<li><p><span class="marginalizedparent"><a class="marginalized">(8.2.2)</a></span>
+For the overloads with no
+<code class="sourceCode cpp">ExecutionPolicy</code>, let
+<code class="sourceCode cpp">T</code> be the value type of
+<code class="sourceCode cpp">InputIterator</code>. If
+<code class="sourceCode cpp">InputIterator</code> models
+<code class="sourceCode cpp">forward_iterator</code> (<span><a href="https://wg21.link/iterator.concept.forward">[iterator.concept.forward]</a></span>),
+then there are no additional requirements for
+<code class="sourceCode cpp">T</code>. Otherwise, if
+<code class="sourceCode cpp">OutputIterator</code> meets the
+<em>Cpp17ForwardIterator</em> requirements and its value type is the
+same as <code class="sourceCode cpp">T</code>, then
+<code class="sourceCode cpp">T</code> meets the
+<em>Cpp17CopyAssignable</em> (Table 34) requirements. Otherwise,
+<code class="sourceCode cpp">T</code> meets both the
+<em>Cpp17CopyConstructible</em> (Table 32) and
+<em>Cpp17CopyAssignable</em> requirements.</p>
+<p>[<em>Note 1</em>: For the overloads with an
+<code class="sourceCode cpp">ExecutionPolicy</code>, there might be a
+performance cost if the value type of
+<code class="sourceCode cpp">ForwardIterator1</code> does not meet both
+the <em>Cpp17CopyConstructible</em> and <em>Cpp17CopyAssignable</em>
+requirements. — <em>end note</em>]</p></li>
+</ul></li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">9</a></span>
+<em>Effects</em>: Copies only the first element from every consecutive
+group of equal elements referred to by the iterator
+<code class="sourceCode cpp">i</code> in the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+for which <em><code class="sourceCode cpp">E</code></em> holds.</p>
+<p><span class="marginalizedparent"><a class="marginalized">10</a></span>
+<em>Returns</em>:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(10.1)</a></span>
+<code class="sourceCode cpp">result <span class="op">+</span> <em>N</em></code>
+for the overloads in namespace
+<code class="sourceCode cpp">std</code>.</li>
+<li><span class="marginalizedparent"><a class="marginalized">(10.2)</a></span>
+<code class="sourceCode cpp"><span class="op">{</span>last, result <span class="op">+</span> <em>N</em><span class="op">}</span></code>
+for the overloads in namespace
+<code class="sourceCode cpp">ranges</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">11</a></span>
+<em>Complexity</em>: Exactly <code class="sourceCode cpp">last <span class="op">-</span> first <span class="op">-</span> <span class="dv">1</span></code>
+applications of the corresponding predicate and no more than twice as
+many applications of any projection.</p>
 <h2 data-number="8.35" id="modify_reverse"><span class="header-section-number">8.35</span> Modify
 <code class="sourceCode cpp">reverse</code> in <span><a href="https://wg21.link/alg.reverse">[alg.reverse]</a></span><a href="#modify_reverse" class="self-link"></a></h2>
 <div class="sourceCode" id="cb116"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb116-1"><a href="#cb116-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>bidirectional_iterator I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S<span class="op">&gt;</span></span>
@@ -5229,6 +5994,25 @@ otherwise <code class="sourceCode cpp">ranges<span class="op">::</span>equal<spa
 <span id="cb117-6"><a href="#cb117-6" aria-hidden="true" tabindex="-1"></a>  borrowed_iterator_t&lt;R&gt; ranges::reverse(Ep&amp;&amp; exec, R&amp;&amp; r);</span></code></pre></div>
 
 </div>
+<p><span class="marginalizedparent"><a class="marginalized">1</a></span>
+<em>Preconditions</em>: For the overloads in namespace
+<code class="sourceCode cpp">std</code>,
+<code class="sourceCode cpp">BidirectionalIterator</code> meets the
+<em>Cpp17ValueSwappable</em> requirements (<span><a href="https://wg21.link/swappable.requirements">[swappable.requirements]</a></span>).</p>
+<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
+<em>Effects</em>: For each non-negative integer <code class="sourceCode cpp">i <span class="op">&lt;</span> <span class="op">(</span>last <span class="op">-</span> first<span class="op">)</span> <span class="op">/</span> <span class="dv">2</span></code>,
+applies <code class="sourceCode cpp">std​<span class="op">::</span>​iter_swap</code>, or
+<code class="sourceCode cpp">ranges​<span class="op">::</span>​​iter_swap</code>
+for the overloads in namespace
+<code class="sourceCode cpp">ranges</code>, to all pairs of iterators
+<code class="sourceCode cpp">first <span class="op">+</span> i</code>,
+<code class="sourceCode cpp"><span class="op">(</span>last <span class="op">-</span> i<span class="op">)</span> <span class="op">-</span> <span class="dv">1</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
+<em>Returns</em>: <code class="sourceCode cpp">last</code> for the
+overloads in namespace <code class="sourceCode cpp">ranges</code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">4</a></span>
+<em>Complexity</em>: Exactly <code class="sourceCode cpp"><span class="op">(</span>last <span class="op">-</span> first<span class="op">)/</span><span class="dv">2</span></code>
+swaps.</p>
 <div class="sourceCode" id="cb118"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb118-1"><a href="#cb118-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>bidirectional_iterator I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S, weakly_incrementable O<span class="op">&gt;</span></span>
 <span id="cb118-2"><a href="#cb118-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> indirectly_copyable<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
 <span id="cb118-3"><a href="#cb118-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> ranges<span class="op">::</span>reverse_copy_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
@@ -5250,6 +6034,34 @@ otherwise <code class="sourceCode cpp">ranges<span class="op">::</span>equal<spa
 <span id="cb119-9"><a href="#cb119-9" aria-hidden="true" tabindex="-1"></a>    ranges::reverse_copy(Ep&amp;&amp; exec, R&amp;&amp; r, OutR&amp;&amp; result);</span></code></pre></div>
 
 </div>
+<p><span class="marginalizedparent"><a class="marginalized">5</a></span>
+Let <em><code class="sourceCode cpp">N</code></em> be
+<code class="sourceCode cpp">last <span class="op">-</span> first</code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">6</a></span>
+<em>Preconditions</em>: The ranges <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+and <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <em>N</em><span class="op">)</span></code>
+do not overlap.</p>
+<p><span class="marginalizedparent"><a class="marginalized">7</a></span>
+<em>Effects</em>: Copies the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+to the range <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <em>N</em><span class="op">)</span></code>
+such that for every non-negative integer
+<code class="sourceCode cpp">i <span class="op">&lt;</span> <em>N</em></code>
+the following assignment takes place: <code class="sourceCode cpp"><span class="op">*(</span>result <span class="op">+</span> <em>N</em> <span class="op">-</span> <span class="dv">1</span> <span class="op">-</span> i<span class="op">)</span> <span class="op">=</span> <span class="op">*(</span>first <span class="op">+</span> i<span class="op">)</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">8</a></span>
+<em>Returns</em>:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(8.1)</a></span>
+<code class="sourceCode cpp">result <span class="op">+</span> <em>N</em></code>
+for the overloads in namespace
+<code class="sourceCode cpp">std</code>.</li>
+<li><span class="marginalizedparent"><a class="marginalized">(8.2)</a></span>
+<code class="sourceCode cpp"><span class="op">{</span>last, result <span class="op">+</span> <em>N</em><span class="op">}</span></code>
+for the overloads in namespace
+<code class="sourceCode cpp">ranges</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">9</a></span>
+<em>Complexity</em>: Exactly
+<em><code class="sourceCode cpp">N</code></em> assignments.</p>
 <h2 data-number="8.36" id="modify_rotate"><span class="header-section-number">8.36</span> Modify
 <code class="sourceCode cpp">rotate</code> in <span><a href="https://wg21.link/alg.rotate">[alg.rotate]</a></span><a href="#modify_rotate" class="self-link"></a></h2>
 <div class="sourceCode" id="cb120"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb120-1"><a href="#cb120-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>permutable I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S<span class="op">&gt;</span></span>
@@ -5261,6 +6073,39 @@ otherwise <code class="sourceCode cpp">ranges<span class="op">::</span>equal<spa
 <span id="cb121-3"><a href="#cb121-3" aria-hidden="true" tabindex="-1"></a>  subrange&lt;I&gt; ranges::rotate(Ep&amp;&amp; exec, I first, I middle, S last);</span></code></pre></div>
 
 </div>
+<p><span class="marginalizedparent"><a class="marginalized">1</a></span>
+<em>Preconditions</em>: <code class="sourceCode cpp"><span class="op">[</span>first, middle<span class="op">)</span></code>
+and <code class="sourceCode cpp"><span class="op">[</span>middle, last<span class="op">)</span></code>
+are valid ranges. For the overloads in namespace
+<code class="sourceCode cpp">std</code>,
+<code class="sourceCode cpp">ForwardIterator</code> meets the
+<em>Cpp17ValueSwappable</em> requirements (<span><a href="https://wg21.link/swappable.requirements">[swappable.requirements]</a></span>),
+and the type of
+<code class="sourceCode cpp"><span class="op">*</span>first</code> meets
+the <em>Cpp17MoveConstructible</em> (Table 31) and
+<em>Cpp17MoveAssignable</em> (Table 33) requirements.</p>
+<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
+<em>Effects</em>: For each non-negative integer <code class="sourceCode cpp">i <span class="op">&lt;</span> <span class="op">(</span>last <span class="op">-</span> first<span class="op">)</span></code>,
+places the element from the position
+<code class="sourceCode cpp">first <span class="op">+</span> i</code>
+into position <code class="sourceCode cpp">first <span class="op">+</span> <span class="op">(</span>i <span class="op">+</span> <span class="op">(</span>last <span class="op">-</span> middle<span class="op">))</span> <span class="op">%</span> <span class="op">(</span>last <span class="op">-</span> first<span class="op">)</span></code>.</p>
+<p>[<em>Note 1</em>: This is a left rotate. — <em>end note</em>]</p>
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
+<em>Returns</em>:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(3.1)</a></span>
+<code class="sourceCode cpp">first <span class="op">+</span> <span class="op">(</span>last <span class="op">-</span> middle<span class="op">)</span></code>
+for the overloads in namespace
+<code class="sourceCode cpp">std</code>.</li>
+<li><span class="marginalizedparent"><a class="marginalized">(3.2)</a></span>
+<code class="sourceCode cpp"><span class="op">{</span>first <span class="op">+</span> <span class="op">(</span>last <span class="op">-</span> middle<span class="op">)</span>, last<span class="op">}</span></code>
+for the overload in namespace
+<code class="sourceCode cpp">ranges</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">4</a></span>
+<em>Complexity</em>: At most
+<code class="sourceCode cpp">last <span class="op">-</span> first</code>
+swaps.</p>
 <div class="sourceCode" id="cb122"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb122-1"><a href="#cb122-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>forward_range R<span class="op">&gt;</span></span>
 <span id="cb122-2"><a href="#cb122-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> permutable<span class="op">&lt;</span>iterator_t<span class="op">&lt;</span>R<span class="op">&gt;&gt;</span></span>
 <span id="cb122-3"><a href="#cb122-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> borrowed_subrange_t<span class="op">&lt;</span>R<span class="op">&gt;</span> ranges<span class="op">::</span>rotate<span class="op">(</span>R<span class="op">&amp;&amp;</span> r, iterator_t<span class="op">&lt;</span>R<span class="op">&gt;</span> middle<span class="op">)</span>;</span></code></pre></div>
@@ -5285,6 +6130,32 @@ otherwise <code class="sourceCode cpp">ranges<span class="op">::</span>equal<spa
 <span id="cb125-5"><a href="#cb125-5" aria-hidden="true" tabindex="-1"></a>    ranges::rotate_copy(Ep&amp;&amp; exec, I first, I middle, S last, O result, OutS result_last);</span></code></pre></div>
 
 </div>
+<p><span class="pnun">6</span> Let
+<em><code class="sourceCode cpp">N</code></em> be
+<code class="sourceCode cpp">last <span class="op">-</span> first</code>.</p>
+<p><span class="pnun">7</span> <em>Preconditions</em>: <code class="sourceCode cpp"><span class="op">[</span>first, middle<span class="op">)</span></code>
+and <code class="sourceCode cpp"><span class="op">[</span>middle, last<span class="op">)</span></code>
+are valid ranges. The ranges <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+and <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <em>N</em><span class="op">)</span></code>
+do not overlap.</p>
+<p><span class="pnun">8</span> <em>Effects</em>: Copies the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+to the range <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <em>N</em><span class="op">)</span></code>
+such that for each non-negative integer
+<code class="sourceCode cpp">i <span class="op">&lt;</span> <em>N</em></code>
+the following assignment takes place: <code class="sourceCode cpp"><span class="op">*(</span>result <span class="op">+</span> i<span class="op">)</span> <span class="op">=</span> <span class="op">*(</span>first <span class="op">+</span> <span class="op">(</span>i <span class="op">+</span> <span class="op">(</span>middle <span class="op">-</span> first<span class="op">))</span> <span class="op">%</span> <em>N</em><span class="op">)</span></code>.</p>
+<p><span class="pnun">9</span> <em>Returns</em>:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(9.1)</a></span>
+<code class="sourceCode cpp">result <span class="op">+</span> <em>N</em></code>
+for the overloads in namespace
+<code class="sourceCode cpp">std</code>.</li>
+<li><span class="marginalizedparent"><a class="marginalized">(9.2)</a></span>
+<code class="sourceCode cpp"><span class="op">{</span>last, result <span class="op">+</span> <em>N</em><span class="op">}</span></code>
+for the overload in namespace
+<code class="sourceCode cpp">ranges</code>.</li>
+</ul>
+<p><span class="pnun">10</span> <em>Complexity</em>: Exactly
+<em><code class="sourceCode cpp">N</code></em> assignments.</p>
 <div class="sourceCode" id="cb126"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb126-1"><a href="#cb126-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>forward_range R, weakly_incrementable O<span class="op">&gt;</span></span>
 <span id="cb126-2"><a href="#cb126-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> indirectly_copyable<span class="op">&lt;</span>iterator_t<span class="op">&lt;</span>R<span class="op">&gt;</span>, O<span class="op">&gt;</span></span>
 <span id="cb126-3"><a href="#cb126-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> ranges<span class="op">::</span>rotate_copy_result<span class="op">&lt;</span>borrowed_iterator_t<span class="op">&lt;</span>R<span class="op">&gt;</span>, O<span class="op">&gt;</span></span>
@@ -5315,6 +6186,41 @@ otherwise <code class="sourceCode cpp">ranges<span class="op">::</span>equal<spa
 <span id="cb129-6"><a href="#cb129-6" aria-hidden="true" tabindex="-1"></a>  borrowed_subrange_t&lt;R&gt; ranges::shift_left(Ep&amp;&amp; exec, R&amp;&amp; r, range_difference_t&lt;R&gt; n);</span></code></pre></div>
 
 </div>
+<p><span class="marginalizedparent"><a class="marginalized">1</a></span>
+<em>Preconditions</em>: <code class="sourceCode cpp">n <span class="op">&gt;=</span> <span class="dv">0</span></code>
+is <code class="sourceCode cpp"><span class="kw">true</span></code>. For
+the overloads in namespace <code class="sourceCode cpp">std</code>, the
+type of
+<code class="sourceCode cpp"><span class="op">*</span>first</code> meets
+the <em>Cpp17MoveAssignable</em> requirements.</p>
+<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
+<em>Effects</em>: If <code class="sourceCode cpp">n <span class="op">==</span> <span class="dv">0</span></code>
+or <code class="sourceCode cpp">n <span class="op">&gt;=</span> last <span class="op">-</span> first</code>,
+does nothing. Otherwise, moves the element from position <code class="sourceCode cpp">first <span class="op">+</span> n <span class="op">+</span> i</code>
+into position
+<code class="sourceCode cpp">first <span class="op">+</span> i</code>
+for each non-negative integer <code class="sourceCode cpp">i <span class="op">&lt;</span> <span class="op">(</span>last <span class="op">-</span> first<span class="op">)</span> <span class="op">-</span> n</code>.
+For the overloads without an
+<code class="sourceCode cpp">ExecutionPolicy</code> template parameter,
+does so in order starting from <code class="sourceCode cpp">i <span class="op">=</span> <span class="dv">0</span></code>
+and proceeding to <code class="sourceCode cpp">i <span class="op">=</span> <span class="op">(</span>last <span class="op">-</span> first<span class="op">)</span> <span class="op">-</span> n <span class="op">-</span> <span class="dv">1</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
+<em>Returns</em>: Let
+<em><code class="sourceCode cpp">NEW_LAST</code></em> be <code class="sourceCode cpp">first <span class="op">+</span> <span class="op">(</span>last <span class="op">-</span> first <span class="op">-</span> n<span class="op">)</span></code>
+if <code class="sourceCode cpp">n <span class="op">&lt;</span> last <span class="op">-</span> first</code>,
+otherwise <code class="sourceCode cpp">first</code>.</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(3.1)</a></span>
+<em><code class="sourceCode cpp">NEW_LAST</code></em> for the overloads
+in namespace <code class="sourceCode cpp">std</code>.</li>
+<li><span class="marginalizedparent"><a class="marginalized">(3.2)</a></span>
+<code class="sourceCode cpp"><span class="op">{</span>first, <em>NEW_LAST</em><span class="op">}</span></code>
+for the overloads in namespace
+<code class="sourceCode cpp">ranges</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">4</a></span>
+<em>Complexity</em>: At most <code class="sourceCode cpp"><span class="op">(</span>last <span class="op">-</span> first<span class="op">)</span> <span class="op">-</span> n</code>
+assignments.</p>
 <div class="sourceCode" id="cb130"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb130-1"><a href="#cb130-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>permutable I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S<span class="op">&gt;</span></span>
 <span id="cb130-2"><a href="#cb130-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> subrange<span class="op">&lt;</span>I<span class="op">&gt;</span> ranges<span class="op">::</span>shift_right<span class="op">(</span>I first, S last, iter_difference_t<span class="op">&lt;</span>I<span class="op">&gt;</span> n<span class="op">)</span>;</span>
 <span id="cb130-3"><a href="#cb130-3" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>forward_range R<span class="op">&gt;</span></span>
@@ -5330,6 +6236,55 @@ otherwise <code class="sourceCode cpp">ranges<span class="op">::</span>equal<spa
 <span id="cb131-6"><a href="#cb131-6" aria-hidden="true" tabindex="-1"></a>  borrowed_subrange_t&lt;R&gt; ranges::shift_right(Ep&amp;&amp; exec, R&amp;&amp; r, range_difference_t&lt;R&gt; n);</span></code></pre></div>
 
 </div>
+<p><span class="marginalizedparent"><a class="marginalized">5</a></span>
+<em>Preconditions</em>: <code class="sourceCode cpp">n <span class="op">&gt;=</span> <span class="dv">0</span></code>
+is <code class="sourceCode cpp"><span class="kw">true</span></code>. For
+the overloads in namespace <code class="sourceCode cpp">std</code>, the
+type of
+<code class="sourceCode cpp"><span class="op">*</span>first</code> meets
+the <em>Cpp17MoveAssignable</em> requirements, and
+<code class="sourceCode cpp">ForwardIterator</code> meets the
+<em>Cpp17BidirectionalIterator</em> requirements (<span><a href="https://wg21.link/bidirectional.iterators">[bidirectional.iterators]</a></span>)
+or the <em>Cpp17ValueSwappable</em> requirements.</p>
+<p><span class="marginalizedparent"><a class="marginalized">6</a></span>
+<em>Effects</em>: If <code class="sourceCode cpp">n <span class="op">==</span> <span class="dv">0</span></code>
+or <code class="sourceCode cpp">n <span class="op">&gt;=</span> last <span class="op">-</span> first</code>,
+does nothing. Otherwise, moves the element from position
+<code class="sourceCode cpp">first <span class="op">+</span> i</code>
+into position <code class="sourceCode cpp">first <span class="op">+</span> n <span class="op">+</span> i</code>
+for each non-negative integer <code class="sourceCode cpp">i <span class="op">&lt;</span> <span class="op">(</span>last <span class="op">-</span> first<span class="op">)</span> <span class="op">-</span> n</code>.
+Does so in order starting from <code class="sourceCode cpp">i <span class="op">=</span> <span class="op">(</span>last <span class="op">-</span> first<span class="op">)</span> <span class="op">-</span> n <span class="op">-</span> <span class="dv">1</span></code>
+and proceeding to <code class="sourceCode cpp">i <span class="op">=</span> <span class="dv">0</span></code>
+if</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(6.1)</a></span> for
+the overload in namespace <code class="sourceCode cpp">std</code>
+without an <code class="sourceCode cpp">ExecutionPolicy</code> template
+parameter, <code class="sourceCode cpp">ForwardIterator</code> meets the
+<em>Cpp17BidirectionalIterator</em> requirements,</li>
+<li><span class="marginalizedparent"><a class="marginalized">(6.2)</a></span> for
+the overloads in namespace <code class="sourceCode cpp">ranges</code>,
+<code class="sourceCode cpp">I</code> models
+<code class="sourceCode cpp">bidirectional_iterator</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">7</a></span>
+<em>Returns</em>: Let
+<em><code class="sourceCode cpp">NEW_FIRST</code></em> be
+<code class="sourceCode cpp">first <span class="op">+</span> n</code> if
+<code class="sourceCode cpp">n <span class="op">&lt;</span> last <span class="op">-</span> first</code>,
+otherwise <code class="sourceCode cpp">last</code>.</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(7.1)</a></span>
+<em><code class="sourceCode cpp">NEW_FIRST</code></em> for the overloads
+in namespace <code class="sourceCode cpp">std</code>.</li>
+<li><span class="marginalizedparent"><a class="marginalized">(7.2)</a></span>
+<code class="sourceCode cpp"><span class="op">{</span><em>NEW_FIRST</em>, last<span class="op">}</span></code>
+for the overloads in namespace
+<code class="sourceCode cpp">ranges</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">8</a></span>
+<em>Complexity</em>: At most <code class="sourceCode cpp"><span class="op">(</span>last <span class="op">-</span> first<span class="op">)</span> <span class="op">-</span> n</code>
+assignments or swaps.</p>
 <h2 data-number="8.38" id="modify_sort"><span class="header-section-number">8.38</span> Modify
 <code class="sourceCode cpp">sort</code> in <span><a href="https://wg21.link/sort">[sort]</a></span><a href="#modify_sort" class="self-link"></a></h2>
 <div class="sourceCode" id="cb132"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb132-1"><a href="#cb132-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>random_access_iterator I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S, <span class="kw">class</span> Comp <span class="op">=</span> ranges<span class="op">::</span>less,</span>
