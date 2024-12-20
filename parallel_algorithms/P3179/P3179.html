@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2024-12-19" />
+  <meta name="dcterms.date" content="2024-12-20" />
   <title>C++ parallel range algorithms</title>
   <style>
       code{white-space: pre-wrap;}
@@ -462,7 +462,7 @@ algorithms</h1>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2024-12-19</td>
+    <td>2024-12-20</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -1858,8 +1858,8 @@ prior to the next committee F2F meeting in Austria, 2025 is the
 following:</p>
 <ul>
 <li><del>Update <span><a href="https://wg21.link/algorithm.syn">[algorithm.syn]</a></span>.</del></li>
-<li>Consider adding the algorithm descriptions to the wording, even if
-no changes are made.</li>
+<li><del>Add the algorithm descriptions to the wording, even if no
+changes are made.</del></li>
 <li><del>Add random-access-sized-range as an exposition-only
 concept</del></li>
 <li><del>Use the old feature testing macro</del></li>
@@ -2422,7 +2422,7 @@ concept:</ins></span></p>
 <span id="cb27-361"><a href="#cb27-361" aria-hidden="true" tabindex="-1"></a><span class="va">+            class Pred = ranges::equal_to, class Proj1 = identity, class Proj2 = identity&gt;</span></span>
 <span id="cb27-362"><a href="#cb27-362" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires indirectly_comparable&lt;I1, I2, Pred, Proj1, Proj2&gt;</span></span>
 <span id="cb27-363"><a href="#cb27-363" aria-hidden="true" tabindex="-1"></a><span class="va">+    mismatch_result&lt;I1, I2&gt;</span></span>
-<span id="cb27-364"><a href="#cb27-364" aria-hidden="true" tabindex="-1"></a><span class="va">+      mismatch(Ep&amp;&amp; exec, I1 first1, S1 last1, I2 first2,S2 last2,</span></span>
+<span id="cb27-364"><a href="#cb27-364" aria-hidden="true" tabindex="-1"></a><span class="va">+      mismatch(Ep&amp;&amp; exec, I1 first1, S1 last1, I2 first2, S2 last2,</span></span>
 <span id="cb27-365"><a href="#cb27-365" aria-hidden="true" tabindex="-1"></a><span class="va">+                Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});</span></span>
 <span id="cb27-366"><a href="#cb27-366" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, <em>random-access-sized-range</em> R1, <em>random-access-sized-range</em> R2,</span></span>
 <span id="cb27-367"><a href="#cb27-367" aria-hidden="true" tabindex="-1"></a><span class="va">+           class Pred = ranges::equal_to, class Proj1 = identity, class Proj2 = identity&gt;</span></span>
@@ -4586,7 +4586,8 @@ for the overloads with both parameters
 <p><span class="marginalizedparent"><a class="marginalized">2</a></span>
 <em>Effects</em>: Returns the number of iterators
 <code class="sourceCode cpp">i</code> in the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
-for which <em><code class="sourceCode cpp">E</code></em> holds. <span class="marginalizedparent"><a class="marginalized">3</a></span>
+for which <em><code class="sourceCode cpp">E</code></em> holds.</p>
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
 <em>Complexity</em>: Exactly
 <code class="sourceCode cpp">last <span class="op">-</span> first</code>
 applications of the corresponding predicate and any projection.</p>
@@ -4611,7 +4612,7 @@ applications of the corresponding predicate and any projection.</p>
 <span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a>         class Pred = ranges::equal_to, class Proj1 = identity, class Proj2 = identity&gt;</span>
 <span id="cb65-4"><a href="#cb65-4" aria-hidden="true" tabindex="-1"></a>  requires indirectly_comparable&lt;I1, I2, Pred, Proj1, Proj2&gt;</span>
 <span id="cb65-5"><a href="#cb65-5" aria-hidden="true" tabindex="-1"></a>  ranges::mismatch_result&lt;I1, I2&gt;</span>
-<span id="cb65-6"><a href="#cb65-6" aria-hidden="true" tabindex="-1"></a>    ranges::mismatch(Ep&amp;&amp; exec, I1 first1, S1 last1, I2 first2,S2 last2,</span>
+<span id="cb65-6"><a href="#cb65-6" aria-hidden="true" tabindex="-1"></a>    ranges::mismatch(Ep&amp;&amp; exec, I1 first1, S1 last1, I2 first2, S2 last2,</span>
 <span id="cb65-7"><a href="#cb65-7" aria-hidden="true" tabindex="-1"></a>                     Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {});</span>
 <span id="cb65-8"><a href="#cb65-8" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, <em>random-access-sized-range</em> R1, <em>random-access-sized-range</em> R2,</span>
 <span id="cb65-9"><a href="#cb65-9" aria-hidden="true" tabindex="-1"></a>         class Pred = ranges::equal_to, class Proj1 = identity, class Proj2 = identity&gt;</span>
