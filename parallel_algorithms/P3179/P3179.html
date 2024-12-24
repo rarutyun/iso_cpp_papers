@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2024-12-20" />
+  <meta name="dcterms.date" content="2024-12-24" />
   <title>C++ parallel range algorithms</title>
   <style>
       code{white-space: pre-wrap;}
@@ -462,7 +462,7 @@ algorithms</h1>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2024-12-20</td>
+    <td>2024-12-24</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -1865,6 +1865,14 @@ concept</del></li>
 <li><del>Use the old feature testing macro</del></li>
 <li><del>Shorten the exec policy parameter + italicize the exposition
 only context</del></li>
+<li>Add mentioning of <code class="sourceCode cpp">result_last</code> or
+similar for the algorithms where range-as-an-output and a novelty
+(<code class="sourceCode cpp">copy</code>,
+<code class="sourceCode cpp">transform</code>, etc.)</li>
+<li>Perhaps add sentinel-for-output for
+<code class="sourceCode cpp">_n</code> algorithms family where output is
+present (like <code class="sourceCode cpp">copy_n</code>,
+<code class="sourceCode cpp">move_n</code>, maybe something else)</li>
 <li>Clarify that views can be copied by parallel algorithms</li>
 <li>The thread safety rules for <code class="sourceCode cpp">begin<span class="op">()/</span>end<span class="op">()</span></code>
 should be like for element access function</li>
@@ -1883,6 +1891,13 @@ Parallel Algorithms exist in the <code class="sourceCode cpp"><span class="op">&
 synopsis only. Should it be fixed?</li>
 <li>namespace <code class="sourceCode cpp">ranges</code> is used (or not
 used) inconsistently, in our opinion. Need an advice.</li>
+<li>For <code class="sourceCode cpp">partial_sort_copy</code>
+range-as-an-output is called <code class="sourceCode cpp">R2</code>. For
+<code class="sourceCode cpp">uninitialized_copy</code> and
+<code class="sourceCode cpp">uninitialized_move</code> it’s called
+<code class="sourceCode cpp">OS</code>. For the new wording we call is
+<code class="sourceCode cpp">OutR</code>. We should probably align. The
+same is true for sentinel-for-output.</li>
 <li><code class="sourceCode cpp">ExecutionPolicy</code> function
 parameter is named <code class="sourceCode cpp">exec</code> everywhere,
 except two places where the name is
@@ -1977,7 +1992,7 @@ template parameter named
 Parallel algorithms access objects indirectly accessible via their
 arguments by invoking the following functions:</p>
 <ul>
-<li>All operations of the categories of the iterators<span class="add" style="color: #006e28"><ins>, sentinels</ins></span> or mdspan types
+<li>All operations of the categories of the iterators<span class="add" style="color: #006e28"><ins>, sentinels,</ins></span> or mdspan types
 that the algorithm is instantiated with.</li>
 <li>Operations on those sequence elements that are required by its
 specification.</li>
@@ -1998,7 +2013,7 @@ parallel algorithms as objects of type
 <code class="sourceCode cpp">BinaryOperation</code>,
 <code class="sourceCode cpp">BinaryOperation1</code>,
 <code class="sourceCode cpp">BinaryOperation2</code>,
-<code class="sourceCode cpp">BinaryDivideOp</code>, <span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">Proj</code></span></ins></span>
+<code class="sourceCode cpp">BinaryDivideOp</code>, <span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">Proj</code></span>,</ins></span>
 and the operators used by the analogous overloads to these parallel
 algorithms that are formed by an invocation with the specified default
 predicate or operation (where applicable) shall not directly or
