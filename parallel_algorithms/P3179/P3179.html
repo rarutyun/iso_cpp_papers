@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2025-01-03" />
+  <meta name="dcterms.date" content="2025-01-08" />
   <title>C++ parallel range algorithms</title>
   <style>
       code{white-space: pre-wrap;}
@@ -458,11 +458,15 @@ algorithms</h1>
 <table style="border:none;float:right">
   <tr>
     <td>Document #:</td>
-    <td>P3179R5</td>
+    <td>
+      P3179R5
+      [<a href="https://wg21.link/P3179">Latest</a>]
+      [<a href="https://wg21.link/P3179/status">Status</a>]
+    </td>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2025-01-03</td>
+    <td>2025-01-08</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -919,20 +923,19 @@ algorithms<a href="#design_diff_to_cpp20_ranges" class="self-link"></a></h3>
 following modifications:</p>
 <ul>
 <li>The execution policy parameter is added, supporting all standard and
-implementation-defined execution policies.
-([[#supported_policies]])</li>
+implementation-defined execution policies. See <a href="#supported_policies">Supported execution policies</a>.</li>
 <li><code class="sourceCode cpp">for_each</code> and
 <code class="sourceCode cpp">for_each_n</code> return only an iterator
-but not the function. ([[#return_type]])</li>
+but not the function. See <a href="#return_type">Algorithm return
+types</a>.</li>
 <li>Parallel range algorithms take a range, not an iterator, as the
 output for the overloads with ranges, and additionally take an output
-sentinel for the “iterator and sentinel” overloads.
-([[#range_as_the_output]])</li>
+sentinel for the “iterator and sentinel” overloads. See <a href="#range_as_the_output">Taking range as the output</a>.</li>
 <li>Until better parallelism-friendly abstractions are proposed,
 parallel algorithms require <code class="sourceCode cpp">random_access_<span class="op">{</span>iterator,range<span class="op">}</span></code>.
-([[#random_access_requirement]])</li>
-<li>All input and output data sequences must be bounded.
-([[#require_bounded_ranges]])</li>
+See <a href="#random_access_requirement">Requiring
+random_access_iterator or random_access_range</a>.</li>
+<li>All input and output data sequences must be bounded. See <a href="#require_bounded_ranges">Requiring ranges to be bounded</a>.</li>
 </ul>
 <h3 data-number="2.1.2" id="design_diff_to_cpp17_par"><span class="header-section-number">2.1.2</span> Differences to C++17 parallel
 algorithms<a href="#design_diff_to_cpp17_par" class="self-link"></a></h3>
@@ -950,19 +953,22 @@ and not <em>LegacyForwardIterator</em>.</li>
 <h3 data-number="2.1.3" id="design_other_aspects"><span class="header-section-number">2.1.3</span> Other design aspects<a href="#design_other_aspects" class="self-link"></a></h3>
 <ul>
 <li>Except as mentioned above, the parallel range algorithms should
-return the same type as the corresponding serial range algorithms.
-([[#return_type]])</li>
+return the same type as the corresponding serial range algorithms. See
+<a href="#return_type">Algorithm return types</a>.</li>
 <li>The proposed algorithms extend the overload set of algorithm
 function objects defined in
 <code class="sourceCode cpp">std<span class="op">::</span>ranges</code>.
-([[#algorithm_func_objects]])</li>
+See <a href="#algorithm_func_objects">Extending the overload sets of
+algorithm function objects</a>.</li>
 <li>The proposed algorithms should require callable object passed to an
 algorithm to be <code class="sourceCode cpp">regular_invocable</code>
-where possible. ([[#callable_parameters]])</li>
+where possible. See <a href="#callable_parameters">Requirements for
+callable parameters</a>.</li>
 <li>The proposed algorithms should follow the design of C++17 parallel
 algorithms with regard to
 <code class="sourceCode cpp"><span class="kw">constexpr</span></code>
-support. ([[#constexpr_support]])</li>
+support. See <a href="#constexpr_support">constexpr parallel range
+algorithms</a>.</li>
 </ul>
 <h3 data-number="2.1.4" id="design_api_example"><span class="header-section-number">2.1.4</span> An example of the proposed
 API<a href="#design_api_example" class="self-link"></a></h3>
@@ -1136,7 +1142,8 @@ wording proposed in <span class="citation" data-cites="P3136R0">[<a href="https:
 needed.</p>
 <p>From the implementation standpoint, adding parallel versions of the
 range algorithms to the overload set should not be a problem. Please see
-[[#possible_impl]] for more information.</p>
+<a href="#possible_impl">Possible implementation of a parallel range
+algorithm</a> for more information.</p>
 <h2 data-number="2.6" id="random_access_requirement"><span class="header-section-number">2.6</span> Requiring
 <code class="sourceCode cpp">random_access_iterator</code> or
 <code class="sourceCode cpp">random_access_range</code><a href="#random_access_requirement" class="self-link"></a></h2>
@@ -1200,8 +1207,8 @@ iteration spaces, including multidimensional ones, suitable for parallel
 algorithms. We intend to work on developing these (likely in another
 paper), however it requires time and effort to make it right, and we
 think trying to squeeze that into C++26 adds significant risks. For now,
-random access ranges with known bounds (see [[#require_bounded_ranges]])
-is probably the best approximation that exists in the standard. Starting
+random access ranges with known bounds (see <a href="#require_bounded_ranges">Requiring ranges to be bounded</a>) is
+probably the best approximation that exists in the standard. Starting
 from that and gradually enabling other types of iteration spaces in a
 source-compatible manner seems to us better than blanket allowance of
 any <code class="sourceCode cpp">forward_range</code>.</p>
@@ -1479,7 +1486,8 @@ not worse than in the first one.</li>
 <h1 data-number="4" id="possible_impl"><span class="header-section-number">4</span> Possible implementation of a
 parallel range algorithm<a href="#possible_impl" class="self-link"></a></h1>
 <p>Here we show a possible implementation of <code class="sourceCode cpp">std<span class="op">::</span>ranges<span class="op">::</span>for_each</code>
-with the new overloads proposed in [[#modify_alg_foreach]]:</p>
+with the new overloads proposed in <a href="#modify_alg_foreach">Modify
+for_each in [alg.foreach]</a>:</p>
 <div class="sourceCode" id="cb21"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">// A possible implementation of std::ranges::for_each</span></span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ranges</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
@@ -1527,106 +1535,172 @@ parallel algorithms in
 <code class="sourceCode cpp">std<span class="op">::</span>ranges</code>
 namespace<a href="#cpp17_counterpart" class="self-link"></a></h3>
 <table>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;"><code class="sourceCode cpp">all_of</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">search<span class="op">{</span>_n<span class="op">}</span></code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">remove_copy</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">is_sorted</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">is_heap</code></td>
+<tr>
+<td>
+<code class="sourceCode cpp">all_of</code>
+<td>
+<code class="sourceCode cpp">search<span class="op">{</span>_n<span class="op">}</span></code>
+<td>
+<code class="sourceCode cpp">remove_copy</code>
+<td>
+<code class="sourceCode cpp">is_sorted</code>
+<td>
+<code class="sourceCode cpp">is_heap</code>
 </tr>
-<tr class="even">
-<td style="text-align: left;"><code class="sourceCode cpp">any_of</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">copy<span class="op">{</span>_n<span class="op">}</span></code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">remove_copy_if</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">is_sorted_until</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">is_heap_until</code></td>
+<tr>
+<td>
+<code class="sourceCode cpp">any_of</code>
+<td>
+<code class="sourceCode cpp">copy<span class="op">{</span>_n<span class="op">}</span></code>
+<td>
+<code class="sourceCode cpp">remove_copy_if</code>
+<td>
+<code class="sourceCode cpp">is_sorted_until</code>
+<td>
+<code class="sourceCode cpp">is_heap_until</code>
 </tr>
-<tr class="odd">
-<td style="text-align: left;"><code class="sourceCode cpp">none_of</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">copy_if</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">unique</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">nth_element</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">min_element</code></td>
+<tr>
+<td>
+<code class="sourceCode cpp">none_of</code>
+<td>
+<code class="sourceCode cpp">copy_if</code>
+<td>
+<code class="sourceCode cpp">unique</code>
+<td>
+<code class="sourceCode cpp">nth_element</code>
+<td>
+<code class="sourceCode cpp">min_element</code>
 </tr>
-<tr class="even">
-<td style="text-align: left;"><code class="sourceCode cpp">for_each<span class="op">{</span>_n<span class="op">}</span></code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">move</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">unique_copy</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">is_partitioned</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">max_element</code></td>
+<tr>
+<td>
+<code class="sourceCode cpp">for_each<span class="op">{</span>_n<span class="op">}</span></code>
+<td>
+<code class="sourceCode cpp">move</code>
+<td>
+<code class="sourceCode cpp">unique_copy</code>
+<td>
+<code class="sourceCode cpp">is_partitioned</code>
+<td>
+<code class="sourceCode cpp">max_element</code>
 </tr>
-<tr class="odd">
-<td style="text-align: left;"><code class="sourceCode cpp">find</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">swap_ranges</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">reverse</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">partition</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">minmax_element</code></td>
+<tr>
+<td>
+<code class="sourceCode cpp">find</code>
+<td>
+<code class="sourceCode cpp">swap_ranges</code>
+<td>
+<code class="sourceCode cpp">reverse</code>
+<td>
+<code class="sourceCode cpp">partition</code>
+<td>
+<code class="sourceCode cpp">minmax_element</code>
 </tr>
-<tr class="even">
-<td style="text-align: left;"><code class="sourceCode cpp">find_if</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">transform</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">reverse_copy</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">stable_partition</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">lexicographical_compare</code></td>
+<tr>
+<td>
+<code class="sourceCode cpp">find_if</code>
+<td>
+<code class="sourceCode cpp">transform</code>
+<td>
+<code class="sourceCode cpp">reverse_copy</code>
+<td>
+<code class="sourceCode cpp">stable_partition</code>
+<td>
+<code class="sourceCode cpp">lexicographical_compare</code>
 </tr>
-<tr class="odd">
-<td style="text-align: left;"><code class="sourceCode cpp">find_if_not</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">replace</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">rotate</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">partition_copy</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">uninitialized_default_construct<span class="op">{</span>_n<span class="op">}</span></code></td>
+<tr>
+<td>
+<code class="sourceCode cpp">find_if_not</code>
+<td>
+<code class="sourceCode cpp">replace</code>
+<td>
+<code class="sourceCode cpp">rotate</code>
+<td>
+<code class="sourceCode cpp">partition_copy</code>
+<td>
+<code class="sourceCode cpp">uninitialized_default_construct<span class="op">{</span>_n<span class="op">}</span></code>
 </tr>
-<tr class="even">
-<td style="text-align: left;"><code class="sourceCode cpp">find_end</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">replace_if</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">rotate_copy</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">merge</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">uninitialized_value_construct<span class="op">{</span>_n<span class="op">}</span></code></td>
+<tr>
+<td>
+<code class="sourceCode cpp">find_end</code>
+<td>
+<code class="sourceCode cpp">replace_if</code>
+<td>
+<code class="sourceCode cpp">rotate_copy</code>
+<td>
+<code class="sourceCode cpp">merge</code>
+<td>
+<code class="sourceCode cpp">uninitialized_value_construct<span class="op">{</span>_n<span class="op">}</span></code>
 </tr>
-<tr class="odd">
-<td style="text-align: left;"><code class="sourceCode cpp">find_first_of</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">replace_copy</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">shift_left</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">inplace_merge</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">uninitialized_copy<span class="op">{</span>_n<span class="op">}</span></code></td>
+<tr>
+<td>
+<code class="sourceCode cpp">find_first_of</code>
+<td>
+<code class="sourceCode cpp">replace_copy</code>
+<td>
+<code class="sourceCode cpp">shift_left</code>
+<td>
+<code class="sourceCode cpp">inplace_merge</code>
+<td>
+<code class="sourceCode cpp">uninitialized_copy<span class="op">{</span>_n<span class="op">}</span></code>
 </tr>
-<tr class="even">
-<td style="text-align: left;"><code class="sourceCode cpp">adjacent_find</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">replace_copy_if</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">shift_right</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">includes</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">uninitialized_move<span class="op">{</span>_n<span class="op">}</span></code></td>
+<tr>
+<td>
+<code class="sourceCode cpp">adjacent_find</code>
+<td>
+<code class="sourceCode cpp">replace_copy_if</code>
+<td>
+<code class="sourceCode cpp">shift_right</code>
+<td>
+<code class="sourceCode cpp">includes</code>
+<td>
+<code class="sourceCode cpp">uninitialized_move<span class="op">{</span>_n<span class="op">}</span></code>
 </tr>
-<tr class="odd">
-<td style="text-align: left;"><code class="sourceCode cpp">count</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">fill<span class="op">{</span>_n<span class="op">}</span></code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">sort</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">set_union</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">uninitialized_fill<span class="op">{</span>_n<span class="op">}</span></code></td>
+<tr>
+<td>
+<code class="sourceCode cpp">count</code>
+<td>
+<code class="sourceCode cpp">fill<span class="op">{</span>_n<span class="op">}</span></code>
+<td>
+<code class="sourceCode cpp">sort</code>
+<td>
+<code class="sourceCode cpp">set_union</code>
+<td>
+<code class="sourceCode cpp">uninitialized_fill<span class="op">{</span>_n<span class="op">}</span></code>
 </tr>
-<tr class="even">
-<td style="text-align: left;"><code class="sourceCode cpp">count_if</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">generate<span class="op">{</span>_n<span class="op">}</span></code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">stable_sort</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">set_intersection</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">destroy<span class="op">{</span>_n<span class="op">}</span></code></td>
+<tr>
+<td>
+<code class="sourceCode cpp">count_if</code>
+<td>
+<code class="sourceCode cpp">generate<span class="op">{</span>_n<span class="op">}</span></code>
+<td>
+<code class="sourceCode cpp">stable_sort</code>
+<td>
+<code class="sourceCode cpp">set_intersection</code>
+<td>
+<code class="sourceCode cpp">destroy<span class="op">{</span>_n<span class="op">}</span></code>
 </tr>
-<tr class="odd">
-<td style="text-align: left;"><code class="sourceCode cpp">mismatch</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">remove</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">partial_sort</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">set_difference</code></td>
-<td style="text-align: left;"></td>
+<tr>
+<td>
+<code class="sourceCode cpp">mismatch</code>
+<td>
+<code class="sourceCode cpp">remove</code>
+<td>
+<code class="sourceCode cpp">partial_sort</code>
+<td>
+<code class="sourceCode cpp">set_difference</code>
+<td>
 </tr>
-<tr class="even">
-<td style="text-align: left;"><code class="sourceCode cpp">equal</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">remove_if</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">partial_sort_copy</code></td>
-<td style="text-align: left;"><code class="sourceCode cpp">set_symmetric_difference</code></td>
-<td style="text-align: left;"></td>
+<tr>
+<td>
+<code class="sourceCode cpp">equal</code>
+<td>
+<code class="sourceCode cpp">remove_if</code>
+<td>
+<code class="sourceCode cpp">partial_sort_copy</code>
+<td>
+<code class="sourceCode cpp">set_symmetric_difference</code>
+<td>
 </tr>
-</tbody>
 </table>
 <h3 data-number="5.1.2" id="only_in_std_ranges"><span class="header-section-number">5.1.2</span> Algorithms in
 <code class="sourceCode cpp">std<span class="op">::</span>ranges</code>
@@ -1809,7 +1883,7 @@ should be like for element access function</li>
 <li>Add testing experience of thread safe access to the views</li>
 <li><del>Add short descriptions of the new exposition-only concepts to
 the design overview.</del></li>
-<li>Fix cross-references</li>
+<li><del>Fix cross-references</del></li>
 <li>Extend <span><a href="https://wg21.link/algorithms.parallel.defns">[algorithms.parallel.defns]</a></span>
 to also refer to algorithm function objects (requires <span class="citation" data-cites="P3136R0">[<a href="https://wg21.link/p3136r0" role="doc-biblioref">P3136R0</a>]</span>), and maybe Mention “ranges”
 next to iterators etc.</li>
