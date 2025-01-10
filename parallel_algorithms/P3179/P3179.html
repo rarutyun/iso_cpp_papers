@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2025-01-09" />
+  <meta name="dcterms.date" content="2025-01-10" />
   <title>C++ parallel range algorithms</title>
   <style>
       code{white-space: pre-wrap;}
@@ -466,7 +466,7 @@ algorithms</h1>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2025-01-09</td>
+    <td>2025-01-10</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -1920,6 +1920,10 @@ defined.</li>
 says <em>were</em> sorted. Should it be <em>was</em>?</li>
 <li><code class="sourceCode cpp">inplace_merge</code> <em>Remarks</em>
 is not consistent with the rest, doesn’t have the same link to <span><a href="https://wg21.link/algorithm.stable">[algorithm.stable]</a></span>.</li>
+<li><code class="sourceCode cpp">find_end</code> defines
+<code class="sourceCode cpp">n</code> after it’s used for the first
+time. Is it ok? The same is for
+<code class="sourceCode cpp">equal</code>.</li>
 </ul>
 <h2 data-number="7.3" id="thread_safe_views"><span class="header-section-number">7.3</span> Thread-safe views examination<a href="#thread_safe_views" class="self-link"></a></h2>
 <p>We need to understand better whether using some
@@ -2607,7 +2611,7 @@ concept:</ins></span></p>
 <span id="cb27-529"><a href="#cb27-529" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, <em>random-access-sized-range</em> R, <em>random-access-sized-range</em> OutR&gt;</span></span>
 <span id="cb27-530"><a href="#cb27-530" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires indirectly_copyable&lt;iterator_t&lt;R&gt;, iterator_t&lt;OutR&gt;&gt;</span></span>
 <span id="cb27-531"><a href="#cb27-531" aria-hidden="true" tabindex="-1"></a><span class="va">+    copy_result&lt;borrowed_iterator_t&lt;R&gt;, borrowed_iterator_t&lt;OutR&gt;&gt;</span></span>
-<span id="cb27-532"><a href="#cb27-532" aria-hidden="true" tabindex="-1"></a><span class="va">+      copy(Ep&amp;&amp; exec, R&amp;&amp; r, OutR&amp;&amp; result);</span></span>
+<span id="cb27-532"><a href="#cb27-532" aria-hidden="true" tabindex="-1"></a><span class="va">+      copy(Ep&amp;&amp; exec, R&amp;&amp; r, OutR&amp;&amp; result_r);</span></span>
 <span id="cb27-533"><a href="#cb27-533" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb27-534"><a href="#cb27-534" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb27-535"><a href="#cb27-535" aria-hidden="true" tabindex="-1"></a>namespace ranges {</span>
@@ -2652,7 +2656,7 @@ concept:</ins></span></p>
 <span id="cb27-574"><a href="#cb27-574" aria-hidden="true" tabindex="-1"></a><span class="va">+            class Proj = identity, indirect_unary_predicate&lt;projected&lt;iterator_t&lt;R&gt;, Proj&gt;&gt; Pred&gt;</span></span>
 <span id="cb27-575"><a href="#cb27-575" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires indirectly_copyable&lt;iterator_t&lt;R&gt;, iterator_t&lt;OutR&gt;&gt;</span></span>
 <span id="cb27-576"><a href="#cb27-576" aria-hidden="true" tabindex="-1"></a><span class="va">+    copy_if_result&lt;borrowed_iterator_t&lt;R&gt;, borrowed_iterator_t&lt;OutR&gt;&gt;</span></span>
-<span id="cb27-577"><a href="#cb27-577" aria-hidden="true" tabindex="-1"></a><span class="va">+      copy_if(Ep&amp;&amp; exec, R&amp;&amp; r, OutR&amp;&amp; result, Pred pred, Proj proj = {});</span></span>
+<span id="cb27-577"><a href="#cb27-577" aria-hidden="true" tabindex="-1"></a><span class="va">+      copy_if(Ep&amp;&amp; exec, R&amp;&amp; r, OutR&amp;&amp; result_r, Pred pred, Proj proj = {});</span></span>
 <span id="cb27-578"><a href="#cb27-578" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb27-579"><a href="#cb27-579" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb27-580"><a href="#cb27-580" aria-hidden="true" tabindex="-1"></a>namespace ranges {</span>
@@ -2675,7 +2679,7 @@ concept:</ins></span></p>
 <span id="cb27-597"><a href="#cb27-597" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, <em>random-access-sized-range</em> R, <em>random-access-sized-range</em> OutR&gt;</span></span>
 <span id="cb27-598"><a href="#cb27-598" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires indirectly_movable&lt;iterator_t&lt;R&gt;, iterator_t&lt;OutR&gt;&gt;</span></span>
 <span id="cb27-599"><a href="#cb27-599" aria-hidden="true" tabindex="-1"></a><span class="va">+    move_result&lt;borrowed_iterator_t&lt;R&gt;, borrowed_iterator_t&lt;OutR&gt;&gt;</span></span>
-<span id="cb27-600"><a href="#cb27-600" aria-hidden="true" tabindex="-1"></a><span class="va">+      move(Ep&amp;&amp; exec, R&amp;&amp; r, OutR&amp;&amp; result);</span></span>
+<span id="cb27-600"><a href="#cb27-600" aria-hidden="true" tabindex="-1"></a><span class="va">+      move(Ep&amp;&amp; exec, R&amp;&amp; r, OutR&amp;&amp; result_r);</span></span>
 <span id="cb27-601"><a href="#cb27-601" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb27-602"><a href="#cb27-602" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb27-603"><a href="#cb27-603" aria-hidden="true" tabindex="-1"></a>namespace ranges {</span>
@@ -4528,13 +4532,13 @@ for which <em><code class="sourceCode cpp">E</code></em> holds. Returns
 <code class="sourceCode cpp">last</code> if no such iterator is
 found.</p>
 <p><span class="marginalizedparent"><a class="marginalized">3</a></span>
-<em>Complexity</em>: For the overloads with no
-<code class="sourceCode cpp">ExecutionPolicy</code>, exactly <code class="sourceCode cpp">min<span class="op">((</span>i <span class="op">-</span> first<span class="op">)</span> <span class="op">+</span> <span class="dv">1</span>,  <span class="op">(</span>last <span class="op">-</span> first<span class="op">)</span> <span class="op">-</span> <span class="dv">1</span><span class="op">)</span></code>
+<em>Complexity</em>: For the overloads with no <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>execution policy</ins></span>,
+exactly <code class="sourceCode cpp">min<span class="op">((</span>i <span class="op">-</span> first<span class="op">)</span> <span class="op">+</span> <span class="dv">1</span>,  <span class="op">(</span>last <span class="op">-</span> first<span class="op">)</span> <span class="op">-</span> <span class="dv">1</span><span class="op">)</span></code>
 applications of the corresponding predicate, where
 <code class="sourceCode cpp">i</code> is
 <code class="sourceCode cpp">adjacent_find</code>’s return value. For
-the overloads with an
-<code class="sourceCode cpp">ExecutionPolicy</code>, <code class="sourceCode cpp"><em>O</em><span class="op">(</span>last <span class="op">-</span> first<span class="op">)</span></code>
+the overloads with an <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>execution policy</ins></span>,
+<code class="sourceCode cpp"><em>O</em><span class="op">(</span>last <span class="op">-</span> first<span class="op">)</span></code>
 applications of the corresponding predicate, and no more than twice as
 many applications of any projection.</p>
 <h2 data-number="8.20" id="modify_alg_count"><span class="header-section-number">8.20</span> Modify
@@ -4770,12 +4774,12 @@ for the second overload in namespace
 projection; otherwise,</p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(3.4)</a></span> For
-the overloads with no
-<code class="sourceCode cpp">ExecutionPolicy</code>, at most <code class="sourceCode cpp">min<span class="op">(</span>last1 <span class="op">-</span> first1,  last2 <span class="op">-</span> first2<span class="op">)</span></code>
+the overloads with no <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>execution policy</ins></span>,
+at most <code class="sourceCode cpp">min<span class="op">(</span>last1 <span class="op">-</span> first1,  last2 <span class="op">-</span> first2<span class="op">)</span></code>
 applications of the corresponding predicate and any projections.</li>
 <li><span class="marginalizedparent"><a class="marginalized">(3.5)</a></span> For
-the overloads with an
-<code class="sourceCode cpp">ExecutionPolicy</code>, <code class="sourceCode cpp"><em>O</em><span class="op">(</span>min<span class="op">(</span>last1 <span class="op">-</span> first1, last2 <span class="op">-</span> first2<span class="op">))</span></code>
+the overloads with an <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>execution policy</ins></span>,
+<code class="sourceCode cpp"><em>O</em><span class="op">(</span>min<span class="op">(</span>last1 <span class="op">-</span> first1, last2 <span class="op">-</span> first2<span class="op">))</span></code>
 applications of the corresponding predicate.</li>
 </ul>
 <h2 data-number="8.23" id="modify_alg_search"><span class="header-section-number">8.23</span> Modify
@@ -4972,23 +4976,30 @@ otherwise <code class="sourceCode cpp">ranges<span class="op">::</span>equal<spa
 <span id="cb79-5"><a href="#cb79-5" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, <em>random-access-sized-range</em> R, <em>random-access-sized-range</em> OutR&gt;</span>
 <span id="cb79-6"><a href="#cb79-6" aria-hidden="true" tabindex="-1"></a>  requires indirectly_copyable&lt;iterator_t&lt;R&gt;, iterator_t&lt;OutR&gt;&gt;</span>
 <span id="cb79-7"><a href="#cb79-7" aria-hidden="true" tabindex="-1"></a>  ranges::copy_result&lt;borrowed_iterator_t&lt;R&gt;, borrowed_iterator_t&lt;OutR&gt;&gt;</span>
-<span id="cb79-8"><a href="#cb79-8" aria-hidden="true" tabindex="-1"></a>    ranges::copy(Ep&amp;&amp; exec, R&amp;&amp; r, OutR&amp;&amp; result);</span></code></pre></div>
-
+<span id="cb79-8"><a href="#cb79-8" aria-hidden="true" tabindex="-1"></a>    ranges::copy(Ep&amp;&amp; exec, R&amp;&amp; r, OutR&amp;&amp; result_r);</span></code></pre></div>
+<p><span class="marginalizedparent"><a class="marginalized">x</a></span>
+Let <code class="sourceCode default">result_last</code> be
+<code class="sourceCode default">first + (last - first)</code> for the
+overloads with no parameter
+<code class="sourceCode default">result_last</code> or
+<code class="sourceCode default">result_r</code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">x</a></span>
+Let <em><code class="sourceCode default">N</code></em> be <code class="sourceCode default">min(last - first, result_last - result)</code>.</p>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">6</a></span>
-<em>Preconditions</em>: The ranges <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
-and <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <span class="op">(</span>last <span class="op">-</span> first<span class="op">))</span></code>
+<em>Preconditions</em>: The ranges <code class="sourceCode cpp"><span class="op">[</span>first, <span class="rm" style="color: #bf0303"><del>last</del></span><span class="add" style="color: #006e28"><ins>first + <em>N</em></ins></span><span class="op">)</span></code>
+and <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">(last - first)</code></span></del></span><span class="add" style="color: #006e28"><ins><em>N</em></ins></span><span class="op">)</span></code>
 do not overlap.</p>
 <p><span class="marginalizedparent"><a class="marginalized">7</a></span>
-<em>Effects</em>: Copies elements in the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
-into the range <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <span class="op">(</span>last <span class="op">-</span> first<span class="op">))</span></code>.
-For each non-negative integer <code class="sourceCode cpp">n <span class="op">&lt;</span> <span class="op">(</span>last <span class="op">-</span> first<span class="op">)</span></code>,
+<em>Effects</em>: Copies elements in the range <code class="sourceCode cpp"><span class="op">[</span>first, <span class="rm" style="color: #bf0303"><del>last</del></span><span class="add" style="color: #006e28"><ins>first + <em>N</em></ins></span><span class="op">)</span></code>
+into the range <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">(last - first)</code></span></del></span><span class="add" style="color: #006e28"><ins><em>N</em></ins></span><span class="op">)</span></code>.
+For each non-negative integer <code class="sourceCode cpp">n <span class="op">&lt;</span> <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">(last - first)</code></span></del></span><span class="add" style="color: #006e28"><ins><em>N</em></ins></span></code>,
 performs <code class="sourceCode cpp"><span class="op">*(</span>result <span class="op">+</span> n<span class="op">)</span> <span class="op">=</span> <span class="op">*(</span>first <span class="op">+</span> n<span class="op">)</span></code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">8</a></span>
-<em>Returns</em>: <code class="sourceCode cpp">result <span class="op">+</span> <span class="op">(</span>last <span class="op">-</span> first<span class="op">)</span></code>.</p>
+<em>Returns</em>: <code class="sourceCode cpp">result <span class="op">+</span> <span class="rm" style="color: #bf0303"><del>(last - first)</del></span><span class="add" style="color: #006e28"><ins><em>N</em></ins></span></code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">9</a></span>
 <em>Complexity</em>: Exactly
-<code class="sourceCode cpp">last <span class="op">-</span> first</code>
+<code class="sourceCode cpp"><span class="rm" style="color: #bf0303"><del>(last - first)</del></span><span class="add" style="color: #006e28"><ins><em>N</em></ins></span></code>
 assignments.</p>
 <div class="sourceCode" id="cb80"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>input_iterator I, weakly_incrementable O<span class="op">&gt;</span></span>
 <span id="cb80-2"><a href="#cb80-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> indirectly_copyable<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
@@ -5001,10 +5012,14 @@ assignments.</p>
 <span id="cb81-3"><a href="#cb81-3" aria-hidden="true" tabindex="-1"></a>  requires indirectly_copyable&lt;I, O&gt;</span>
 <span id="cb81-4"><a href="#cb81-4" aria-hidden="true" tabindex="-1"></a>  ranges::copy_n_result&lt;I, O&gt;</span>
 <span id="cb81-5"><a href="#cb81-5" aria-hidden="true" tabindex="-1"></a>    ranges::copy_n(Ep&amp;&amp; exec, I first, iter_difference_t&lt;I&gt; n, O result, OutS result_last);</span></code></pre></div>
-
+<p><span class="marginalizedparent"><a class="marginalized">x</a></span>
+Let <code class="sourceCode default">result_last</code> be
+<code class="sourceCode default">first + (last - first)</code> for the
+overloads with no parameter
+<code class="sourceCode default">result_last</code>.</p>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">10</a></span> Let
-<em><code class="sourceCode cpp">N</code></em> be <code class="sourceCode cpp">max<span class="op">(</span><span class="dv">0</span>, n<span class="op">)</span></code>.</p>
+<em><code class="sourceCode cpp">N</code></em> be <code class="sourceCode cpp">max<span class="op">(</span><span class="dv">0</span>, <span class="rm" style="color: #bf0303"><del>n</del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">min(n, result_last - result)</code></span></ins></span><span class="op">)</span></code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">11</a></span>
 <em>Mandates</em>: The type <code class="sourceCode cpp">Size</code> is
 convertible to an integral type (<span><a href="https://wg21.link/conv.integral">[conv.integral]</a></span>,
@@ -5051,37 +5066,78 @@ for the overload in namespace
 <span id="cb83-9"><a href="#cb83-9" aria-hidden="true" tabindex="-1"></a>         class Proj = identity, indirect_unary_predicate&lt;projected&lt;iterator_t&lt;R&gt;, Proj&gt;&gt; Pred&gt;</span>
 <span id="cb83-10"><a href="#cb83-10" aria-hidden="true" tabindex="-1"></a>  requires indirectly_copyable&lt;iterator_t&lt;R&gt;, iterator_t&lt;OutR&gt;&gt;</span>
 <span id="cb83-11"><a href="#cb83-11" aria-hidden="true" tabindex="-1"></a>  ranges::copy_if_result&lt;borrowed_iterator_t&lt;R&gt;, borrowed_iterator_t&lt;OutR&gt;&gt;</span>
-<span id="cb83-12"><a href="#cb83-12" aria-hidden="true" tabindex="-1"></a>    ranges::copy_if(Ep&amp;&amp; exec, R&amp;&amp; r, OutR&amp;&amp; result, Pred pred, Proj proj = {});</span></code></pre></div>
+<span id="cb83-12"><a href="#cb83-12" aria-hidden="true" tabindex="-1"></a>    ranges::copy_if(Ep&amp;&amp; exec, R&amp;&amp; r, OutR&amp;&amp; result_r, Pred pred, Proj proj = {});</span></code></pre></div>
 
 </div>
+<div class="rm" style="color: #bf0303">
 <p><span class="marginalizedparent"><a class="marginalized">15</a></span> Let
-<em><code class="sourceCode cpp">E</code></em> be:</p>
+<em><code class="sourceCode default">E</code></em> be:</p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(15.1)</a></span>
-<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(</span>pred<span class="op">(*</span>i<span class="op">))</span></code>
-for the overloads in namespace
-<code class="sourceCode cpp">std</code>;</li>
+<code class="sourceCode default">bool(pred(*i))</code> for the overloads
+in namespace <code class="sourceCode default">std</code>;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(15.2)</a></span>
-<code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(</span>invoke<span class="op">(</span>pred, invoke<span class="op">(</span>proj, <span class="op">*</span>i<span class="op">)))</span></code>
+<code class="sourceCode default">bool(invoke(pred, invoke(proj, *i)))</code>
 for the overloads in namespace
-<code class="sourceCode cpp">ranges</code>,</li>
+<code class="sourceCode default">ranges</code>,</li>
 </ul>
-<p>and <em><code class="sourceCode cpp">N</code></em> be the number of
-iterators <code class="sourceCode cpp">i</code> in the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
-for which the condition <em><code class="sourceCode cpp">E</code></em>
-holds.</p>
+<p>and <em><code class="sourceCode default">N</code></em> be the number
+of iterators <code class="sourceCode default">i</code> in the range
+<code class="sourceCode default">[first, last)</code> for which the
+condition <em><code class="sourceCode default">E</code></em> holds.</p>
+</div>
+<div class="add" style="color: #006e28">
+<p><span class="marginalizedparent"><a class="marginalized">x</a></span>
+Let:</p>
+<ul>
+<li><p><span class="marginalizedparent"><a class="marginalized">x</a></span>
+<code class="sourceCode default">result_last</code> be
+<code class="sourceCode default">first + (last - first)</code> for the
+overloads with no parameter
+<code class="sourceCode default">result_last</code>.</p></li>
+<li><p><span class="marginalizedparent"><a class="marginalized">x</a></span>
+<em><code class="sourceCode default">E</code></em> be:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(x.x)</a></span>
+<code class="sourceCode default">bool(pred(*i))</code> for the overloads
+in namespace <code class="sourceCode default">std</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(x.x)</a></span>
+<code class="sourceCode default">bool(invoke(pred, invoke(proj, *i)))</code>
+for the overloads in namespace
+<code class="sourceCode default">ranges</code>,</li>
+</ul></li>
+<li><p><span class="marginalizedparent"><a class="marginalized">x</a></span>
+<em><code class="sourceCode default">M</code></em> be the number of
+iterators <code class="sourceCode default">i</code> in the range
+<code class="sourceCode default">[first, last)</code> for which the
+condition <em><code class="sourceCode default">E</code></em>
+holds.</p></li>
+<li><p><span class="marginalizedparent"><a class="marginalized">x</a></span>
+<em><code class="sourceCode default">N</code></em> be
+<code class="sourceCode default">min(<em>M</em>, result_last - result)</code>.</p></li>
+</ul>
+
+</div>
 <p><span class="marginalizedparent"><a class="marginalized">16</a></span>
-<em>Preconditions</em>: The ranges <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
-and <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <span class="op">(</span>last <span class="op">-</span> first<span class="op">))</span></code>
+<em>Preconditions</em>: The ranges <code class="sourceCode cpp"><span class="op">[</span>first, <span class="rm" style="color: #bf0303"><del>last</del></span><span class="add" style="color: #006e28"><ins>first + <em>N</em></ins></span><span class="op">)</span></code>
+and <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">(last - first)</code></span></del></span><span class="add" style="color: #006e28"><ins><em>N</em></ins></span><span class="op">)</span></code>
 do not overlap.</p>
 <p>[<em>Note 1</em>: For the overload with an
 <code class="sourceCode cpp">ExecutionPolicy</code>, there might be a
 performance cost if <code class="sourceCode cpp">iterator_traits<span class="op">&lt;</span>ForwardIterator1<span class="op">&gt;</span>​<span class="op">::</span>​value_type</code>
 is not <em>Cpp17MoveConstructible</em> (Table 31). — <em>end
 note</em>]</p>
+<div class="add" style="color: #006e28">
+<p>[<em>Note 2</em>: For the overload with an
+<em><code class="sourceCode default">execution-policy</code></em>, there
+might be a performance cost if
+<code class="sourceCode default">iter_value_t&lt;I&gt;</code> is not
+<code class="sourceCode default">move_constructible</code>. — <em>end
+note</em>]</p>
+</div>
 <p><span class="marginalizedparent"><a class="marginalized">17</a></span>
 <em>Effects</em>: Copies all of the elements referred to by the iterator
-<code class="sourceCode cpp">i</code> in the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+<code class="sourceCode cpp">i</code> in the range <code class="sourceCode cpp"><span class="op">[</span>first, <span class="rm" style="color: #bf0303"><del>last</del></span><span class="add" style="color: #006e28"><ins>first + <em>N</em></ins></span><span class="op">)</span></code>
 for which <em><code class="sourceCode cpp">E</code></em> is
 <code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">18</a></span>
@@ -5092,7 +5148,7 @@ for which <em><code class="sourceCode cpp">E</code></em> is
 for the overloads in namespace
 <code class="sourceCode cpp">std</code>.</li>
 <li><span class="marginalizedparent"><a class="marginalized">(18.2)</a></span>
-<code class="sourceCode cpp"><span class="op">{</span>last, result <span class="op">+</span> <em>N</em><span class="op">}</span></code>
+<code class="sourceCode cpp"><span class="op">{</span><span class="rm" style="color: #bf0303"><del>last</del></span><span class="add" style="color: #006e28"><ins>first + <em>N</em></ins></span>, result <span class="op">+</span> <em>N</em><span class="op">}</span></code>
 for the overloads in namespace
 <code class="sourceCode cpp">ranges</code>.</li>
 </ul>
@@ -5117,18 +5173,21 @@ applications of the corresponding predicate and any projection.</p>
 <span id="cb85-5"><a href="#cb85-5" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, <em>random-access-sized-range</em> R, <em>random-access-sized-range</em> OutR&gt;</span>
 <span id="cb85-6"><a href="#cb85-6" aria-hidden="true" tabindex="-1"></a>  requires indirectly_movable&lt;iterator_t&lt;R&gt;, iterator_t&lt;OutR&gt;&gt;</span>
 <span id="cb85-7"><a href="#cb85-7" aria-hidden="true" tabindex="-1"></a>  ranges::move_result&lt;borrowed_iterator_t&lt;R&gt;, borrowed_iterator_t&lt;OutR&gt;&gt;</span>
-<span id="cb85-8"><a href="#cb85-8" aria-hidden="true" tabindex="-1"></a>    ranges::move(Ep&amp;&amp; exec, R&amp;&amp; r, OutR&amp;&amp; result);</span></code></pre></div>
-
+<span id="cb85-8"><a href="#cb85-8" aria-hidden="true" tabindex="-1"></a>    ranges::move(Ep&amp;&amp; exec, R&amp;&amp; r, OutR&amp;&amp; result_r);</span></code></pre></div>
+<p><span class="marginalizedparent"><a class="marginalized">x</a></span>
+Let <code class="sourceCode default">result_last</code> be
+<code class="sourceCode default">first + (last - first)</code> for the
+overloads with no parameter
+<code class="sourceCode default">result_last</code>.</p>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">6</a></span>
-Let <em><code class="sourceCode cpp">N</code></em> be
-<code class="sourceCode cpp">last <span class="op">-</span> first</code>.</p>
+Let <em><code class="sourceCode cpp">N</code></em> be <code class="sourceCode cpp"><span class="add" style="color: #006e28"><ins>min(</ins></span>last <span class="op">-</span> first<span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">, result_last - result)</code></span></ins></span></code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">7</a></span>
-<em>Preconditions</em>: The ranges <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+<em>Preconditions</em>: The ranges <code class="sourceCode cpp"><span class="op">[</span>first, <span class="rm" style="color: #bf0303"><del>last</del></span><span class="add" style="color: #006e28"><ins>first + <em>N</em></ins></span><span class="op">)</span></code>
 and <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <em>N</em><span class="op">)</span></code>
 do not overlap.</p>
 <p><span class="marginalizedparent"><a class="marginalized">8</a></span>
-<em>Effects</em>: Moves elements in the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+<em>Effects</em>: Moves elements in the range <code class="sourceCode cpp"><span class="op">[</span>first, <span class="rm" style="color: #bf0303"><del>last</del></span><span class="add" style="color: #006e28"><ins>first + <em>N</em></ins></span><span class="op">)</span></code>
 into the range <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <em>N</em><span class="op">)</span></code>.
 For each non-negative integer <code class="sourceCode cpp"><em>n</em> <span class="op">&lt;</span> <em>N</em></code>,
 performs <code class="sourceCode cpp"><span class="op">*(</span>result <span class="op">+</span> <em>n</em><span class="op">)</span> <span class="op">=</span> std​<span class="op">::</span>​​move<span class="op">(*(</span>first <span class="op">+</span> <em>n</em><span class="op">))</span></code>.</p>
@@ -7846,15 +7905,17 @@ lexicographically less than the longer sequence. Otherwise, the
 lexicographical comparison of the sequences yields the same result as
 the comparison of the first corresponding pair of elements that are not
 equivalent.</p>
-<p><span class="marginalizedparent"><a class="marginalized">4</a></span>
-<em>Example 1</em>: <code class="sourceCode cpp">ranges​<span class="op">::</span>​lexicographical_compare<span class="op">(</span>I1, S1, I2, S2, Comp, Proj1, Proj2<span class="op">)</span></code>
+<p><span class="marginalizedparent"><a class="marginalized">4</a></span></p>
+<div class="example">
+<p><span>[ <em>Example:</em> </span> <code class="sourceCode cpp">ranges​<span class="op">::</span>​lexicographical_compare<span class="op">(</span>I1, S1, I2, S2, Comp, Proj1, Proj2<span class="op">)</span></code>
 can be implemented as:</p>
 <div class="sourceCode" id="cb192"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb192-1"><a href="#cb192-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">(</span> ; first1 <span class="op">!=</span> last1 <span class="op">&amp;&amp;</span> first2 <span class="op">!=</span> last2 ; <span class="op">++</span>first1, <span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">++</span>first2<span class="op">)</span> <span class="op">{</span></span>
 <span id="cb192-2"><a href="#cb192-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span>invoke<span class="op">(</span>comp, invoke<span class="op">(</span>proj1, <span class="op">*</span>first1<span class="op">)</span>, invoke<span class="op">(</span>proj2, <span class="op">*</span>first2<span class="op">)))</span> <span class="cf">return</span> <span class="kw">true</span>;</span>
 <span id="cb192-3"><a href="#cb192-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span>invoke<span class="op">(</span>comp, invoke<span class="op">(</span>proj2, <span class="op">*</span>first2<span class="op">)</span>, invoke<span class="op">(</span>proj1, <span class="op">*</span>first1<span class="op">)))</span> <span class="cf">return</span> <span class="kw">false</span>;</span>
 <span id="cb192-4"><a href="#cb192-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
 <span id="cb192-5"><a href="#cb192-5" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> first1 <span class="op">==</span> last1 <span class="op">&amp;&amp;</span> first2 <span class="op">!=</span> last2;</span></code></pre></div>
-<p>— <em>end example</em></p>
+<span> — <em>end example</em> ]</span>
+</div>
 <p><span class="marginalizedparent"><a class="marginalized">5</a></span>
 [<em>Note 1</em>: An empty sequence is lexicographically less than any
 non-empty sequence, but not less than any empty sequence. — <em>end
