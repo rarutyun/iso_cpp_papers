@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2025-01-12" />
+  <meta name="dcterms.date" content="2025-01-13" />
   <title>C++ parallel range algorithms</title>
   <style>
       code{white-space: pre-wrap;}
@@ -466,7 +466,7 @@ algorithms</h1>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2025-01-12</td>
+    <td>2025-01-13</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -3467,7 +3467,7 @@ concept:</ins></span></p>
 <span id="cb27-1383"><a href="#cb27-1383" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires indirectly_copyable&lt;iterator_t&lt;R&gt;, iterator_t&lt;OutR1&gt;&gt; &amp;&amp;</span></span>
 <span id="cb27-1384"><a href="#cb27-1384" aria-hidden="true" tabindex="-1"></a><span class="va">+             indirectly_copyable&lt;iterator_t&lt;R&gt;, iterator_t&lt;OutR2&gt;&gt;</span></span>
 <span id="cb27-1385"><a href="#cb27-1385" aria-hidden="true" tabindex="-1"></a><span class="va">+    partition_copy_result&lt;borrowed_iterator_t&lt;R&gt;, borrowed_iterator_t&lt;OutR1&gt;, borrowed_iterator_t&lt;OutR2&gt;&gt;</span></span>
-<span id="cb27-1386"><a href="#cb27-1386" aria-hidden="true" tabindex="-1"></a><span class="va">+      partition_copy(Ep&amp;&amp; exec, R&amp;&amp; r, OutR1&amp;&amp; out_true, OutR2&amp;&amp; out_false,</span></span>
+<span id="cb27-1386"><a href="#cb27-1386" aria-hidden="true" tabindex="-1"></a><span class="va">+      partition_copy(Ep&amp;&amp; exec, R&amp;&amp; r, OutR1&amp;&amp; out_true_r, OutR2&amp;&amp; out_false_r,</span></span>
 <span id="cb27-1387"><a href="#cb27-1387" aria-hidden="true" tabindex="-1"></a><span class="va">+                      Pred pred, Proj proj = {});</span></span>
 <span id="cb27-1388"><a href="#cb27-1388" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb27-1389"><a href="#cb27-1389" aria-hidden="true" tabindex="-1"></a></span>
@@ -3503,7 +3503,7 @@ concept:</ins></span></p>
 <span id="cb27-1419"><a href="#cb27-1419" aria-hidden="true" tabindex="-1"></a><span class="va">+            class Proj1 = identity, class Proj2 = identity&gt;</span></span>
 <span id="cb27-1420"><a href="#cb27-1420" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires mergeable&lt;iterator_t&lt;R1&gt;, iterator_t&lt;R2&gt;, iterator_t&lt;OutR&gt;, Comp, Proj1, Proj2&gt;</span></span>
 <span id="cb27-1421"><a href="#cb27-1421" aria-hidden="true" tabindex="-1"></a><span class="va">+    merge_result&lt;borrowed_iterator_t&lt;R1&gt;, borrowed_iterator_t&lt;R2&gt;, borrowed_iterator_t&lt;OutR&gt;&gt;</span></span>
-<span id="cb27-1422"><a href="#cb27-1422" aria-hidden="true" tabindex="-1"></a><span class="va">+      merge(Ep&amp;&amp; exec, R1&amp;&amp; r1, R2&amp;&amp; r2, OutR&amp;&amp; result,</span></span>
+<span id="cb27-1422"><a href="#cb27-1422" aria-hidden="true" tabindex="-1"></a><span class="va">+      merge(Ep&amp;&amp; exec, R1&amp;&amp; r1, R2&amp;&amp; r2, OutR&amp;&amp; result_r,</span></span>
 <span id="cb27-1423"><a href="#cb27-1423" aria-hidden="true" tabindex="-1"></a><span class="va">+             Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {});</span></span>
 <span id="cb27-1424"><a href="#cb27-1424" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb27-1425"><a href="#cb27-1425" aria-hidden="true" tabindex="-1"></a></span>
@@ -3589,7 +3589,7 @@ concept:</ins></span></p>
 <span id="cb27-1505"><a href="#cb27-1505" aria-hidden="true" tabindex="-1"></a><span class="va">+            class Proj1 = identity, class Proj2 = identity&gt;</span></span>
 <span id="cb27-1506"><a href="#cb27-1506" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires mergeable&lt;iterator_t&lt;R1&gt;, iterator_t&lt;R2&gt;, iterator_t&lt;OutR&gt;, Comp, Proj1, Proj2&gt;</span></span>
 <span id="cb27-1507"><a href="#cb27-1507" aria-hidden="true" tabindex="-1"></a><span class="va">+    set_union_result&lt;borrowed_iterator_t&lt;R1&gt;, borrowed_iterator_t&lt;R2&gt;, borrowed_iterator_t&lt;OutR&gt;&gt;</span></span>
-<span id="cb27-1508"><a href="#cb27-1508" aria-hidden="true" tabindex="-1"></a><span class="va">+      set_union(Ep&amp;&amp; exec, R1&amp;&amp; r1, R2&amp;&amp; r2, OutR&amp;&amp; result,</span></span>
+<span id="cb27-1508"><a href="#cb27-1508" aria-hidden="true" tabindex="-1"></a><span class="va">+      set_union(Ep&amp;&amp; exec, R1&amp;&amp; r1, R2&amp;&amp; r2, OutR&amp;&amp; result_r,</span></span>
 <span id="cb27-1509"><a href="#cb27-1509" aria-hidden="true" tabindex="-1"></a><span class="va">+                 Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {});</span></span>
 <span id="cb27-1510"><a href="#cb27-1510" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb27-1511"><a href="#cb27-1511" aria-hidden="true" tabindex="-1"></a></span>
@@ -3625,7 +3625,7 @@ concept:</ins></span></p>
 <span id="cb27-1541"><a href="#cb27-1541" aria-hidden="true" tabindex="-1"></a><span class="va">+            class Proj1 = identity, class Proj2 = identity&gt;</span></span>
 <span id="cb27-1542"><a href="#cb27-1542" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires mergeable&lt;iterator_t&lt;R1&gt;, iterator_t&lt;R2&gt;, iterator_t&lt;OutR&gt;, Comp, Proj1, Proj2&gt;</span></span>
 <span id="cb27-1543"><a href="#cb27-1543" aria-hidden="true" tabindex="-1"></a><span class="va">+    rages::set_intersection_result&lt;borrowed_iterator_t&lt;R1&gt;, borrowed_iterator_t&lt;R2&gt;, borrowed_iterator_t&lt;OutR&gt;&gt;</span></span>
-<span id="cb27-1544"><a href="#cb27-1544" aria-hidden="true" tabindex="-1"></a><span class="va">+      set_intersection(Ep&amp;&amp; exec, R1&amp;&amp; r1, R2&amp;&amp; r2, OutR&amp;&amp; result,</span></span>
+<span id="cb27-1544"><a href="#cb27-1544" aria-hidden="true" tabindex="-1"></a><span class="va">+      set_intersection(Ep&amp;&amp; exec, R1&amp;&amp; r1, R2&amp;&amp; r2, OutR&amp;&amp; result_r,</span></span>
 <span id="cb27-1545"><a href="#cb27-1545" aria-hidden="true" tabindex="-1"></a><span class="va">+                        Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {});</span></span>
 <span id="cb27-1546"><a href="#cb27-1546" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb27-1547"><a href="#cb27-1547" aria-hidden="true" tabindex="-1"></a></span>
@@ -3661,7 +3661,7 @@ concept:</ins></span></p>
 <span id="cb27-1577"><a href="#cb27-1577" aria-hidden="true" tabindex="-1"></a><span class="va">+            class Proj1 = identity, class Proj2 = identity&gt;</span></span>
 <span id="cb27-1578"><a href="#cb27-1578" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires mergeable&lt;iterator_t&lt;R1&gt;, iterator_t&lt;R2&gt;, iterator_t&lt;OutR&gt;, Comp, Proj1, Proj2&gt;</span></span>
 <span id="cb27-1579"><a href="#cb27-1579" aria-hidden="true" tabindex="-1"></a><span class="va">+    set_difference_result&lt;borrowed_iterator_t&lt;R1&gt;, borrowed_iterator_t&lt;OutR&gt;&gt;</span></span>
-<span id="cb27-1580"><a href="#cb27-1580" aria-hidden="true" tabindex="-1"></a><span class="va">+      set_difference(Ep&amp;&amp; exec, R1&amp;&amp; r1, R2&amp;&amp; r2, OutR&amp;&amp; result,</span></span>
+<span id="cb27-1580"><a href="#cb27-1580" aria-hidden="true" tabindex="-1"></a><span class="va">+      set_difference(Ep&amp;&amp; exec, R1&amp;&amp; r1, R2&amp;&amp; r2, OutR&amp;&amp; result_r,</span></span>
 <span id="cb27-1581"><a href="#cb27-1581" aria-hidden="true" tabindex="-1"></a><span class="va">+                      Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {});</span></span>
 <span id="cb27-1582"><a href="#cb27-1582" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb27-1583"><a href="#cb27-1583" aria-hidden="true" tabindex="-1"></a></span>
@@ -3699,7 +3699,7 @@ concept:</ins></span></p>
 <span id="cb27-1615"><a href="#cb27-1615" aria-hidden="true" tabindex="-1"></a><span class="va">+           class Proj1 = identity, class Proj2 = identity&gt;</span></span>
 <span id="cb27-1616"><a href="#cb27-1616" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires mergeable&lt;iterator_t&lt;R1&gt;, iterator_t&lt;R2&gt;, iterator_t&lt;OutR&gt;, Comp, Proj1, Proj2&gt;</span></span>
 <span id="cb27-1617"><a href="#cb27-1617" aria-hidden="true" tabindex="-1"></a><span class="va">+    set_symmetric_difference_result&lt;borrowed_iterator_t&lt;R1&gt;, borrowed_iterator_t&lt;R2&gt;, borrowed_iterator_t&lt;OutR&gt;&gt;</span></span>
-<span id="cb27-1618"><a href="#cb27-1618" aria-hidden="true" tabindex="-1"></a><span class="va">+      set_symmetric_difference(Ep&amp;&amp; exec, R1&amp;&amp; r1, R2&amp;&amp; r2, OutR&amp;&amp; result,</span></span>
+<span id="cb27-1618"><a href="#cb27-1618" aria-hidden="true" tabindex="-1"></a><span class="va">+      set_symmetric_difference(Ep&amp;&amp; exec, R1&amp;&amp; r1, R2&amp;&amp; r2, OutR&amp;&amp; result_r,</span></span>
 <span id="cb27-1619"><a href="#cb27-1619" aria-hidden="true" tabindex="-1"></a><span class="va">+                                Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {});</span></span>
 <span id="cb27-1620"><a href="#cb27-1620" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb27-1621"><a href="#cb27-1621" aria-hidden="true" tabindex="-1"></a></span>
@@ -6932,10 +6932,9 @@ is
 <em>Returns</em>: <code class="sourceCode cpp">last</code> for the
 overload in namespace <code class="sourceCode cpp">ranges</code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">5</a></span>
-<em>Complexity</em>: For the overloads with no
-<code class="sourceCode cpp">ExecutionPolicy</code>, linear on average.
-For the overloads with an
-<code class="sourceCode cpp">ExecutionPolicy</code>, <code class="sourceCode cpp"><em>O</em><span class="op">(</span><em>N</em><span class="op">)</span></code>
+<em>Complexity</em>: For the overloads with no <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>execution policy</ins></span>,
+linear on average. For the overloads with an <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>execution policy</ins></span>,
+<code class="sourceCode cpp"><em>O</em><span class="op">(</span><em>N</em><span class="op">)</span></code>
 applications of the predicate, and <code class="sourceCode cpp"><em>O</em><span class="op">(</span><em>N</em>log<em>N</em><span class="op">)</span></code>
 swaps, where <code class="sourceCode cpp"><em>N</em> <span class="op">=</span> last <span class="op">-</span> first</code>.</p>
 <div class="sourceCode" id="cb148"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb148-1"><a href="#cb148-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>random_access_range R, <span class="kw">class</span> Comp <span class="op">=</span> ranges<span class="op">::</span>less, <span class="kw">class</span> Proj <span class="op">=</span> identity<span class="op">&gt;</span></span>
@@ -7042,10 +7041,9 @@ for the overloads in namespace
 <em>Complexity</em>: Let <code class="sourceCode cpp"><em>N</em> <span class="op">=</span> last <span class="op">-</span> first</code>:</p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(8.1)</a></span> For
-the overload with no
-<code class="sourceCode cpp">ExecutionPolicy</code>, exactly
-<em><code class="sourceCode cpp">N</code></em> applications of the
-predicate and projection. At most <code class="sourceCode cpp"><em>N</em> <span class="op">/</span> <span class="dv">2</span></code>
+the overload with no <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>execution policy</ins></span>,
+exactly <em><code class="sourceCode cpp">N</code></em> applications of
+the predicate and projection. At most <code class="sourceCode cpp"><em>N</em> <span class="op">/</span> <span class="dv">2</span></code>
 swaps if the type of <code class="sourceCode cpp">first</code> meets the
 <em>Cpp17BidirectionalIterator</em> requirements for the overloads in
 namespace <code class="sourceCode cpp">std</code> or models
@@ -7054,8 +7052,8 @@ overloads in namespace <code class="sourceCode cpp">ranges</code>, and
 at most <em><code class="sourceCode cpp">N</code></em> swaps
 otherwise.</li>
 <li><span class="marginalizedparent"><a class="marginalized">(8.2)</a></span> For
-the overload with an
-<code class="sourceCode cpp">ExecutionPolicy</code>, <code class="sourceCode cpp"><em>O</em><span class="op">(</span><em>N</em>log<em>N</em><span class="op">)</span></code>
+the overload with an <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>execution policy</ins></span>,
+<code class="sourceCode cpp"><em>O</em><span class="op">(</span><em>N</em>log<em>N</em><span class="op">)</span></code>
 swaps and <code class="sourceCode cpp"><em>O</em><span class="op">(</span><em>N</em><span class="op">)</span></code>
 applications of the predicate.</li>
 </ul>
@@ -7124,16 +7122,17 @@ for the overloads in namespace
 <em>Complexity</em>: Let <code class="sourceCode cpp"><em>N</em> <span class="op">=</span> last <span class="op">-</span> first</code>:</p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(13.1)</a></span> For
-the overloads with no
-<code class="sourceCode cpp">ExecutionPolicy</code>, at most
+the overloads with no <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>execution policy</ins></span>,
+at most
 <code class="sourceCode cpp"><em>N</em>log<sub>2</sub><em>N</em></code>
 swaps, but only <code class="sourceCode cpp"><em>O</em><span class="op">(</span><em>N</em><span class="op">)</span></code>
 swaps if there is enough extra memory. Exactly
 <em><code class="sourceCode cpp">N</code></em> applications of the
 predicate and projection.</li>
 <li><span class="marginalizedparent"><a class="marginalized">(13.2)</a></span> For
-the overload with an
-<code class="sourceCode cpp">ExecutionPolicy</code>, <code class="sourceCode cpp"><em>O</em><span class="op">(</span><em>N</em>log<em>N</em><span class="op">)</span></code>
+the overload<span class="add" style="color: #006e28"><ins>s</ins></span>
+with an <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>execution policy</ins></span>,
+<code class="sourceCode cpp"><em>O</em><span class="op">(</span><em>N</em>log<em>N</em><span class="op">)</span></code>
 swaps and <code class="sourceCode cpp"><em>O</em><span class="op">(</span><em>N</em><span class="op">)</span></code>
 applications of the predicate.</li>
 </ul>
@@ -7166,7 +7165,7 @@ applications of the predicate.</li>
 <span id="cb157-12"><a href="#cb157-12" aria-hidden="true" tabindex="-1"></a>  requires indirectly_copyable&lt;iterator_t&lt;R&gt;, iterator_t&lt;OutR1&gt;&gt; &amp;&amp;</span>
 <span id="cb157-13"><a href="#cb157-13" aria-hidden="true" tabindex="-1"></a>           indirectly_copyable&lt;iterator_t&lt;R&gt;, iterator_t&lt;OutR2&gt;&gt;</span>
 <span id="cb157-14"><a href="#cb157-14" aria-hidden="true" tabindex="-1"></a>  ranges::partition_copy_result&lt;borrowed_iterator_t&lt;R&gt;, borrowed_iterator_t&lt;OutR1&gt;, borrowed_iterator_t&lt;OutR2&gt;&gt;</span>
-<span id="cb157-15"><a href="#cb157-15" aria-hidden="true" tabindex="-1"></a>    ranges::partition_copy(Ep&amp;&amp; exec, R&amp;&amp; r, OutR1&amp;&amp; out_true, OutR2&amp;&amp; out_false,</span>
+<span id="cb157-15"><a href="#cb157-15" aria-hidden="true" tabindex="-1"></a>    ranges::partition_copy(Ep&amp;&amp; exec, R&amp;&amp; r, OutR1&amp;&amp; out_true_r, OutR2&amp;&amp; out_false_r,</span>
 <span id="cb157-16"><a href="#cb157-16" aria-hidden="true" tabindex="-1"></a>                           Pred pred, Proj proj = {});</span></code></pre></div>
 
 </div>
@@ -7189,8 +7188,14 @@ overlap.</p>
 <p>[<em>Note 1</em>: For the overload with an
 <code class="sourceCode cpp">ExecutionPolicy</code>, there might be a
 performance cost if <code class="sourceCode cpp">first</code>’s value
-type does not meet the <em>Cpp17CopyConstructible</em> requirements. —
-<em>end note</em>]</p>
+type does not meet the <em>Cpp17CopyConstructible</em> requirements.
+<span class="add" style="color: #006e28"><ins>For the overloads with an
+<em><span><code class="sourceCode default">execution-policy</code></span></em>,
+there might be a performance cost if
+<span><code class="sourceCode default">first</code></span>’s value type
+does not meet the
+<span><code class="sourceCode default">copy_constructible</code></span>
+requirements.</ins></span> — <em>end note</em>.]</p>
 <p><span class="marginalizedparent"><a class="marginalized">17</a></span>
 <em>Effects</em>: For each iterator
 <code class="sourceCode cpp">i</code> in <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>,
@@ -7252,19 +7257,53 @@ applications of <code class="sourceCode cpp">pred</code> and
 <span id="cb159-12"><a href="#cb159-12" aria-hidden="true" tabindex="-1"></a>         class Proj1 = identity, class Proj2 = identity&gt;</span>
 <span id="cb159-13"><a href="#cb159-13" aria-hidden="true" tabindex="-1"></a>  requires mergeable&lt;iterator_t&lt;R1&gt;, iterator_t&lt;R2&gt;, iterator_t&lt;OutR&gt;, Comp, Proj1, Proj2&gt;</span>
 <span id="cb159-14"><a href="#cb159-14" aria-hidden="true" tabindex="-1"></a>  ranges::merge_result&lt;borrowed_iterator_t&lt;R1&gt;, borrowed_iterator_t&lt;R2&gt;, borrowed_iterator_t&lt;OutR&gt;&gt;</span>
-<span id="cb159-15"><a href="#cb159-15" aria-hidden="true" tabindex="-1"></a>    ranges::merge(Ep&amp;&amp; exec, R1&amp;&amp; r1, R2&amp;&amp; r2, OutR&amp;&amp; result,</span>
+<span id="cb159-15"><a href="#cb159-15" aria-hidden="true" tabindex="-1"></a>    ranges::merge(Ep&amp;&amp; exec, R1&amp;&amp; r1, R2&amp;&amp; r2, OutR&amp;&amp; result_r,</span>
 <span id="cb159-16"><a href="#cb159-16" aria-hidden="true" tabindex="-1"></a>                  Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {});</span></code></pre></div>
 
 </div>
+<div class="rm" style="color: #bf0303">
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
-Let <em><code class="sourceCode cpp">N</code></em> be <code class="sourceCode cpp"><span class="op">(</span>last1 <span class="op">-</span> first1<span class="op">)</span> <span class="op">+</span> <span class="op">(</span>last2 <span class="op">-</span> first2<span class="op">)</span></code>.
-Let <code class="sourceCode cpp">comp</code> be
-<code class="sourceCode cpp">less<span class="op">{}</span></code>,
-<code class="sourceCode cpp">proj1</code> be
-<code class="sourceCode cpp">identity<span class="op">{}</span></code>,
-and <code class="sourceCode cpp">proj2</code> be
-<code class="sourceCode cpp">identity<span class="op">{}</span></code>,
-for the overloads with no parameters by those names.</p>
+Let <em><code class="sourceCode default">N</code></em> be <code class="sourceCode default">(last1 - first1) + (last2 - first2)</code>.
+Let <code class="sourceCode default">comp</code> be
+<code class="sourceCode default">less{}</code>,
+<code class="sourceCode default">proj1</code> be
+<code class="sourceCode default">identity{}</code>, and
+<code class="sourceCode default">proj2</code> be
+<code class="sourceCode default">identity{}</code>, for the overloads
+with no parameters by those names.</p>
+</div>
+<div class="add" style="color: #006e28">
+<p><span class="marginalizedparent"><a class="marginalized">x</a></span>
+Let</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(x.1)</a></span>
+<em><code class="sourceCode default">M</code></em> be <code class="sourceCode default">(last1 - first1) + (last2 - first2)</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(x.2)</a></span>
+<code class="sourceCode default">comp</code> be
+<code class="sourceCode default">less{}</code>,
+<code class="sourceCode default">proj1</code> be
+<code class="sourceCode default">identity{}</code>, and
+<code class="sourceCode default">proj2</code> be
+<code class="sourceCode default">identity{}</code>, for the overloads
+with no parameters by those names;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(x.3)</a></span>
+<em><code class="sourceCode default">N</code></em> be
+<code class="sourceCode default">min(<em>M</em>, result_last - result)</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(x.4)</a></span>
+<code class="sourceCode default">result_last</code> be
+<code class="sourceCode default">result + <em>N</em></code> for the
+overloads with no parameter
+<code class="sourceCode default">result_last</code> or
+<code class="sourceCode default">result_r</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(x.5)</a></span>
+<em><code class="sourceCode default">E</code></em> be <code class="sourceCode default">bool(invoke(comp, invoke(proj2, e2), invoke(proj1, e1)))</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(x.6)</a></span>
+<em><code class="sourceCode default">K</code></em> be the number of
+elements for which <em><code class="sourceCode default">E</code></em>
+holds.</li>
+</ul>
+
+</div>
 <p><span class="marginalizedparent"><a class="marginalized">2</a></span>
 <em>Preconditions</em>: The ranges <code class="sourceCode cpp"><span class="op">[</span>first1, last1<span class="op">)</span></code>
 and <code class="sourceCode cpp"><span class="op">[</span>first2, last2<span class="op">)</span></code>
@@ -7273,10 +7312,24 @@ are sorted with respect to <code class="sourceCode cpp">comp</code> and
 <code class="sourceCode cpp">proj2</code>, respectively. The resulting
 range does not overlap with either of the original ranges.</p>
 <p><span class="marginalizedparent"><a class="marginalized">3</a></span>
-<em>Effects</em>: Copies all the elements of the two ranges <code class="sourceCode cpp"><span class="op">[</span>first1, last1<span class="op">)</span></code>
-and <code class="sourceCode cpp"><span class="op">[</span>first2, last2<span class="op">)</span></code>
-into the range <code class="sourceCode cpp"><span class="op">[</span>result, result_last<span class="op">)</span></code>,
-where <code class="sourceCode cpp">result_last</code> is <code class="sourceCode cpp">result <span class="op">+</span> <em>N</em></code>.
+<em>Effects</em>: <span class="rm" style="color: #bf0303"><del>Copies
+all the elements of the two ranges
+<span><code class="sourceCode default">[first1, last1)</code></span> and
+<span><code class="sourceCode default">[first2, last2)</code></span>
+into the range
+<span><code class="sourceCode default">[result, result_last)</code></span>,
+where <span><code class="sourceCode default">result_last</code></span>
+is
+<span><code class="sourceCode default">result + <em>N</em></code></span></del></span><span class="add" style="color: #006e28"><ins>Copies
+<span><code class="sourceCode default">[first1 + <em>N</em> - <em>K</em>)</code></span>
+elements of the range
+<span><code class="sourceCode default">[first1, last1)</code></span> and
+<span><code class="sourceCode default">[first2 + <em>K</em>)</code></span>
+elements of the range
+<span><code class="sourceCode default">[first2, last2)</code></span></ins></span>
+into the range <code class="sourceCode cpp"><span class="op">[</span>result, <span class="rm" style="color: #bf0303"><del>result_last</del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">result + <em>N</em></code></span></ins></span><span class="op">)</span></code><span class="rm" style="color: #bf0303"><del>, where
+<span><code class="sourceCode default">result_last</code></span> is
+<span><code class="sourceCode default">result + <em>N</em></code></span></del></span>.
 If an element <code class="sourceCode cpp">a</code> precedes
 <code class="sourceCode cpp">b</code> in an input range,
 <code class="sourceCode cpp">a</code> is copied into the output range
@@ -7284,7 +7337,7 @@ before <code class="sourceCode cpp">b</code>. If
 <code class="sourceCode cpp">e1</code> is an element of <code class="sourceCode cpp"><span class="op">[</span>first1, last1<span class="op">)</span></code>
 and <code class="sourceCode cpp">e2</code> of <code class="sourceCode cpp"><span class="op">[</span>first2, last2<span class="op">)</span></code>,
 <code class="sourceCode cpp">e2</code> is copied into the output range
-before <code class="sourceCode cpp">e1</code> if and only if <code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(</span>invoke<span class="op">(</span>comp, invoke<span class="op">(</span>proj2, e2<span class="op">)</span>, invoke<span class="op">(</span>proj1, e1<span class="op">)))</span></code>
+before <code class="sourceCode cpp">e1</code> if and only if <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">bool(invoke(comp, invoke(proj2, e2), invoke(proj1, e1)))</code></span></del></span><span class="add" style="color: #006e28"><ins><em><span><code class="sourceCode default">E</code></span></em></ins></span>
 is <code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">4</a></span>
 <em>Returns</em>:</p>
@@ -7293,7 +7346,7 @@ is <code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
 <code class="sourceCode cpp">result_last</code> for the overloads in
 namespace <code class="sourceCode cpp">std</code>.</li>
 <li><span class="marginalizedparent"><a class="marginalized">(4.2)</a></span>
-<code class="sourceCode cpp"><span class="op">{</span>last1, last2, result_last<span class="op">}</span></code>
+<span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">{last1, last2, result_last}</code></span></del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">{first1 + <em>N</em> - <em>K</em>, first2 + <em>K</em>, result + <em>N</em>}</code></span></ins></span>
 for the overloads in namespace
 <code class="sourceCode cpp">ranges</code>.</li>
 </ul>
@@ -7301,14 +7354,15 @@ for the overloads in namespace
 <em>Complexity</em>:</p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(5.1)</a></span> For
-the overloads with no
-<code class="sourceCode cpp">ExecutionPolicy</code>, at most
+the overloads with no <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>execution policy</ins></span>,
+at most
 <code class="sourceCode cpp"><em>N</em> − <span class="dv">1</span></code>
 comparisons and applications of each projection.</li>
 <li><span class="marginalizedparent"><a class="marginalized">(5.2)</a></span> For
-the overloads with an
-<code class="sourceCode cpp">ExecutionPolicy</code>, <code class="sourceCode cpp"><em>O</em><span class="op">(</span><em>N</em><span class="op">)</span></code>
-comparisons.</li>
+the overloads with an <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>execution policy</ins></span>,
+<code class="sourceCode cpp"><em>O</em><span class="op">(</span><em>N</em><span class="op">)</span></code>
+comparisons <span class="add" style="color: #006e28"><ins>and
+applications of each projection</ins></span>.</li>
 </ul>
 <p><span class="marginalizedparent"><a class="marginalized">6</a></span>
 <em>Remarks</em>: Stable (<span><a href="https://wg21.link/algorithm.stable">[algorithm.stable]</a></span>).</p>
@@ -7357,9 +7411,8 @@ overload in namespace <code class="sourceCode cpp">ranges</code>.</p>
 <em>Complexity</em>: Let <code class="sourceCode cpp"><em>N</em> <span class="op">=</span> last <span class="op">-</span> first</code>:</p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(11.1)</a></span> For
-the overloads with no
-<code class="sourceCode cpp">ExecutionPolicy</code>, and if enough
-additional memory is available, exactly
+the overloads with no <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>execution policy</ins></span>,
+and if enough additional memory is available, exactly
 <code class="sourceCode cpp"><em>N</em> − <span class="dv">1</span></code>
 comparisons.</li>
 <li><span class="marginalizedparent"><a class="marginalized">(11.2)</a></span>
@@ -7474,7 +7527,7 @@ comparisons and applications of each projection.</p>
 <span id="cb167-12"><a href="#cb167-12" aria-hidden="true" tabindex="-1"></a>         class Proj1 = identity, class Proj2 = identity&gt;</span>
 <span id="cb167-13"><a href="#cb167-13" aria-hidden="true" tabindex="-1"></a>  requires mergeable&lt;iterator_t&lt;R1&gt;, iterator_t&lt;R2&gt;, iterator_t&lt;OutR&gt;, Comp, Proj1, Proj2&gt;</span>
 <span id="cb167-14"><a href="#cb167-14" aria-hidden="true" tabindex="-1"></a>  ranges::set_union_result&lt;borrowed_iterator_t&lt;R1&gt;, borrowed_iterator_t&lt;R2&gt;, borrowed_iterator_t&lt;OutR&gt;&gt;</span>
-<span id="cb167-15"><a href="#cb167-15" aria-hidden="true" tabindex="-1"></a>    ranges::set_union(Ep&amp;&amp; exec, R1&amp;&amp; r1, R2&amp;&amp; r2, OutR&amp;&amp; result,</span>
+<span id="cb167-15"><a href="#cb167-15" aria-hidden="true" tabindex="-1"></a>    ranges::set_union(Ep&amp;&amp; exec, R1&amp;&amp; r1, R2&amp;&amp; r2, OutR&amp;&amp; result_r,</span>
 <span id="cb167-16"><a href="#cb167-16" aria-hidden="true" tabindex="-1"></a>                      Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {});</span></code></pre></div>
 
 </div>
@@ -7500,9 +7553,11 @@ the ranges.</p>
 <em>Returns</em>: Let <code class="sourceCode cpp">result_last</code> be
 the end of the constructed range. Returns</p>
 <ul>
-<li>[4.1] <code class="sourceCode cpp">result_last</code> for the
-overloads in namespace <code class="sourceCode cpp">std</code>.</li>
-<li>[4.2] <code class="sourceCode cpp"><span class="op">{</span>last1, last2, result_last<span class="op">}</span></code>
+<li><span class="marginalizedparent"><a class="marginalized">(4.1)</a></span>
+<code class="sourceCode cpp">result_last</code> for the overloads in
+namespace <code class="sourceCode cpp">std</code>.</li>
+<li><span class="marginalizedparent"><a class="marginalized">(4.2)</a></span>
+<code class="sourceCode cpp"><span class="op">{</span>last1, last2, result_last<span class="op">}</span></code>
 for the overloads in namespace
 <code class="sourceCode cpp">ranges</code>.</li>
 </ul>
@@ -7551,7 +7606,7 @@ order.</p>
 <span id="cb169-12"><a href="#cb169-12" aria-hidden="true" tabindex="-1"></a>         class Proj1 = identity, class Proj2 = identity&gt;</span>
 <span id="cb169-13"><a href="#cb169-13" aria-hidden="true" tabindex="-1"></a>  requires mergeable&lt;iterator_t&lt;R1&gt;, iterator_t&lt;R2&gt;, iterator_t&lt;OutR&gt;, Comp, Proj1, Proj2&gt;</span>
 <span id="cb169-14"><a href="#cb169-14" aria-hidden="true" tabindex="-1"></a>  ranges::set_intersection_result&lt;borrowed_iterator_t&lt;R1&gt;, borrowed_iterator_t&lt;R2&gt;, borrowed_iterator_t&lt;OutR&gt;&gt;</span>
-<span id="cb169-15"><a href="#cb169-15" aria-hidden="true" tabindex="-1"></a>    ranges::set_intersection(Ep&amp;&amp; exec, R1&amp;&amp; r1, R2&amp;&amp; r2, OutR&amp;&amp; result,</span>
+<span id="cb169-15"><a href="#cb169-15" aria-hidden="true" tabindex="-1"></a>    ranges::set_intersection(Ep&amp;&amp; exec, R1&amp;&amp; r1, R2&amp;&amp; r2, OutR&amp;&amp; result_r,</span>
 <span id="cb169-16"><a href="#cb169-16" aria-hidden="true" tabindex="-1"></a>                             Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {});</span></code></pre></div>
 
 </div>
@@ -7628,7 +7683,7 @@ order.</p>
 <span id="cb171-12"><a href="#cb171-12" aria-hidden="true" tabindex="-1"></a>         class Proj1 = identity, class Proj2 = identity&gt;</span>
 <span id="cb171-13"><a href="#cb171-13" aria-hidden="true" tabindex="-1"></a>  requires mergeable&lt;iterator_t&lt;R1&gt;, iterator_t&lt;R2&gt;, iterator_t&lt;OutR&gt;, Comp, Proj1, Proj2&gt;</span>
 <span id="cb171-14"><a href="#cb171-14" aria-hidden="true" tabindex="-1"></a>  ranges::set_difference_result&lt;borrowed_iterator_t&lt;R1&gt;, borrowed_iterator_t&lt;OutR&gt;&gt;</span>
-<span id="cb171-15"><a href="#cb171-15" aria-hidden="true" tabindex="-1"></a>    ranges::set_difference(Ep&amp;&amp; exec, R1&amp;&amp; r1, R2&amp;&amp; r2, OutR&amp;&amp; result,</span>
+<span id="cb171-15"><a href="#cb171-15" aria-hidden="true" tabindex="-1"></a>    ranges::set_difference(Ep&amp;&amp; exec, R1&amp;&amp; r1, R2&amp;&amp; r2, OutR&amp;&amp; result_r,</span>
 <span id="cb171-16"><a href="#cb171-16" aria-hidden="true" tabindex="-1"></a>                           Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {});</span></code></pre></div>
 
 </div>
@@ -7707,7 +7762,7 @@ are copied to the output range, in order.</p>
 <span id="cb173-12"><a href="#cb173-12" aria-hidden="true" tabindex="-1"></a>         class Proj1 = identity, class Proj2 = identity&gt;</span>
 <span id="cb173-13"><a href="#cb173-13" aria-hidden="true" tabindex="-1"></a>  requires mergeable&lt;iterator_t&lt;R1&gt;, iterator_t&lt;R2&gt;, iterator_t&lt;OutR&gt;, Comp, Proj1, Proj2&gt;</span>
 <span id="cb173-14"><a href="#cb173-14" aria-hidden="true" tabindex="-1"></a>  ranges::set_symmetric_difference_result&lt;borrowed_iterator_t&lt;R1&gt;, borrowed_iterator_t&lt;R2&gt;, borrowed_iterator_t&lt;OutR&gt;&gt;</span>
-<span id="cb173-15"><a href="#cb173-15" aria-hidden="true" tabindex="-1"></a>    ranges::set_symmetric_difference(Ep&amp;&amp; exec, R1&amp;&amp; r1, R2&amp;&amp; r2, OutR&amp;&amp; result,</span>
+<span id="cb173-15"><a href="#cb173-15" aria-hidden="true" tabindex="-1"></a>    ranges::set_symmetric_difference(Ep&amp;&amp; exec, R1&amp;&amp; r1, R2&amp;&amp; r2, OutR&amp;&amp; result_r,</span>
 <span id="cb173-16"><a href="#cb173-16" aria-hidden="true" tabindex="-1"></a>                                    Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {});</span></code></pre></div>
 
 </div>
