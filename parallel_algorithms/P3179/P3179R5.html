@@ -1784,7 +1784,7 @@ algorithms to add
 </table>
 <h2 data-number="5.2" id="out_of_scope"><span class="header-section-number">5.2</span> Out-of-scope<a href="#out_of_scope" class="self-link"></a></h2>
 <h3 data-number="5.2.1" id="corner_cases"><span class="header-section-number">5.2.1</span> Corner cases<a href="#corner_cases" class="self-link"></a></h3>
-<p>Below we list of algorithms where we faced design issue(s). We would
+<p>Below we list the algorithms where we faced design issue(s). We would
 like to add them later:</p>
 <ul>
 <li><code class="sourceCode cpp">rotate_copy</code></li>
@@ -1872,33 +1872,7 @@ the existing ones.</p>
 prior to the next committee F2F meeting in Austria, 2025 is the
 following:</p>
 <ul>
-<li><del>Update <span><a href="https://wg21.link/algorithm.syn">[algorithm.syn]</a></span></del></li>
-<li><del>Add the algorithm descriptions to the wording, even if no
-changes are made</del></li>
-<li><del>Add random-access-sized-range as an exposition-only
-concept</del></li>
-<li><del>Use the old feature testing macro</del></li>
-<li><del>Shorten the exec policy parameter + italicize the exposition
-only context</del></li>
-<li>Add mentioning of <code class="sourceCode cpp">result_last</code> or
-similar for the algorithms where range-as-an-output and a novelty
-(<code class="sourceCode cpp">copy</code>,
-<code class="sourceCode cpp">transform</code>, etc.)</li>
-<li><del>Decide on
-<code class="sourceCode cpp">rotate_copy</code></del></li>
-<li><del>Decide if <code class="sourceCode cpp">fill</code> should use
-<code class="sourceCode cpp">output_iterator</code> or not</del></li>
-<li><del>Add sentinel-for-output for
-<code class="sourceCode cpp">copy_n</code> algorithm family</del></li>
-<li>Clarify that views can be copied by parallel algorithms</li>
-<li>The thread safety rules for <code class="sourceCode cpp">begin<span class="op">()/</span>end<span class="op">()</span></code>
-should be like for element access function</li>
 <li>Add testing experience of thread safe access to the views</li>
-<li><del>Add short descriptions of the new exposition-only concepts to
-the design overview</del></li>
-<li><del>Fix cross-references</del></li>
-<li>In <span><a href="https://wg21.link/algorithms.parallel.defns">[algorithms.parallel.defns]</a></span>,
-maybe Mention “ranges” next to iterators etc.</li>
 <li>Add necessary wording modifications to
 <code class="sourceCode cpp">partition_copy</code> and
 <code class="sourceCode cpp">set_</code> algorithms family (like
@@ -1968,6 +1942,10 @@ such views?</li>
 standard libraries?</li>
 <li>Do we need to add extra requirements towards thread safety to the
 standard views?</li>
+<li>Should it be allowed for parallel algorithms to copy views?</li>
+<li>Should <code class="sourceCode cpp">begin<span class="op">()/</span>end<span class="op">()/</span>size<span class="op">()</span></code>
+and possibly other operations with ranges be considered like element
+access functions for the purpose of thread safety definition?</li>
 </ul>
 <h1 data-number="8" id="formal_wording"><span class="header-section-number">8</span> Formal wording<a href="#formal_wording" class="self-link"></a></h1>
 <h2 data-number="8.1" id="modify_version_syn"><span class="header-section-number">8.1</span> Modify the
@@ -2002,7 +1980,8 @@ concept specifies the requirements of a
 <code class="sourceCode default">range</code> type that is sized and
 allows random access to its elements.</p>
 <p>[<em>Note X</em>: This concept constraints some parallel algorithm
-overloads; see [algorithms]. — <em>end note</em>]</p>
+overloads; see <span><a href="https://wg21.link/algorithms">[algorithms]</a></span> — <em>end
+note</em>]</p>
 <div class="sourceCode" id="cb25"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>  template&lt;class R&gt;</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    concept <em>random-access-sized-range</em> =     <em>// exposition only</em></span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>      random_access_range&lt;R&gt; &amp;&amp; sized_range&lt;R&gt;;</span></code></pre></div>
@@ -4980,7 +4959,7 @@ otherwise <code class="sourceCode cpp">ranges<span class="op">::</span>equal<spa
 <span id="cb79-8"><a href="#cb79-8" aria-hidden="true" tabindex="-1"></a>    ranges::copy(Ep&amp;&amp; exec, R&amp;&amp; r, OutR&amp;&amp; result_r);</span></code></pre></div>
 <p><span class="marginalizedparent"><a class="marginalized">x</a></span>
 Let <code class="sourceCode default">result_last</code> be
-<code class="sourceCode default">first + (last - first)</code> for the
+<code class="sourceCode default">result + (last - first)</code> for the
 overloads with no parameter
 <code class="sourceCode default">result_last</code> or
 <code class="sourceCode default">result_r</code>.</p>
@@ -5028,7 +5007,7 @@ assignments.</p>
 <span id="cb81-5"><a href="#cb81-5" aria-hidden="true" tabindex="-1"></a>    ranges::copy_n(Ep&amp;&amp; exec, I first, iter_difference_t&lt;I&gt; n, O result, OutS result_last);</span></code></pre></div>
 <p><span class="marginalizedparent"><a class="marginalized">x</a></span>
 Let <code class="sourceCode default">result_last</code> be
-<code class="sourceCode default">first + (last - first)</code> for the
+<code class="sourceCode default">result + (last - first)</code> for the
 overloads with no parameter
 <code class="sourceCode default">result_last</code>.</p>
 </div>
@@ -5106,7 +5085,7 @@ Let:</p>
 <ul>
 <li><p><span class="marginalizedparent"><a class="marginalized">(x.1)</a></span>
 <code class="sourceCode default">result_last</code> be
-<code class="sourceCode default">first + (last - first)</code> for the
+<code class="sourceCode default">result + (last - first)</code> for the
 overloads with no parameter
 <code class="sourceCode default">result_last</code> or
 <code class="sourceCode default">result_r</code>;</p></li>
@@ -5209,7 +5188,7 @@ for the overloads in namespace
 </ul>
 <p><span class="marginalizedparent"><a class="marginalized">x</a></span>
 Let <code class="sourceCode default">result_last</code> be
-<code class="sourceCode default">first + (last - first)</code> for the
+<code class="sourceCode default">result + (last - first)</code> for the
 overloads with no parameter
 <code class="sourceCode default">result_last</code> or
 <code class="sourceCode default">result_r</code>.</p>
@@ -5649,7 +5628,7 @@ Let</p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(x.1)</a></span>
 <code class="sourceCode default">result_last</code> be
-<code class="sourceCode default">first + (last - first)</code> for the
+<code class="sourceCode default">result + (last - first)</code> for the
 overloads with no parameter
 <code class="sourceCode default">result_last</code> or
 <code class="sourceCode default">result_r</code>;</li>
@@ -5961,7 +5940,7 @@ Let</p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(x.1)</a></span>
 <code class="sourceCode default">result_last</code> be
-<code class="sourceCode default">first + (last - first)</code> for the
+<code class="sourceCode default">result + (last - first)</code> for the
 overloads with no parameter
 <code class="sourceCode default">result_last</code> or
 <code class="sourceCode default">result_r</code>;</li>
@@ -6152,18 +6131,18 @@ for the overloads in namespace
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(x.1)</a></span>
 <code class="sourceCode default">result_last</code> be
-<code class="sourceCode default">first + (last - first)</code> for the
+<code class="sourceCode default">result + (last - first)</code> for the
 overloads with no parameter
 <code class="sourceCode default">result_last</code> or
 <code class="sourceCode default">result_r</code>;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(x.2)</a></span>
-<em><code class="sourceCode default">M</code></em> be the number the
-first element from every consecutive group of equal elements in the
-range <code class="sourceCode default">[first, last)</code> for which
-<em><code class="sourceCode default">E</code></em> holds.</li>
+<em><code class="sourceCode default">M</code></em> be the number of
+elements in the range
+<code class="sourceCode default">[first + 1, last)</code> for which
+<em><code class="sourceCode default">E</code></em> is
+<code class="sourceCode default">false</code>.</li>
 <li><span class="marginalizedparent"><a class="marginalized">(x.3)</a></span>
-<em><code class="sourceCode default">N</code></em> be
-<code class="sourceCode default">min(<em>M</em>, result_last - result)</code>.</li>
+<em><code class="sourceCode default">N</code></em> be <code class="sourceCode default">min(<em>M</em> + 1, result_last - result)</code>.</li>
 </ul>
 
 </div>
@@ -6177,7 +6156,7 @@ to <code class="sourceCode cpp">result</code>.</p>
 <ul>
 <li><p><span class="marginalizedparent"><a class="marginalized">(8.1)</a></span> The
 ranges <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
-and <code class="sourceCode cpp"><span class="op">[</span>result, result<span class="op">+(</span>last<span class="op">-</span>first<span class="op">))</span></code>
+and <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">(last - first)</code></span></del></span><span class="add" style="color: #006e28"><ins><em>N</em></ins></span><span class="op">)</span></code>
 do not overlap.</p></li>
 <li><p><span class="marginalizedparent"><a class="marginalized">(8.2)</a></span> For
 the overloads in namespace <code class="sourceCode cpp">std</code>:</p>
@@ -6227,10 +6206,9 @@ and
 <span><code class="sourceCode default">copy_assignable</code></span>. —
 <em>end note</em>]</ins></span></p>
 <p><span class="marginalizedparent"><a class="marginalized">9</a></span>
-<em>Effects</em>: Copies <span class="rm" style="color: #bf0303"><del>only the</del></span><span class="add" style="color: #006e28"><ins><em><span><code class="sourceCode default">N</code></span></em></ins></span>
-first element<span class="add" style="color: #006e28"><ins>s</ins></span> from every consecutive group
-of equal elements referred to by the iterator
-<code class="sourceCode cpp">i</code> in the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+<em>Effects</em>: Copies only the first element from <span class="rm" style="color: #bf0303"><del>every</del></span><span class="add" style="color: #006e28"><ins><em><span><code class="sourceCode default">N</code></span></em></ins></span>
+consecutive group<span class="add" style="color: #006e28"><ins>s</ins></span> of equal elements referred to
+by the iterator <code class="sourceCode cpp">i</code> in the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
 for which <em><code class="sourceCode cpp">E</code></em> holds <span class="add" style="color: #006e28"><ins>into a range
 <span><code class="sourceCode default">[result, result + <em>N</em>)</code></span></ins></span>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">10</a></span>
@@ -6254,8 +6232,8 @@ otherwise</ins></span>.</li>
 </ul>
 <p><span class="marginalizedparent"><a class="marginalized">11</a></span>
 <em>Complexity</em>: <span class="rm" style="color: #bf0303"><del>Exactly</del></span><span class="add" style="color: #006e28"><ins>At most</ins></span> <code class="sourceCode cpp">last <span class="op">-</span> first <span class="op">-</span> <span class="dv">1</span></code>
-applications of the corresponding predicate and no more than twice
-asmany applications of any projection.</p>
+applications of the corresponding predicate and no more than twice as
+many applications of any projection.</p>
 <h2 data-number="8.35" id="modify_reverse"><span class="header-section-number">8.35</span> Modify
 <code class="sourceCode cpp">reverse</code> in <span><a href="https://wg21.link/alg.reverse">[alg.reverse]</a></span><a href="#modify_reverse" class="self-link"></a></h2>
 <div class="sourceCode" id="cb116"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb116-1"><a href="#cb116-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>bidirectional_iterator I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S<span class="op">&gt;</span></span>
@@ -6313,24 +6291,29 @@ swaps.</p>
 <span id="cb119-8"><a href="#cb119-8" aria-hidden="true" tabindex="-1"></a>  ranges::reverse_copy_result&lt;borrowed_iterator_t&lt;R&gt;, borrowed_iterator_t&lt;OutR&gt;&gt;</span>
 <span id="cb119-9"><a href="#cb119-9" aria-hidden="true" tabindex="-1"></a>    ranges::reverse_copy(Ep&amp;&amp; exec, R&amp;&amp; r, OutR&amp;&amp; result_r);</span></code></pre></div>
 <p><span class="marginalizedparent"><a class="marginalized">x</a></span>
-<code class="sourceCode default">result_last</code> be
-<code class="sourceCode default">first + (last - first)</code> for the
+Let <code class="sourceCode default">result_last</code> be
+<code class="sourceCode default">result + (last - first)</code> for the
 overloads with no parameter
 <code class="sourceCode default">result_last</code> or
-<code class="sourceCode default">result_r</code>;</p>
+<code class="sourceCode default">result_r</code>.</p>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">5</a></span>
 Let <em><code class="sourceCode cpp">N</code></em> be <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">last - first</code></span></del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">min(last - first, result_last - result)</code></span></ins></span>.</p>
+<div class="add" style="color: #006e28">
+<p><span class="marginalizedparent"><a class="marginalized">x</a></span>
+Let <em><code class="sourceCode default">NEW_FIRST</code></em> be
+<code class="sourceCode default">first + (last - first) - <em>N</em></code>.</p>
+</div>
 <p><span class="marginalizedparent"><a class="marginalized">6</a></span>
-<em>Preconditions</em>: The ranges <code class="sourceCode cpp"><span class="op">[</span>first, <span class="rm" style="color: #bf0303"><del>last</del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">first + <em>N</em></code></span></ins></span><span class="op">)</span></code>
+<em>Preconditions</em>: The ranges <code class="sourceCode cpp"><span class="op">[</span><span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins><em>NEW_FIRST</em></ins></span>, last<span class="op">)</span></code>
 and <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <em>N</em><span class="op">)</span></code>
 do not overlap.</p>
 <p><span class="marginalizedparent"><a class="marginalized">7</a></span>
-<em>Effects</em>: Copies the range <code class="sourceCode cpp"><span class="op">[</span>first, <span class="rm" style="color: #bf0303"><del>last</del></span><span class="add" style="color: #006e28"><ins>`first + <span class="citation" data-cites="_N_"><em>N</em></span></ins></span><span class="op">)</span></code>
+<em>Effects</em>: Copies the range <code class="sourceCode cpp"><span class="op">[</span><span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins><em>NEW_FIRST</em></ins></span>, last<span class="op">)</span></code>
 to the range <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <em>N</em><span class="op">)</span></code>
 such that for every non-negative integer
 <code class="sourceCode cpp">i <span class="op">&lt;</span> <em>N</em></code>
-the following assignment takes place: <code class="sourceCode cpp"><span class="op">*(</span>result <span class="op">+</span> <em>N</em> <span class="op">-</span> <span class="dv">1</span> <span class="op">-</span> i<span class="op">)</span> <span class="op">=</span> <span class="op">*(</span>first <span class="op">+</span> i<span class="op">)</span></code>.</p>
+the following assignment takes place: <code class="sourceCode cpp"><span class="op">*(</span>result <span class="op">+</span> <em>N</em> <span class="op">-</span> <span class="dv">1</span> <span class="op">-</span> i<span class="op">)</span> <span class="op">=</span> <span class="op">*(</span><span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins><em>NEW_FIRST</em></ins></span> <span class="op">+</span> i<span class="op">)</span></code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">8</a></span>
 <em>Returns</em>:</p>
 <ul>
@@ -6339,7 +6322,7 @@ the following assignment takes place: <code class="sourceCode cpp"><span class="
 for the overloads in namespace
 <code class="sourceCode cpp">std</code>.</li>
 <li><span class="marginalizedparent"><a class="marginalized">(8.2)</a></span>
-<code class="sourceCode cpp"><span class="op">{</span><span class="rm" style="color: #bf0303"><del>last</del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">first + <em>N</em></code></span></ins></span>, result <span class="op">+</span> <em>N</em><span class="op">}</span></code>
+<code class="sourceCode cpp"><span class="op">{</span><span class="rm" style="color: #bf0303"><del>last</del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default"><em>NEW_FIRST</em></code></span></ins></span>, result <span class="op">+</span> <em>N</em><span class="op">}</span></code>
 for the overloads in namespace
 <code class="sourceCode cpp">ranges</code>.</li>
 </ul>
@@ -7231,20 +7214,24 @@ Let</p>
 <code class="sourceCode default">identity{}</code>, for the overloads
 with no parameters by those names;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(x.3)</a></span>
-<em><code class="sourceCode default">N</code></em> be
-<code class="sourceCode default">min(<em>M</em>, result_last - result)</code>;</li>
-<li><span class="marginalizedparent"><a class="marginalized">(x.4)</a></span>
 <code class="sourceCode default">result_last</code> be
-<code class="sourceCode default">result + <em>N</em></code> for the
+<code class="sourceCode default">result + <em>M</em></code> for the
 overloads with no parameter
 <code class="sourceCode default">result_last</code> or
 <code class="sourceCode default">result_r</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(x.4)</a></span>
+<em><code class="sourceCode default">N</code></em> be
+<code class="sourceCode default">min(<em>M</em>, result_last - result)</code>;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(x.5)</a></span>
 <em><code class="sourceCode default">E</code></em> be <code class="sourceCode default">bool(invoke(comp, invoke(proj2, e2), invoke(proj1, e1)))</code>;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(x.6)</a></span>
-<em><code class="sourceCode default">K</code></em> be the number of
-elements for which <em><code class="sourceCode default">E</code></em>
-holds.</li>
+<em><code class="sourceCode default">K</code></em> be the rightmost
+position of an element <code class="sourceCode default">e2</code> in
+<code class="sourceCode default">[first2, last2)</code> such that the
+number of elements <code class="sourceCode default">e1</code> in
+<code class="sourceCode default">[first1, last1)</code> for which
+<em><code class="sourceCode default">E</code></em> holds is less than or
+equal to <em><code class="sourceCode default">N - K</code></em>.</li>
 </ul>
 
 </div>
@@ -7265,10 +7252,10 @@ into the range
 where <span><code class="sourceCode default">result_last</code></span>
 is
 <span><code class="sourceCode default">result + <em>N</em></code></span></del></span><span class="add" style="color: #006e28"><ins>Copies
-<span><code class="sourceCode default">[first1 + <em>N</em> - <em>K</em>)</code></span>
+<span><code class="sourceCode default">first1 + <em>N</em> - <em>K</em></code></span>
 elements of the range
 <span><code class="sourceCode default">[first1, last1)</code></span> and
-<span><code class="sourceCode default">[first2 + <em>K</em>)</code></span>
+<span><code class="sourceCode default">first2 + <em>K</em></code></span>
 elements of the range
 <span><code class="sourceCode default">[first2, last2)</code></span></ins></span>
 into the range <code class="sourceCode cpp"><span class="op">[</span>result, <span class="rm" style="color: #bf0303"><del>result_last</del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">result + <em>N</em></code></span></ins></span><span class="op">)</span></code><span class="rm" style="color: #bf0303"><del>, where
@@ -8065,7 +8052,7 @@ only if the sequence of elements defined by the range <code class="sourceCode cp
 is lexicographically less than the sequence of elements defined by the
 range <code class="sourceCode cpp"><span class="op">[</span>first2, last2<span class="op">)</span></code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">2</a></span>
-<em>Complexity</em>: At most 2 <code class="sourceCode cpp">min<span class="op">(</span>last1 <span class="op">-</span> first1,  last2 <span class="op">-</span> first2<span class="op">)</span></code>
+<em>Complexity</em>: At most <code class="sourceCode cpp"><span class="dv">2</span> min<span class="op">(</span>last1 <span class="op">-</span> first1, last2 <span class="op">-</span> first2<span class="op">)</span></code>
 applications of the corresponding comparison and each projection, if
 any.</p>
 <p><span class="marginalizedparent"><a class="marginalized">3</a></span>
@@ -8394,32 +8381,33 @@ iterators.</p>
 <h1 data-number="9" id="revision_history"><span class="header-section-number">9</span> Revision history<a href="#revision_history" class="self-link"></a></h1>
 <h2 data-number="9.1" id="r4_r5"><span class="header-section-number">9.1</span> R4 =&gt; R5<a href="#r4_r5" class="self-link"></a></h2>
 <ul>
-<li>Add necessary wording to <span><a href="https://wg21.link/algorithm.syn">[algorithm.syn]</a></span></li>
+<li>Add the necessary wording to <span><a href="https://wg21.link/algorithm.syn">[algorithm.syn]</a></span></li>
 <li>Add the contextual algorithms description to the wording, even if no
-changes are made.</li>
+changes are made</li>
 <li>Add <em><code class="sourceCode cpp">random<span class="op">-</span>access<span class="op">-</span>sized<span class="op">-</span>range</code></em>
-an exposition-only concept for wording simplification</li>
-<li>Suggest to bump old feature testing macro as was voted in LEWG</li>
+as an exposition-only concept for wording simplification</li>
+<li>Suggest to bump the existing feature testing macro as was voted in
+LEWG</li>
 <li>Shorten the <code class="sourceCode cpp">ExecutionPolicy</code>
 parameter, italicize <em><code class="sourceCode cpp">execution<span class="op">-</span>policy</code></em>
-concept in wording.</li>
+concept in wording</li>
 <li>Support <code class="sourceCode cpp">result_last</code> or similar
-for the algorithms where range-as-an-output and a novelty
+for the algorithms where range-as-the-output is a novelty
 (<code class="sourceCode cpp">copy</code>,
 <code class="sourceCode cpp">transform</code>, etc.), unless stated
-otherwise in <a href="#issues_to_address">Issues to address</a> or in <a href="#out_of_scope">Out-of-scope</a>.</li>
+otherwise in <a href="#issues_to_address">Issues to address</a> or in <a href="#out_of_scope">Out-of-scope</a></li>
 <li>Modify <code class="sourceCode cpp">fill</code> and
 <code class="sourceCode cpp">generate</code> algorithms family to use
 <code class="sourceCode cpp">indirectly_writable</code> instead of
 <code class="sourceCode cpp">output_iterator</code> and
 <code class="sourceCode cpp">output_range</code> for design
-consitency.</li>
+consistency</li>
 <li>Add sentinel-for-output for
-<code class="sourceCode cpp">copy_n</code> algorithm family.</li>
+<code class="sourceCode cpp">copy_n</code> algorithm family</li>
 <li>Add short descriptions of the new exposition-only concepts to the
-design overview.</li>
+design overview</li>
 <li>Remove <code class="sourceCode cpp">rotate_copy</code> from scope
-due to design issues.</li>
+due to design issues</li>
 </ul>
 <h2 data-number="9.2" id="r3_r4"><span class="header-section-number">9.2</span> R3 =&gt; R4<a href="#r3_r4" class="self-link"></a></h2>
 <ul>
