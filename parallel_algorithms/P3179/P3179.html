@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2025-01-18" />
+  <meta name="dcterms.date" content="2025-01-22" />
   <title>C++ parallel range algorithms</title>
   <style>
       code{white-space: pre-wrap;}
@@ -466,7 +466,7 @@ algorithms</h1>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2025-01-18</td>
+    <td>2025-01-22</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -757,15 +757,6 @@ Acknowledgments<span></span></a></li>
 </ul>
 </div>
 <style>
-/*
-table, th, td {
-    border: 1px solid black;
-}
-
-span, span * {
-  white-space: pre;
-}
-*/
 @media screen {
     #TOC {
         position: fixed;
@@ -6429,20 +6420,23 @@ swaps.</p>
 <span id="cb124-2"><a href="#cb124-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> indirectly_copyable<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
 <span id="cb124-3"><a href="#cb124-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">constexpr</span> ranges<span class="op">::</span>rotate_copy_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
 <span id="cb124-4"><a href="#cb124-4" aria-hidden="true" tabindex="-1"></a>      ranges<span class="op">::</span>rotate_copy<span class="op">(</span>I first, I middle, S last, O result<span class="op">)</span>;</span></code></pre></div>
-<p><span class="pnun">6</span> Let
-<em><code class="sourceCode cpp">N</code></em> be
+<p><span class="marginalizedparent"><a class="marginalized">6</a></span>
+Let <em><code class="sourceCode cpp">N</code></em> be
 <code class="sourceCode cpp">last <span class="op">-</span> first</code>.</p>
-<p><span class="pnun">7</span> <em>Preconditions</em>: <code class="sourceCode cpp"><span class="op">[</span>first, middle<span class="op">)</span></code>
+<p><span class="marginalizedparent"><a class="marginalized">7</a></span>
+<em>Preconditions</em>: <code class="sourceCode cpp"><span class="op">[</span>first, middle<span class="op">)</span></code>
 and <code class="sourceCode cpp"><span class="op">[</span>middle, last<span class="op">)</span></code>
 are valid ranges. The ranges <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
 and <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <em>N</em><span class="op">)</span></code>
 do not overlap.</p>
-<p><span class="pnun">8</span> <em>Effects</em>: Copies the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+<p><span class="marginalizedparent"><a class="marginalized">8</a></span>
+<em>Effects</em>: Copies the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
 to the range <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <em>N</em><span class="op">)</span></code>
 such that for each non-negative integer
 <code class="sourceCode cpp">i <span class="op">&lt;</span> <em>N</em></code>
 the following assignment takes place: <code class="sourceCode cpp"><span class="op">*(</span>result <span class="op">+</span> i<span class="op">)</span> <span class="op">=</span> <span class="op">*(</span>first <span class="op">+</span> <span class="op">(</span>i <span class="op">+</span> <span class="op">(</span>middle <span class="op">-</span> first<span class="op">))</span> <span class="op">%</span> <em>N</em><span class="op">)</span></code>.</p>
-<p><span class="pnun">9</span> <em>Returns</em>:</p>
+<p><span class="marginalizedparent"><a class="marginalized">9</a></span>
+<em>Returns</em>:</p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(9.1)</a></span>
 <code class="sourceCode cpp">result <span class="op">+</span> <em>N</em></code>
@@ -6453,7 +6447,8 @@ for the overloads in namespace
 for the overload in namespace
 <code class="sourceCode cpp">ranges</code>.</li>
 </ul>
-<p><span class="pnun">10</span> <em>Complexity</em>: Exactly
+<p><span class="marginalizedparent"><a class="marginalized">10</a></span>
+<em>Complexity</em>: Exactly
 <em><code class="sourceCode cpp">N</code></em> assignments.</p>
 <div class="add" style="color: #006e28">
 
@@ -6463,17 +6458,10 @@ for the overload in namespace
 <span id="cb125-4"><a href="#cb125-4" aria-hidden="true" tabindex="-1"></a>  ranges::rotate_copy_result&lt;I, O&gt;</span>
 <span id="cb125-5"><a href="#cb125-5" aria-hidden="true" tabindex="-1"></a>    ranges::rotate_copy(Ep&amp;&amp; exec, I first, I middle, S last, O result, OutS result_last);</span></code></pre></div>
 <p><span class="marginalizedparent"><a class="marginalized">x</a></span>
-Let</p>
-<ul>
-<li><span class="marginalizedparent"><a class="marginalized">(x.1)</a></span>
-<em><code class="sourceCode default">M</code></em> be
-<code class="sourceCode default">last - first</code>;</li>
-<li><span class="marginalizedparent"><a class="marginalized">(x.2)</a></span>
+Let <em><code class="sourceCode default">M</code></em> be
+<code class="sourceCode default">last - first</code> and
 <em><code class="sourceCode default">N</code></em> be
-<code class="sourceCode default">min(<em>M</em>, result_last - result)</code>;</li>
-<li><span class="marginalizedparent"><a class="marginalized">(x.2)</a></span><em><code class="sourceCode default">NEW_MIDDLE</code></em>
-be <code class="sourceCode default">first + ((<em>N</em> + (middle - first)) % <em>M</em>)</code>.</li>
-</ul>
+<code class="sourceCode default">min(<em>M</em>, result_last - result)</code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">x</a></span>
 <em>Preconditions</em>:
 <code class="sourceCode default">[first, middle)</code> and
@@ -6489,16 +6477,7 @@ such that for each non-negative integer
 <code class="sourceCode default">i &lt; <em>N</em></code> the following
 assignment takes place: <code class="sourceCode default">*(result + i) = *(first + (i + (middle - first)) % <em>M</em>)</code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">x</a></span>
-<em>Returns</em>:</p>
-<ul>
-<li><span class="marginalizedparent"><a class="marginalized">(x.1)</a></span>
-<code class="sourceCode default">result + <em>N</em></code> for the
-overloads in namespace <code class="sourceCode default">std</code>.</li>
-<li><span class="marginalizedparent"><a class="marginalized">(x.2)</a></span>
-<code class="sourceCode default">{<em>NEW_MIDDLE</em>, result + <em>N</em>}</code>
-for the overload in namespace
-<code class="sourceCode default">ranges</code>.</li>
-</ul>
+<em>Returns</em>: <code class="sourceCode default">{first + (<em>N</em> + (middle - first)) % <em>M</em>, result + <em>N</em>}</code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">x</a></span>
 <em>Complexity</em>: Exactly
 <em><code class="sourceCode default">N</code></em> assignments.</p>
@@ -7254,7 +7233,7 @@ there might be a performance cost if
 <span><code class="sourceCode default">first</code></span>’s value type
 does not meet the
 <span><code class="sourceCode default">copy_constructible</code></span>
-requirements.</ins></span> — <em>end note</em>.]</p>
+requirements.</ins></span> — <em>end note</em>]</p>
 <p><span class="marginalizedparent"><a class="marginalized">17</a></span>
 <em>Effects</em>: For each iterator
 <code class="sourceCode cpp">i</code> in <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>,
@@ -7285,6 +7264,101 @@ for the overloads in namespace
 <code class="sourceCode cpp">last <span class="op">-</span> first</code>
 applications of <code class="sourceCode cpp">pred</code> and
 <code class="sourceCode cpp">proj</code>.</p>
+<div class="add" style="color: #006e28">
+<p><span class="marginalizedparent"><a class="marginalized">14</a></span> Let</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(x.1)</a></span>
+<code class="sourceCode default">proj</code> be
+<code class="sourceCode default">identity{}</code> for the overloads
+with no parameter named <code class="sourceCode default">proj</code> and
+let <code class="sourceCode default"><em>E</em>(<em>x</em>)</code> be
+<code class="sourceCode default">bool(invoke(pred, invoke(proj, x)))</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(x.2)</a></span>
+<em><code class="sourceCode default">M</code></em> be the number of
+elements for which
+<code class="sourceCode default"><em>E</em>(<em>x</em>)</code> holds,
+<code class="sourceCode default">K</code> be
+<code class="sourceCode default">last - first - <em>M</em></code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(x.3)</a></span>
+<code class="sourceCode default">last_true</code> be
+<code class="sourceCode default">out_true + <em>M</em></code> for the
+overloads with no parameter
+<code class="sourceCode default">last_true</code> or
+<code class="sourceCode default">out_true_r</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(x.4)</a></span>
+<code class="sourceCode default">last_false</code> be
+<code class="sourceCode default">out_false + <em>K</em></code> for the
+overloads with no parameter
+<code class="sourceCode default">last_false</code> or
+<code class="sourceCode default">out_false_r</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(x.5)</a></span>
+<em><code class="sourceCode default">i1</code></em> be the rightmost
+iterator in <code class="sourceCode default">[first, last)</code> for
+which <em><code class="sourceCode default">E</code></em> holds and
+<code class="sourceCode default">out_true == last_true</code>, if such
+an iterator exists. Otherwise, let
+<em><code class="sourceCode default">i1</code></em> be
+<code class="sourceCode default">last</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(x.6)</a></span>
+<em><code class="sourceCode default">i2</code></em> be the rightmost
+iterator in <code class="sourceCode default">[first, last)</code> for
+which <em><code class="sourceCode default">E</code></em> is
+<code class="sourceCode default">false</code> and
+<code class="sourceCode default">out_false == last_false</code>, if such
+an iterator exists. Otherwise, let
+<em><code class="sourceCode default">i2</code></em> be
+<code class="sourceCode default">last</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(x.7)</a></span>
+<em><code class="sourceCode default">N</code></em> be <code class="sourceCode default">min(<em>j1</em> - first, <em>j2</em> - first)</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">15</a></span>
+<em>Mandates</em>: For the overloads in namespace
+<code class="sourceCode default">std</code>, the expression
+<code class="sourceCode default">*first</code> is writable (<span><a href="https://wg21.link/iterator.requirements.general">[iterator.requirements.general]</a></span>)
+to <code class="sourceCode default">out_true</code> and
+<code class="sourceCode default">out_false</code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">16</a></span>
+<em>Preconditions</em>: The input range and output ranges do not
+overlap.</p>
+<p>[<em>Note 1</em>: For the overload with an
+<code class="sourceCode default">ExecutionPolicy</code>, there might be
+a performance cost if <code class="sourceCode default">first</code>’s
+value type does not meet the <em>Cpp17CopyConstructible</em>
+requirements. <span class="add" style="color: #006e28"><ins>For the
+overloads with an
+<em><span><code class="sourceCode default">execution-policy</code></span></em>,
+there might be a performance cost if
+<span><code class="sourceCode default">first</code></span>’s value type
+does not meet the
+<span><code class="sourceCode default">copy_constructible</code></span>
+requirements.</ins></span> — <em>end note</em>]</p>
+<p><span class="marginalizedparent"><a class="marginalized">17</a></span>
+<em>Effects</em>: For each iterator
+<code class="sourceCode default">i</code> in
+<code class="sourceCode default">[first, <em>N</em>)</code>, copies
+<code class="sourceCode default">*i</code> to the output range beginning
+with <code class="sourceCode default">out_true</code> if
+<code class="sourceCode default"><em>E</em>(*i)</code> is
+<code class="sourceCode default">true</code>, or to the output range
+beginning with <code class="sourceCode default">out_false</code>
+otherwise.</p>
+<p><span class="marginalizedparent"><a class="marginalized">18</a></span>
+<em>Returns</em>:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(18.1)</a></span>
+<code class="sourceCode default">{last_true, last_false}</code> for the
+overloads in namespace <code class="sourceCode default">std</code>.</li>
+<li><span class="marginalizedparent"><a class="marginalized">(18.2)</a></span>
+<code class="sourceCode default">{first + <em>N</em>, o1, o2}</code> for
+the overloads in namespace
+<code class="sourceCode default">ranges</code>, where o1… // TODO</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">19</a></span>
+<em>Complexity</em>: At most
+<code class="sourceCode default">first + <em>N</em></code> applications
+of <code class="sourceCode default">pred</code> and
+<code class="sourceCode default">proj</code>.</p>
+</div>
 <h2 data-number="8.45" id="modify_merge"><span class="header-section-number">8.45</span> Modify
 <code class="sourceCode cpp">merge</code> in <span><a href="https://wg21.link/alg.merge">[alg.merge]</a></span><a href="#modify_merge" class="self-link"></a></h2>
 <div class="sourceCode" id="cb158"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb158-1"><a href="#cb158-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>input_iterator I1, sentinel_for<span class="op">&lt;</span>I1<span class="op">&gt;</span> S1, input_iterator I2, sentinel_for<span class="op">&lt;</span>I2<span class="op">&gt;</span> S2,</span>
@@ -7358,10 +7432,10 @@ overloads with no parameter
 <em><code class="sourceCode default">E</code></em> be <code class="sourceCode default">bool(invoke(comp, invoke(proj2, e2), invoke(proj1, e1)))</code>;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(x.6)</a></span>
 <em><code class="sourceCode default">K</code></em> be the rightmost
-position of an element <code class="sourceCode default">e2</code> in
-<code class="sourceCode default">[first2, last2)</code> such that the
-number of elements <code class="sourceCode default">e1</code> in
-<code class="sourceCode default">[first1, last1)</code> for which
+position of an element <code class="sourceCode default">e1</code> in
+<code class="sourceCode default">[first1, last1)</code> such that the
+number of elements <code class="sourceCode default">e2</code> in
+<code class="sourceCode default">[first2, last2)</code> for which
 <em><code class="sourceCode default">E</code></em> holds is less than or
 equal to <em><code class="sourceCode default">N - K</code></em>.</li>
 </ul>
@@ -7375,21 +7449,11 @@ are sorted with respect to <code class="sourceCode cpp">comp</code> and
 <code class="sourceCode cpp">proj2</code>, respectively. The resulting
 range does not overlap with either of the original ranges.</p>
 <p><span class="marginalizedparent"><a class="marginalized">3</a></span>
-<em>Effects</em>: <span class="rm" style="color: #bf0303"><del>Copies
-all the elements of the two ranges
-<span><code class="sourceCode default">[first1, last1)</code></span> and
-<span><code class="sourceCode default">[first2, last2)</code></span>
-into the range
-<span><code class="sourceCode default">[result, result_last)</code></span>,
-where <span><code class="sourceCode default">result_last</code></span>
-is
-<span><code class="sourceCode default">result + <em>N</em></code></span></del></span><span class="add" style="color: #006e28"><ins>Copies
-<span><code class="sourceCode default">first1 + <em>N</em> - <em>K</em></code></span>
-elements of the range
-<span><code class="sourceCode default">[first1, last1)</code></span> and
-<span><code class="sourceCode default">first2 + <em>K</em></code></span>
-elements of the range
-<span><code class="sourceCode default">[first2, last2)</code></span></ins></span>
+<em>Effects</em>: Copies <span class="rm" style="color: #bf0303"><del>all the elements of the two
+ranges</del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default"><em>K</em></code></span>
+elements of the range</ins></span> <code class="sourceCode cpp"><span class="op">[</span>first1, last1<span class="op">)</span></code>
+and <span class="add" style="color: #006e28"><ins><span><code class="sourceCode default"><em>N</em> - <em>K</em></code></span>
+elements of the range</ins></span> <code class="sourceCode cpp"><span class="op">[</span>first2, last2<span class="op">)</span></code>
 into the range <code class="sourceCode cpp"><span class="op">[</span>result, <span class="rm" style="color: #bf0303"><del>result_last</del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">result + <em>N</em></code></span></ins></span><span class="op">)</span></code><span class="rm" style="color: #bf0303"><del>, where
 <span><code class="sourceCode default">result_last</code></span> is
 <span><code class="sourceCode default">result + <em>N</em></code></span></del></span>.
@@ -7409,7 +7473,7 @@ is <code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
 <code class="sourceCode cpp">result_last</code> for the overloads in
 namespace <code class="sourceCode cpp">std</code>.</li>
 <li><span class="marginalizedparent"><a class="marginalized">(4.2)</a></span>
-<span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">{last1, last2, result_last}</code></span></del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">{first1 + <em>N</em> - <em>K</em>, first2 + <em>K</em>, result + <em>N</em>}</code></span></ins></span>
+<span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">{last1, last2, result_last}</code></span></del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">{first1 + <em>K</em>, first2 + <em>N</em> - <em>K</em>, result + <em>N</em>}</code></span></ins></span>
 for the overloads in namespace
 <code class="sourceCode cpp">ranges</code>.</li>
 </ul>
@@ -7594,13 +7658,53 @@ comparisons and applications of each projection.</p>
 <span id="cb167-16"><a href="#cb167-16" aria-hidden="true" tabindex="-1"></a>                      Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {});</span></code></pre></div>
 
 </div>
+<div class="rm" style="color: #bf0303">
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
-Let <code class="sourceCode cpp">comp</code> be
-<code class="sourceCode cpp">less<span class="op">{}</span></code>, and
-<code class="sourceCode cpp">proj1</code> and
-<code class="sourceCode cpp">proj2</code> be
-<code class="sourceCode cpp">identity<span class="op">{}</span></code>
-for the overloads with no parameters by those names.</p>
+Let <code class="sourceCode default">comp</code> be
+<code class="sourceCode default">less{}</code>, and
+<code class="sourceCode default">proj1</code> and
+<code class="sourceCode default">proj2</code> be
+<code class="sourceCode default">identity{}</code> for the overloads
+with no parameters by those names.</p>
+</div>
+<div class="add" style="color: #006e28">
+<p><span class="marginalizedparent"><a class="marginalized">x</a></span>
+Let:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(x.1)</a></span>
+<code class="sourceCode default">comp</code> be
+<code class="sourceCode default">less{}</code>, and
+<code class="sourceCode default">proj1</code> and
+<code class="sourceCode default">proj2</code> be
+<code class="sourceCode default">identity{}</code> for the overloads
+with no parameters by those names;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(x.2)</a></span>
+<em><code class="sourceCode default">K</code></em> be the number of
+elements in <code class="sourceCode default">[first2, last2)</code> that
+are not present in
+<code class="sourceCode default">[first1, last1)</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(x.3)</a></span>
+<code class="sourceCode default">result_last</code> be <code class="sourceCode default">result + (last1 - first1) + <em>K</em></code>
+for the overloads with no parameter
+<code class="sourceCode default">result_last</code> or
+<code class="sourceCode default">result_r</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(x.4)</a></span>
+<em><code class="sourceCode default">N</code></em> be <code class="sourceCode default">min((last1 - first1) + <em>K</em>, result_last - result)</code>.</li>
+</ul>
+<div class="note">
+<p><span>[ <em>Note:</em> </span>If
+<code class="sourceCode default">[first1, last1)</code> contains
+<em><code class="sourceCode default">m</code></em> elements that are
+equivalent to each other and
+<code class="sourceCode default">[first2, last2)</code> contains
+<em><code class="sourceCode default">n</code></em> elements that are
+equivalent to them, then the last
+<code class="sourceCode default">max(<em>n</em> − <em>m</em>, 0)</code>
+equivalent elements from the second range are not present in the first
+range.<span> — <em>end note</em> ]</span></p>
+</div>
+
+</div>
 <p><span class="marginalizedparent"><a class="marginalized">2</a></span>
 <em>Preconditions</em>: The ranges <code class="sourceCode cpp"><span class="op">[</span>first1, last1<span class="op">)</span></code>
 and <code class="sourceCode cpp"><span class="op">[</span>first2, last2<span class="op">)</span></code>
@@ -7609,20 +7713,31 @@ are sorted with respect to <code class="sourceCode cpp">comp</code> and
 <code class="sourceCode cpp">proj2</code>, respectively. The resulting
 range does not overlap with either of the original ranges.</p>
 <p><span class="marginalizedparent"><a class="marginalized">3</a></span>
-<em>Effects</em>: Constructs a sorted union of the elements from the two
-ranges; that is, the set of elements that are present in one or both of
-the ranges.</p>
+<em>Effects</em>: Constructs a sorted union of the elements from <span class="rm" style="color: #bf0303"><del>the</del></span><span class="add" style="color: #006e28"><ins><em><span><code class="sourceCode default">N</code></span></em></ins></span>
+two ranges; that is, the set of elements that are present in one or both
+of the ranges.</p>
 <p><span class="marginalizedparent"><a class="marginalized">4</a></span>
-<em>Returns</em>: Let <code class="sourceCode cpp">result_last</code> be
-the end of the constructed range. Returns</p>
+<em>Returns</em>: <span class="rm" style="color: #bf0303"><del>Let
+<span><code class="sourceCode default">result_last</code></span> be the
+end of the constructed range. Returns</del></span></p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(4.1)</a></span>
 <code class="sourceCode cpp">result_last</code> for the overloads in
 namespace <code class="sourceCode cpp">std</code>.</li>
 <li><span class="marginalizedparent"><a class="marginalized">(4.2)</a></span>
-<code class="sourceCode cpp"><span class="op">{</span>last1, last2, result_last<span class="op">}</span></code>
+<span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">{last1, last2, result_last}</code></span></del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">{j1, j2, result + <em>N</em>}</code></span></ins></span>
 for the overloads in namespace
-<code class="sourceCode cpp">ranges</code>.</li>
+<code class="sourceCode cpp">ranges</code><span class="add" style="color: #006e28"><ins>, where the iterators
+<span><code class="sourceCode default">j1</code></span> and
+<span><code class="sourceCode default">j2</code></span> point to
+positions past the last copied elements in
+<span><code class="sourceCode default">[first1, last1)</code></span> and
+<span><code class="sourceCode default">[first2, last2)</code></span>
+respectively if
+<span><code class="sourceCode default">result + <em>N</em> == result_last</code></span>,
+and <span><code class="sourceCode default">j1 == last1</code></span>,
+<span><code class="sourceCode default">j2 == last2</code></span>
+otherwise</ins></span>.</li>
 </ul>
 <p><span class="marginalizedparent"><a class="marginalized">5</a></span>
 <em>Complexity</em>: At most <code class="sourceCode cpp"><span class="dv">2</span> <span class="op">*</span> <span class="op">((</span>last1 <span class="op">-</span> first1<span class="op">)</span> <span class="op">+</span> <span class="op">(</span>last2 <span class="op">-</span> first2<span class="op">))</span> <span class="op">-</span> <span class="dv">1</span></code>
@@ -7630,14 +7745,20 @@ comparisons and applications of each projection.</p>
 <p><span class="marginalizedparent"><a class="marginalized">6</a></span>
 <em>Remarks</em>: Stable (<span><a href="https://wg21.link/algorithm.stable">[algorithm.stable]</a></span>).
 If <code class="sourceCode cpp"><span class="op">[</span>first1, last1<span class="op">)</span></code>
-contains <em><code class="sourceCode cpp">m</code></em> elements that
-are equivalent to each other and <code class="sourceCode cpp"><span class="op">[</span>first2, last2<span class="op">)</span></code>
-contains <em><code class="sourceCode cpp">n</code></em> elements that
-are equivalent to them, then all
-<em><code class="sourceCode cpp">m</code></em> elements from the first
-range are copied to the output range, in order, and then the final <code class="sourceCode cpp">max<span class="op">(</span><em>n</em> − <em>m</em>, <span class="dv">0</span><span class="op">)</span></code>
-elements from the second range are copied to the output range, in
-order.</p>
+<span class="add" style="color: #006e28"><ins>and
+<span><code class="sourceCode default">[first2, last2)</code></span></ins></span>
+contain<span class="rm" style="color: #bf0303"><del>s
+<em><span><code class="sourceCode default">m</code></span></em></del></span>
+elements that are equivalent to each other <span class="rm" style="color: #bf0303"><del>and
+<span><code class="sourceCode default">[first2, last2)</code></span>
+contains <em><span><code class="sourceCode default">n</code></span></em>
+elements that are equivalent to them</del></span>, then <span class="rm" style="color: #bf0303"><del>all
+<em><span><code class="sourceCode default">m</code></span></em></del></span><span class="add" style="color: #006e28"><ins>equivalent</ins></span> elements
+from the first range are copied to the output range, in order, and then
+the <span class="rm" style="color: #bf0303"><del>final
+<span><code class="sourceCode default">max(<em>n</em> − <em>m</em>, 0)</code></span></del></span>
+elements from the second range <span class="add" style="color: #006e28"><ins>not present in the first range</ins></span>
+are copied to the output range, in order.</p>
 <h2 data-number="8.48" id="modify_set_intersection"><span class="header-section-number">8.48</span> Modify
 <code class="sourceCode cpp">set_intersection</code> in <span><a href="https://wg21.link/set.intersection">[set.intersection]</a></span><a href="#modify_set_intersection" class="self-link"></a></h2>
 <div class="sourceCode" id="cb168"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb168-1"><a href="#cb168-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>input_iterator I1, sentinel_for<span class="op">&lt;</span>I1<span class="op">&gt;</span> S1, input_iterator I2, sentinel_for<span class="op">&lt;</span>I2<span class="op">&gt;</span> S2,</span>
@@ -7673,13 +7794,43 @@ order.</p>
 <span id="cb169-16"><a href="#cb169-16" aria-hidden="true" tabindex="-1"></a>                             Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {});</span></code></pre></div>
 
 </div>
+<div class="rm" style="color: #bf0303">
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
-Let <code class="sourceCode cpp">comp</code> be
-<code class="sourceCode cpp">less<span class="op">{}</span></code>, and
-<code class="sourceCode cpp">proj1</code> and
-<code class="sourceCode cpp">proj2</code> be
-<code class="sourceCode cpp">identity<span class="op">{}</span></code>
-for the overloads with no parameters by those names.</p>
+Let <code class="sourceCode default">comp</code> be
+<code class="sourceCode default">less{}</code>, and
+<code class="sourceCode default">proj1</code> and
+<code class="sourceCode default">proj2</code> be
+<code class="sourceCode default">identity{}</code> for the overloads
+with no parameters by those names.</p>
+</div>
+<div class="add" style="color: #006e28">
+<p><span class="marginalizedparent"><a class="marginalized">x</a></span>
+Let</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(x.1)</a></span>
+<code class="sourceCode default">comp</code> be
+<code class="sourceCode default">less{}</code>, and
+<code class="sourceCode default">proj1</code> and
+<code class="sourceCode default">proj2</code> be
+<code class="sourceCode default">identity{}</code> for the overloads
+with no parameters by those names;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(x.2)</a></span>
+<em><code class="sourceCode default">K</code></em> be the number of
+elements in <code class="sourceCode default">[first1, last1)</code> that
+are present in
+<code class="sourceCode default">[first2, last2)</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(x.3)</a></span>
+<code class="sourceCode default">result_last</code> be
+<code class="sourceCode default">result + <em>K</em></code> for the
+overloads with no parameter
+<code class="sourceCode default">result_last</code> or
+<code class="sourceCode default">result_r</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(x.4)</a></span>
+<em><code class="sourceCode default">N</code></em> be
+<code class="sourceCode default">min(<em>K</em>, result_last - result)</code>.</li>
+</ul>
+
+</div>
 <p><span class="marginalizedparent"><a class="marginalized">2</a></span>
 <em>Preconditions</em>: The ranges <code class="sourceCode cpp"><span class="op">[</span>first1, last1<span class="op">)</span></code>
 and <code class="sourceCode cpp"><span class="op">[</span>first2, last2<span class="op">)</span></code>
@@ -7688,20 +7839,31 @@ are sorted with respect to <code class="sourceCode cpp">comp</code> and
 <code class="sourceCode cpp">proj2</code>, respectively. The resulting
 range does not overlap with either of the original ranges.</p>
 <p><span class="marginalizedparent"><a class="marginalized">3</a></span>
-<em>Effects</em>: Constructs a sorted intersection of the elements from
-the two ranges; that is, the set of elements that are present in both of
-the ranges.</p>
+<em>Effects</em>: Constructs a sorted intersection of <span class="rm" style="color: #bf0303"><del>the</del></span><span class="add" style="color: #006e28"><ins><em><span><code class="sourceCode default">N</code></span></em></ins></span>
+elements from the two ranges; that is, the set of elements that are
+present in both of the ranges.</p>
 <p><span class="marginalizedparent"><a class="marginalized">4</a></span>
-<em>Returns</em>: Let <code class="sourceCode cpp">result_last</code> be
-the end of the constructed range. Returns</p>
+<em>Returns</em>: <span class="rm" style="color: #bf0303"><del>Let
+<span><code class="sourceCode default">result_last</code></span> be the
+end of the constructed range. Returns</del></span></p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(4.1)</a></span>
 <code class="sourceCode cpp">result_last</code> for the overloads in
 namespace <code class="sourceCode cpp">std</code>.</li>
 <li><span class="marginalizedparent"><a class="marginalized">(4.2)</a></span>
-<code class="sourceCode cpp"><span class="op">{</span>last1, last2, result_last<span class="op">}</span></code>
+<span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">{last1, last2, result_last}</code></span></del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">{j1, j2, result + <em>N</em>}</code></span></ins></span>
 for the overloads in namespace
-<code class="sourceCode cpp">ranges</code>.</li>
+<code class="sourceCode cpp">ranges</code><span class="add" style="color: #006e28"><ins>, where the iterators
+<span><code class="sourceCode default">j1</code></span> and
+<span><code class="sourceCode default">j2</code></span> point to
+positions past the last copied element in
+<span><code class="sourceCode default">[first1, last1)</code></span> and
+<span><code class="sourceCode default">[first2, last2)</code></span>
+respectively if
+<span><code class="sourceCode default">result + <em>N</em> == result_last</code></span>,
+and <span><code class="sourceCode default">j1 == last1</code></span>,
+<span><code class="sourceCode default">j2 == last2</code></span>
+otherwise</ins></span>.</li>
 </ul>
 <p><span class="marginalizedparent"><a class="marginalized">5</a></span>
 <em>Complexity</em>: At most <code class="sourceCode cpp"><span class="dv">2</span> <span class="op">*</span> <span class="op">((</span>last1 <span class="op">-</span> first1<span class="op">)</span> <span class="op">+</span> <span class="op">(</span>last2 <span class="op">-</span> first2<span class="op">))</span> <span class="op">-</span> <span class="dv">1</span></code>
@@ -7750,13 +7912,43 @@ order.</p>
 <span id="cb171-16"><a href="#cb171-16" aria-hidden="true" tabindex="-1"></a>                           Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {});</span></code></pre></div>
 
 </div>
+<div class="rm" style="color: #bf0303">
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
-Let <code class="sourceCode cpp">comp</code> be
-<code class="sourceCode cpp">less<span class="op">{}</span></code>, and
-<code class="sourceCode cpp">proj1</code> and
-<code class="sourceCode cpp">proj2</code> be
-<code class="sourceCode cpp">identity<span class="op">{}</span></code>
-for the overloads with no parameters by those names.</p>
+Let <code class="sourceCode default">comp</code> be
+<code class="sourceCode default">less{}</code>, and
+<code class="sourceCode default">proj1</code> and
+<code class="sourceCode default">proj2</code> be
+<code class="sourceCode default">identity{}</code> for the overloads
+with no parameters by those names.</p>
+</div>
+<div class="add" style="color: #006e28">
+<p><span class="marginalizedparent"><a class="marginalized">x</a></span>
+Let</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(x.1)</a></span>
+<code class="sourceCode default">comp</code> be
+<code class="sourceCode default">less{}</code>, and
+<code class="sourceCode default">proj1</code> and
+<code class="sourceCode default">proj2</code> be
+<code class="sourceCode default">identity{}</code> for the overloads
+with no parameters by those names;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(x.2)</a></span>
+<em><code class="sourceCode default">K</code></em> be the number of
+elements in <code class="sourceCode default">[first1, last1)</code> that
+are not present in
+<code class="sourceCode default">[first2, last2)</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(x.3)</a></span>
+<code class="sourceCode default">result_last</code> be
+<code class="sourceCode default">result + <em>K</em></code> for the
+overloads with no parameter
+<code class="sourceCode default">result_last</code> or
+<code class="sourceCode default">result_r</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(x.4)</a></span>
+<em><code class="sourceCode default">N</code></em> be
+<code class="sourceCode default">min(<em>K</em>, result_last - result)</code>.</li>
+</ul>
+
+</div>
 <p><span class="marginalizedparent"><a class="marginalized">2</a></span>
 <em>Preconditions</em>: The ranges <code class="sourceCode cpp"><span class="op">[</span>first1, last1<span class="op">)</span></code>
 and <code class="sourceCode cpp"><span class="op">[</span>first2, last2<span class="op">)</span></code>
@@ -7765,21 +7957,29 @@ are sorted with respect to <code class="sourceCode cpp">comp</code> and
 <code class="sourceCode cpp">proj2</code>, respectively. The resulting
 range does not overlap with either of the original ranges.</p>
 <p><span class="marginalizedparent"><a class="marginalized">3</a></span>
-<em>Effects</em>: Copies the elements of the range <code class="sourceCode cpp"><span class="op">[</span>first1, last1<span class="op">)</span></code>
+<em>Effects</em>: Copies <span class="rm" style="color: #bf0303"><del>the</del></span><span class="add" style="color: #006e28"><ins><em><span><code class="sourceCode default">N</code></span></em></ins></span>
+elements of the range <code class="sourceCode cpp"><span class="op">[</span>first1, last1<span class="op">)</span></code>
 which are not present in the range <code class="sourceCode cpp"><span class="op">[</span>first2, last2<span class="op">)</span></code>
 to the range beginning at <code class="sourceCode cpp">result</code>.
 The elements in the constructed range are sorted.</p>
 <p><span class="marginalizedparent"><a class="marginalized">4</a></span>
-<em>Returns</em>: Let <code class="sourceCode cpp">result_last</code> be
-the end of the constructed range. Returns</p>
+<em>Returns</em>: <span class="rm" style="color: #bf0303"><del>Let
+<span><code class="sourceCode default">result_last</code></span> be the
+end of the constructed range. Returns</del></span></p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(4.1)</a></span>
 <code class="sourceCode cpp">result_last</code> for the overloads in
 namespace <code class="sourceCode cpp">std</code>.</li>
 <li><span class="marginalizedparent"><a class="marginalized">(4.2)</a></span>
-<code class="sourceCode cpp"><span class="op">{</span>last1, result_last<span class="op">}</span></code>
+<span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">{last1, result_last}</code></span></del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">{j1, result + <em>N</em>}</code></span></ins></span>
 for the overloads in namespace
-<code class="sourceCode cpp">ranges</code>.</li>
+<code class="sourceCode cpp">ranges</code><span class="add" style="color: #006e28"><ins>, where the iterator
+<span><code class="sourceCode default">j1</code></span> points to
+position past the last copied element in
+<span><code class="sourceCode default">[first1, last1)</code></span> if
+<span><code class="sourceCode default">result + <em>N</em> == result_last</code></span>,
+and <span><code class="sourceCode default">j1 == last1</code></span>
+otherwise</ins></span>.</li>
 </ul>
 <p><span class="marginalizedparent"><a class="marginalized">5</a></span>
 <em>Complexity</em>: At most <code class="sourceCode cpp"><span class="dv">2</span> <span class="op">*</span> <span class="op">((</span>last1 <span class="op">-</span> first1<span class="op">)</span> <span class="op">+</span> <span class="op">(</span>last2 <span class="op">-</span> first2<span class="op">))</span> <span class="op">-</span> <span class="dv">1</span></code>
@@ -7829,13 +8029,47 @@ are copied to the output range, in order.</p>
 <span id="cb173-16"><a href="#cb173-16" aria-hidden="true" tabindex="-1"></a>                                    Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {});</span></code></pre></div>
 
 </div>
+<div class="rm" style="color: #bf0303">
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
-Let <code class="sourceCode cpp">comp</code> be
-<code class="sourceCode cpp">less<span class="op">{}</span></code>, and
-<code class="sourceCode cpp">proj1</code> and
-<code class="sourceCode cpp">proj2</code> be
-<code class="sourceCode cpp">identity<span class="op">{}</span></code>
-for the overloads with no parameters by those names.</p>
+Let <code class="sourceCode default">comp</code> be
+<code class="sourceCode default">less{}</code>, and
+<code class="sourceCode default">proj1</code> and
+<code class="sourceCode default">proj2</code> be
+<code class="sourceCode default">identity{}</code> for the overloads
+with no parameters by those names.</p>
+</div>
+<div class="add" style="color: #006e28">
+<p><span class="marginalizedparent"><a class="marginalized">x</a></span>
+Let</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(x.1)</a></span>
+<code class="sourceCode default">comp</code> be
+<code class="sourceCode default">less{}</code>, and
+<code class="sourceCode default">proj1</code> and
+<code class="sourceCode default">proj2</code> be
+<code class="sourceCode default">identity{}</code> for the overloads
+with no parameters by those names;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(x.2)</a></span>
+<em><code class="sourceCode default">K</code></em> be the number of
+elements in <code class="sourceCode default">[first1, last1)</code> that
+are not present in
+<code class="sourceCode default">[first2, last2)</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(x.3)</a></span>
+<em><code class="sourceCode default">M</code></em> be the number of
+elements in <code class="sourceCode default">[first2, last2)</code> that
+are not present in
+<code class="sourceCode default">[first1, last1)</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(x.3)</a></span>
+<code class="sourceCode default">result_last</code> be
+<code class="sourceCode default">result + <em>K</em></code> for the
+overloads with no parameter
+<code class="sourceCode default">result_last</code> or
+<code class="sourceCode default">result_r</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(x.4)</a></span>
+<em><code class="sourceCode default">N</code></em> be <code class="sourceCode default">min(<em>K</em> + <em>M</em>, result_last - result)</code>.</li>
+</ul>
+
+</div>
 <p><span class="marginalizedparent"><a class="marginalized">2</a></span>
 <em>Preconditions</em>: The ranges <code class="sourceCode cpp"><span class="op">[</span>first1, last1<span class="op">)</span></code>
 and <code class="sourceCode cpp"><span class="op">[</span>first2, last2<span class="op">)</span></code>
@@ -7851,14 +8085,27 @@ that are not present in the range <code class="sourceCode cpp"><span class="op">
 to the range beginning at <code class="sourceCode cpp">result</code>.
 The elements in the constructed range are sorted.</p>
 <p><span class="marginalizedparent"><a class="marginalized">4</a></span>
-<em>Returns</em>: Let <code class="sourceCode cpp">result_last</code> be
-the end of the constructed range. Returns</p>
+<em>Returns</em>:<span class="rm" style="color: #bf0303"><del>Let
+<span><code class="sourceCode default">result_last</code></span> be the
+end of the constructed range. Returns</del></span></p>
 <ul>
-<li>[4.1] <code class="sourceCode cpp">result_last</code> for the
-overloads in namespace <code class="sourceCode cpp">std</code>.</li>
-<li>[4.2] <code class="sourceCode cpp"><span class="op">{</span>last1, last2, result_last<span class="op">}</span></code>
+<li><span class="marginalizedparent"><a class="marginalized">(4.1)</a></span>
+<code class="sourceCode cpp">result_last</code> for the overloads in
+namespace <code class="sourceCode cpp">std</code>.</li>
+<li><span class="marginalizedparent"><a class="marginalized">(4.2)</a></span>
+<span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">{last1, last2, result_last}</code></span></del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">{j1, j2, result + <em>N</em>}</code></span></ins></span>
 for the overloads in namespace
-<code class="sourceCode cpp">ranges</code>.</li>
+<code class="sourceCode cpp">ranges</code><span class="add" style="color: #006e28"><ins>, where the iterators
+<span><code class="sourceCode default">j1</code></span> and
+<span><code class="sourceCode default">j2</code></span> point to
+positions past the last copied elements in
+<span><code class="sourceCode default">[first1, last1)</code></span> and
+<span><code class="sourceCode default">[first2, last2)</code></span>
+respectively if
+<span><code class="sourceCode default">result + <em>N</em> == result_last</code></span>,
+and <span><code class="sourceCode default">j1 == last1</code></span>,
+<span><code class="sourceCode default">j2 == last2</code></span>
+otherwise</ins></span>.</li>
 </ul>
 <p><span class="marginalizedparent"><a class="marginalized">5</a></span>
 <em>Complexity</em>: At most <code class="sourceCode cpp"><span class="dv">2</span> <span class="op">*</span> <span class="op">((</span>last1 <span class="op">-</span> first1<span class="op">)</span> <span class="op">+</span> <span class="op">(</span>last2 <span class="op">-</span> first2<span class="op">))</span> <span class="op">-</span> <span class="dv">1</span></code>
@@ -8515,12 +8762,16 @@ iterators.</p>
 <ul>
 <li>Add <code class="sourceCode cpp">rotate_copy</code> back into the
 scope</li>
-<li>Fix <code class="sourceCode cpp">reverse_copy</code> wording</li>
+<li>Fix wording for <code class="sourceCode cpp">reverse_copy</code> and
+<code class="sourceCode cpp">merge</code></li>
 <li>TODO: Explain design choice for
 <code class="sourceCode cpp">rotate_copy</code> and
 <code class="sourceCode cpp">reverse_copy</code></li>
 <li>TODO: Add wording for <code class="sourceCode cpp">set_</code>
 algorithms family (that makes wording complete)</li>
+<li>TODO: Add wording for
+<code class="sourceCode cpp">partition_copy</code> algorithms family
+(that makes wording complete)</li>
 </ul>
 <h2 data-number="9.2" id="r4_r5"><span class="header-section-number">9.2</span> R4 =&gt; R5<a href="#r4_r5" class="self-link"></a></h2>
 <ul>
@@ -8893,8 +9144,11 @@ SA
 </tr>
 </table>
 <h1 data-number="11" id="acknoledgements"><span class="header-section-number">11</span> Acknowledgments<a href="#acknoledgements" class="self-link"></a></h1>
-<p>Thanks to Jonathan Muller for the wording review and providing useful
-feedback.</p>
+<ul>
+<li>Thanks to Jonathan Muller for the wording review and providing
+useful feedback.</li>
+<li>Thanks to Mikhail Dvorsky for the implementation experience.</li>
+</ul>
 <h1 data-number="12" id="bibliography"><span class="header-section-number">12</span> References<a href="#bibliography" class="self-link"></a></h1>
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="1" role="doc-bibliography">
 <div id="ref-P1068R11" class="csl-entry" role="doc-biblioentry">
