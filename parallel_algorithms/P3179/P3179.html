@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2025-01-22" />
+  <meta name="dcterms.date" content="2025-01-24" />
   <title>C++ parallel range algorithms</title>
   <style>
       code{white-space: pre-wrap;}
@@ -466,7 +466,7 @@ algorithms</h1>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2025-01-22</td>
+    <td>2025-01-24</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -7431,13 +7431,20 @@ overloads with no parameter
 <li><span class="marginalizedparent"><a class="marginalized">(x.5)</a></span>
 <em><code class="sourceCode default">E</code></em> be <code class="sourceCode default">bool(invoke(comp, invoke(proj2, e2), invoke(proj1, e1)))</code>;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(x.6)</a></span>
-<em><code class="sourceCode default">K</code></em> be the rightmost
-position of an element <code class="sourceCode default">e1</code> in
-<code class="sourceCode default">[first1, last1)</code> such that the
-number of elements <code class="sourceCode default">e2</code> in
+<em><code class="sourceCode default">K</code></em> be the smallest
+integer in <code class="sourceCode default">[0, last1 - first1)</code>
+such that for the element <code class="sourceCode default">e1</code> in
+the position <code class="sourceCode default">first1 + <em>K</em></code>
+there are at least
+<em><code class="sourceCode default">N - K</code></em> elements
+<code class="sourceCode default">e2</code> in
 <code class="sourceCode default">[first2, last2)</code> for which
-<em><code class="sourceCode default">E</code></em> holds is less than or
-equal to <em><code class="sourceCode default">N - K</code></em>.</li>
+<em><code class="sourceCode default">E</code></em> holds, and be equal
+to <code class="sourceCode default">last1 - first1</code> if no such
+integer exists. <span class="note"><span>[ <em>Note:</em>
+</span><code class="sourceCode default">first1 + <em>K</em></code>
+points to the position past the last element to be copied.<span> —
+<em>end note</em> ]</span></span></li>
 </ul>
 
 </div>
@@ -7713,9 +7720,9 @@ are sorted with respect to <code class="sourceCode cpp">comp</code> and
 <code class="sourceCode cpp">proj2</code>, respectively. The resulting
 range does not overlap with either of the original ranges.</p>
 <p><span class="marginalizedparent"><a class="marginalized">3</a></span>
-<em>Effects</em>: Constructs a sorted union of the elements from <span class="rm" style="color: #bf0303"><del>the</del></span><span class="add" style="color: #006e28"><ins><em><span><code class="sourceCode default">N</code></span></em></ins></span>
-two ranges; that is, the set of elements that are present in one or both
-of the ranges.</p>
+<em>Effects</em>: Constructs a sorted union of <span class="rm" style="color: #bf0303"><del>the</del></span><span class="add" style="color: #006e28"><ins><em><span><code class="sourceCode default">N</code></span></em></ins></span>
+elements from the two ranges; that is, the set of elements that are
+present in one or both of the ranges.</p>
 <p><span class="marginalizedparent"><a class="marginalized">4</a></span>
 <em>Returns</em>: <span class="rm" style="color: #bf0303"><del>Let
 <span><code class="sourceCode default">result_last</code></span> be the
@@ -7730,7 +7737,7 @@ for the overloads in namespace
 <code class="sourceCode cpp">ranges</code><span class="add" style="color: #006e28"><ins>, where the iterators
 <span><code class="sourceCode default">j1</code></span> and
 <span><code class="sourceCode default">j2</code></span> point to
-positions past the last copied elements in
+positions past the last copied or skipped elements in
 <span><code class="sourceCode default">[first1, last1)</code></span> and
 <span><code class="sourceCode default">[first2, last2)</code></span>
 respectively if
@@ -7856,7 +7863,7 @@ for the overloads in namespace
 <code class="sourceCode cpp">ranges</code><span class="add" style="color: #006e28"><ins>, where the iterators
 <span><code class="sourceCode default">j1</code></span> and
 <span><code class="sourceCode default">j2</code></span> point to
-positions past the last copied element in
+positions past the last copied or skipped elements in
 <span><code class="sourceCode default">[first1, last1)</code></span> and
 <span><code class="sourceCode default">[first2, last2)</code></span>
 respectively if
@@ -7960,7 +7967,8 @@ range does not overlap with either of the original ranges.</p>
 <em>Effects</em>: Copies <span class="rm" style="color: #bf0303"><del>the</del></span><span class="add" style="color: #006e28"><ins><em><span><code class="sourceCode default">N</code></span></em></ins></span>
 elements of the range <code class="sourceCode cpp"><span class="op">[</span>first1, last1<span class="op">)</span></code>
 which are not present in the range <code class="sourceCode cpp"><span class="op">[</span>first2, last2<span class="op">)</span></code>
-to the range beginning at <code class="sourceCode cpp">result</code>.
+to the range <span class="rm" style="color: #bf0303"><del>beginning at
+<span><code class="sourceCode default">result</code></span></del></span>[<span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">result, result + <em>N</em></code></span>)</ins></span>.
 The elements in the constructed range are sorted.</p>
 <p><span class="marginalizedparent"><a class="marginalized">4</a></span>
 <em>Returns</em>: <span class="rm" style="color: #bf0303"><del>Let
@@ -7974,7 +7982,7 @@ namespace <code class="sourceCode cpp">std</code>.</li>
 <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">{last1, result_last}</code></span></del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">{j1, result + <em>N</em>}</code></span></ins></span>
 for the overloads in namespace
 <code class="sourceCode cpp">ranges</code><span class="add" style="color: #006e28"><ins>, where the iterator
-<span><code class="sourceCode default">j1</code></span> points to
+<span><code class="sourceCode default">j1</code></span> points to the
 position past the last copied element in
 <span><code class="sourceCode default">[first1, last1)</code></span> if
 <span><code class="sourceCode default">result + <em>N</em> == result_last</code></span>,
@@ -8061,8 +8069,8 @@ are not present in
 <code class="sourceCode default">[first1, last1)</code>;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(x.3)</a></span>
 <code class="sourceCode default">result_last</code> be
-<code class="sourceCode default">result + <em>K</em></code> for the
-overloads with no parameter
+<code class="sourceCode default">result + <em>K</em> + <em>M</em></code>
+for the overloads with no parameter
 <code class="sourceCode default">result_last</code> or
 <code class="sourceCode default">result_r</code>;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(x.4)</a></span>
@@ -8082,7 +8090,8 @@ range does not overlap with either of the original ranges.</p>
 that are not present in the range <code class="sourceCode cpp"><span class="op">[</span>first2, last2<span class="op">)</span></code>,
 and the elements of the range <code class="sourceCode cpp"><span class="op">[</span>first2, last2<span class="op">)</span></code>
 that are not present in the range <code class="sourceCode cpp"><span class="op">[</span>first1, last1<span class="op">)</span></code>
-to the range beginning at <code class="sourceCode cpp">result</code>.
+to the range <span class="rm" style="color: #bf0303"><del>beginning at
+<span><code class="sourceCode default">result</code></span></del></span>[<span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">result, result + <em>N</em></code></span>)</ins></span>.
 The elements in the constructed range are sorted.</p>
 <p><span class="marginalizedparent"><a class="marginalized">4</a></span>
 <em>Returns</em>:<span class="rm" style="color: #bf0303"><del>Let
@@ -8098,7 +8107,7 @@ for the overloads in namespace
 <code class="sourceCode cpp">ranges</code><span class="add" style="color: #006e28"><ins>, where the iterators
 <span><code class="sourceCode default">j1</code></span> and
 <span><code class="sourceCode default">j2</code></span> point to
-positions past the last copied elements in
+positions past the last copied or skipped elements in
 <span><code class="sourceCode default">[first1, last1)</code></span> and
 <span><code class="sourceCode default">[first2, last2)</code></span>
 respectively if
