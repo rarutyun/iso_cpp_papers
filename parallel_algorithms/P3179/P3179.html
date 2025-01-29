@@ -7392,62 +7392,69 @@ applications of the predicate.</li>
 <span id="cb170-16"><a href="#cb170-16" aria-hidden="true" tabindex="-1"></a>                           Pred pred, Proj proj = {});</span></code></pre></div>
 
 </div>
-<div class="rm" style="color: #bf0303">
 <p><span class="marginalizedparent"><a class="marginalized">14</a></span> Let
-<code class="sourceCode default">proj</code> be
-<code class="sourceCode default">identity{}</code> for the overloads
-with no parameter named <code class="sourceCode default">proj</code> and
-let <code class="sourceCode default"><em>E</em>(<em>x</em>)</code> be
-<code class="sourceCode default">bool(invoke(pred, invoke(proj, x)))</code>.</p>
-</div>
+<code class="sourceCode cpp">proj</code> be
+<code class="sourceCode cpp">identity<span class="op">{}</span></code>
+for the overloads with no parameter named
+<code class="sourceCode cpp">proj</code> and let <code class="sourceCode cpp"><em>E</em><span class="op">(</span><em>x</em><span class="op">)</span></code>
+be <code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(</span>invoke<span class="op">(</span>pred, invoke<span class="op">(</span>proj, x<span class="op">)))</span></code>.</p>
 <div class="add" style="color: #006e28">
+<p><span class="marginalizedparent"><a class="marginalized">x</a></span>
+For the overloads with no parameters
+<code class="sourceCode default">last_true</code>,
+<code class="sourceCode default">last_false</code>,
+<code class="sourceCode default">out_true_r</code>, or
+<code class="sourceCode default">out_false_r</code> let</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(x.1)</a></span>
+<em><code class="sourceCode default">M</code></em> be the number of
+iterators <code class="sourceCode default">i</code> in
+<code class="sourceCode default">[first, last)</code> for which
+<code class="sourceCode default"><em>E</em>(*i)</code> holds, and
+<em><code class="sourceCode default">K</code></em> be
+<code class="sourceCode default">last - first - M</code>;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(x.2)</a></span>
+<code class="sourceCode default">last_true</code> be
+<code class="sourceCode default">out_true + <em>M</em></code>, and
+<code class="sourceCode default">last_false</code> be
+<code class="sourceCode default">out_false + <em>K</em></code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">x</a></span>
+For the overloads with parameters
+<code class="sourceCode default">last_true</code>,
+<code class="sourceCode default">last_false</code>,
+<code class="sourceCode default">out_true_r</code>, or
+<code class="sourceCode default">out_false_r</code>, let
+<em><code class="sourceCode default">M</code></em> be
+<code class="sourceCode default">last_true - out_true</code> and
+<em><code class="sourceCode default">K</code></em> be
+<code class="sourceCode default">last_false - out_false</code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">x</a></span>
 Let</p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(x.1)</a></span>
-<code class="sourceCode default">proj</code> be
-<code class="sourceCode default">identity{}</code> for the overloads
-with no parameter named <code class="sourceCode default">proj</code> and
-let <code class="sourceCode default"><em>E</em>(<em>x</em>)</code> be
-<code class="sourceCode default">bool(invoke(pred, invoke(proj, x)))</code>;</li>
+<em><code class="sourceCode default">i1</code></em> be the iterator in
+<code class="sourceCode default">[first, last)</code> for which
+<code class="sourceCode default"><em>E</em>(*<em>i1</em>)</code> holds
+and there are exactly <em><code class="sourceCode default">M</code></em>
+iterators <code class="sourceCode default">j</code> in
+<code class="sourceCode default">[first, <em>i1</em>)</code> for which
+<code class="sourceCode default"><em>E</em>(*j)</code> holds, or
+<code class="sourceCode default">last</code> if no such iterator
+exists;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(x.2)</a></span>
-<em><code class="sourceCode default">M</code></em> be the number of
-elements for which
-<code class="sourceCode default"><em>E</em>(<em>x</em>)</code> holds,
-<code class="sourceCode default">K</code> be
-<code class="sourceCode default">last - first - <em>M</em></code>;</li>
+<em><code class="sourceCode default">i2</code></em> be the iterator in
+<code class="sourceCode default">[first, last)</code> for which
+<code class="sourceCode default"><em>E</em>(*<em>i2</em>)</code> is
+<code class="sourceCode default">false</code> and there are exactly
+<em><code class="sourceCode default">K</code></em> iterators
+<code class="sourceCode default">j</code> in
+<code class="sourceCode default">[first, <em>i2</em>)</code> for which
+<code class="sourceCode default"><em>E</em>(*j)</code> is
+<code class="sourceCode default">false</code>, or
+<code class="sourceCode default">last</code> if no such iterator
+exists;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(x.3)</a></span>
-<code class="sourceCode default">last_true</code> be
-<code class="sourceCode default">out_true + <em>M</em></code> for the
-overloads with no parameter
-<code class="sourceCode default">last_true</code> or
-<code class="sourceCode default">out_true_r</code>;</li>
-<li><span class="marginalizedparent"><a class="marginalized">(x.4)</a></span>
-<code class="sourceCode default">last_false</code> be
-<code class="sourceCode default">out_false + <em>K</em></code> for the
-overloads with no parameter
-<code class="sourceCode default">last_false</code> or
-<code class="sourceCode default">out_false_r</code>;</li>
-<li><span class="marginalizedparent"><a class="marginalized">(x.5)</a></span>
-<em><code class="sourceCode default">i1</code></em> be the rightmost
-iterator in <code class="sourceCode default">[first, last)</code> for
-which <em><code class="sourceCode default">E</code></em> holds and there
-is an iterator <code class="sourceCode default">out_true_it</code> such
-that <code class="sourceCode default">out_true_it == last_true</code> is
-<code class="sourceCode default">true</code>. If such iterators do not
-exist, let <em><code class="sourceCode default">i1</code></em> be
-<code class="sourceCode default">last</code>;</li>
-<li><span class="marginalizedparent"><a class="marginalized">(x.6)</a></span>
-<em><code class="sourceCode default">i2</code></em> be the rightmost
-iterator in <code class="sourceCode default">[first, last)</code> for
-which <em><code class="sourceCode default">E</code></em> is
-<code class="sourceCode default">false</code> and there is an iterator
-<code class="sourceCode default">out_false_it</code> such that
-<code class="sourceCode default">out_false_it == last_false</code> is
-<code class="sourceCode default">true</code>. If such iterators do not
-exist, let <em><code class="sourceCode default">i2</code></em> be
-<code class="sourceCode default">last</code>;</li>
-<li><span class="marginalizedparent"><a class="marginalized">(x.7)</a></span>
 <em><code class="sourceCode default">N</code></em> be <code class="sourceCode default">min(<em>i1</em> - first, <em>i2</em> - first)</code>.</li>
 </ul>
 
@@ -7477,7 +7484,7 @@ requirements.</ins></span> — <em>end note</em>]</p>
 <em>Effects</em>: For each iterator
 <code class="sourceCode cpp">i</code> in <code class="sourceCode cpp"><span class="op">[</span>first, <span class="rm" style="color: #bf0303"><del>last</del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">first + <em>N</em></code></span></ins></span><span class="op">)</span></code>,
 copies <code class="sourceCode cpp"><span class="op">*</span>i</code> to
-the output range beginning with
+theoutput range beginning with
 <code class="sourceCode cpp">out_true</code> if <code class="sourceCode cpp"><em>E</em><span class="op">(*</span>i<span class="op">)</span></code>
 is <code class="sourceCode cpp"><span class="kw">true</span></code>, or
 to the output range beginning with
@@ -7504,9 +7511,8 @@ for the overloads in namespace
 <code class="sourceCode cpp">ranges</code>.</li>
 </ul>
 <p><span class="marginalizedparent"><a class="marginalized">19</a></span>
-<em>Complexity</em>: <span class="rm" style="color: #bf0303"><del>Exactly
-<span><code class="sourceCode default">last - first</code></span></del></span><span class="add" style="color: #006e28"><ins>At most
-<span><code class="sourceCode default">first + <em>N</em></code></span></ins></span>
+<em>Complexity</em>: <span class="rm" style="color: #bf0303"><del>Exactly</del></span><span class="add" style="color: #006e28"><ins>At most</ins></span>
+<code class="sourceCode cpp">last <span class="op">-</span> first</code>
 applications of <code class="sourceCode cpp">pred</code> and
 <code class="sourceCode cpp">proj</code>.</p>
 <h2 data-number="8.45" id="modify_merge"><span class="header-section-number">8.45</span> Modify <span><a href="https://wg21.link/alg.merge">[alg.merge]</a></span><a href="#modify_merge" class="self-link"></a></h2>
@@ -8922,8 +8928,7 @@ scope</li>
 <code class="sourceCode cpp">set_difference</code>,
 <code class="sourceCode cpp">set_symmetric_difference</code>, and
 <code class="sourceCode cpp">partition_copy</code>.</li>
-<li>TODO: Possible improve the wording for
-<code class="sourceCode cpp">partition_copy</code> and
+<li>TODO: Possibly improve the wording for
 <code class="sourceCode cpp">merge</code>. DO NOT FORGET TO REMOVE THIS
 BULLET !!!!</li>
 </ul>
