@@ -580,8 +580,8 @@ experience<span></span></a></li>
 <ul>
 <li><a href="#lwg_questions" id="toc-lwg_questions"><span class="toc-section-number">7.1</span> LWG
 questions<span></span></a></li>
-<li><a href="#parallelism_and_views" id="toc-parallelism_and_views"><span class="toc-section-number">7.2</span> Parallelism implications for
-views<span></span></a></li>
+<li><a href="#parallelism_and_views" id="toc-parallelism_and_views"><span class="toc-section-number">7.2</span> Parallelism and
+Views<span></span></a></li>
 </ul></li>
 <li><a href="#formal_wording" id="toc-formal_wording"><span class="toc-section-number">8</span> Formal wording<span></span></a>
 <ul>
@@ -2091,13 +2091,13 @@ algorithms<a href="#views_out_of_scope" class="self-link"></a></h3>
 concept, it can be used with parallel range algorithms; the same applies
 to a view pipeline. There are additional questions to explore, and it is
 possible that some views - standard or custom - cannot be safely used in
-a parallel context. However, we think that these questions have no
-direct impact on the proposed design, and should better be considered in
-a follow-up paper. The reason is that these potential problems are not
-novel for C++ standard. They same questions apply if we pass iterators
-taken from views to the existing C++17 parallel algorithms.</p>
-<p>We present our initial analysis and exploration scope in the <a href="#parallelism_and_views">Parallelism implications for views</a>
-subsection below.</p>
+a parallel context. It is not new or unique to the proposed parallel
+range algorithms but also applies if view iterators are passed to the
+existing C++17 parallel algorithms.</p>
+<p>We think that these questions have no direct impact on the proposed
+design, and should better be considered in a follow-up paper. We present
+our initial analysis and exploration scope in the <a href="#parallelism_and_views">Parallelism and Views</a> subsection
+below.</p>
 <h1 data-number="6" id="impl_exp"><span class="header-section-number">6</span> Implementation experience<a href="#impl_exp" class="self-link"></a></h1>
 <p>The oneAPI DPC++ Library (oneDPL) <a href="https://uxlfoundation.github.io/oneDPL/parallel_api/parallel_range_algorithms.html">developer
 guide</a> covers parallel range algorithms we’ve implemented so far. The
@@ -2162,8 +2162,7 @@ incomplete wording.</li>
 algorithms, would it make sense to describe more formally which elements
 are present and which are not?</li>
 </ul>
-<h2 data-number="7.2" id="parallelism_and_views"><span class="header-section-number">7.2</span> Parallelism implications for
-views<a href="#parallelism_and_views" class="self-link"></a></h2>
+<h2 data-number="7.2" id="parallelism_and_views"><span class="header-section-number">7.2</span> Parallelism and Views<a href="#parallelism_and_views" class="self-link"></a></h2>
 <p>We would like to provide detailed analysis of the possibility to use
 views in parallel contexts and potential consequences of such use. Some
 investigation was done by other authors in <span class="citation" data-cites="P3159R0">[<a href="https://wg21.link/p3159r0" role="doc-biblioref">P3159R0</a>]</span>, however it is primarily about
@@ -2179,7 +2178,7 @@ algorithms yet cannot be safely used. We know from practice that many
 views are safe to use. The <a href="#impl_exp">mentioned</a> oneDPL
 implementation has been tested with <a href="https://uxlfoundation.github.io/oneDPL/parallel_api/parallel_range_algorithms.html#supported-range-views">several
 standard view types</a>. Views are also sometimes used via iterators
-with C++17 parallel algorithms; see examples in <a href="#motivation">Motivation</a>. However, certain views are known to
+with the C++17 parallel algorithms; see examples in <a href="#motivation">Motivation</a>. However, certain views are known to
 cache some state (for example,
 <code class="sourceCode cpp">reverse_view</code> caches the result of
 <code class="sourceCode cpp">begin<span class="op">()</span></code> even
@@ -2188,15 +2187,15 @@ when its base is a
 the state shared by view iterators (such as
 <code class="sourceCode cpp">transform_view</code>, where iterators keep
 pointers to the function object that is stored in the view itself).
-Possible implications of that need to be carefully studied.</p>
+Possible implications of that need to be carefully studied, taking into
+account both range-based and C++17 parallel algorithms.</p>
 <p>The second question is about which user-specified view arguments
 should be considered element access functions. An obvious example is,
 again, <code class="sourceCode cpp">transform_view</code> that applies a
-function to each element of its base range. The current description in
-<span><a href="https://wg21.link/algorithms.parallel.defns">[algorithms.parallel.defns]</a></span>
-may need to be extended to better explain the impact on views. However,
-this question also applies to the existing C++17 parallel algorithms,
-thus the design of this paper does not introduce new problems.</p>
+function to each element of its base range. We would like to check if
+the current description in <span><a href="https://wg21.link/algorithms.parallel.defns">[algorithms.parallel.defns]</a></span>
+suitable for classic iterators over data structures is sufficient also
+for views and their iterators, and if not, extend it as needed.</p>
 <p>Looking from a different angle, it makes sense to consider how C++
 ranges, and views in particular, might be used in parallel contexts
 other than the standard algorithms. While iterators are a powerful
@@ -2236,8 +2235,9 @@ copy will operate on the same instance of
 <code class="sourceCode cpp">reverse_view</code>, which
 <code class="sourceCode cpp">begin</code> method is not thread safe as
 its result is cached.</p>
-<p>We plan to consider all these questions in detail in a separate
-paper.</p>
+<p>As all these questions go beyond just the parallel range algorithms
+and are mainly orthogonal to their design, we plan to consider them in
+detail in a separate paper.</p>
 <h1 data-number="8" id="formal_wording"><span class="header-section-number">8</span> Formal wording<a href="#formal_wording" class="self-link"></a></h1>
 <h2 data-number="8.1" id="modify_version_syn"><span class="header-section-number">8.1</span> Modify the
 <code class="sourceCode cpp">__cpp_lib_parallel_algorithm</code> macro
@@ -8996,6 +8996,7 @@ values</li>
 <code class="sourceCode cpp">set_difference</code>,
 <code class="sourceCode cpp">set_symmetric_difference</code>, and
 <code class="sourceCode cpp">partition_copy</code></li>
+<li>Update analysis on using views in parallel context</li>
 </ul>
 <h2 data-number="9.2" id="r4_r5"><span class="header-section-number">9.2</span> R4 =&gt; R5<a href="#r4_r5" class="self-link"></a></h2>
 <ul>
