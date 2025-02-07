@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2025-02-06" />
+  <meta name="dcterms.date" content="2025-02-03" />
   <title>C++ parallel range algorithms</title>
   <style>
       code{white-space: pre-wrap;}
@@ -466,7 +466,7 @@ algorithms</h1>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2025-02-06</td>
+    <td>2025-02-03</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -570,18 +570,18 @@ algorithms without
 <code class="sourceCode cpp">ExecutionPolicy</code><span></span></a></li>
 <li><a href="#serial_range_based_absence" id="toc-serial_range_based_absence"><span class="toc-section-number">5.2.2</span> Absence of some serial
 range-based algorithms<span></span></a></li>
+<li><a href="#views_out_of_scope" id="toc-views_out_of_scope"><span class="toc-section-number">5.2.3</span> Use of views with parallel
+algorithms<span></span></a></li>
 </ul></li>
 </ul></li>
 <li><a href="#impl_exp" id="toc-impl_exp"><span class="toc-section-number">6</span> Implementation
 experience<span></span></a></li>
 <li><a href="#further_work" id="toc-further_work"><span class="toc-section-number">7</span> Further work<span></span></a>
 <ul>
-<li><a href="#issues_to_address" id="toc-issues_to_address"><span class="toc-section-number">7.1</span> Issues to
-address<span></span></a></li>
-<li><a href="#lwg_questions" id="toc-lwg_questions"><span class="toc-section-number">7.2</span> LWG
+<li><a href="#lwg_questions" id="toc-lwg_questions"><span class="toc-section-number">7.1</span> LWG
 questions<span></span></a></li>
-<li><a href="#thread_safe_views" id="toc-thread_safe_views"><span class="toc-section-number">7.3</span> Thread-safe views
-examination<span></span></a></li>
+<li><a href="#parallelism_and_views" id="toc-parallelism_and_views"><span class="toc-section-number">7.2</span> Parallelism implications for
+views<span></span></a></li>
 </ul></li>
 <li><a href="#formal_wording" id="toc-formal_wording"><span class="toc-section-number">8</span> Formal wording<span></span></a>
 <ul>
@@ -2085,10 +2085,23 @@ algorithms to
 <code class="sourceCode cpp">std<span class="op">::</span>ranges</code>
 should also consider adding dedicated overloads with
 <code class="sourceCode cpp">ExecutionPolicy</code>.</p>
+<h3 data-number="5.2.3" id="views_out_of_scope"><span class="header-section-number">5.2.3</span> Use of views with parallel
+algorithms<a href="#views_out_of_scope" class="self-link"></a></h3>
+<p>As a general principle, if a view satisfies the <em><code class="sourceCode cpp">random<span class="op">-</span>access<span class="op">-</span>sized<span class="op">-</span>range</code></em>
+concept, it can be used with parallel range algorithms; the same applies
+to a view pipeline. There are additional questions to explore, and it is
+possible that some views - standard or custom - cannot be safely used in
+a parallel context. However, we think that these questions have no
+direct impact on the proposed design, and should better be considered in
+a follow-up paper. The reason is that these potential problems are not
+novel for C++ standard. They same questions apply if we pass iterators
+taken from views to the existing C++17 parallel algorithms.</p>
+<p>We present our initial analysis and exploration scope in the <a href="#parallelism_and_views">Parallelism implications for views</a>
+subsection below.</p>
 <h1 data-number="6" id="impl_exp"><span class="header-section-number">6</span> Implementation experience<a href="#impl_exp" class="self-link"></a></h1>
-<p>The oneAPI DPC++ Library (oneDPL) <a href="https://oneapi-src.github.io/oneDPL/parallel_api/parallel_range_algorithms.html">developer
+<p>The oneAPI DPC++ Library (oneDPL) <a href="https://uxlfoundation.github.io/oneDPL/parallel_api/parallel_range_algorithms.html">developer
 guide</a> covers parallel range algorithms we’ve implemented so far. The
-oneAPI specification provides <a href="https://github.com/uxlfoundation/oneAPI-spec/blob/main/source/elements/oneDPL/source/parallel_api/parallel_range_api.rst">formal
+oneAPI specification provides <a href="https://oneapi-spec.uxlfoundation.org/specifications/oneapi/v1.4-rev-1/elements/onedpl/source/parallel_api/parallel_range_api">formal
 signatures</a> of these algorithms. The implementation supports
 execution policies for CPUs (semantically aligned with the C++ standard)
 and for SYCL devices, and it works with a subset of the standard C++
@@ -2103,14 +2116,7 @@ proposed parallel algorithms because all of them were already
 implemented in C++17 and new APIs that we propose are expressible via
 the existing ones.</p>
 <h1 data-number="7" id="further_work"><span class="header-section-number">7</span> Further work<a href="#further_work" class="self-link"></a></h1>
-<h2 data-number="7.1" id="issues_to_address"><span class="header-section-number">7.1</span> Issues to address<a href="#issues_to_address" class="self-link"></a></h2>
-<p>Having known bugs and feedback from SG1 and SG9, the plan of work
-prior to the next committee F2F meeting in Austria, 2025 is the
-following:</p>
-<ul>
-<li>Add testing experience of thread safe access to the views</li>
-</ul>
-<h2 data-number="7.2" id="lwg_questions"><span class="header-section-number">7.2</span> LWG questions<a href="#lwg_questions" class="self-link"></a></h2>
+<h2 data-number="7.1" id="lwg_questions"><span class="header-section-number">7.1</span> LWG questions<a href="#lwg_questions" class="self-link"></a></h2>
 <ul>
 <li>C++17 <code class="sourceCode cpp"><span class="op">&lt;</span>memory<span class="op">&gt;</span></code>
 Parallel Algorithms exist in the <code class="sourceCode cpp"><span class="op">&lt;</span>memory<span class="op">&gt;</span></code>
@@ -2156,47 +2162,67 @@ incomplete wording.</li>
 algorithms, would it make sense to describe more formally which elements
 are present and which are not?</li>
 </ul>
-<h2 data-number="7.3" id="thread_safe_views"><span class="header-section-number">7.3</span> Thread-safe views examination<a href="#thread_safe_views" class="self-link"></a></h2>
-<p>We need to provide an analysis of using
-<code class="sourceCode cpp">views</code> in parallel context. Even
-though, we require
-<code class="sourceCode cpp">random_access_range</code> for Parallel
-Range Algorithms API, data races are still possible.</p>
-<p>While some investigation was done by other authors in <span class="citation" data-cites="P3159R0">[<a href="https://wg21.link/p3159r0" role="doc-biblioref">P3159R0</a>]</span>, it’s mostly not about the data
-races but about ability to parallelize processing of data represented by
-various <code class="sourceCode cpp">views</code>.</p>
-<p>Today range-based overloads are specified to call the “iterator and
-sentinel” overloads, but it might be useful to extend allowed operations
-directly on <code class="sourceCode cpp">views</code> in parallel
-context. Such an extension gives the implementation freedom, which might
-be useful for accelerators (e.g., GPUs).</p>
-<p>In particular, we think that the operations listed below are the the
-minimal list for analysis:</p>
-<ul>
-<li><code class="sourceCode cpp">begin<span class="op">()/</span>end<span class="op">()</span></code></li>
-<li><code class="sourceCode cpp">size<span class="op">()</span></code>
-for sized ranges</li>
-<li>copy constructor</li>
-<li><code class="sourceCode cpp"><span class="kw">operator</span><span class="op">[]</span></code>,
-if available</li>
-</ul>
-<p>Besides that we need to cover the implications of sharing a state
-between <code class="sourceCode cpp">view</code> and
-<code class="sourceCode cpp">iterator</code> on the possibility of data
-races. One example is
+<h2 data-number="7.2" id="parallelism_and_views"><span class="header-section-number">7.2</span> Parallelism implications for
+views<a href="#parallelism_and_views" class="self-link"></a></h2>
+<p>We would like to provide detailed analysis of the possibility to use
+views in parallel contexts and potential consequences of such use. Some
+investigation was done by other authors in <span class="citation" data-cites="P3159R0">[<a href="https://wg21.link/p3159r0" role="doc-biblioref">P3159R0</a>]</span>, however it is primarily about
+the ability to parallelize processing of data represented by various
+views. We want to look at other aspects.</p>
+<p>The key concern is, of course, data races. Even though parallel range
+algorithms require random access ranges, data races are possible if a
+range has some state that can be modified by <em>element access
+functions</em> <span><a href="https://wg21.link/algorithms.parallel.defns">[algorithms.parallel.defns]</a></span>.</p>
+<p>The first question to answer is: which, if any, of the view types in
+the C++ standard library satisfy the requirements of parallel range
+algorithms yet cannot be safely used. We know from practice that many
+views are safe to use. The <a href="#impl_exp">mentioned</a> oneDPL
+implementation has been tested with <a href="https://uxlfoundation.github.io/oneDPL/parallel_api/parallel_range_algorithms.html#supported-range-views">several
+standard view types</a>. Views are also sometimes used via iterators
+with C++17 parallel algorithms; see examples in <a href="#motivation">Motivation</a>. However, certain views are known to
+cache some state (for example,
+<code class="sourceCode cpp">reverse_view</code> caches the result of
+<code class="sourceCode cpp">begin<span class="op">()</span></code> even
+when its base is a
+<code class="sourceCode cpp">random_access_range</code>), and some have
+the state shared by view iterators (such as
 <code class="sourceCode cpp">transform_view</code>, where iterators keep
-pointers to the function object that is stored in the view itself.</p>
-<p>Going forward, we want to analyze
-<code class="sourceCode cpp">views</code> that cache their state. The
-example is <code class="sourceCode cpp">reverse_view</code>, which
-caches the end even when
-<em><code class="sourceCode cpp">base_</code></em> is
-<code class="sourceCode cpp">random_access_range</code>.</p>
-<p>Also, if we extend the allowed operations on
-<code class="sourceCode cpp">views</code> in parallel context we should
-add the analysis, which <code class="sourceCode cpp">views</code>
-pipelines are considered to be thread-safe to do such operations. For
-example:</p>
+pointers to the function object that is stored in the view itself).
+Possible implications of that need to be carefully studied.</p>
+<p>The second question is about which user-specified view arguments
+should be considered element access functions. An obvious example is,
+again, <code class="sourceCode cpp">transform_view</code> that applies a
+function to each element of its base range. The current description in
+<span><a href="https://wg21.link/algorithms.parallel.defns">[algorithms.parallel.defns]</a></span>
+may need to be extended to better explain the impact on views. However,
+this question also applies to the existing C++17 parallel algorithms,
+thus the design of this paper does not introduce new problems.</p>
+<p>Looking from a different angle, it makes sense to consider how C++
+ranges, and views in particular, might be used in parallel contexts
+other than the standard algorithms. While iterators are a powerful
+abstraction that allows algorithms to operate with a variety of data
+structures, random-access containers as well as many views allow
+referring to data elements by index via <code class="sourceCode cpp"><span class="kw">operator</span><span class="op">[]</span></code>,
+and this is often the preferred way, especially in parallel programming.
+Also, data access patterns of some computations might depend on the data
+itself or spread over the whole range, in which case it makes more sense
+for executing threads to obtain a reference to the data container or a
+copy of the view, rather than an iterator. As an additional benefit,
+copying views to each thread would reduce the risk of modifying a shared
+view state (though not eliminate it; see an example below).</p>
+<p>It might therefore be useful to conditionally extend operations on
+ranges allowed for parallel algorithms beyond <code class="sourceCode cpp">std<span class="op">::</span>ranges<span class="op">::</span>begin</code>,
+<code class="sourceCode cpp">end</code>, and
+<code class="sourceCode cpp">size</code> which are guaranteed by the
+<em><code class="sourceCode cpp">random<span class="op">-</span>access<span class="op">-</span>sized<span class="op">-</span>range</code></em>
+concept. While not strictly required to implement this proposal, such
+extensions may provide implementers with more freedom, which could be
+quite useful e.g. for accelerated execution on GPUs. The standard would
+also provide general guidance for C++ developers on the use of ranges by
+multiple threads of execution.</p>
+<p>To better define the desired extensions, we should also analyze which
+view pipelines would be thread-safe for these operations. Consider the
+following example:</p>
 <div class="sourceCode" id="cb35"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector input<span class="op">{</span><span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span><span class="op">}</span>;</span>
 <span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> pipeline <span class="op">=</span> input <span class="op">|</span> std<span class="op">::</span>views<span class="op">::</span>reverse;</span>
 <span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -2205,32 +2231,13 @@ example:</p>
 <span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a><span class="co">// The resulting pipeline of ref is std::ranges::ref_view&lt;std::ranges::reverse_view&lt;std::ranges::ref_view&lt;std::vector&lt;...&gt;&gt;&gt;&gt;&gt;</span></span></code></pre></div>
 <p>If we then use <code class="sourceCode cpp">ref</code> in parallel
-algorithms and allow copy operations for
-<code class="sourceCode cpp">views</code> in parallel context the
-pipeline above potentially leads to data races because every copy will
-operate on <code class="sourceCode cpp">reverse_view</code>, which would
-cache the state concurrently on the
-<code class="sourceCode cpp">begin<span class="op">()</span></code> call
-but <code class="sourceCode cpp">reverse_view</code> itself does not
-guarantee thread safe
-<code class="sourceCode cpp">begin<span class="op">()</span></code>
-access.</p>
-<p>To conclude:</p>
-<ul>
-<li>This proposal does not require any design changes based on our
-analysis of <code class="sourceCode cpp">views</code> thread safety
-because parallel range algorithms can be implemented by calling <code class="sourceCode cpp">ranges<span class="op">::</span>begin</code> and
-<code class="sourceCode cpp">ranges<span class="op">::</span>end<span class="op">()</span></code>
-in serial context and then work with iterators.</li>
-<li>However, other implementation strategies might also be useful,
-specifically for heterogeneous implementation (e.g., for GPUs), thus we
-would like to bring the analysis what operations directly on
-<code class="sourceCode cpp">views</code> are useful in parallel
-context.</li>
-<li>Our plan is to cover allowed operations on
-<code class="sourceCode cpp">views</code> in parallel context in a
-separate paper.</li>
-</ul>
+algorithms, copying it potentially leads to data races because every
+copy will operate on the same instance of
+<code class="sourceCode cpp">reverse_view</code>, which
+<code class="sourceCode cpp">begin</code> method is not thread safe as
+its result is cached.</p>
+<p>We plan to consider all these questions in detail in a separate
+paper.</p>
 <h1 data-number="8" id="formal_wording"><span class="header-section-number">8</span> Formal wording<a href="#formal_wording" class="self-link"></a></h1>
 <h2 data-number="8.1" id="modify_version_syn"><span class="header-section-number">8.1</span> Modify the
 <code class="sourceCode cpp">__cpp_lib_parallel_algorithm</code> macro
@@ -9006,7 +9013,7 @@ concept in wording</li>
 for the algorithms where range-as-the-output is a novelty
 (<code class="sourceCode cpp">copy</code>,
 <code class="sourceCode cpp">transform</code>, etc.), unless stated
-otherwise in <a href="#issues_to_address">Issues to address</a> or in <a href="#out_of_scope">Out-of-scope</a></li>
+otherwise in “Issues to address” or in “Out-of-scope”</li>
 <li>Modify <code class="sourceCode cpp">fill</code> and
 <code class="sourceCode cpp">generate</code> algorithms family to use
 <code class="sourceCode cpp">indirectly_writable</code> instead of
@@ -9364,7 +9371,7 @@ SA
 <ul>
 <li>Thanks to Jonathan Muller for the wording review and providing
 useful feedback.</li>
-<li>Thanks to Mikhail Dvorsky for the implementation experience.</li>
+<li>Thanks to Mikhail Dvorskiy for the implementation experience.</li>
 </ul>
 <h1 data-number="12" id="bibliography"><span class="header-section-number">12</span> References<a href="#bibliography" class="self-link"></a></h1>
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="1" role="doc-bibliography">
