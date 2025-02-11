@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2025-02-03" />
+  <meta name="dcterms.date" content="2025-02-11" />
   <title>C++ parallel range algorithms</title>
   <style>
       code{white-space: pre-wrap;}
@@ -459,14 +459,14 @@ algorithms</h1>
   <tr>
     <td>Document #:</td>
     <td>
-      P3179R6
+      P3179R7
       [<a href="https://wg21.link/P3179">Latest</a>]
       [<a href="https://wg21.link/P3179/status">Status</a>]
     </td>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2025-02-03</td>
+    <td>2025-02-11</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -522,8 +522,8 @@ output<span></span></a></li>
 <li><a href="#require_bounded_ranges" id="toc-require_bounded_ranges"><span class="toc-section-number">2.8</span> Requiring ranges to be
 bounded<span></span></a>
 <ul>
-<li><a href="#corner_cases" id="toc-corner_cases"><span class="toc-section-number">2.8.1</span> Algorithms with semantic
-adjustments<span></span></a>
+<li><a href="#bounded_output" id="toc-bounded_output"><span class="toc-section-number">2.8.1</span> Handling bounded
+output<span></span></a>
 <ul>
 <li><a href="#reverse_copy" id="toc-reverse_copy"><span class="toc-section-number">2.8.1.1</span>
 <code class="sourceCode cpp">reverse_copy</code>
@@ -699,22 +699,25 @@ in <span><span>[version.syn]</span></span><span></span></a></li>
 </ul></li>
 <li><a href="#revision_history" id="toc-revision_history"><span class="toc-section-number">9</span> Revision history<span></span></a>
 <ul>
-<li><a href="#r5_r6" id="toc-r5_r6"><span class="toc-section-number">9.1</span> R5 =&gt; R6<span></span></a></li>
-<li><a href="#r4_r5" id="toc-r4_r5"><span class="toc-section-number">9.2</span> R4 =&gt; R5<span></span></a></li>
-<li><a href="#r3_r4" id="toc-r3_r4"><span class="toc-section-number">9.3</span> R3 =&gt; R4<span></span></a></li>
-<li><a href="#r2_r3" id="toc-r2_r3"><span class="toc-section-number">9.4</span> R2 =&gt; R3<span></span></a></li>
-<li><a href="#r1_r2" id="toc-r1_r2"><span class="toc-section-number">9.5</span> R1 =&gt; R2<span></span></a></li>
-<li><a href="#r0_r1" id="toc-r0_r1"><span class="toc-section-number">9.6</span> R0 =&gt; R1<span></span></a></li>
+<li><a href="#r6_r7" id="toc-r6_r7"><span class="toc-section-number">9.1</span> R6 =&gt; R7<span></span></a></li>
+<li><a href="#r5_r6" id="toc-r5_r6"><span class="toc-section-number">9.2</span> R5 =&gt; R6<span></span></a></li>
+<li><a href="#r4_r5" id="toc-r4_r5"><span class="toc-section-number">9.3</span> R4 =&gt; R5<span></span></a></li>
+<li><a href="#r3_r4" id="toc-r3_r4"><span class="toc-section-number">9.4</span> R3 =&gt; R4<span></span></a></li>
+<li><a href="#r2_r3" id="toc-r2_r3"><span class="toc-section-number">9.5</span> R2 =&gt; R3<span></span></a></li>
+<li><a href="#r1_r2" id="toc-r1_r2"><span class="toc-section-number">9.6</span> R1 =&gt; R2<span></span></a></li>
+<li><a href="#r0_r1" id="toc-r0_r1"><span class="toc-section-number">9.7</span> R0 =&gt; R1<span></span></a></li>
 </ul></li>
 <li><a href="#polls" id="toc-polls"><span class="toc-section-number">10</span> Polls<span></span></a>
 <ul>
-<li><a href="#sg9_wroclaw_2024" id="toc-sg9_wroclaw_2024"><span class="toc-section-number">10.1</span> SG9, Wroclaw,
+<li><a href="#lewg_hagenberg_2025" id="toc-lewg_hagenberg_2025"><span class="toc-section-number">10.1</span> LEWG, Hagenberg,
+2025<span></span></a></li>
+<li><a href="#sg9_wroclaw_2024" id="toc-sg9_wroclaw_2024"><span class="toc-section-number">10.2</span> SG9, Wroclaw,
 2024<span></span></a></li>
-<li><a href="#sg1_wroclaw_2024" id="toc-sg1_wroclaw_2024"><span class="toc-section-number">10.2</span> SG1, Wroclaw,
+<li><a href="#sg1_wroclaw_2024" id="toc-sg1_wroclaw_2024"><span class="toc-section-number">10.3</span> SG1, Wroclaw,
 2024<span></span></a></li>
-<li><a href="#sg1_sg9_st_louis_2024" id="toc-sg1_sg9_st_louis_2024"><span class="toc-section-number">10.3</span> Joint SG1 + SG9, St. Louis,
+<li><a href="#sg1_sg9_st_louis_2024" id="toc-sg1_sg9_st_louis_2024"><span class="toc-section-number">10.4</span> Joint SG1 + SG9, St. Louis,
 2024<span></span></a></li>
-<li><a href="#sg9_tokyo_2024" id="toc-sg9_tokyo_2024"><span class="toc-section-number">10.4</span> SG9, Tokyo,
+<li><a href="#sg9_tokyo_2024" id="toc-sg9_tokyo_2024"><span class="toc-section-number">10.5</span> SG9, Tokyo,
 2024<span></span></a></li>
 </ul></li>
 <li><a href="#acknoledgements" id="toc-acknoledgements"><span class="toc-section-number">11</span>
@@ -761,7 +764,7 @@ overhead on parallelism. That is especially valuable for heterogeneous
 implementations of parallel algorithms, for which the range-based API
 helps reducing the number of kernels submitted to an accelerator.</p>
 <p>Users are already using ranges and range adaptors by passing range
-iterators to the existing non-range parallel algorithms. <span class="citation" data-cites="P2408R5">[<a href="https://wg21.link/p2408r5" role="doc-biblioref">P2408R5</a>]</span> was adopted to enable this.
+iterators to the existing non-range parallel algorithms. <span class="citation" data-cites="P2408R5"><a href="https://wg21.link/p2408r5" role="doc-biblioref">[P2408R5]</a></span> was adopted to enable this.
 This pattern is often featured when teaching C++ parallel algorithms and
 appears in many codebases.</p>
 <p><code class="sourceCode cpp">iota</code> and
@@ -869,10 +872,10 @@ algorithms.</p>
 </tr>
 </tbody>
 </table>
-<p>Earlier, <span class="citation" data-cites="P2500R2">[<a href="https://wg21.link/p2500r2" role="doc-biblioref">P2500R2</a>]</span> proposed to add the range-based
-C++ parallel algorithms together with its primary goal of extending
-algorithms with schedulers. We have decided to split those parts to
-separate papers, which could progress independently.</p>
+<p>Earlier, <span class="citation" data-cites="P2500R2"><a href="https://wg21.link/p2500r2" role="doc-biblioref">[P2500R2]</a></span> proposed to add the
+range-based C++ parallel algorithms together with its primary goal of
+extending algorithms with schedulers. We have decided to split those
+parts to separate papers, which could progress independently.</p>
 <h1 data-number="2" id="design_overview"><span class="header-section-number">2</span> Design overview<a href="#design_overview" class="self-link"></a></h1>
 <p>This paper proposes execution policy support for C++ range-based
 algorithms. In the nutshell, the proposal extends C++ range algorithms
@@ -903,7 +906,7 @@ random_access_iterator or random_access_range</a>.</li>
 <ul>
 <li>As a consequence, when the bounded output has less space than needed
 for all the input, an algorithm might return iterators pointing to the
-positions past the last processed elements.</li>
+positions where the processing stopped. See <a href="#bounded_output">Handling bounded output</a>.</li>
 </ul></li>
 </ul>
 <h3 data-number="2.1.2" id="design_diff_to_cpp17_par"><span class="header-section-number">2.1.2</span> Differences to C++17 parallel
@@ -941,8 +944,8 @@ algorithms</a>.</li>
 <li><code class="sourceCode cpp">rotate_copy</code>,
 <code class="sourceCode cpp">reverse_copy</code>, and
 <code class="sourceCode cpp">partition_copy</code> design is described
-separately. See <a href="#corner_cases">Algorithms with semantic
-adjustments</a>.</li>
+separately. See <a href="#bounded_output">Handling bounded
+output</a>.</li>
 </ul>
 <h3 data-number="2.1.4" id="design_api_example"><span class="header-section-number">2.1.4</span> An example of the proposed
 API<a href="#design_api_example" class="self-link"></a></h3>
@@ -966,8 +969,8 @@ API<a href="#design_api_example" class="self-link"></a></h3>
 <p>We believe that adding parallel range algorithms does not have the
 risk of conflict with anticipated scheduler-based algorithms, because an
 execution policy does not satisfy the requirements for a policy-aware
-scheduler <span class="citation" data-cites="P2500R2">[<a href="https://wg21.link/p2500r2" role="doc-biblioref">P2500R2</a>]</span>, a sender <span class="citation" data-cites="P3300R0">[<a href="https://wg21.link/p3300r0" role="doc-biblioref">P3300R0</a>]</span>, or really anything else from
-<span class="citation" data-cites="P2300R10">[<a href="https://wg21.link/p2300r10" role="doc-biblioref">P2300R10</a>]</span> that can be used to specify
+scheduler <span class="citation" data-cites="P2500R2"><a href="https://wg21.link/p2500r2" role="doc-biblioref">[P2500R2]</a></span>, a sender <span class="citation" data-cites="P3300R0"><a href="https://wg21.link/p3300r0" role="doc-biblioref">[P3300R0]</a></span>, or really anything else from
+<span class="citation" data-cites="P2300R10"><a href="https://wg21.link/p2300r10" role="doc-biblioref">[P2300R10]</a></span> that can be used to specify
 such algorithms.</p>
 <p>At this point we do not, however, discuss how the appearance of
 schedulers may or should impact the execution rules for parallel
@@ -1104,7 +1107,7 @@ algorithm function objects<a href="#algorithm_func_objects" class="self-link"></
 <p>We believe the proposed functionality should have the same properties
 and general behavior as serial range algorithms, particularly regarding
 the name lookup.</p>
-<p>With the adoption of <span class="citation" data-cites="P3136R0">[<a href="https://wg21.link/p3136r0" role="doc-biblioref">P3136R0</a>]</span>, function templates in the
+<p>With the adoption of <span class="citation" data-cites="P3136R0"><a href="https://wg21.link/p3136r0" role="doc-biblioref">[P3136R0]</a></span>, function templates in the
 <code class="sourceCode cpp">std<span class="op">::</span>ranges</code>
 namespace have been respecified as <em>algorithm function objects</em>.
 These objects are defined as sets of one or more overloaded function
@@ -1112,7 +1115,7 @@ templates, which names designate the objects.</p>
 <p>The parallel range algorithms we propose will extend the overload
 sets for the respective algorithm function objects. The name lookup
 rules for such objects will apply automatically. It is covered by the
-wording proposed in <span class="citation" data-cites="P3136R0">[<a href="https://wg21.link/p3136r0" role="doc-biblioref">P3136R0</a>]</span>; additional changes are not
+wording proposed in <span class="citation" data-cites="P3136R0"><a href="https://wg21.link/p3136r0" role="doc-biblioref">[P3136R0]</a></span>; additional changes are not
 needed.</p>
 <p>From the implementation standpoint, adding parallel versions of the
 range algorithms to the overload set should not be a problem. Please see
@@ -1178,14 +1181,15 @@ should not become a gating factor for important design decisions.</p>
 random access is very important. We think though that it should better
 be addressed through proper abstractions and new concepts defining
 iteration spaces, including multidimensional ones, suitable for parallel
-algorithms. We intend to work on developing these (likely in another
-paper), however it requires time and effort to make it right, and we
-think trying to squeeze that into C++26 adds significant risks. For now,
-random access ranges with known bounds (see <a href="#require_bounded_ranges">Requiring ranges to be bounded</a>) is
-probably the best approximation that exists in the standard. Starting
-from that and gradually enabling other types of iteration spaces in a
-source-compatible manner seems to us better than blanket allowance of
-any <code class="sourceCode cpp">forward_range</code>.</p>
+algorithms. We intend to work on developing these in the future, however
+it requires time and effort to make it right; trying to squeeze that
+into C++26 would add significant risks. For now, random access ranges
+with known bounds (see <a href="#require_bounded_ranges">Requiring
+ranges to be bounded</a>) is probably the best approximation that exists
+in the standard. Starting from that and gradually enabling other types
+of iteration spaces in a source-compatible manner seems to us better
+than blanket allowance of any
+<code class="sourceCode cpp">forward_range</code>.</p>
 <h2 data-number="2.7" id="range_as_the_output"><span class="header-section-number">2.7</span> Taking range as the output<a href="#range_as_the_output" class="self-link"></a></h2>
 <p>We propose taking a range as the output for the overloads that take
 ranges for input. Similarly, we propose requiring a sentinel for the
@@ -1206,15 +1210,15 @@ output may open opportunities for more efficient implementations.</li>
 <li>Passing a range for the output makes code a bit simpler in the cases
 typical for parallel execution.</li>
 </ul>
-<p>On the joint SG1 and SG9 discussion of <span class="citation" data-cites="P3179R2">[<a href="https://wg21.link/p3179r2" role="doc-biblioref">P3179R2</a>]</span> the audience expressed several
+<p>On the joint SG1 and SG9 discussion of <span class="citation" data-cites="P3179R2"><a href="https://wg21.link/p3179r2" role="doc-biblioref">[P3179R2]</a></span> the audience expressed several
 concerns about the idea and <a href="#sg1_sg9_st_louis_2024">requested
 to stay with iterators for the output</a> until deeper investigation is
 made.</p>
-<p>To address the concerns, we wrote a separate paper <span class="citation" data-cites="P3490R0">[<a href="https://wg21.link/p3490r0" role="doc-biblioref">P3490R0</a>]</span> with the detailed investigation
-of the topic, suggesting there a compromise solution with adding
-separate function template overloads for both
+<p>To address the concerns, we wrote a separate paper <span class="citation" data-cites="P3490R0"><a href="https://wg21.link/p3490r0" role="doc-biblioref">[P3490R0]</a></span> with the detailed
+investigation of the topic, suggesting there a compromise solution with
+adding separate function template overloads for both
 <em>iterator-as-the-output</em> and <em>range-as-the-output</em>. See
-<span class="citation" data-cites="P3490R0">[<a href="https://wg21.link/p3490r0" role="doc-biblioref">P3490R0</a>]</span> for more details.</p>
+<span class="citation" data-cites="P3490R0"><a href="https://wg21.link/p3490r0" role="doc-biblioref">[P3490R0]</a></span> for more details.</p>
 <p>Eventually SG9 <a href="#sg9_wroclaw_2024">accepted</a> our original
 proposal to use ranges for the output, without extra overloads for
 legacy convenience.</p>
@@ -1237,21 +1241,18 @@ of secure coding, which recommend or even require to always specify the
 size of the output in order to prevent out-of-range data
 modifications.</li>
 </ul>
-<p>If several provided ranges or sequences are bounded, an algorithm
-should stop as soon as the end is reached for the shortest one. (One
-possible deviation from this principle,
-<code class="sourceCode cpp">partition_copy</code>, is discussed
-separately <a href="#partition_copy">below</a>.) There are already
-precedents in the standard that an algorithm takes two sequences with
-potentially different input sizes and chooses the smaller size as the
-number of iterations it is going to make, such as <code class="sourceCode cpp">std<span class="op">::</span>ranges<span class="op">::</span>transform</code>
+<p>If several input ranges or sequences are bounded, an algorithm should
+usually stop as soon as the end is reached for the shortest one. There
+are already precedents in the standard that an algorithm takes two
+sequences with potentially different input sizes and chooses the smaller
+size as the number of iterations it is going to make, such as <code class="sourceCode cpp">std<span class="op">::</span>ranges<span class="op">::</span>transform</code>
 and <code class="sourceCode cpp">std<span class="op">::</span>ranges<span class="op">::</span>mismatch</code>.
 For the record, <code class="sourceCode cpp">std<span class="op">::</span>transform</code>
 (including the overload with execution policy) doesn’t support different
 input sizes, while <code class="sourceCode cpp">std<span class="op">::</span>mismatch</code>
 does.</p>
-<p>In the case of two input ranges or sequences, for a few algorithms -
-namely, <code class="sourceCode cpp">mismatch</code>,
+<p>For a few algorithms - namely,
+<code class="sourceCode cpp">mismatch</code>,
 <code class="sourceCode cpp">equal</code>, and
 <code class="sourceCode cpp">transform</code> - it could be sufficient
 for just one range to be bounded and the other assumed to have at least
@@ -1268,24 +1269,38 @@ plan to relax these constraints for
 <code class="sourceCode cpp">transform</code> once there is a way to
 statically detect infinite ranges like <code class="sourceCode cpp">views<span class="op">::</span>repeat</code> (as
 opposed to finite unsized ranges, such as null terminated strings).</p>
+<p>Dealing with bounded output sequences is discussed in detail in <a href="#bounded_output">Handling bounded output</a>.</p>
 <p>The exposition-only concept <em><code class="sourceCode cpp">random<span class="op">-</span>access<span class="op">-</span>sized<span class="op">-</span>range</code></em>
 combines the key requirements to the types of ranges to simplify the
 signatures of parallel range algorithms:</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> R<span class="op">&gt;</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">concept</span> <em>random-access-sized-range</em> <span class="op">=</span> <em><code class="sourceCode cpp"><span class="co">// exposition only</span></code></em></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    ranges<span class="op">::</span>random_access_range<span class="op">&lt;</span>R<span class="op">&gt;</span> <span class="op">&amp;&amp;</span> ranges<span class="op">::</span>sized_range<span class="op">&lt;</span>R<span class="op">&gt;</span>;</span></code></pre></div>
-<h3 data-number="2.8.1" id="corner_cases"><span class="header-section-number">2.8.1</span> Algorithms with semantic
-adjustments<a href="#corner_cases" class="self-link"></a></h3>
+<h3 data-number="2.8.1" id="bounded_output"><span class="header-section-number">2.8.1</span> Handling bounded output<a href="#bounded_output" class="self-link"></a></h3>
 <p>As the output data sequences are bounded, they are no more assumed to
 have sufficient space for all the input. There is thus a possibility
 that some elements of the input sequences are not processed by an
 algorithm, and it makes sense for it to return iterators to the
 positions in these sequences where the processing stopped.</p>
-<p>Because of that, for several algorithms described below we propose
-modifications to which iterators are returned that do not match their
-existing serial counterparts. If some day serial range algorithms with
-range-as-the-output appear, we envision the same semantics for these
+<p>As the general principle, we propose the algorithm execution to stop
+once the next value cannot be written to the output. For some algorithms
+(<code class="sourceCode cpp">copy</code>,
+<code class="sourceCode cpp">transform</code>, and others), this is
+equivalent to reaching the end of the output sequence. Other algorithms,
+however, may skip some elements of the input, and so can keep going even
+if the output has no space for as long as nothing needs to be written.
+We discuss these options in the <a href="#partition_copy">partition_copy
+design</a> subsection. Per <a href="#lewg_hagenberg_2025">LEWG
+decision</a>, the same semantics should be used for
+<code class="sourceCode cpp">copy_if</code>, <code class="sourceCode cpp">remove_copy<span class="op">[</span>_if<span class="op">]</span></code>,
+<code class="sourceCode cpp">unique_copy</code>, as well as for set
 algorithms.</p>
+<p>For <code class="sourceCode cpp">reverse_copy</code> and
+<code class="sourceCode cpp">rotate_copy</code> below we propose
+modifications to which iterators are returned that do not match their
+existing serial counterparts.</p>
+<p>If some day serial range algorithms with range-as-the-output appear,
+we envision the same semantics for these algorithms.</p>
 <h4 data-number="2.8.1.1" id="reverse_copy"><span class="header-section-number">2.8.1.1</span>
 <code class="sourceCode cpp">reverse_copy</code> design<a href="#reverse_copy" class="self-link"></a></h4>
 <p>The <code class="sourceCode cpp">reverse_copy</code> algorithm is
@@ -1319,7 +1334,7 @@ sufficient to write all the input.</p>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> output<span class="op">(</span><span class="dv">2</span><span class="op">)</span>;</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co">// Takes 2 elements from input</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> res <span class="op">=</span> std<span class="op">::</span>ranges<span class="op">::</span>copy<span class="op">(</span><em>policy</em>, input, output<span class="op">)</span>;</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> res <span class="op">=</span> std<span class="op">::</span>ranges<span class="op">::</span>reverse_copy<span class="op">(</span><em>policy</em>, input, output<span class="op">)</span>;</span>
 <span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="co">// After the algorithm execution:</span></span>
 <span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co">// - output is {4,3}</span></span>
 <span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="co">// - res.in == (input.end() - 2) is true</span></span></code></pre></div>
@@ -1357,7 +1372,7 @@ limit the output:</p>
 <p>The situation for <code class="sourceCode cpp">rotate_copy</code> is
 very similar to <code class="sourceCode cpp">reverse_copy</code> in the
 sense that it also does not traverse the input in order.</p>
-<p>Let’s look at the signature:</p>
+<p>Let’s look at the existing signature:</p>
 <div class="sourceCode" id="cb16"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>std<span class="op">::</span>forward_iterator I, std<span class="op">::</span>sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S, std<span class="op">::</span>weakly_incrementable O<span class="op">&gt;</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="kw">requires</span> std<span class="op">::</span>indirectly_copyable<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="kw">constexpr</span> rotate_copy_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span> rotate_copy<span class="op">(</span>I first, I middle, S last, O result<span class="op">)</span>;</span></code></pre></div>
@@ -1546,9 +1561,9 @@ the next 4 consecutive elements. Thus, we do NOT propose this
 semantics.</p>
 <h2 data-number="2.9" id="callable_parameters"><span class="header-section-number">2.9</span> Requirements for callable
 parameters<a href="#callable_parameters" class="self-link"></a></h2>
-<p>In <span class="citation" data-cites="P3179R0">[<a href="https://wg21.link/p3179r0" role="doc-biblioref">P3179R0</a>]</span> we proposed that parallel range
-algorithms should require function objects for predicates, comparators,
-etc. to have
+<p>In <span class="citation" data-cites="P3179R0"><a href="https://wg21.link/p3179r0" role="doc-biblioref">[P3179R0]</a></span> we proposed that parallel
+range algorithms should require function objects for predicates,
+comparators, etc. to have
 <code class="sourceCode cpp"><span class="kw">const</span></code>-qualified
 <code class="sourceCode cpp"><span class="kw">operator</span><span class="op">()</span></code>,
 with the intent to provide compile-time diagnostics for mutable function
@@ -1633,7 +1648,7 @@ algorithms.</p>
 <h2 data-number="2.10" id="constexpr_support"><span class="header-section-number">2.10</span>
 <code class="sourceCode cpp"><span class="kw">constexpr</span></code>
 parallel range algorithms<a href="#constexpr_support" class="self-link"></a></h2>
-<p><span class="citation" data-cites="P2902R0">[<a href="https://wg21.link/p2902r0" role="doc-biblioref">P2902R0</a>]</span> suggests allowing algorithms
+<p><span class="citation" data-cites="P2902R0"><a href="https://wg21.link/p2902r0" role="doc-biblioref">[P2902R0]</a></span> suggests allowing algorithms
 with execution policies to be used in constant expressions. We do not
 consider that as a primary design goal for our work, however we will
 happily align with that proposal in the future once it progresses
@@ -2069,7 +2084,7 @@ only algorithms where we don’t add the
 <li><code class="sourceCode cpp">fold_left_first_with_iter</code></li>
 <li><code class="sourceCode cpp">generate_random</code> (RNG specific,
 <code class="sourceCode cpp">ExecutionPolicy</code> parameter was
-rejected during <span class="citation" data-cites="P1068R11">[<a href="https://wg21.link/p1068r11" role="doc-biblioref">P1068R11</a>]</span> review)</li>
+rejected during <span class="citation" data-cites="P1068R11"><a href="https://wg21.link/p1068r11" role="doc-biblioref">[P1068R11]</a></span> review)</li>
 </ul>
 <h3 data-number="5.2.2" id="serial_range_based_absence"><span class="header-section-number">5.2.2</span> Absence of some serial
 range-based algorithms<a href="#serial_range_based_absence" class="self-link"></a></h3>
@@ -2165,7 +2180,7 @@ are present and which are not?</li>
 <h2 data-number="7.2" id="parallelism_and_views"><span class="header-section-number">7.2</span> Parallelism and Views<a href="#parallelism_and_views" class="self-link"></a></h2>
 <p>We would like to provide detailed analysis of the possibility to use
 views in parallel contexts and potential consequences of such use. Some
-investigation was done by other authors in <span class="citation" data-cites="P3159R0">[<a href="https://wg21.link/p3159r0" role="doc-biblioref">P3159R0</a>]</span>, however it is primarily about
+investigation was done by one of the authors in <span class="citation" data-cites="P3159R0"><a href="https://wg21.link/p3159r0" role="doc-biblioref">[P3159R0]</a></span>, however it is primarily about
 the ability to parallelize processing of data represented by various
 views. We want to look at other aspects.</p>
 <p>The key concern is, of course, data races. Even though parallel range
@@ -5388,7 +5403,7 @@ overloads with no parameter
 <code class="sourceCode default">result_last</code> or
 <code class="sourceCode default">result_r</code>;</p></li>
 <li><p><span class="marginalizedparent"><a class="marginalized">(x.2)</a></span>
-<em><code class="sourceCode default">E</code></em> be:</p>
+<code class="sourceCode default"><em>E</em>(i)</code> be:</p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(x.2.1)</a></span>
 <code class="sourceCode default">bool(pred(*i))</code> for the overloads
@@ -5402,7 +5417,7 @@ for the overloads in namespace
 <em><code class="sourceCode default">M</code></em> be the number of
 iterators <code class="sourceCode default">i</code> in the range
 <code class="sourceCode default">[first, last)</code> for which the
-condition <em><code class="sourceCode default">E</code></em>
+condition <code class="sourceCode default"><em>E</em>(i)</code>
 holds;</p></li>
 <li><p><span class="marginalizedparent"><a class="marginalized">(x.4)</a></span>
 <em><code class="sourceCode default">N</code></em> be
@@ -5428,8 +5443,10 @@ is not
 <em>Effects</em>: Copies <span class="rm" style="color: #bf0303"><del>all of the</del></span><span class="add" style="color: #006e28"><ins><em><span><code class="sourceCode default">N</code></span></em></ins></span>
 elements referred to by the iterator
 <code class="sourceCode cpp">i</code> in the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
-for which <em><code class="sourceCode cpp">E</code></em> is
-<code class="sourceCode cpp"><span class="kw">true</span></code> <span class="add" style="color: #006e28"><ins>into the range
+for which
+<code class="sourceCode cpp"><em>E</em><span class="add" style="color: #006e28"><ins>(i)</ins></span></code>
+is <code class="sourceCode cpp"><span class="kw">true</span></code>
+<span class="add" style="color: #006e28"><ins>into the range
 <span><code class="sourceCode default">[result, result + <em>N</em>)</code></span></ins></span>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">18</a></span>
 <em>Returns</em>:</p>
@@ -5441,14 +5458,18 @@ for the overloads in namespace
 <li><span class="marginalizedparent"><a class="marginalized">(18.2)</a></span>
 <code class="sourceCode cpp"><span class="op">{</span><span class="rm" style="color: #bf0303"><del>last</del></span><span class="add" style="color: #006e28"><ins>j</ins></span>, result <span class="op">+</span> <em>N</em><span class="op">}</span></code>
 for the overloads in namespace
-<code class="sourceCode cpp">ranges</code><span class="add" style="color: #006e28"><ins>, where the iterator
-<span><code class="sourceCode default">j</code></span> points to a
-position in the range
-<span><code class="sourceCode default">[first, last)</code></span> past
-the last copied element if
-<span><code class="sourceCode default">result + <em>N</em> == result_last</code></span>,
-and <span><code class="sourceCode default">j == last</code></span>
-otherwise</ins></span>.</li>
+<code class="sourceCode cpp">ranges</code><span class="add" style="color: #006e28"><ins>, where
+<span><code class="sourceCode default">j</code></span> is the iterator
+in <span><code class="sourceCode default">[first, last)</code></span>
+for which
+<span><code class="sourceCode default"><em>E</em>(j)</code></span> holds
+and there are exactly
+<em><span><code class="sourceCode default">N</code></span></em>
+iterators <span><code class="sourceCode default">i</code></span> in
+<span><code class="sourceCode default">[first, j)</code></span> for
+which <span><code class="sourceCode default"><em>E</em>(i)</code></span>
+holds, or <span><code class="sourceCode default">j == last</code></span>
+if no such iterator exists</ins></span>.</li>
 </ul>
 <p><span class="marginalizedparent"><a class="marginalized">19</a></span>
 <em>Complexity</em>: <span class="rm" style="color: #bf0303"><del>Exactly</del></span><span class="add" style="color: #006e28"><ins>At most</ins></span>
@@ -6203,7 +6224,9 @@ elements by moving from elements that were originally in that range. —
 
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">8</a></span>
-Let <em><code class="sourceCode cpp">E</code></em> be</p>
+Let
+<code class="sourceCode cpp"><em>E</em><span class="add" style="color: #006e28"><ins>(i)</ins></span></code>
+be</p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(8.1)</a></span>
 <code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(*</span>i <span class="op">==</span> value<span class="op">)</span></code>
@@ -6237,8 +6260,9 @@ overloads with no parameter
 <code class="sourceCode default">result_r</code>;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(x.2)</a></span>
 <em><code class="sourceCode default">M</code></em> be the number of
-elements in <code class="sourceCode default">[first, last)</code> for
-which <em><code class="sourceCode default">E</code></em> is
+iterators <code class="sourceCode default">i</code> in
+<code class="sourceCode default">[first, last)</code> for which
+<code class="sourceCode default"><em>E</em>(i)</code> is
 <code class="sourceCode default">false</code>;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(x.3)</a></span>
 <em><code class="sourceCode default">N</code></em> be
@@ -6271,8 +6295,10 @@ is not
 <em>Effects</em>: Copies <span class="rm" style="color: #bf0303"><del>all the</del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default"><em>N</em></code></span></ins></span>
 elements referred to by the iterator
 <code class="sourceCode cpp">i</code> in the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
-for which <em><code class="sourceCode cpp">E</code></em> is
-<code class="sourceCode cpp"><span class="kw">false</span></code> <span class="add" style="color: #006e28"><ins>into the range
+for which
+<code class="sourceCode cpp"><em>E</em><span class="add" style="color: #006e28"><ins>(i)</ins></span></code>
+is <code class="sourceCode cpp"><span class="kw">false</span></code>
+<span class="add" style="color: #006e28"><ins>into the range
 <span><code class="sourceCode default">[result, result + <em>N</em>)</code></span></ins></span>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">13</a></span>
 <em>Returns</em>:</p>
@@ -6284,14 +6310,19 @@ for the algorithms in namespace
 <li><span class="marginalizedparent"><a class="marginalized">(13.2)</a></span>
 <code class="sourceCode cpp"><span class="op">{</span><span class="rm" style="color: #bf0303"><del>last</del></span><span class="add" style="color: #006e28"><ins>j</ins></span>, result <span class="op">+</span> <em>N</em><span class="op">}</span></code>,
 for the algorithms in namespace
-<code class="sourceCode cpp">ranges</code><span class="add" style="color: #006e28"><ins>, where the iterator
-<span><code class="sourceCode default">j</code></span> points to a
-position in the range
-<span><code class="sourceCode default">[first, last)</code></span> past
-the last copied element if
-<span><code class="sourceCode default">result + <em>N</em> == result_last</code></span>,
-and <span><code class="sourceCode default">j == last</code></span>
-otherwise</ins></span>.</li>
+<code class="sourceCode cpp">ranges</code><span class="add" style="color: #006e28"><ins>, where
+<span><code class="sourceCode default">j</code></span> is the iterator
+in <span><code class="sourceCode default">[first, last)</code></span>
+for which
+<span><code class="sourceCode default"><em>E</em>(j)</code></span> is
+<span><code class="sourceCode default">false</code></span> and there are
+exactly <em><span><code class="sourceCode default">N</code></span></em>
+iterators <span><code class="sourceCode default">i</code></span> in
+<span><code class="sourceCode default">[first, j)</code></span> for
+which <span><code class="sourceCode default"><em>E</em>(i)</code></span>
+is <span><code class="sourceCode default">false</code></span>, or
+<span><code class="sourceCode default">j == last</code></span> if no
+such iterator exists</ins></span>.</li>
 </ul>
 <p><span class="marginalizedparent"><a class="marginalized">14</a></span>
 <em>Complexity</em>: <span class="rm" style="color: #bf0303"><del>Exactly</del></span><span class="add" style="color: #006e28"><ins>At most</ins></span>
@@ -6405,7 +6436,8 @@ Let <code class="sourceCode cpp">pred</code> be
 <code class="sourceCode cpp">equal_to<span class="op">{}</span></code>
 for the overloads in namespace <code class="sourceCode cpp">std</code>
 with no parameter <code class="sourceCode cpp">pred</code>, and let
-<em><code class="sourceCode cpp">E</code></em> be</p>
+<code class="sourceCode cpp"><em>E</em><span class="add" style="color: #006e28"><ins>(i)</ins></span></code>
+be</p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(6.1)</a></span>
 <code class="sourceCode cpp"><span class="dt">bool</span><span class="op">(</span>pred<span class="op">(*</span>i, <span class="op">*(</span>i <span class="op">-</span> <span class="dv">1</span><span class="op">)))</span></code>
@@ -6429,7 +6461,7 @@ overloads with no parameter
 <em><code class="sourceCode default">M</code></em> be the number of
 elements in the range
 <code class="sourceCode default">[first + 1, last)</code> for which
-<em><code class="sourceCode default">E</code></em> is
+<code class="sourceCode default"><em>E</em>(i)</code> is
 <code class="sourceCode default">false</code>.</li>
 <li><span class="marginalizedparent"><a class="marginalized">(x.3)</a></span>
 <em><code class="sourceCode default">N</code></em> be <code class="sourceCode default">min(<em>M</em> + 1, result_last - result)</code>.</li>
@@ -6497,10 +6529,16 @@ and
 <em>end note</em>]</ins></span></p>
 <p><span class="marginalizedparent"><a class="marginalized">9</a></span>
 <em>Effects</em>: Copies only the first element from <span class="rm" style="color: #bf0303"><del>every</del></span><span class="add" style="color: #006e28"><ins><em><span><code class="sourceCode default">N</code></span></em></ins></span>
-consecutive group<span class="add" style="color: #006e28"><ins>s</ins></span> of equal elements referred to
-by the iterator <code class="sourceCode cpp">i</code> in the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
-for which <em><code class="sourceCode cpp">E</code></em> holds <span class="add" style="color: #006e28"><ins>into a range
-<span><code class="sourceCode default">[result, result + <em>N</em>)</code></span></ins></span>.</p>
+consecutive group<span class="add" style="color: #006e28"><ins>s</ins></span> of <span class="rm" style="color: #bf0303"><del>equal</del></span><span class="add" style="color: #006e28"><ins>equivalent</ins></span> elements referred to
+by the iterator <code class="sourceCode cpp">i</code> in the range <code class="sourceCode cpp"><span class="op">[</span>first <span class="add" style="color: #006e28"><ins>+ 1</ins></span>, last<span class="op">)</span></code>
+for which
+<code class="sourceCode cpp"><em>E</em><span class="add" style="color: #006e28"><ins>(i)</ins></span></code>
+holds <span class="add" style="color: #006e28"><ins>into a range
+<span><code class="sourceCode default">[result, result + <em>N</em>)</code></span></ins></span>.
+<span class="draftnote" data-audience="LWG" style="color: #0000ff">[
+Drafting note for LWG: Modifications in the middle of the sentence are
+to fix the wording by aligning with
+<code class="sourceCode default">unique</code>. ]</span></p>
 <p><span class="marginalizedparent"><a class="marginalized">10</a></span>
 <em>Returns</em>:</p>
 <ul>
@@ -6511,14 +6549,21 @@ for the overloads in namespace
 <li><span class="marginalizedparent"><a class="marginalized">(10.2)</a></span>
 <code class="sourceCode cpp"><span class="op">{</span><span class="rm" style="color: #bf0303"><del>last</del></span><span class="add" style="color: #006e28"><ins>j</ins></span>, result <span class="op">+</span> <em>N</em><span class="op">}</span></code>
 for the overloads in namespace
-<code class="sourceCode cpp">ranges</code><span class="add" style="color: #006e28"><ins>, where the iterator
-<span><code class="sourceCode default">j</code></span> points to a
-position in the range
-<span><code class="sourceCode default">[first, last)</code></span> past
-the last copied element if
-<span><code class="sourceCode default">result + <em>N</em> == result_last</code></span>,
-and <span><code class="sourceCode default">j == last</code></span>
-otherwise</ins></span>.</li>
+<code class="sourceCode cpp">ranges</code><span class="add" style="color: #006e28"><ins>, where
+<span><code class="sourceCode default">j</code></span> is the iterator
+in
+<span><code class="sourceCode default">[first + 1, last)</code></span>
+for which
+<span><code class="sourceCode default"><em>E</em>(j)</code></span> is
+<span><code class="sourceCode default">false</code></span> and there are
+exactly
+<span><code class="sourceCode default"><em>N</em> - 1</code></span>
+iterators <span><code class="sourceCode default">i</code></span> in
+<span><code class="sourceCode default">[first + 1, j)</code></span> for
+which <span><code class="sourceCode default"><em>E</em>(i)</code></span>
+is <span><code class="sourceCode default">false</code></span>, or
+<span><code class="sourceCode default">j == last</code></span> if no
+such iterator exists</ins></span>.</li>
 </ul>
 <p><span class="marginalizedparent"><a class="marginalized">11</a></span>
 <em>Complexity</em>: <span class="rm" style="color: #bf0303"><del>Exactly</del></span><span class="add" style="color: #006e28"><ins>At most</ins></span> <code class="sourceCode cpp">last <span class="op">-</span> first <span class="op">-</span> <span class="dv">1</span></code>
@@ -8200,7 +8245,7 @@ namespace <code class="sourceCode cpp">std</code>.</li>
 for the overloads in namespace
 <code class="sourceCode cpp">ranges</code><span class="add" style="color: #006e28"><ins>, where the iterator
 <span><code class="sourceCode default">j1</code></span> points to the
-position past the last copied element in
+position past the last copied or skipped element in
 <span><code class="sourceCode default">[first1, last1)</code></span> if
 <span><code class="sourceCode default">result + <em>N</em> == result_last</code></span>,
 and <span><code class="sourceCode default">j1 == last1</code></span>
@@ -8602,8 +8647,8 @@ is empty, otherwise <code class="sourceCode cpp"><span class="op">{</span>m, M<s
 where <code class="sourceCode cpp">m</code> is the first iterator in
 <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
 such that no iterator in the range refers to a smaller element, and
-where <code class="sourceCode cpp">M</code> is the last
-iterator<sup>209</sup> in <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+where <code class="sourceCode cpp">M</code> is the last iterator in
+<code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
 such that no iterator in the range refers to a larger element.</p>
 <p><span class="marginalizedparent"><a class="marginalized">32</a></span>
 <em>Complexity</em>: Let <em><code class="sourceCode cpp">N</code></em>
@@ -8978,7 +9023,12 @@ iterators.</p>
 
 </div>
 <h1 data-number="9" id="revision_history"><span class="header-section-number">9</span> Revision history<a href="#revision_history" class="self-link"></a></h1>
-<h2 data-number="9.1" id="r5_r6"><span class="header-section-number">9.1</span> R5 =&gt; R6<a href="#r5_r6" class="self-link"></a></h2>
+<h2 data-number="9.1" id="r6_r7"><span class="header-section-number">9.1</span> R6 =&gt; R7<a href="#r6_r7" class="self-link"></a></h2>
+<ul>
+<li>Update the design description and the wording to reflect the LEWG
+decision on where an algorithm with bounded output should stop</li>
+</ul>
+<h2 data-number="9.2" id="r5_r6"><span class="header-section-number">9.2</span> R5 =&gt; R6<a href="#r5_r6" class="self-link"></a></h2>
 <ul>
 <li>Add <code class="sourceCode cpp">rotate_copy</code> back into the
 scope</li>
@@ -8998,7 +9048,7 @@ values</li>
 <code class="sourceCode cpp">partition_copy</code></li>
 <li>Update analysis on using views in parallel context</li>
 </ul>
-<h2 data-number="9.2" id="r4_r5"><span class="header-section-number">9.2</span> R4 =&gt; R5<a href="#r4_r5" class="self-link"></a></h2>
+<h2 data-number="9.3" id="r4_r5"><span class="header-section-number">9.3</span> R4 =&gt; R5<a href="#r4_r5" class="self-link"></a></h2>
 <ul>
 <li>Add the necessary wording to <span><a href="https://wg21.link/algorithm.syn">[algorithm.syn]</a></span></li>
 <li>Add the contextual algorithms description to the wording, even if no
@@ -9028,7 +9078,7 @@ design overview</li>
 <li>Remove <code class="sourceCode cpp">rotate_copy</code> from scope
 due to design issues</li>
 </ul>
-<h2 data-number="9.3" id="r3_r4"><span class="header-section-number">9.3</span> R3 =&gt; R4<a href="#r3_r4" class="self-link"></a></h2>
+<h2 data-number="9.4" id="r3_r4"><span class="header-section-number">9.4</span> R3 =&gt; R4<a href="#r3_r4" class="self-link"></a></h2>
 <ul>
 <li>Revert back to range-as-the-output design aspect, change the formal
 wording accordingly</li>
@@ -9050,12 +9100,12 @@ overloads</li>
 <li>List range algorithms that are being excluded</li>
 </ul></li>
 </ul>
-<h2 data-number="9.4" id="r2_r3"><span class="header-section-number">9.4</span> R2 =&gt; R3<a href="#r2_r3" class="self-link"></a></h2>
+<h2 data-number="9.5" id="r2_r3"><span class="header-section-number">9.5</span> R2 =&gt; R3<a href="#r2_r3" class="self-link"></a></h2>
 <ul>
 <li>Use <code class="sourceCode cpp">iterator</code> as an output</li>
 <li>Add wording</li>
 </ul>
-<h2 data-number="9.5" id="r1_r2"><span class="header-section-number">9.5</span> R1 =&gt; R2<a href="#r1_r2" class="self-link"></a></h2>
+<h2 data-number="9.6" id="r1_r2"><span class="header-section-number">9.6</span> R1 =&gt; R2<a href="#r1_r2" class="self-link"></a></h2>
 <ul>
 <li>Summarize proposed differences from the serial range algorithms and
 from the non-range parallel algorithms</li>
@@ -9066,7 +9116,7 @@ from the non-range parallel algorithms</li>
 <li>Fix the signatures of <code class="sourceCode cpp">for_each</code>
 to match the proposed design</li>
 </ul>
-<h2 data-number="9.6" id="r0_r1"><span class="header-section-number">9.6</span> R0 =&gt; R1<a href="#r0_r1" class="self-link"></a></h2>
+<h2 data-number="9.7" id="r0_r1"><span class="header-section-number">9.7</span> R0 =&gt; R1<a href="#r0_r1" class="self-link"></a></h2>
 <ul>
 <li>Address the feedback from SG1 and SG9 review</li>
 <li>Add more information about iterator constraints</li>
@@ -9075,7 +9125,68 @@ the algorithms</li>
 <li>Require ranges to be bounded</li>
 </ul>
 <h1 data-number="10" id="polls"><span class="header-section-number">10</span> Polls<a href="#polls" class="self-link"></a></h1>
-<h2 data-number="10.1" id="sg9_wroclaw_2024"><span class="header-section-number">10.1</span> SG9, Wroclaw, 2024<a href="#sg9_wroclaw_2024" class="self-link"></a></h2>
+<h2 data-number="10.1" id="lewg_hagenberg_2025"><span class="header-section-number">10.1</span> LEWG, Hagenberg, 2025<a href="#lewg_hagenberg_2025" class="self-link"></a></h2>
+<strong>Poll 1</strong>: In “copy_if” and similar algorithms modify the
+behaviour into: return the first element which wasn’t copied which
+comply with the predicate or sentinel.
+<table>
+<tr>
+<th>
+SF
+<th>
+F
+<th>
+N
+<th>
+A
+<th>
+SA
+</tr>
+<tr>
+<td>
+11
+<td>
+12
+<td>
+1
+<td>
+0
+<td>
+0
+</tr>
+</table>
+<strong>Poll 2</strong>: Apply the design and wording changes described
+above and forward P3179R7 including following algorithms: “contains”,
+“for_each”, “for_each_n”, “copy”, “copy_n”, “copy_if”, “rotate_copy”,
+“reverse_copy”, “partition_copy”, “merge”, “set_union” and algorithms
+with the similar pattern and forward the paper to LWG for C++26.
+<table>
+<tr>
+<th>
+SF
+<th>
+F
+<th>
+N
+<th>
+A
+<th>
+SA
+</tr>
+<tr>
+<td>
+11
+<td>
+9
+<td>
+2
+<td>
+0
+<td>
+0
+</tr>
+</table>
+<h2 data-number="10.2" id="sg9_wroclaw_2024"><span class="header-section-number">10.2</span> SG9, Wroclaw, 2024<a href="#sg9_wroclaw_2024" class="self-link"></a></h2>
 <strong>Poll 1</strong>: Change
 <code class="sourceCode cpp">mismatch</code> and
 <code class="sourceCode cpp">equal</code> to require
@@ -9172,7 +9283,7 @@ SA
 0
 </tr>
 </table>
-<p><strong>Poll 4</strong> Forward <span class="citation" data-cites="P3179R3">[<a href="https://wg21.link/p3179r3" role="doc-biblioref">P3179R3</a>]</span> with the changes in <span class="citation" data-cites="P3490R0">[<a href="https://wg21.link/p3490r0" role="doc-biblioref">P3490R0</a>]</span> (as updated above) to LEWG for
+<p><strong>Poll 4</strong> Forward <span class="citation" data-cites="P3179R3"><a href="https://wg21.link/p3179r3" role="doc-biblioref">[P3179R3]</a></span> with the changes in <span class="citation" data-cites="P3490R0"><a href="https://wg21.link/p3490r0" role="doc-biblioref">[P3490R0]</a></span> (as updated above) to LEWG for
 inclusion in C++26 with these changes polled above.</p>
 <table>
 <tr>
@@ -9200,8 +9311,8 @@ SA
 0
 </tr>
 </table>
-<h2 data-number="10.2" id="sg1_wroclaw_2024"><span class="header-section-number">10.2</span> SG1, Wroclaw, 2024<a href="#sg1_wroclaw_2024" class="self-link"></a></h2>
-<p>Forward <span class="citation" data-cites="P3179R3">[<a href="https://wg21.link/p3179r3" role="doc-biblioref">P3179R3</a>]</span> to LEWG with the following
+<h2 data-number="10.3" id="sg1_wroclaw_2024"><span class="header-section-number">10.3</span> SG1, Wroclaw, 2024<a href="#sg1_wroclaw_2024" class="self-link"></a></h2>
+<p>Forward <span class="citation" data-cites="P3179R3"><a href="https://wg21.link/p3179r3" role="doc-biblioref">[P3179R3]</a></span> to LEWG with the following
 notes:</p>
 <ol type="1">
 <li>The intention is that algorithms call
@@ -9240,9 +9351,9 @@ SA
 0
 </tr>
 </table>
-<h2 data-number="10.3" id="sg1_sg9_st_louis_2024"><span class="header-section-number">10.3</span> Joint SG1 + SG9, St. Louis,
+<h2 data-number="10.4" id="sg1_sg9_st_louis_2024"><span class="header-section-number">10.4</span> Joint SG1 + SG9, St. Louis,
 2024<a href="#sg1_sg9_st_louis_2024" class="self-link"></a></h2>
-<p><strong>Poll</strong>: Continue work on <span class="citation" data-cites="P3179R2">[<a href="https://wg21.link/p3179r2" role="doc-biblioref">P3179R2</a>]</span> for IS’26 with these notes: 1.
+<p><strong>Poll</strong>: Continue work on <span class="citation" data-cites="P3179R2"><a href="https://wg21.link/p3179r2" role="doc-biblioref">[P3179R2]</a></span> for IS’26 with these notes: 1.
 RandomAccess for inputs and outputs 2. Iterators for outputs 3. We
 believe the overloads are worth it</p>
 <table>
@@ -9271,7 +9382,7 @@ SA
 0
 </tr>
 </table>
-<h2 data-number="10.4" id="sg9_tokyo_2024"><span class="header-section-number">10.4</span> SG9, Tokyo, 2024<a href="#sg9_tokyo_2024" class="self-link"></a></h2>
+<h2 data-number="10.5" id="sg9_tokyo_2024"><span class="header-section-number">10.5</span> SG9, Tokyo, 2024<a href="#sg9_tokyo_2024" class="self-link"></a></h2>
 <strong>Poll 1</strong>: <code class="sourceCode cpp">for_each</code>
 shouldn’t return the callable
 <table>
