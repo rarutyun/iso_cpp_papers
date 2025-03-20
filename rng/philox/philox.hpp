@@ -156,7 +156,7 @@ public:
 
     void set_counter(const array<result_type, n>& counter) {
         for (std::size_t j = 0; j < n; ++j) {
-            x[n - j - 1] = counter[j] & result_mask;
+            x[n - j - 1] = counter[j] & counter_mask;
         }
     }
 
@@ -232,8 +232,8 @@ private:
     using counter_type = std::tuple_element_t<get_log_index(w), uint_types>;
     using promotion_type = std::tuple_element_t<get_log_index(w), promotion_types>;
 
-    static constexpr counter_type counter_mask = ~counter_type(0) >> (sizeof(counter_type) * CHAR_BIT - w);
-    static constexpr result_type result_mask = ~result_type(0) >> (sizeof(result_type) * CHAR_BIT - w);
+    static constexpr counter_type counter_mask = static_cast<counter_type>(~counter_type(0)) >> (std::numeric_limits<counter_type>::digits - w);
+    static constexpr result_type result_mask = static_cast<result_type>(~result_type(0)) >> (std::numeric_limits<result_type>::digits - w);
 
 
 private: // functions
@@ -334,7 +334,7 @@ operator<<(std::basic_ostream<CharT, Traits>& os, const philox_engine<UIntType, 
         os << engine.k[i] << sp;
     }
     for (std::size_t i = 0; i < n; ++i) {
-        os << engine.x[i] << sp;
+        os << (UIntType)engine.x[i] << sp;
     }
     for (std::size_t i = 0; i < n; ++i) {
         os << engine.y[i] << sp;

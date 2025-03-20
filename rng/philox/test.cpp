@@ -6,6 +6,11 @@
 
 #include "philox.hpp"
 
+using philox2x32_w5 = std::philox_engine<std::uint_fast32_t, 5, 2, 10, 0xD256D193, 0x0>;
+using philox2x32_w30 = std::philox_engine<std::uint_fast32_t, 30, 2, 10, 0xD256D193, 0x0>;
+using philox2x64_w15 = std::philox_engine<std::uint_fast64_t, 15, 2, 10, 0xD2B74407B1CE6E93, 0x0>;
+using philox2x64_w49 = std::philox_engine<std::uint_fast64_t, 49, 2, 10, 0xD2B74407B1CE6E93, 0x0>;
+
 // Test the conformance of the implementation with the ISO C++ standard
 template <typename Engine>
 void conformance_test() {
@@ -254,26 +259,50 @@ int main() {
     conformance_test<std::philox4x32>();
     conformance_test<std::philox4x64>();
 
-    api_test<std::philox4x32>();
-    api_test<std::philox4x64>();
-
-    seed_test<std::philox4x32>();
-    seed_test<std::philox4x64>();
-
-    discard_test<std::philox4x32>();
-    discard_test<std::philox4x64>();
-
     set_counter_conformance_test<std::philox4x32>();
     set_counter_conformance_test<std::philox4x64>();
 
+    api_test<std::philox4x32>();
+    api_test<std::philox4x64>();
+    api_test<philox2x32_w5>();
+    api_test<philox2x32_w30>();
+    api_test<philox2x64_w15>();
+    api_test<philox2x64_w49>();
+
+    seed_test<std::philox4x32>();
+    seed_test<std::philox4x64>();
+    seed_test<philox2x32_w5>();
+    seed_test<philox2x32_w30>();
+    seed_test<philox2x64_w15>();
+    seed_test<philox2x64_w49>();
+
+    discard_test<std::philox4x32>();
+    discard_test<std::philox4x64>();
+    discard_test<philox2x32_w5>();
+    discard_test<philox2x32_w30>();
+    discard_test<philox2x64_w15>();
+    discard_test<philox2x64_w49>();
+
     skip_test<std::philox4x32>();
     skip_test<std::philox4x64>();
+    skip_test<philox2x32_w5>();
+    skip_test<philox2x32_w30>();
+    skip_test<philox2x64_w15>();
+    skip_test<philox2x64_w49>();
 
     counter_overflow_test<std::philox4x32>();
     counter_overflow_test<std::philox4x64>();
+    counter_overflow_test<philox2x32_w5>();
+    counter_overflow_test<philox2x32_w30>();
+    counter_overflow_test<philox2x64_w15>();
+    counter_overflow_test<philox2x64_w49>();
 
     discard_overflow_test<std::philox4x32>();
     discard_overflow_test<std::philox4x64>();
+    discard_overflow_test<philox2x32_w5>();
+    discard_overflow_test<philox2x32_w30>();
+    discard_overflow_test<philox2x64_w15>();
+    discard_overflow_test<philox2x64_w49>();
 
     return 0;
 }
