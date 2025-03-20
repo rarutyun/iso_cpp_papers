@@ -111,7 +111,7 @@ public:
     static constexpr std::array<result_type, array_size> multipliers = extract_elements(even_indices_sequence{});
     static constexpr std::array<result_type, array_size> round_consts = extract_elements(odd_indices_sequence{});
     static constexpr result_type min() { return 0; }
-    static constexpr result_type max() { return max_impl(); }
+    static constexpr result_type max() { return result_mask; }
     static constexpr result_type default_seed = 20111115u;
     // constructors and seeding functions
     philox_engine() : philox_engine(default_seed) {}
@@ -310,13 +310,6 @@ private: // functions
             x[j] = 0;
         }
         state_i = n - 1;
-    }
-
-    static constexpr result_type max_impl()
-    {
-        return w == std::numeric_limits<result_type>::digits
-            ? std::numeric_limits<result_type>::digits - 1
-            : (result_type(1) << w) - 1;
     }
 
 public: // state

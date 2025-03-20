@@ -212,35 +212,40 @@ void counter_overflow_test() {
 template <typename Engine>
 void discard_overflow_test() {
     using T = typename Engine::result_type;
-    Engine engine1;
-    std::array<T, Engine::word_count> counter;
+    for (int overflow_position = 0; overflow_position < Engine::word_count - 1; overflow_position++) {
+        Engine engine1;
+        std::array<T, Engine::word_count> counter = {0};
 
-    for(int i = 0; i < Engine::word_count; i++) {
-        counter[i] = 0;
-    }
-    
-    if(std::is_same_v<Engine, std::philox4x32>) {
-        counter[1] = 1;
-    }
-    else if(std::is_same_v<Engine, std::philox4x64>) {
-        counter[2] = 1;
-    }
+        int raw_counter_position = (Engine::word_count - overflow_position - 2) % Engine::word_count;
+        std::cout << "Testing discard overflow for position " << raw_counter_position << std::endl;
+        counter[raw_counter_position] = 1;
 
-    engine1.set_counter(counter);
+        engine1.set_counter(counter);
 
-    Engine engine2;
+        Engine engine2;
 
-    for(int i = 0; i < Engine::word_count; i++) {
-        engine2();
-    }
-    for(int i = 0; i < Engine::word_count; i++) {
-        engine2.discard(std::numeric_limits<unsigned long long>::max());
-    }
+        std::array<T, Engine::word_count> counter2 = {0};
+        for (int i = Engine::word_count - overflow_position - 1; i < Engine::word_count - 1; i++) {
+            counter2[i] = std::numeric_limits<T>::max();
+        }
 
-    if(engine1() == engine2()) {
-        std::cout << __PRETTY_FUNCTION__ << " passed" << std::endl;
-    } else {
-        std::cout << __PRETTY_FUNCTION__ << " failed" << std::endl;
+        engine2.set_counter(counter2);
+
+        for (int i = 0; i < Engine::word_count; i++) {
+            engine2();
+        }
+
+        for (int i = 0; i < Engine::word_count; i++) {
+            engine2.discard(engine2.max());
+        }
+
+        if (engine1() == engine2()) {
+            std::cout << __PRETTY_FUNCTION__ << " passed for overflow_position " << overflow_position << std::endl;
+        }
+        else {
+            std::cout << __PRETTY_FUNCTION__ << " failed for overflow_position " << overflow_position << std::endl;
+            break;
+        }
     }
 }
 
