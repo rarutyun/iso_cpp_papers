@@ -156,7 +156,7 @@ public:
 
     void set_counter(const array<result_type, n>& counter) {
         for (std::size_t j = 0; j < n; ++j) {
-            x[n - j - 1] = counter[j] & counter_mask;
+            x[n - j - 1] = counter[j] & result_mask;
         }
     }
 
