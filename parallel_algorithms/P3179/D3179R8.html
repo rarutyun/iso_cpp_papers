@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2025-04-03" />
+  <meta name="dcterms.date" content="2025-04-04" />
   <title>C++ parallel range algorithms</title>
   <style>
       code{white-space: pre-wrap;}
@@ -466,7 +466,7 @@ algorithms</h1>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2025-04-03</td>
+    <td>2025-04-04</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -2261,25 +2261,23 @@ as if they are implemented by<span class="rm" style="color: #bf0303"><del>callin
 range(s) and</del></span> dispatching to the overload in namespace
 <code class="sourceCode cpp">ranges</code> that takes separate iterator
 and sentinel arguments<span class="rm" style="color: #bf0303"><del>.</del></span><span class="add" style="color: #006e28"><ins>, where for each range argument
-<span><code class="sourceCode default">r</code></span> a
-corresponding:</ins></span></p>
+<span><code class="sourceCode default">r</code></span></ins></span></p>
 <div class="add" style="color: #006e28">
 
 <ul>
-<li><span class="marginalizedparent"><a class="marginalized">(14.1)</a></span>
-iterator argument is initialized with
-<code class="sourceCode default">ranges::begin(r)</code>;</li>
-<li><span class="marginalizedparent"><a class="marginalized">(14.1)</a></span>
-sentinel argument is initialized with
-<code class="sourceCode default">ranges::end(r)</code> or <code class="sourceCode default">ranges::next(ranges::begin(r), ranges::end(r))</code>
+<li><span class="marginalizedparent"><a class="marginalized">(14.1)</a></span> a
+corresponding iterator argument is initialized with
+<code class="sourceCode default">ranges::begin(r)</code> and</li>
+<li><span class="marginalizedparent"><a class="marginalized">(14.2)</a></span> a
+corresponding sentinel argument is initialized with
+<code class="sourceCode default">ranges::end(r)</code>, or <code class="sourceCode default">ranges::next(ranges::begin(r), ranges::end(r))</code>
 if the type of <code class="sourceCode default">r</code> models
 <code class="sourceCode default">forward_range</code> and computing
-<code class="sourceCode default">ranges::next</code> does not change
-specified algorithm complexity.</li>
+<code class="sourceCode default">ranges::next</code> meets the specified
+complexity requirements.</li>
 </ul>
-<p><span class="marginalizedparent"><a class="marginalized">15</a></span> For
-each iterator <code class="sourceCode default">i</code> and sentinel
-<code class="sourceCode default">s</code> produced from range
+<p>For each iterator <code class="sourceCode default">i</code> and
+sentinel <code class="sourceCode default">s</code> produced from range
 <code class="sourceCode default">r</code>, the semantics of
 <code class="sourceCode default">s - i</code> is either
 <code class="sourceCode default">ranges::distance(r)</code> or
@@ -2288,18 +2286,24 @@ each iterator <code class="sourceCode default">i</code> and sentinel
 <h2 data-number="8.5" id="modify_alg_parallel_def"><span class="header-section-number">8.5</span> Modify <span><a href="https://wg21.link/algorithms.parallel.defns">[algorithms.parallel.defns]</a></span><a href="#modify_alg_parallel_def" class="self-link"></a></h2>
 <p><span class="marginalizedparent"><a class="marginalized">2</a></span>
 A <em>parallel algorithm</em> is a function template listed in this
-document with a<span class="add" style="color: #006e28"><ins>n
-<em>execution policy</em> (<span><a href="https://wg21.link/execpol">[execpol]</a></span>)</ins></span>
-template parameter named
-<code class="sourceCode cpp">ExecutionPolicy</code> <span class="add" style="color: #006e28"><ins>or constrained by the
-<span><code class="sourceCode default"><em>execution-policy</em></code></span>
-concept</ins></span>.</p>
+document with a template parameter named
+<code class="sourceCode cpp">ExecutionPolicy</code> <span class="add" style="color: #006e28"><ins>or constrained by the following
+exposition-only concept:</ins></span></p>
+<div class="add" style="color: #006e28">
+
+<div class="sourceCode" id="cb40"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>template&lt;class Ep&gt;</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>concept <em>execution-policy</em> = <em>// exposition only</em></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  is_execution_policy_v&lt;remove_cvref_t&lt;Ep&gt;&gt;;</span></code></pre></div>
+<p>Such a template parameter is termed an <em>execution policy template
+parameter</em>.</p>
+</div>
 <p><span class="marginalizedparent"><a class="marginalized">3</a></span>
 Parallel algorithms access objects indirectly accessible via their
 arguments by invoking the following functions:</p>
 <ul>
-<li>All operations of the categories of the iterators<span class="add" style="color: #006e28"><ins>, sentinels,</ins></span> or mdspan types
-that the algorithm is instantiated with.</li>
+<li>All operations of the categories of the iterators<span class="add" style="color: #006e28"><ins>, sentinels,</ins></span> or
+<code class="sourceCode cpp">mdspan</code> types that the algorithm is
+instantiated with.</li>
 <li>Operations on those sequence elements that are required by its
 specification.</li>
 <li>User-provided <span class="rm" style="color: #bf0303"><del>function</del></span><span class="add" style="color: #006e28"><ins>invocable</ins></span> objects to be applied
@@ -2327,12 +2331,15 @@ indirectly modify objects via their arguments, nor shall they rely on
 the identity of the provided objects.</p>
 <h2 data-number="8.7" id="modify_alg_parallel_exec"><span class="header-section-number">8.7</span> Modify <span><a href="https://wg21.link/algorithms.parallel.exec">[algorithms.parallel.exec]</a></span><a href="#modify_alg_parallel_exec" class="self-link"></a></h2>
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
-Parallel algorithms <span class="rm" style="color: #bf0303"><del>have</del></span> template parameter<span class="rm" style="color: #bf0303"><del>s</del></span> named
-<code class="sourceCode cpp">ExecutionPolicy</code> <span class="add" style="color: #006e28"><ins>or
-<span><code class="sourceCode default">Ep</code></span></ins></span>
-(<span><a href="https://wg21.link/execpol">[execpol]</a></span>) <span class="rm" style="color: #bf0303"><del>which</del></span> describe<span class="add" style="color: #006e28"><ins>s</ins></span> the manner in
-which the execution of these algorithms may be parallelized and the
-manner in which they apply the element access functions.</p>
+<span class="rm" style="color: #bf0303"><del>Parallel algorithms have
+template parameters named
+<span><code class="sourceCode default">ExecutionPolicy</code></span>
+(<span><a href="https://wg21.link/execpol">[execpol]</a></span>) which
+describe</del></span><span class="add" style="color: #006e28"><ins>An
+execution policy template parameter describes</ins></span> the manner in
+which the execution of <span class="rm" style="color: #bf0303"><del>these</del></span> <span class="add" style="color: #006e28"><ins>a parallel</ins></span> algorithm<span class="rm" style="color: #bf0303"><del>s</del></span> may be
+parallelized and the manner in which <span class="rm" style="color: #bf0303"><del>they</del></span><span class="add" style="color: #006e28"><ins>it</ins></span> appl<span class="rm" style="color: #bf0303"><del>y</del></span><span class="add" style="color: #006e28"><ins>ies</ins></span> the element access
+functions.</p>
 <h2 data-number="8.8" id="modify_alg_parallel_exceptions"><span class="header-section-number">8.8</span> Modify <span><a href="https://wg21.link/algorithms.parallel.exceptions">[algorithms.parallel.exceptions]</a></span><a href="#modify_alg_parallel_exceptions" class="self-link"></a></h2>
 <p><span class="marginalizedparent"><a class="marginalized">2</a></span>
 During the execution of a parallel algorithm, if the invocation of an
@@ -2341,14 +2348,16 @@ determined by the <span class="rm" style="color: #bf0303"><del><span><code class
 policy</ins></span>.</p>
 <h2 data-number="8.9" id="modify_alg_parallel_overloads"><span class="header-section-number">8.9</span> Modify <span><a href="https://wg21.link/algorithms.parallel.overloads">[algorithms.parallel.overloads]</a></span><a href="#modify_alg_parallel_overloads" class="self-link"></a></h2>
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
-Parallel algorithms are algorithm overloads. <span class="rm" style="color: #bf0303"><del>Each parallel algorithm overload has an
-additional template type parameter named
+Parallel algorithms are algorithm overloads. Each parallel algorithm
+overload has an additional <span class="rm" style="color: #bf0303"><del>template type parameter named
 <span><code class="sourceCode default">ExecutionPolicy</code></span>,
-which is the first template parameter. Additionally, e</del></span><span class="add" style="color: #006e28"><ins>E</ins></span>ach parallel
-algorithm overload has an additional function parameter of type <code class="sourceCode cpp">ExecutionPolicy<span class="op">&amp;&amp;</span></code>
-<span class="add" style="color: #006e28"><ins>or
-<span><code class="sourceCode default">Ep&amp;&amp;</code></span></ins></span>,
-which is the first function parameter.</p>
+which is the first template parameter. Additionally, each parallel
+algorithm overload has an additional</del></span> function parameter of
+type <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy&amp;&amp;</code></span></del></span>
+<span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">T&amp;&amp;</code></span>,
+where <span><code class="sourceCode default">T</code></span> is the
+execution policy template parameter</ins></span>, <span class="rm" style="color: #bf0303"><del>which is the</del></span><span class="add" style="color: #006e28"><ins>as an additional</ins></span> first function
+parameter <span class="add" style="color: #006e28"><ins>P</ins></span>.</p>
 <p>[<em>Note 1</em>: Not all algorithms have parallel algorithm
 overloads. — <em>end note</em>]</p>
 <p><span class="marginalizedparent"><a class="marginalized">2</a></span>
@@ -2360,21 +2369,17 @@ without.</p>
 Unless otherwise specified, the complexity requirements of <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span>
 algorithm overloads <span class="add" style="color: #006e28"><ins>with
 an execution policy</ins></span> are relaxed from the complexity
-requirements of the overloads without as follows: …</p>
+requirements of the overloads without as follows:</p>
 <p><span class="marginalizedparent"><a class="marginalized">4</a></span>
-Parallel algorithms shall not participate in overload resolution unless
-<code class="sourceCode cpp">is_execution_policy_v<span class="op">&lt;</span>remove_cvref_t<span class="op">&lt;</span>ExecutionPolicy<span class="op">&gt;&gt;</span></code>
-is <code class="sourceCode cpp"><span class="kw">true</span></code>.
-<span class="add" style="color: #006e28"><ins>Some parallel algorithms
-are constrained with the following exposition-only
-concept:</ins></span></p>
-<div class="add" style="color: #006e28">
-
-<div class="sourceCode" id="cb40"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>template&lt;class Ep&gt;</span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>concept <em>execution-policy</em> = <em>// exposition only</em></span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  is_execution_policy_v&lt;remove_cvref_t&lt;Ep&gt;&gt;;</span></code></pre></div>
-
-</div>
+<span class="add" style="color: #006e28"><ins>A</ins></span> <span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>arallel algorithm<span class="rm" style="color: #bf0303"><del>s</del></span> <span class="add" style="color: #006e28"><ins>with a template parameter named
+<span><code class="sourceCode default">ExecutionPolicy</code></span></ins></span>
+shall not participate in overload resolution unless <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">is_execution_policy_v&lt;remove_cvref_t&lt;ExecutionPolicy&gt;&gt;</code></span>
+is
+<span><code class="sourceCode default">true</code></span>.</del></span>
+<span class="add" style="color: #006e28"><ins>that template parameter
+satisfies
+<em><span><code class="sourceCode default">execution-policy</code></span></em>
+concept</ins></span>.</p>
 <h2 data-number="8.10" id="modify_alg_syn"><span class="header-section-number">8.10</span> Modify <span><a href="https://wg21.link/algorithm.syn">[algorithm.syn]</a></span><a href="#modify_alg_syn" class="self-link"></a></h2>
 <div>
 <div class="sourceCode" id="cb41"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>namespace ranges {</span>
@@ -4476,11 +4481,6 @@ non-constant functions. — <em>end note</em>]</p>
 returns a result, the result is ignored. Implementations do not have the
 freedom granted under <span><a href="https://wg21.link/algorithms.parallel.exec">[algorithms.parallel.exec]</a></span>
 to make arbitrary copies of elements from the input sequence.</p>
-<p>[<em>Note X</em>: The overload in namespace
-<code class="sourceCode default">ranges</code> requires
-<code class="sourceCode default">Fun</code> to model
-<code class="sourceCode default">copy_constructible</code>. — <em>end
-note</em>]</p>
 <p>[<em>Note X</em>: Does not return a copy of its
 <code class="sourceCode default">Fun</code> parameter, since
 parallelization often does not permit efficient state accumulation. —
@@ -4944,9 +4944,11 @@ applications of the corresponding predicate and any projection.</p>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
 Let <code class="sourceCode cpp">last2</code> be <code class="sourceCode cpp">first2 <span class="op">+</span> <span class="op">(</span>last1 <span class="op">-</span> first1<span class="op">)</span></code>
-for the overloads with no parameter
-<code class="sourceCode cpp">last2</code> or
-<code class="sourceCode cpp">r2</code>.</p>
+for the overloads <span class="add" style="color: #006e28"><ins>in
+namespace
+<span><code class="sourceCode default">std</code></span></ins></span>
+with no parameter <code class="sourceCode cpp">last2</code><span class="rm" style="color: #bf0303"><del>or
+<span><code class="sourceCode default">r2</code></span></del></span>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">2</a></span>
 Let <em><code class="sourceCode cpp">E</code></em> be:</p>
 <ul>
@@ -5010,9 +5012,11 @@ Let:</p>
 <ul>
 <li><p><span class="marginalizedparent"><a class="marginalized">(1.1)</a></span>
 <code class="sourceCode cpp">last2</code> be <code class="sourceCode cpp">first2 <span class="op">+</span> <span class="op">(</span>last1 <span class="op">-</span> first1<span class="op">)</span></code>
-for the overloads with no parameter
-<code class="sourceCode cpp">last2</code> or
-<code class="sourceCode cpp">r2</code>;</p></li>
+for the overloads <span class="add" style="color: #006e28"><ins>in
+namespace
+<span><code class="sourceCode default">std</code></span></ins></span>
+with no parameter <code class="sourceCode cpp">last2</code> <span class="rm" style="color: #bf0303"><del>or
+<span><code class="sourceCode default">r2</code></span></del></span>;</p></li>
 <li><p><span class="marginalizedparent"><a class="marginalized">(1.2)</a></span>
 <code class="sourceCode cpp">pred</code> be
 <code class="sourceCode cpp">equal_to<span class="op">{}</span></code>
@@ -5261,7 +5265,7 @@ otherwise <code class="sourceCode cpp">ranges<span class="op">::</span>equal<spa
 </div>
 <h2 data-number="8.27" id="modify_copy"><span class="header-section-number">8.27</span> Modify <span><a href="https://wg21.link/alg.copy">[alg.copy]</a></span><a href="#modify_copy" class="self-link"></a></h2>
 <div class="sourceCode" id="cb92"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb92-1"><a href="#cb92-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> ExecutionPolicy, <span class="kw">class</span> ForwardIterator1, <span class="kw">class</span> ForwardIterator2<span class="op">&gt;</span></span>
-<span id="cb92-2"><a href="#cb92-2" aria-hidden="true" tabindex="-1"></a>  ForwardIterator2 copy<span class="op">(</span>ExecutionPolicy<span class="op">&amp;&amp;</span> policy,</span>
+<span id="cb92-2"><a href="#cb92-2" aria-hidden="true" tabindex="-1"></a>  ForwardIterator2 copy<span class="op">(</span>ExecutionPolicy<span class="op">&amp;&amp;</span> exec,</span>
 <span id="cb92-3"><a href="#cb92-3" aria-hidden="true" tabindex="-1"></a>                        ForwardIterator1 first, ForwardIterator1 last,</span>
 <span id="cb92-4"><a href="#cb92-4" aria-hidden="true" tabindex="-1"></a>                        ForwardIterator2 result<span class="op">)</span>;</span></code></pre></div>
 <div class="add" style="color: #006e28">
@@ -5310,7 +5314,7 @@ performs <code class="sourceCode cpp"><span class="op">*(</span>result <span cla
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(x.1)</a></span>
 <code class="sourceCode default">result + <em>N</em></code> for the
-overloads in namespace <code class="sourceCode default">std</code>.</li>
+overload in namespace <code class="sourceCode default">std</code>.</li>
 <li><span class="marginalizedparent"><a class="marginalized">(x.2)</a></span>
 <code class="sourceCode default">{first + <em>N</em>, result + <em>N</em>}</code>
 for the overloads in namespace
@@ -5334,13 +5338,19 @@ assignments.</p>
 <span id="cb95-4"><a href="#cb95-4" aria-hidden="true" tabindex="-1"></a>  ranges::copy_n_result&lt;I, O&gt;</span>
 <span id="cb95-5"><a href="#cb95-5" aria-hidden="true" tabindex="-1"></a>    ranges::copy_n(Ep&amp;&amp; exec, I first, iter_difference_t&lt;I&gt; n, O result, OutS result_last);</span></code></pre></div>
 <p><span class="marginalizedparent"><a class="marginalized">x</a></span>
+Let <em><code class="sourceCode default">M</code></em> be
+max(<code class="sourceCode default">0</code>,
+<code class="sourceCode default">n</code>).</p>
+<p><span class="marginalizedparent"><a class="marginalized">x</a></span>
 Let <code class="sourceCode default">result_last</code> be
-<code class="sourceCode default">result + (last - first)</code> for the
+<code class="sourceCode default">result + <em>M</em></code> for the
 overloads with no parameter
 <code class="sourceCode default">result_last</code>.</p>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">10</a></span> Let
-<em><code class="sourceCode cpp">N</code></em> be <code class="sourceCode cpp">max<span class="op">(</span><span class="dv">0</span>, <span class="rm" style="color: #bf0303"><del>n</del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">min(n, result_last - result)</code></span></ins></span><span class="op">)</span></code>.</p>
+<em><code class="sourceCode cpp">N</code></em> be <span class="rm" style="color: #bf0303"><del>max(0,
+<span><code class="sourceCode default">n</code></span>)</del></span><span class="add" style="color: #006e28"><ins>min(<span><code class="sourceCode default">result_last - result</code></span>,
+<em><span><code class="sourceCode default">M</code></span></em>)</ins></span>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">11</a></span>
 <em>Mandates</em>: The type <code class="sourceCode cpp">Size</code> is
 convertible to an integral type (<span><a href="https://wg21.link/conv.integral">[conv.integral]</a></span>,
@@ -5486,14 +5496,9 @@ applications of the corresponding predicate and any projection.</p>
 <em>Remarks</em>: Stable (<span><a href="https://wg21.link/algorithm.stable">[algorithm.stable]</a></span>).</p>
 <h2 data-number="8.28" id="modify_move"><span class="header-section-number">8.28</span> Modify <span><a href="https://wg21.link/alg.move">[alg.move]</a></span><a href="#modify_move" class="self-link"></a></h2>
 <div class="sourceCode" id="cb98"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> ExecutionPolicy, <span class="kw">class</span> ForwardIterator1, <span class="kw">class</span> ForwardIterator2<span class="op">&gt;</span></span>
-<span id="cb98-2"><a href="#cb98-2" aria-hidden="true" tabindex="-1"></a>  ForwardIterator2 move<span class="op">(</span>ExecutionPolicy<span class="op">&amp;&amp;</span> policy,</span>
+<span id="cb98-2"><a href="#cb98-2" aria-hidden="true" tabindex="-1"></a>  ForwardIterator2 move<span class="op">(</span>ExecutionPolicy<span class="op">&amp;&amp;</span> exec,</span>
 <span id="cb98-3"><a href="#cb98-3" aria-hidden="true" tabindex="-1"></a>                        ForwardIterator1 first, ForwardIterator1 last,</span>
 <span id="cb98-4"><a href="#cb98-4" aria-hidden="true" tabindex="-1"></a>                        ForwardIterator2 result<span class="op">)</span>;</span></code></pre></div>
-<p><span class="draftnote" data-audience="LWG" style="color: #0000ff">[
-Drafting note for LWG: Should we change
-<code class="sourceCode default">policy</code> to
-<code class="sourceCode default">exec</code> above, for consistency with
-every other place? ]</span></p>
 <div class="add" style="color: #006e28">
 
 <div class="sourceCode" id="cb99"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb99-1"><a href="#cb99-1" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, random_access_iterator I, sized_sentinel_for&lt;I&gt; S,</span>
