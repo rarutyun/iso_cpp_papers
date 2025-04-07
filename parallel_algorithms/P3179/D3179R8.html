@@ -2369,7 +2369,11 @@ without.</p>
 Unless otherwise specified, the complexity requirements of <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span>
 algorithm overloads <span class="add" style="color: #006e28"><ins>with
 an execution policy</ins></span> are relaxed from the complexity
-requirements of the overloads without as follows:</p>
+requirements of the overloads without as follows: when the guarantee
+says “at most <em>expr</em>” or “exactly <em>expr</em>” and does not
+specify the number of assignments or swaps, and <em>expr</em> is not
+already expressed with <em>O</em>() notation, the complexity of the
+algorithm shall be <em>O</em>(<em>expr</em>).</p>
 <p><span class="marginalizedparent"><a class="marginalized">4</a></span>
 <span class="add" style="color: #006e28"><ins>A</ins></span> <span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>arallel algorithm<span class="rm" style="color: #bf0303"><del>s</del></span> <span class="add" style="color: #006e28"><ins>with a template parameter named
 <span><code class="sourceCode default">ExecutionPolicy</code></span></ins></span>
@@ -2378,8 +2382,7 @@ is
 <span><code class="sourceCode default">true</code></span>.</del></span>
 <span class="add" style="color: #006e28"><ins>that template parameter
 satisfies
-<em><span><code class="sourceCode default">execution-policy</code></span></em>
-concept</ins></span>.</p>
+<em><span><code class="sourceCode default">execution-policy</code></span></em></ins></span>.</p>
 <h2 data-number="8.10" id="modify_alg_syn"><span class="header-section-number">8.10</span> Modify <span><a href="https://wg21.link/algorithm.syn">[algorithm.syn]</a></span><a href="#modify_alg_syn" class="self-link"></a></h2>
 <div>
 <div class="sourceCode" id="cb41"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>namespace ranges {</span>
@@ -4832,13 +4835,15 @@ for which <em><code class="sourceCode cpp">E</code></em> holds. Returns
 <code class="sourceCode cpp">last</code> if no such iterator is
 found.</p>
 <p><span class="marginalizedparent"><a class="marginalized">3</a></span>
-<em>Complexity</em>: For the overloads with no <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>execution policy</ins></span>,
-exactly <code class="sourceCode cpp">min<span class="op">((</span>i <span class="op">-</span> first<span class="op">)</span> <span class="op">+</span> <span class="dv">1</span>,  <span class="op">(</span>last <span class="op">-</span> first<span class="op">)</span> <span class="op">-</span> <span class="dv">1</span><span class="op">)</span></code>
+<em>Complexity</em>: For the overloads with no <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>execution policy template
+parameter</ins></span>, exactly min(<code class="sourceCode cpp"><span class="op">(</span>i <span class="op">-</span> first<span class="op">)</span> <span class="op">+</span> <span class="dv">1</span></code>,
+<code class="sourceCode cpp"><span class="op">(</span>last <span class="op">-</span> first<span class="op">)</span> <span class="op">-</span> <span class="dv">1</span></code>)
 applications of the corresponding predicate, where
 <code class="sourceCode cpp">i</code> is
 <code class="sourceCode cpp">adjacent_find</code>’s return value. For
-the overloads with an <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>execution policy</ins></span>,
-<code class="sourceCode cpp"><em>O</em><span class="op">(</span>last <span class="op">-</span> first<span class="op">)</span></code>
+the overloads with an <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>execution policy template
+parameter</ins></span>,
+<em>O</em>(<code class="sourceCode cpp">last <span class="op">-</span> first</code>)
 applications of the corresponding predicate<span class="rm" style="color: #bf0303"><del>, and no</del></span><span class="add" style="color: #006e28"><ins>. No</ins></span> more than twice as many
 applications of any projection.</p>
 <h2 data-number="8.21" id="modify_alg_count"><span class="header-section-number">8.21</span> Modify <span><a href="https://wg21.link/alg.count">[alg.count]</a></span><a href="#modify_alg_count" class="self-link"></a></h2>
@@ -4968,7 +4973,8 @@ for the overloads with both parameters
 <code class="sourceCode cpp">proj1</code>.</li>
 </ul>
 <p><span class="marginalizedparent"><a class="marginalized">3</a></span>
-Let <em><code class="sourceCode cpp">N</code></em> be <code class="sourceCode cpp">min<span class="op">(</span>last1 <span class="op">-</span> first1,  last2 <span class="op">-</span> first2<span class="op">)</span></code>.</p>
+Let <em><code class="sourceCode cpp">N</code></em> be min(<code class="sourceCode cpp">last1 <span class="op">-</span> first1</code>,
+<code class="sourceCode cpp">last2 <span class="op">-</span> first2</code>).</p>
 <p><span class="marginalizedparent"><a class="marginalized">4</a></span>
 <em>Returns</em>: <code class="sourceCode cpp"><span class="op">{</span> first1 <span class="op">+</span> n, first2 <span class="op">+</span> n <span class="op">}</span></code>,
 where <code class="sourceCode cpp">n</code> is the smallest integer in
@@ -5064,13 +5070,15 @@ types of <code class="sourceCode cpp">first1</code>,
 <code class="sourceCode cpp">last2</code> pairwise model
 <code class="sourceCode cpp">sized_sentinel_for</code> (<span><a href="https://wg21.link/iterator.concept.sizedsentinel">[iterator.concept.sizedsentinel]</a></span>)
 and <code class="sourceCode cpp">last1 <span class="op">-</span> first1 <span class="op">!=</span> last2 <span class="op">-</span> first2</code>
-for the first overload in namespace
+for the first <span class="add" style="color: #006e28"><ins>and
+third</ins></span> overload<span class="add" style="color: #006e28"><ins>s</ins></span> in namespace
 <code class="sourceCode cpp">ranges</code>, <span class="add" style="color: #006e28"><ins>or</ins></span></li>
 <li><span class="marginalizedparent"><a class="marginalized">(3.3)</a></span>
 <code class="sourceCode cpp">R1</code> and
 <code class="sourceCode cpp">R2</code> each model
 <code class="sourceCode cpp">sized_range</code> and <code class="sourceCode cpp">ranges<span class="op">::</span>distance<span class="op">(</span>r1<span class="op">)</span> <span class="op">!=</span> ranges<span class="op">::</span>distance<span class="op">(</span>r2<span class="op">)</span></code>
-for the second overload in namespace
+for the second <span class="add" style="color: #006e28"><ins>and
+fourth</ins></span> overload<span class="add" style="color: #006e28"><ins>s</ins></span> in namespace
 <code class="sourceCode cpp">ranges</code>,</li>
 </ul>
 <p>then no applications of the corresponding predicate and each
@@ -5079,12 +5087,14 @@ projection; otherwise,</p>
 <li><span class="marginalizedparent"><a class="marginalized">(3.4)</a></span>
 <span class="rm" style="color: #bf0303"><del>For the overloads with no
 <span><code class="sourceCode default">ExecutionPolicy</code></span>,
-a</del></span><span class="add" style="color: #006e28"><ins>A</ins></span>t most <code class="sourceCode cpp">min<span class="op">(</span>last1 <span class="op">-</span> first1,  last2 <span class="op">-</span> first2<span class="op">)</span></code>
+a</del></span><span class="add" style="color: #006e28"><ins>A</ins></span>t most min(<code class="sourceCode cpp">last1 <span class="op">-</span> first1</code>,
+<code class="sourceCode cpp">last2 <span class="op">-</span> first2</code>)
 applications of the corresponding predicate and any projections.</li>
 <li><span class="marginalizedparent"><a class="marginalized">(3.5)</a></span>
 <span class="rm" style="color: #bf0303"><del>For the overloads with an
 <span><code class="sourceCode default">ExecutionPolicy</code></span>,
-<span><code class="sourceCode default"><em>O</em>(min(last1 - first1, last2 - first2))</code></span>
+<em>O</em>(min(<span><code class="sourceCode default">last1 - first1</code></span>,
+<span><code class="sourceCode default">last2 - first2</code></span>))
 applications of the corresponding predicate.</del></span></li>
 </ul>
 <h2 data-number="8.24" id="modify_alg_search"><span class="header-section-number">8.24</span> Modify <span><a href="https://wg21.link/alg.search">[alg.search]</a></span><a href="#modify_alg_search" class="self-link"></a></h2>
@@ -5296,7 +5306,9 @@ Let <code class="sourceCode default">result_last</code> be
 <code class="sourceCode default">result + (last - first)</code> for the
 overload in namespace <code class="sourceCode default">std</code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">x</a></span>
-Let <em><code class="sourceCode default">N</code></em> be <code class="sourceCode default">min(last - first, result_last - result)</code>.</p>
+Let <em><code class="sourceCode default">N</code></em> be
+min(<code class="sourceCode default">last - first</code>,
+<code class="sourceCode default">result_last - result</code>).</p>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">6</a></span>
 <em>Preconditions</em>: The ranges <code class="sourceCode cpp"><span class="op">[</span>first, <span class="rm" style="color: #bf0303"><del>last</del></span><span class="add" style="color: #006e28"><ins>first + <em>N</em></ins></span><span class="op">)</span></code>
