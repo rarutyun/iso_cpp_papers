@@ -5350,8 +5350,7 @@ assignments.</p>
 <span id="cb95-4"><a href="#cb95-4" aria-hidden="true" tabindex="-1"></a>  ranges::copy_n_result&lt;I, O&gt;</span>
 <span id="cb95-5"><a href="#cb95-5" aria-hidden="true" tabindex="-1"></a>    ranges::copy_n(Ep&amp;&amp; exec, I first, iter_difference_t&lt;I&gt; n, O result, OutS result_last);</span></code></pre></div>
 <p><span class="marginalizedparent"><a class="marginalized">x</a></span>
-Let <em><code class="sourceCode default">M</code></em> be
-max(<code class="sourceCode default">0</code>,
+Let <em><code class="sourceCode default">M</code></em> be max(0,
 <code class="sourceCode default">n</code>).</p>
 <p><span class="marginalizedparent"><a class="marginalized">x</a></span>
 Let <code class="sourceCode default">result_last</code> be
@@ -5449,7 +5448,8 @@ overloads with no parameter
 <code class="sourceCode default">result_r</code>;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(x.3)</a></span>
 <em><code class="sourceCode default">N</code></em> be
-<code class="sourceCode default">min(<em>M</em>, result_last - result)</code>.</li>
+min(<em><code class="sourceCode default">M</code></em>,
+<code class="sourceCode default">result_last - result</code>).</li>
 </ul>
 
 </div>
@@ -5541,7 +5541,8 @@ overloads with no parameter
 <code class="sourceCode default">result_r</code>.</p>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">6</a></span>
-Let <em><code class="sourceCode cpp">N</code></em> be <code class="sourceCode cpp"><span class="add" style="color: #006e28"><ins>min(</ins></span>last <span class="op">-</span> first<span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">, result_last - result)</code></span></ins></span></code>.</p>
+Let <em><code class="sourceCode cpp">N</code></em> be <span class="add" style="color: #006e28"><ins>min(</ins></span><code class="sourceCode cpp">last <span class="op">-</span> first</code><span class="add" style="color: #006e28"><ins>,
+<span><code class="sourceCode default">result_last - result</code></span>)</ins></span>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">7</a></span>
 <em>Preconditions</em>: The ranges <code class="sourceCode cpp"><span class="op">[</span>first, <span class="rm" style="color: #bf0303"><del>last</del></span><span class="add" style="color: #006e28"><ins>first + <em>N</em></ins></span><span class="op">)</span></code>
 and <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <em>N</em><span class="op">)</span></code>
@@ -5599,7 +5600,8 @@ Let:</p>
 for the overloads with no parameter named
 <code class="sourceCode cpp">last2</code>;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(1.2)</a></span>
-<em><code class="sourceCode cpp">M</code></em> be <code class="sourceCode cpp">min<span class="op">(</span>last1 <span class="op">-</span> first1,  last2 <span class="op">-</span> first2<span class="op">)</span></code>.</li>
+<em><code class="sourceCode cpp">M</code></em> be min(<code class="sourceCode cpp">last1 <span class="op">-</span> first1</code>,
+<code class="sourceCode cpp">last2 <span class="op">-</span> first2</code>).</li>
 </ul>
 <p><span class="marginalizedparent"><a class="marginalized">2</a></span>
 <em>Preconditions</em>: The two ranges <code class="sourceCode cpp"><span class="op">[</span>first1, last1<span class="op">)</span></code>
@@ -5706,7 +5708,8 @@ for the overloads with parameter
 <code class="sourceCode cpp">last2</code>;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(1.2)</a></span>
 <code class="sourceCode cpp"><span class="rm" style="color: #bf0303"><del><em>N</em></del></span><span class="add" style="color: #006e28"><ins><em>M</em></ins></span></code> be <code class="sourceCode cpp">last1 <span class="op">-</span> first1</code> for
-unary transforms, or <code class="sourceCode cpp">min<span class="op">(</span>last1 <span class="op">-</span> first1,  last2 <span class="op">-</span> first2<span class="op">)</span></code>
+unary transforms, or min(<code class="sourceCode cpp">last1 <span class="op">-</span> first1</code>,
+<code class="sourceCode cpp">last2 <span class="op">-</span> first2</code>)
 for binary transforms;</li>
 </ul>
 <div class="add" style="color: #006e28">
@@ -5719,7 +5722,8 @@ with no parameter <code class="sourceCode default">result_last</code> or
 <code class="sourceCode default">result_r</code>;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(1.x)</a></span>
 <em><code class="sourceCode default">N</code></em> be
-<code class="sourceCode default">min(<em>M</em>, result_last - result)</code>;</li>
+min(<em><code class="sourceCode default">M</code></em>,
+<code class="sourceCode default">result_last - result</code>);</li>
 </ul>
 
 </div>
@@ -5977,7 +5981,9 @@ overloads with no parameter
 <code class="sourceCode default">result_last</code> or
 <code class="sourceCode default">result_r</code>;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(x.2)</a></span>
-<em><code class="sourceCode default">N</code></em> be <code class="sourceCode default">min(last - first, result_last - result)</code>.</li>
+<em><code class="sourceCode default">N</code></em> be
+min(<code class="sourceCode default">last - first</code>,
+<code class="sourceCode default">result_last - result</code>).</li>
 </ul>
 
 </div>
@@ -6043,8 +6049,9 @@ applications of the corresponding predicate and any projection.</p>
 
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
-Let <em><code class="sourceCode cpp">N</code></em> be <code class="sourceCode cpp">max<span class="op">(</span><span class="dv">0</span>, n<span class="op">)</span></code>
-for the <code class="sourceCode cpp">fill_n</code> algorithms, and
+Let <em><code class="sourceCode cpp">N</code></em> be max(0,
+<code class="sourceCode cpp">n</code>) for the
+<code class="sourceCode cpp">fill_n</code> algorithms, and
 <code class="sourceCode cpp">last <span class="op">-</span> first</code>
 for the <code class="sourceCode cpp">fill</code> algorithms.</p>
 <p><span class="marginalizedparent"><a class="marginalized">2</a></span>
@@ -6085,8 +6092,9 @@ type (<span><a href="https://wg21.link/conv.integral">[conv.integral]</a></span>
 
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
-Let <em><code class="sourceCode cpp">N</code></em> be <code class="sourceCode cpp">max<span class="op">(</span><span class="dv">0</span>, n<span class="op">)</span></code>
-for the <code class="sourceCode cpp">generate_n</code> algorithms, and
+Let <em><code class="sourceCode cpp">N</code></em> be max(0,
+<code class="sourceCode cpp">n</code>) for the
+<code class="sourceCode cpp">generate_n</code> algorithms, and
 <code class="sourceCode cpp">last <span class="op">-</span> first</code>
 for the <code class="sourceCode cpp">generate</code> algorithms.</p>
 <p><span class="marginalizedparent"><a class="marginalized">2</a></span>
@@ -6295,7 +6303,8 @@ overloads with no parameter
 <code class="sourceCode default">result_r</code>;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(x.3)</a></span>
 <em><code class="sourceCode default">N</code></em> be
-<code class="sourceCode default">min(<em>M</em>, result_last - result)</code>.</li>
+min(<em><code class="sourceCode default">M</code></em>,
+<code class="sourceCode default">result_last - result</code>).</li>
 </ul>
 
 </div>
@@ -6494,7 +6503,9 @@ overloads with no parameter
 <code class="sourceCode default">result_last</code> or
 <code class="sourceCode default">result_r</code>;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(x.3)</a></span>
-<em><code class="sourceCode default">N</code></em> be <code class="sourceCode default">min(<em>M</em> + 1, result_last - result)</code>.</li>
+<em><code class="sourceCode default">N</code></em> be
+min(<code class="sourceCode default"><em>M</em> + 1</code>,
+<code class="sourceCode default">result_last - result</code>).</li>
 </ul>
 
 </div>
@@ -6686,8 +6697,10 @@ for the overloads in namespace
 <span id="cb133-8"><a href="#cb133-8" aria-hidden="true" tabindex="-1"></a>  ranges::reverse_copy_result&lt;borrowed_iterator_t&lt;R&gt;, borrowed_iterator_t&lt;OutR&gt;&gt;</span>
 <span id="cb133-9"><a href="#cb133-9" aria-hidden="true" tabindex="-1"></a>    ranges::reverse_copy(Ep&amp;&amp; exec, R&amp;&amp; r, OutR&amp;&amp; result_r);</span></code></pre></div>
 <p><span class="marginalizedparent"><a class="marginalized">x</a></span>
-Let <em><code class="sourceCode default">N</code></em> be <code class="sourceCode default">min(last - first, result_last - result)</code>,
-and let <em><code class="sourceCode default">NEW_FIRST</code></em> be
+Let <em><code class="sourceCode default">N</code></em> be
+min(<code class="sourceCode default">last - first</code>,
+<code class="sourceCode default">result_last - result</code>), and let
+<em><code class="sourceCode default">NEW_FIRST</code></em> be
 <code class="sourceCode default">first + (last - first) - <em>N</em></code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">x</a></span>
 <em>Preconditions</em>: The ranges
@@ -6808,7 +6821,8 @@ for the overload in namespace
 Let <em><code class="sourceCode default">M</code></em> be
 <code class="sourceCode default">last - first</code> and
 <em><code class="sourceCode default">N</code></em> be
-<code class="sourceCode default">min(<em>M</em>, result_last - result)</code>.</p>
+min(<em><code class="sourceCode default">M</code></em>,
+<code class="sourceCode default">result_last - result</code>).</p>
 <p><span class="marginalizedparent"><a class="marginalized">x</a></span>
 <em>Preconditions</em>:
 <code class="sourceCode default">[first, middle)</code> and
@@ -7162,7 +7176,9 @@ comparisons, and twice as many projections.</p>
 
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
-Let <em><code class="sourceCode cpp">N</code></em> be <code class="sourceCode cpp">min<span class="op">(</span>last <span class="op">-</span> first,  result_last <span class="op">-</span> result_first<span class="op">)</span></code>.
+Let <em><code class="sourceCode cpp">N</code></em> be
+min(<code class="sourceCode cpp">last <span class="op">-</span> first</code>,
+<code class="sourceCode cpp">result_last <span class="op">-</span> result_first</code>).
 Let <code class="sourceCode cpp">comp</code> be
 <code class="sourceCode cpp">less<span class="op">{}</span></code>, and
 <code class="sourceCode cpp">proj1</code> and
@@ -7618,7 +7634,9 @@ exists;</li>
 <code class="sourceCode default">last</code> if no such iterator
 exists;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(x.3)</a></span>
-<em><code class="sourceCode default">N</code></em> be <code class="sourceCode default">min(<em>i1</em> - first, <em>i2</em> - first)</code>.</li>
+<em><code class="sourceCode default">N</code></em> be
+min(<code class="sourceCode default"><em>i1</em> - first</code>,
+<code class="sourceCode default"><em>i2</em> - first</code>).</li>
 </ul>
 
 </div>
@@ -7740,8 +7758,9 @@ for the overloads with no parameter
 <code class="sourceCode default">result_last</code> or
 <code class="sourceCode default">result_r</code>;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(x.1.2)</a></span>
-<code class="sourceCode default">min((last1 - first1) + (last2 - first2), result_last - result)</code>
-for the overloads with parameters
+min(<code class="sourceCode default">(last1 - first1) + (last2 - first2)</code>,
+<code class="sourceCode default">result_last - result</code>) for the
+overloads with parameters
 <code class="sourceCode default">result_last</code> or
 <code class="sourceCode default">result_r</code>;</li>
 </ul></li>
@@ -8029,7 +8048,9 @@ for the overloads with no parameter
 <code class="sourceCode default">result_last</code> or
 <code class="sourceCode default">result_r</code>;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(x.4)</a></span>
-<em><code class="sourceCode default">N</code></em> be <code class="sourceCode default">min((last1 - first1) + <em>K</em>, result_last - result)</code>.</li>
+<em><code class="sourceCode default">N</code></em> be
+min(<code class="sourceCode default">(last1 - first1) + <em>K</em></code>,
+<code class="sourceCode default">result_last - result</code>).</li>
 </ul>
 
 </div>
@@ -8073,14 +8094,11 @@ comparisons and applications of each projection.</p>
 <p><span class="marginalizedparent"><a class="marginalized">6</a></span>
 <em>Remarks</em>: Stable (<span><a href="https://wg21.link/algorithm.stable">[algorithm.stable]</a></span>).
 If <code class="sourceCode cpp"><span class="op">[</span>first1, last1<span class="op">)</span></code>
-contains <em><code class="sourceCode cpp">m</code></em> elements that
-are equivalent to each other and <code class="sourceCode cpp"><span class="op">[</span>first2, last2<span class="op">)</span></code>
-contains <em><code class="sourceCode cpp">n</code></em> elements that
-are equivalent to them, then all
-<em><code class="sourceCode cpp">m</code></em> elements from the first
-range are copied to the output range, in order, and then the final <code class="sourceCode cpp">max<span class="op">(</span><em>n</em> − <em>m</em>, <span class="dv">0</span><span class="op">)</span></code>
-elements from the second range are copied to the output range, in
-order.</p>
+contains <em>m</em> elements that are equivalent to each other and <code class="sourceCode cpp"><span class="op">[</span>first2, last2<span class="op">)</span></code>
+contains <em>n</em> elements that are equivalent to them, then all
+<em>m</em> elements from the first range are copied to the output range,
+in order, and then the final max(<em>n</em> − <em>m</em>, 0) elements
+from the second range are copied to the output range, in order.</p>
 <h2 data-number="8.49" id="modify_set_intersection"><span class="header-section-number">8.49</span> Modify <span><a href="https://wg21.link/set.intersection">[set.intersection]</a></span><a href="#modify_set_intersection" class="self-link"></a></h2>
 <div class="sourceCode" id="cb182"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb182-1"><a href="#cb182-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>input_iterator I1, sentinel_for<span class="op">&lt;</span>I1<span class="op">&gt;</span> S1, input_iterator I2, sentinel_for<span class="op">&lt;</span>I2<span class="op">&gt;</span> S2,</span>
 <span id="cb182-2"><a href="#cb182-2" aria-hidden="true" tabindex="-1"></a>         weakly_incrementable O, <span class="kw">class</span> Comp <span class="op">=</span> ranges<span class="op">::</span>less,</span>
@@ -8148,7 +8166,8 @@ overloads with no parameter
 <code class="sourceCode default">result_r</code>;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(x.4)</a></span>
 <em><code class="sourceCode default">N</code></em> be
-<code class="sourceCode default">min(<em>K</em>, result_last - result)</code>.</li>
+min(<em><code class="sourceCode default">K</code></em>,
+<code class="sourceCode default">result_last - result</code>).</li>
 </ul>
 
 </div>
@@ -8192,12 +8211,10 @@ comparisons and applications of each projection.</p>
 <p><span class="marginalizedparent"><a class="marginalized">6</a></span>
 <em>Remarks</em>: Stable (<span><a href="https://wg21.link/algorithm.stable">[algorithm.stable]</a></span>).
 If <code class="sourceCode cpp"><span class="op">[</span>first1, last1<span class="op">)</span></code>
-contains <em><code class="sourceCode cpp">m</code></em> elements that
-are equivalent to each other and <code class="sourceCode cpp"><span class="op">[</span>first2, last2<span class="op">)</span></code>
-contains <em><code class="sourceCode cpp">n</code></em> elements that
-are equivalent to them, the first <code class="sourceCode cpp">min<span class="op">(</span><em>m</em>,<em>n</em><span class="op">)</span></code>
-elements are copied from the first range to the output range, in
-order.</p>
+contains <em>m</em> elements that are equivalent to each other and <code class="sourceCode cpp"><span class="op">[</span>first2, last2<span class="op">)</span></code>
+contains <em>n</em> elements that are equivalent to them, the first
+min(<em>m</em>, <em>n</em>) elements are copied from the first range to
+the output range, in order.</p>
 <h2 data-number="8.50" id="modify_set_difference"><span class="header-section-number">8.50</span> Modify <span><a href="https://wg21.link/set.difference">[set.difference]</a></span><a href="#modify_set_difference" class="self-link"></a></h2>
 <div class="sourceCode" id="cb184"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb184-1"><a href="#cb184-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>input_iterator I1, sentinel_for<span class="op">&lt;</span>I1<span class="op">&gt;</span> S1, input_iterator I2, sentinel_for<span class="op">&lt;</span>I2<span class="op">&gt;</span> S2,</span>
 <span id="cb184-2"><a href="#cb184-2" aria-hidden="true" tabindex="-1"></a>         weakly_incrementable O, <span class="kw">class</span> Comp <span class="op">=</span> ranges<span class="op">::</span>less,</span>
@@ -8265,7 +8282,8 @@ overloads with no parameter
 <code class="sourceCode default">result_r</code>;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(x.4)</a></span>
 <em><code class="sourceCode default">N</code></em> be
-<code class="sourceCode default">min(<em>K</em>, result_last - result)</code>.</li>
+min(<em><code class="sourceCode default">K</code></em>,
+<code class="sourceCode default">result_last - result</code>).</li>
 </ul>
 
 </div>
@@ -8307,11 +8325,9 @@ otherwise</ins></span>.</li>
 comparisons and applications of each projection.</p>
 <p><span class="marginalizedparent"><a class="marginalized">6</a></span>
 <em>Remarks</em>: If <code class="sourceCode cpp"><span class="op">[</span>first1, last1<span class="op">)</span></code>
-contains <em><code class="sourceCode cpp">m</code></em> elements that
-are equivalent to each other and <code class="sourceCode cpp"><span class="op">[</span>first2, last2<span class="op">)</span></code>
-contains <em><code class="sourceCode cpp">n</code></em> elements that
-are equivalent to them, the last <code class="sourceCode cpp">max<span class="op">(</span><em>m</em> − <em>n</em>, <span class="dv">0</span><span class="op">)</span></code>
-elements from <code class="sourceCode cpp"><span class="op">[</span>first1, last1<span class="op">)</span></code>
+contains <em>m</em> elements that are equivalent to each other and <code class="sourceCode cpp"><span class="op">[</span>first2, last2<span class="op">)</span></code>
+contains <em>n</em> elements that are equivalent to them, the last
+max(<em>m</em> − <em>n</em>, 0) elements from <code class="sourceCode cpp"><span class="op">[</span>first1, last1<span class="op">)</span></code>
 are copied to the output range, in order.</p>
 <h2 data-number="8.51" id="modify_set_symmetric_difference"><span class="header-section-number">8.51</span> Modify <span><a href="https://wg21.link/set.symmetric.difference">[set.symmetric.difference]</a></span><a href="#modify_set_symmetric_difference" class="self-link"></a></h2>
 <div class="sourceCode" id="cb186"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb186-1"><a href="#cb186-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>input_iterator I1, sentinel_for<span class="op">&lt;</span>I1<span class="op">&gt;</span> S1, input_iterator I2, sentinel_for<span class="op">&lt;</span>I2<span class="op">&gt;</span> S2,</span>
@@ -8386,7 +8402,9 @@ for the overloads with no parameter
 <code class="sourceCode default">result_last</code> or
 <code class="sourceCode default">result_r</code>;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(x.4)</a></span>
-<em><code class="sourceCode default">N</code></em> be <code class="sourceCode default">min(<em>K</em> + <em>M</em>, result_last - result)</code>.</li>
+<em><code class="sourceCode default">N</code></em> be
+min(<code class="sourceCode default"><em>K</em> + <em>M</em></code>,
+<code class="sourceCode default">result_last - result</code>).</li>
 </ul>
 
 </div>
@@ -8434,18 +8452,15 @@ comparisons and applications of each projection.</p>
 <p><span class="marginalizedparent"><a class="marginalized">6</a></span>
 <em>Remarks</em>: Stable (<span><a href="https://wg21.link/algorithm.stable">[algorithm.stable]</a></span>).
 If <code class="sourceCode cpp"><span class="op">[</span>first1, last1<span class="op">)</span></code>
-contains <em><code class="sourceCode cpp">m</code></em> elements that
-are equivalent to each other and <code class="sourceCode cpp"><span class="op">[</span>first2, last2<span class="op">)</span></code>
-contains <em><code class="sourceCode cpp">n</code></em> elements that
-are equivalent to them, then <code class="sourceCode cpp"><span class="op">|</span><em>m</em> − <em>n</em><span class="op">|</span></code>
-of those elements shall be copied to the output range: the last
-<code class="sourceCode cpp"><em>m</em> − <em>n</em></code> of these
-elements from <code class="sourceCode cpp"><span class="op">[</span>first1, last1<span class="op">)</span></code>
-if <code class="sourceCode cpp"><em>m</em> <span class="op">&gt;</span> <em>n</em></code>,
-and the last <code class="sourceCode cpp"><em>n</em> − <em>m</em></code>
-of these elements from <code class="sourceCode cpp"><span class="op">[</span>first2, last2<span class="op">)</span></code>
-if <code class="sourceCode cpp"><em>m</em> <span class="op">&lt;</span> <em>n</em></code>.
-In either case, the elements are copied in order.</p>
+contains <em>m</em> elements that are equivalent to each other and <code class="sourceCode cpp"><span class="op">[</span>first2, last2<span class="op">)</span></code>
+contains <em>n</em> elements that are equivalent to them, then
+|<em>m</em> − <em>n</em>| of those elements shall be copied to the
+output range: the last <em>m</em> − <em>n</em> of these elements from
+<code class="sourceCode cpp"><span class="op">[</span>first1, last1<span class="op">)</span></code>
+if <em>m</em> &gt; <em>n</em>, and the last <em>n</em> − <em>m</em> of
+these elements from <code class="sourceCode cpp"><span class="op">[</span>first2, last2<span class="op">)</span></code>
+if <em>m</em> &lt; <em>n</em>. In either case, the elements are copied
+in order.</p>
 <h2 data-number="8.52" id="modify_is_heap"><span class="header-section-number">8.52</span> Modify <span><a href="https://wg21.link/is.heap">[is.heap]</a></span><a href="#modify_is_heap" class="self-link"></a></h2>
 <div class="sourceCode" id="cb188"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb188-1"><a href="#cb188-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>random_access_iterator I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S, <span class="kw">class</span> Proj <span class="op">=</span> identity,</span>
 <span id="cb188-2"><a href="#cb188-2" aria-hidden="true" tabindex="-1"></a>         indirect_strict_weak_order<span class="op">&lt;</span>projected<span class="op">&lt;</span>I, Proj<span class="op">&gt;&gt;</span> Comp <span class="op">=</span> ranges<span class="op">::</span>less<span class="op">&gt;</span></span>
@@ -8632,8 +8647,8 @@ the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span
 <p>is <code class="sourceCode cpp"><span class="kw">false</span></code>.
 Returns <code class="sourceCode cpp">last</code> if <code class="sourceCode cpp">first <span class="op">==</span> last</code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">27</a></span>
-<em>Complexity</em>: Exactly <code class="sourceCode cpp">max<span class="op">(</span>last <span class="op">-</span> first <span class="op">-</span> <span class="dv">1</span>, <span class="dv">0</span><span class="op">)</span></code>
-comparisons and twice as many projections.</p>
+<em>Complexity</em>: Exactly max(<code class="sourceCode cpp">last <span class="op">-</span> first <span class="op">-</span> <span class="dv">1</span></code>,
+0) comparisons and twice as many projections.</p>
 <div class="sourceCode" id="cb200"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb200-1"><a href="#cb200-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>forward_iterator I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S, <span class="kw">class</span> Proj <span class="op">=</span> identity,</span>
 <span id="cb200-2"><a href="#cb200-2" aria-hidden="true" tabindex="-1"></a>         indirect_strict_weak_order<span class="op">&lt;</span>projected<span class="op">&lt;</span>I, Proj<span class="op">&gt;&gt;</span> Comp <span class="op">=</span> ranges<span class="op">::</span>less<span class="op">&gt;</span></span>
 <span id="cb200-3"><a href="#cb200-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> I ranges<span class="op">::</span>max_element<span class="op">(</span>I first, S last, Comp comp <span class="op">=</span> <span class="op">{}</span>, Proj proj <span class="op">=</span> <span class="op">{})</span>;</span>
@@ -8668,8 +8683,8 @@ the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span
 <p>is <code class="sourceCode cpp"><span class="kw">false</span></code>.
 Returns <code class="sourceCode cpp">last</code> if <code class="sourceCode cpp">first <span class="op">==</span> last</code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">30</a></span>
-<em>Complexity</em>: Exactly <code class="sourceCode cpp">max<span class="op">(</span>last <span class="op">-</span> first <span class="op">-</span> <span class="dv">1</span>, <span class="dv">0</span><span class="op">)</span></code>
-comparisons and twice as many projections.</p>
+<em>Complexity</em>: Exactly max(<code class="sourceCode cpp">last <span class="op">-</span> first <span class="op">-</span> <span class="dv">1</span></code>,
+0) comparisons and twice as many projections.</p>
 <div class="sourceCode" id="cb202"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb202-1"><a href="#cb202-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>forward_iterator I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S, <span class="kw">class</span> Proj <span class="op">=</span> identity,</span>
 <span id="cb202-2"><a href="#cb202-2" aria-hidden="true" tabindex="-1"></a>         indirect_strict_weak_order<span class="op">&lt;</span>projected<span class="op">&lt;</span>I, Proj<span class="op">&gt;&gt;</span> Comp <span class="op">=</span> ranges<span class="op">::</span>less<span class="op">&gt;</span></span>
 <span id="cb202-3"><a href="#cb202-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> ranges<span class="op">::</span>minmax_element_result<span class="op">&lt;</span>I<span class="op">&gt;</span></span>
@@ -8702,13 +8717,11 @@ where <code class="sourceCode cpp">M</code> is the last iterator in
 <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
 such that no iterator in the range refers to a larger element.</p>
 <p><span class="marginalizedparent"><a class="marginalized">32</a></span>
-<em>Complexity</em>: Let <em><code class="sourceCode cpp">N</code></em>
-be
+<em>Complexity</em>: Let <em>N</em> be
 <code class="sourceCode cpp">last <span class="op">-</span> first</code>.
-At most
-<code class="sourceCode cpp">max<span class="op">(</span>⌊</code><span class="math inline">\(\frac{3}{2}\)</span><code class="sourceCode cpp"><span class="op">(</span><em>N</em> − <span class="dv">1</span><span class="op">)</span>⌋, <span class="dv">0</span><span class="op">)</span></code>
-comparisons and twice as many applications of the projection, if
-any.</p>
+At most max(⌊<span class="math inline">\(\frac{3}{2}\)</span>(<em>N</em>
+− 1)⌋, 0) comparisons and twice as many applications of the projection,
+if any.</p>
 <h2 data-number="8.54" id="modify_alg_lex_comparison"><span class="header-section-number">8.54</span> Modify <span><a href="https://wg21.link/alg.lex.comparison">[alg.lex.comparison]</a></span><a href="#modify_alg_lex_comparison" class="self-link"></a></h2>
 <div class="sourceCode" id="cb204"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb204-1"><a href="#cb204-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>input_iterator I1, sentinel_for<span class="op">&lt;</span>I1<span class="op">&gt;</span> S1, input_iterator I2, sentinel_for<span class="op">&lt;</span>I2<span class="op">&gt;</span> S2,</span>
 <span id="cb204-2"><a href="#cb204-2" aria-hidden="true" tabindex="-1"></a>         <span class="kw">class</span> Proj1 <span class="op">=</span> identity, <span class="kw">class</span> Proj2 <span class="op">=</span> identity,</span>
@@ -8747,7 +8760,8 @@ only if the sequence of elements defined by the range <code class="sourceCode cp
 is lexicographically less than the sequence of elements defined by the
 range <code class="sourceCode cpp"><span class="op">[</span>first2, last2<span class="op">)</span></code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">2</a></span>
-<em>Complexity</em>: At most <code class="sourceCode cpp"><span class="dv">2</span> min<span class="op">(</span>last1 <span class="op">-</span> first1, last2 <span class="op">-</span> first2<span class="op">)</span></code>
+<em>Complexity</em>: At most 2 min(<code class="sourceCode cpp">last1 <span class="op">-</span> first1</code>,
+<code class="sourceCode cpp">last2 <span class="op">-</span> first2</code>)
 applications of the corresponding comparison and each projection, if
 any.</p>
 <p><span class="marginalizedparent"><a class="marginalized">3</a></span>
