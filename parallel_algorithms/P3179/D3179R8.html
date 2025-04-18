@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2025-04-04" />
+  <meta name="dcterms.date" content="2025-04-18" />
   <title>C++ parallel range algorithms</title>
   <style>
       code{white-space: pre-wrap;}
@@ -466,7 +466,7 @@ algorithms</h1>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2025-04-04</td>
+    <td>2025-04-18</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -2356,24 +2356,25 @@ algorithm overload has an additional</del></span> function parameter of
 type <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy&amp;&amp;</code></span></del></span>
 <span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">T&amp;&amp;</code></span>,
 where <span><code class="sourceCode default">T</code></span> is the
-execution policy template parameter</ins></span>, <span class="rm" style="color: #bf0303"><del>which is the</del></span><span class="add" style="color: #006e28"><ins>as an additional</ins></span> first function
-parameter <span class="add" style="color: #006e28"><ins>P</ins></span>.</p>
+execution policy template parameter</ins></span>, <span class="rm" style="color: #bf0303"><del>which is the</del></span><span class="add" style="color: #006e28"><ins>as the</ins></span> first function parameter
+<span class="add" style="color: #006e28"><ins>P</ins></span>.</p>
 <p>[<em>Note 1</em>: Not all algorithms have parallel algorithm
 overloads. — <em>end note</em>]</p>
 <p><span class="marginalizedparent"><a class="marginalized">2</a></span>
-Unless otherwise specified, the semantics of <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span>
-algorithm overloads <span class="add" style="color: #006e28"><ins>with
-an execution policy</ins></span> are identical to their overloads
-without.</p>
+Unless otherwise specified, the semantics of <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>calling a parallel</ins></span>
+algorithm overload<span class="rm" style="color: #bf0303"><del>s</del></span> are identical to <span class="rm" style="color: #bf0303"><del>their overloads
+without</del></span><span class="add" style="color: #006e28"><ins>calling the corresponding algorithm overload
+without the parameter P, using all but the first
+argument</ins></span>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">3</a></span>
-Unless otherwise specified, the complexity requirements of <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span>
-algorithm overloads <span class="add" style="color: #006e28"><ins>with
-an execution policy</ins></span> are relaxed from the complexity
-requirements of the overloads without as follows: when the guarantee
-says “at most <em>expr</em>” or “exactly <em>expr</em>” and does not
-specify the number of assignments or swaps, and <em>expr</em> is not
-already expressed with <em>O</em>() notation, the complexity of the
-algorithm shall be <em>O</em>(<em>expr</em>).</p>
+Unless otherwise specified, the complexity requirements of <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>parallel</ins></span> algorithm
+overloads are relaxed from the complexity requirements of the <span class="add" style="color: #006e28"><ins>corresponding</ins></span>
+overloads without <span class="add" style="color: #006e28"><ins>the
+parameter P</ins></span> as follows: when the guarantee says “at most
+<em>expr</em>” or “exactly <em>expr</em>” and does not specify the
+number of assignments or swaps, and <em>expr</em> is not already
+expressed with <em>O</em>() notation, the complexity of the algorithm
+shall be <em>O</em>(<em>expr</em>).</p>
 <p><span class="marginalizedparent"><a class="marginalized">4</a></span>
 <span class="add" style="color: #006e28"><ins>A</ins></span> <span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>arallel algorithm<span class="rm" style="color: #bf0303"><del>s</del></span> <span class="add" style="color: #006e28"><ins>with a template parameter named
 <span><code class="sourceCode default">ExecutionPolicy</code></span></ins></span>
@@ -5311,7 +5312,7 @@ min(<code class="sourceCode default">last - first</code>,
 <code class="sourceCode default">result_last - result</code>).</p>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">6</a></span>
-<em>Preconditions</em>: The ranges <code class="sourceCode cpp"><span class="op">[</span>first, <span class="rm" style="color: #bf0303"><del>last</del></span><span class="add" style="color: #006e28"><ins>first + <em>N</em></ins></span><span class="op">)</span></code>
+<em>Preconditions</em>: The ranges <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
 and <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">(last - first)</code></span></del></span><span class="add" style="color: #006e28"><ins><em>N</em></ins></span><span class="op">)</span></code>
 do not overlap.</p>
 <p><span class="marginalizedparent"><a class="marginalized">7</a></span>
@@ -5457,18 +5458,21 @@ min(<em><code class="sourceCode default">M</code></em>,
 <em>Preconditions</em>: The ranges <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
 and <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">(last - first)</code></span></del></span><span class="add" style="color: #006e28"><ins><em>N</em></ins></span><span class="op">)</span></code>
 do not overlap.</p>
-<p>[<em>Note 1</em>: For the overload with an
-<code class="sourceCode cpp">ExecutionPolicy</code>, there might be a
-performance cost if <code class="sourceCode cpp">iterator_traits<span class="op">&lt;</span>ForwardIterator1<span class="op">&gt;::</span>value_type</code>
-is not <em>Cpp17MoveConstructible</em> (Table 31). <span class="add" style="color: #006e28"><ins>For the overloads with an
-<em><span><code class="sourceCode default">execution-policy</code></span></em>,
-there might be a performance cost if
+<p>[<em>Note 1</em>: For the <span class="add" style="color: #006e28"><ins>parallel algorithm</ins></span> overload
+<span class="rm" style="color: #bf0303"><del>with an
+<span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>in namespace
+<span><code class="sourceCode default">std</code></span></ins></span>,
+there <span class="rm" style="color: #bf0303"><del>might</del></span><span class="add" style="color: #006e28"><ins>can</ins></span> be a performance cost if
+<code class="sourceCode cpp">iterator_traits<span class="op">&lt;</span>ForwardIterator1<span class="op">&gt;::</span>value_type</code>
+is not <em>Cpp17MoveConstructible</em> (Table 31). <span class="add" style="color: #006e28"><ins>For the parallel algorithm overloads in
+namespace <span><code class="sourceCode default">ranges</code></span>,
+there can be a performance cost if
 <span><code class="sourceCode default">iter_value_t&lt;I&gt;</code></span>
 is not
 <span><code class="sourceCode default">move_constructible</code></span>.</ins></span>
 — <em>end note</em>]</p>
 <p><span class="marginalizedparent"><a class="marginalized">17</a></span>
-<em>Effects</em>: Copies <span class="rm" style="color: #bf0303"><del>all of the</del></span><span class="add" style="color: #006e28"><ins>first
+<em>Effects</em>: Copies <span class="rm" style="color: #bf0303"><del>all of the</del></span><span class="add" style="color: #006e28"><ins>the first
 <em><span><code class="sourceCode default">N</code></span></em></ins></span>
 elements referred to by the iterator
 <code class="sourceCode cpp">i</code> in the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
@@ -5544,7 +5548,7 @@ overloads with no parameter
 Let <em><code class="sourceCode cpp">N</code></em> be <span class="add" style="color: #006e28"><ins>min(</ins></span><code class="sourceCode cpp">last <span class="op">-</span> first</code><span class="add" style="color: #006e28"><ins>,
 <span><code class="sourceCode default">result_last - result</code></span>)</ins></span>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">7</a></span>
-<em>Preconditions</em>: The ranges <code class="sourceCode cpp"><span class="op">[</span>first, <span class="rm" style="color: #bf0303"><del>last</del></span><span class="add" style="color: #006e28"><ins>first + <em>N</em></ins></span><span class="op">)</span></code>
+<em>Preconditions</em>: The ranges <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
 and <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <em>N</em><span class="op">)</span></code>
 do not overlap.</p>
 <p><span class="marginalizedparent"><a class="marginalized">8</a></span>
@@ -5597,8 +5601,10 @@ Let:</p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(1.1)</a></span>
 <code class="sourceCode cpp">last2</code> be <code class="sourceCode cpp">first2 <span class="op">+</span> <span class="op">(</span>last1 <span class="op">-</span> first1<span class="op">)</span></code>
-for the overloads with no parameter named
-<code class="sourceCode cpp">last2</code>;</li>
+for the overloads <span class="add" style="color: #006e28"><ins>in
+namespace
+<span><code class="sourceCode default">std</code></span></ins></span>
+with no parameter named <code class="sourceCode cpp">last2</code>;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(1.2)</a></span>
 <em><code class="sourceCode cpp">M</code></em> be min(<code class="sourceCode cpp">last1 <span class="op">-</span> first1</code>,
 <code class="sourceCode cpp">last2 <span class="op">-</span> first2</code>).</li>
@@ -5703,9 +5709,11 @@ Let:</p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(1.1)</a></span>
 <code class="sourceCode cpp">last2</code> be <code class="sourceCode cpp">first2 <span class="op">+</span> <span class="op">(</span>last1 <span class="op">-</span> first1<span class="op">)</span></code>
-for the overloads with parameter
-<code class="sourceCode cpp">first2</code> but no parameter
-<code class="sourceCode cpp">last2</code>;</li>
+for the overloads <span class="add" style="color: #006e28"><ins>in
+namespace
+<span><code class="sourceCode default">std</code></span></ins></span>
+with parameter <code class="sourceCode cpp">first2</code> but no
+parameter <code class="sourceCode cpp">last2</code>;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(1.2)</a></span>
 <code class="sourceCode cpp"><span class="rm" style="color: #bf0303"><del><em>N</em></del></span><span class="add" style="color: #006e28"><ins><em>M</em></ins></span></code> be <code class="sourceCode cpp">last1 <span class="op">-</span> first1</code> for
 unary transforms, or min(<code class="sourceCode cpp">last1 <span class="op">-</span> first1</code>,
@@ -5717,8 +5725,9 @@ for binary transforms;</li>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(1.x)</a></span>
 <code class="sourceCode default">result_last</code> be
-<code class="sourceCode default">result + M</code> for the overloads
-with no parameter <code class="sourceCode default">result_last</code> or
+<code class="sourceCode default">result + <em>M</em></code> for the
+overloads with no parameter
+<code class="sourceCode default">result_last</code> or
 <code class="sourceCode default">result_r</code>;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(1.x)</a></span>
 <em><code class="sourceCode default">N</code></em> be
@@ -5787,10 +5796,10 @@ for binary transforms defined in namespace
 <em>Complexity</em>: Exactly
 <em><code class="sourceCode cpp">N</code></em> applications of
 <code class="sourceCode cpp">op</code> or
-<code class="sourceCode cpp">binary_op</code>, and any projections.
-<span class="rm" style="color: #bf0303"><del>This requirement also
-applies to the overload with an
-<span><code class="sourceCode default">ExecutionPolicy</code></span>.</del></span></p>
+<code class="sourceCode cpp">binary_op</code>, and any projections. This
+requirement also applies to the <span class="add" style="color: #006e28"><ins>parallel algorithm</ins></span>
+overload<span class="add" style="color: #006e28"><ins>s</ins></span><span class="rm" style="color: #bf0303"><del>with an
+<span><code class="sourceCode default">ExecutionPolicy</code></span></del></span>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">6</a></span>
 <em>Remarks</em>: <code class="sourceCode cpp">result</code> may be
 equal to <code class="sourceCode cpp">first1</code> or
@@ -5993,7 +6002,7 @@ min(<code class="sourceCode default">last - first</code>,
 <code class="sourceCode cpp">new_value</code> are writable (<span><a href="https://wg21.link/iterator.requirements.general">[iterator.requirements.general]</a></span>)
 to <code class="sourceCode cpp">result</code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">8</a></span>
-<em>Preconditions</em>: The ranges <code class="sourceCode cpp"><span class="op">[</span>first, <span class="rm" style="color: #bf0303"><del>last</del></span><span class="add" style="color: #006e28"><ins>first + <em>N</em></ins></span><span class="op">)</span></code>
+<em>Preconditions</em>: The ranges <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
 and <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">(last - first)</code></span></del></span><span class="add" style="color: #006e28"><ins><em>N</em></ins></span><span class="op">)</span></code>
 do not overlap.</p>
 <p><span class="marginalizedparent"><a class="marginalized">9</a></span>
@@ -6317,20 +6326,23 @@ to <code class="sourceCode cpp">result</code>.</p>
 <em>Preconditions</em>: The ranges <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
 and <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">(last - first)</code></span></del></span><span class="add" style="color: #006e28"><ins><em>N</em></ins></span><span class="op">)</span></code>
 do not overlap.</p>
-<p>[<em>Note 2</em>: For the overloads with an
-<code class="sourceCode cpp">ExecutionPolicy</code>, there might be a
-performance cost if <code class="sourceCode cpp">iterator_traits<span class="op">&lt;</span>ForwardIterator1<span class="op">&gt;::</span>value_type</code>
+<p>[<em>Note 2</em>: For the <span class="add" style="color: #006e28"><ins>parallel algorithm</ins></span> overloads
+<span class="rm" style="color: #bf0303"><del>with an
+<span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>in namespace
+<span><code class="sourceCode default">std</code></span></ins></span>,
+there <span class="rm" style="color: #bf0303"><del>might</del></span><span class="add" style="color: #006e28"><ins>can</ins></span> be a performance cost if
+<code class="sourceCode cpp">iterator_traits<span class="op">&lt;</span>ForwardIterator1<span class="op">&gt;::</span>value_type</code>
 does not meet the <em>Cpp17MoveConstructible</em> (Table 31)
 requirements. <span class="add" style="color: #006e28"><ins>For the
-overloads with an
-<em><span><code class="sourceCode default">execution-policy</code></span></em>,
-there might be a performance cost if
+parallel algorithm overloads in namespace
+<span><code class="sourceCode default">ranges</code></span>, there can
+be a performance cost if
 <span><code class="sourceCode default">iter_value_t&lt;I&gt;</code></span>
 is not
 <span><code class="sourceCode default">move_constructible</code></span>.</ins></span>
 — <em>end note</em>]</p>
 <p><span class="marginalizedparent"><a class="marginalized">12</a></span>
-<em>Effects</em>: Copies <span class="rm" style="color: #bf0303"><del>all the</del></span><span class="add" style="color: #006e28"><ins>first
+<em>Effects</em>: Copies <span class="rm" style="color: #bf0303"><del>all the</del></span><span class="add" style="color: #006e28"><ins>the first
 <em><span><code class="sourceCode default">N</code></span></em></ins></span>
 elements referred to by the iterator
 <code class="sourceCode cpp">i</code> in the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
@@ -6554,14 +6566,15 @@ note</em>]</del></span></p></li>
 </ul></li>
 </ul>
 <p><span class="add" style="color: #006e28"><ins>[<em>Note 1</em>: For
-the overloads with an
-<span><code class="sourceCode default">ExecutionPolicy</code></span>,
-there might be a performance cost if the value type of
+the parallel algorihtm overloads in namespace
+<span><code class="sourceCode default">std</code></span>, there can be a
+performance cost if the value type of
 <span><code class="sourceCode default">ForwardIterator1</code></span>
 does not meet both the <em>Cpp17CopyConstructible</em> and
-<em>Cpp17CopyAssignable</em> requirements. For the overloads with an
-<em><span><code class="sourceCode default">execution-policy</code></span></em>,
-there might be a performance cost if
+<em>Cpp17CopyAssignable</em> requirements. For the parallel algorithm
+overloads in namespace
+<span><code class="sourceCode default">ranges</code></span>, there can
+be a performance cost if
 <span><code class="sourceCode default">iter_value_t&lt;I&gt;</code></span>
 does not meet both the
 <span><code class="sourceCode default">copy_constructible</code></span>
@@ -6585,11 +6598,8 @@ to fix the wording by aligning with
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(10.1)</a></span>
 <code class="sourceCode cpp">result <span class="op">+</span> <em>N</em></code>
-for the overloads in namespace <code class="sourceCode cpp">std</code>.
-<span class="draftnote" data-audience="LWG" style="color: #0000ff">[
-Drafting note for LWG:
-<em><code class="sourceCode default">N</code></em> was not defined
-previously, now it is. ]</span></li>
+for the overloads in namespace
+<code class="sourceCode cpp">std</code>.</li>
 <li><span class="marginalizedparent"><a class="marginalized">(10.2)</a></span>
 <code class="sourceCode cpp"><span class="op">{</span><span class="rm" style="color: #bf0303"><del>last</del></span><span class="add" style="color: #006e28"><ins>j</ins></span>, result <span class="op">+</span> <em>N</em><span class="op">}</span></code>
 for the overloads in namespace
@@ -6704,7 +6714,7 @@ min(<code class="sourceCode default">last - first</code>,
 <code class="sourceCode default">first + (last - first) - <em>N</em></code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">x</a></span>
 <em>Preconditions</em>: The ranges
-<code class="sourceCode default">[<em>NEW_FIRST</em>, last)</code> and
+<code class="sourceCode default">[first, last)</code> and
 <code class="sourceCode default">[result, result + <em>N</em>)</code> do
 not overlap.</p>
 <p><span class="marginalizedparent"><a class="marginalized">x</a></span>
@@ -7650,13 +7660,15 @@ to <code class="sourceCode cpp">out_true</code> and
 <p><span class="marginalizedparent"><a class="marginalized">16</a></span>
 <em>Preconditions</em>: The input range and output ranges do not
 overlap.</p>
-<p>[<em>Note 1</em>: For the overload with an
-<code class="sourceCode cpp">ExecutionPolicy</code>, there might be a
-performance cost if <code class="sourceCode cpp">first</code>’s value
-type does not meet the <em>Cpp17CopyConstructible</em> requirements.
-<span class="add" style="color: #006e28"><ins>For the overloads with an
-<em><span><code class="sourceCode default">execution-policy</code></span></em>,
-there might be a performance cost if
+<p>[<em>Note 1</em>: For the <span class="add" style="color: #006e28"><ins>parallel algorithm</ins></span> overload
+<span class="rm" style="color: #bf0303"><del>with an
+<span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>in namespace
+<span><code class="sourceCode default">std</code></span></ins></span>,
+there <span class="rm" style="color: #bf0303"><del>might</del></span><span class="add" style="color: #006e28"><ins>can</ins></span> be a performance cost if
+<code class="sourceCode cpp">first</code>’s value type does not meet the
+<em>Cpp17CopyConstructible</em> requirements. <span class="add" style="color: #006e28"><ins>For the parallel algorithm overloads in
+namespace <span><code class="sourceCode default">ranges</code></span>,
+there can be a performance cost if
 <span><code class="sourceCode default">first</code></span>’s value type
 does not meet the
 <span><code class="sourceCode default">copy_constructible</code></span>
@@ -9566,6 +9578,10 @@ SA
 useful feedback.</li>
 <li>Thanks to Mikhail Dvorskiy for the implementation experience.</li>
 </ul>
+<!-- internal TODOs:
+think about Tomasz's suggestion about copy_if wording.
+SUGGESTION: TK’s chat: “18.2 {last, result + N} if N == M
+18.2 {j, result + N} if j is iterator // without the or” -->
 <h1 data-number="12" id="bibliography"><span class="header-section-number">12</span> References<a href="#bibliography" class="self-link"></a></h1>
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="1" role="doc-bibliography">
 <div id="ref-P1068R11" class="csl-entry" role="doc-biblioentry">
