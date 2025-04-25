@@ -720,7 +720,7 @@ in <span><span>[version.syn]</span></span><span></span></a></li>
 <li><a href="#sg9_tokyo_2024" id="toc-sg9_tokyo_2024"><span class="toc-section-number">10.5</span> SG9, Tokyo,
 2024<span></span></a></li>
 </ul></li>
-<li><a href="#acknoledgements" id="toc-acknoledgements"><span class="toc-section-number">11</span>
+<li><a href="#acknowledgements" id="toc-acknowledgements"><span class="toc-section-number">11</span>
 Acknowledgments<span></span></a></li>
 <li><a href="#bibliography" id="toc-bibliography"><span class="toc-section-number">12</span> References<span></span></a></li>
 </ul>
@@ -1801,7 +1801,7 @@ namespace<a href="#cpp17_counterpart" class="self-link"></a></h3>
 <td>
 <code class="sourceCode cpp">all_of</code>
 <td>
-<code class="sourceCode cpp">search<span class="op">{</span>_n<span class="op">}</span></code>
+<code class="sourceCode cpp">search<span class="op">[</span>_n<span class="op">]</span></code>
 <td>
 <code class="sourceCode cpp">remove_copy</code>
 <td>
@@ -1813,7 +1813,7 @@ namespace<a href="#cpp17_counterpart" class="self-link"></a></h3>
 <td>
 <code class="sourceCode cpp">any_of</code>
 <td>
-<code class="sourceCode cpp">copy<span class="op">{</span>_n<span class="op">}</span></code>
+<code class="sourceCode cpp">copy<span class="op">[</span>_n<span class="op">]</span></code>
 <td>
 <code class="sourceCode cpp">remove_copy_if</code>
 <td>
@@ -1835,7 +1835,7 @@ namespace<a href="#cpp17_counterpart" class="self-link"></a></h3>
 </tr>
 <tr>
 <td>
-<code class="sourceCode cpp">for_each<span class="op">{</span>_n<span class="op">}</span></code>
+<code class="sourceCode cpp">for_each<span class="op">[</span>_n<span class="op">]</span></code>
 <td>
 <code class="sourceCode cpp">move</code>
 <td>
@@ -1879,7 +1879,7 @@ namespace<a href="#cpp17_counterpart" class="self-link"></a></h3>
 <td>
 <code class="sourceCode cpp">partition_copy</code>
 <td>
-<code class="sourceCode cpp">uninitialized_default_construct<span class="op">{</span>_n<span class="op">}</span></code>
+<code class="sourceCode cpp">uninitialized_default_construct<span class="op">[</span>_n<span class="op">]</span></code>
 </tr>
 <tr>
 <td>
@@ -1891,7 +1891,7 @@ namespace<a href="#cpp17_counterpart" class="self-link"></a></h3>
 <td>
 <code class="sourceCode cpp">merge</code>
 <td>
-<code class="sourceCode cpp">uninitialized_value_construct<span class="op">{</span>_n<span class="op">}</span></code>
+<code class="sourceCode cpp">uninitialized_value_construct<span class="op">[</span>_n<span class="op">]</span></code>
 </tr>
 <tr>
 <td>
@@ -1903,7 +1903,7 @@ namespace<a href="#cpp17_counterpart" class="self-link"></a></h3>
 <td>
 <code class="sourceCode cpp">inplace_merge</code>
 <td>
-<code class="sourceCode cpp">uninitialized_copy<span class="op">{</span>_n<span class="op">}</span></code>
+<code class="sourceCode cpp">uninitialized_copy<span class="op">[</span>_n<span class="op">]</span></code>
 </tr>
 <tr>
 <td>
@@ -1915,31 +1915,31 @@ namespace<a href="#cpp17_counterpart" class="self-link"></a></h3>
 <td>
 <code class="sourceCode cpp">includes</code>
 <td>
-<code class="sourceCode cpp">uninitialized_move<span class="op">{</span>_n<span class="op">}</span></code>
+<code class="sourceCode cpp">uninitialized_move<span class="op">[</span>_n<span class="op">]</span></code>
 </tr>
 <tr>
 <td>
 <code class="sourceCode cpp">count</code>
 <td>
-<code class="sourceCode cpp">fill<span class="op">{</span>_n<span class="op">}</span></code>
+<code class="sourceCode cpp">fill<span class="op">[</span>_n<span class="op">]</span></code>
 <td>
 <code class="sourceCode cpp">sort</code>
 <td>
 <code class="sourceCode cpp">set_union</code>
 <td>
-<code class="sourceCode cpp">uninitialized_fill<span class="op">{</span>_n<span class="op">}</span></code>
+<code class="sourceCode cpp">uninitialized_fill<span class="op">[</span>_n<span class="op">]</span></code>
 </tr>
 <tr>
 <td>
 <code class="sourceCode cpp">count_if</code>
 <td>
-<code class="sourceCode cpp">generate<span class="op">{</span>_n<span class="op">}</span></code>
+<code class="sourceCode cpp">generate<span class="op">[</span>_n<span class="op">]</span></code>
 <td>
 <code class="sourceCode cpp">stable_sort</code>
 <td>
 <code class="sourceCode cpp">set_intersection</code>
 <td>
-<code class="sourceCode cpp">destroy<span class="op">{</span>_n<span class="op">}</span></code>
+<code class="sourceCode cpp">destroy<span class="op">[</span>_n<span class="op">]</span></code>
 </tr>
 <tr>
 <td>
@@ -2960,7 +2960,7 @@ satisfies
 <span id="cb41-572"><a href="#cb41-572" aria-hidden="true" tabindex="-1"></a><span class="va">+    copy_if_result&lt;I, O&gt;</span></span>
 <span id="cb41-573"><a href="#cb41-573" aria-hidden="true" tabindex="-1"></a><span class="va">+      copy_if(Ep&amp;&amp; exec, I first, S last, O result, OutS result_last,</span></span>
 <span id="cb41-574"><a href="#cb41-574" aria-hidden="true" tabindex="-1"></a><span class="va">+               Pred pred, Proj proj = {});    <em>// freestanding-deleted</em></span></span>
-<span id="cb41-575"><a href="#cb41-575" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, <em>sized-random-access-range</em> R, random_access_iterator OutR,</span></span>
+<span id="cb41-575"><a href="#cb41-575" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, <em>sized-random-access-range</em> R, <em>sized-random-access-range</em> OutR,</span></span>
 <span id="cb41-576"><a href="#cb41-576" aria-hidden="true" tabindex="-1"></a><span class="va">+            class Proj = identity, indirect_unary_predicate&lt;projected&lt;iterator_t&lt;R&gt;, Proj&gt;&gt; Pred&gt;</span></span>
 <span id="cb41-577"><a href="#cb41-577" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires indirectly_copyable&lt;iterator_t&lt;R&gt;, iterator_t&lt;OutR&gt;&gt;</span></span>
 <span id="cb41-578"><a href="#cb41-578" aria-hidden="true" tabindex="-1"></a><span class="va">+    copy_if_result&lt;borrowed_iterator_t&lt;R&gt;, borrowed_iterator_t&lt;OutR&gt;&gt;</span></span>
@@ -4836,14 +4836,17 @@ for which <em><code class="sourceCode cpp">E</code></em> holds. Returns
 <code class="sourceCode cpp">last</code> if no such iterator is
 found.</p>
 <p><span class="marginalizedparent"><a class="marginalized">3</a></span>
-<em>Complexity</em>: For the overloads with no <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>execution policy template
-parameter</ins></span>, exactly min(<code class="sourceCode cpp"><span class="op">(</span>i <span class="op">-</span> first<span class="op">)</span> <span class="op">+</span> <span class="dv">1</span></code>,
+<em>Complexity</em>: For the <span class="add" style="color: #006e28"><ins>non-parallel algorithm</ins></span>
+overloads <span class="rm" style="color: #bf0303"><del>with no
+<span><code class="sourceCode default">ExecutionPolicy</code></span></del></span>,
+exactly min(<code class="sourceCode cpp"><span class="op">(</span>i <span class="op">-</span> first<span class="op">)</span> <span class="op">+</span> <span class="dv">1</span></code>,
 <code class="sourceCode cpp"><span class="op">(</span>last <span class="op">-</span> first<span class="op">)</span> <span class="op">-</span> <span class="dv">1</span></code>)
 applications of the corresponding predicate, where
 <code class="sourceCode cpp">i</code> is
 <code class="sourceCode cpp">adjacent_find</code>’s return value. For
-the overloads with an <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>execution policy template
-parameter</ins></span>,
+the <span class="add" style="color: #006e28"><ins>parallel
+algorithm</ins></span> overloads <span class="rm" style="color: #bf0303"><del>with an
+<span><code class="sourceCode default">ExecutionPolicy</code></span></del></span>,
 <em>O</em>(<code class="sourceCode cpp">last <span class="op">-</span> first</code>)
 applications of the corresponding predicate<span class="rm" style="color: #bf0303"><del>, and no</del></span><span class="add" style="color: #006e28"><ins>. No</ins></span> more than twice as many
 applications of any projection.</p>
@@ -5405,7 +5408,7 @@ for the overload<span class="add" style="color: #006e28"><ins>s</ins></span> in 
 <span id="cb97-5"><a href="#cb97-5" aria-hidden="true" tabindex="-1"></a>  ranges::copy_if_result&lt;I, O&gt;</span>
 <span id="cb97-6"><a href="#cb97-6" aria-hidden="true" tabindex="-1"></a>    ranges::copy_if(Ep&amp;&amp; exec, I first, S last, O result, OutS result_last,</span>
 <span id="cb97-7"><a href="#cb97-7" aria-hidden="true" tabindex="-1"></a>                    Pred pred, Proj proj = {});</span>
-<span id="cb97-8"><a href="#cb97-8" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, <em>sized-random-access-range</em> R, random_access_iterator OutR,</span>
+<span id="cb97-8"><a href="#cb97-8" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, <em>sized-random-access-range</em> R, <em>sized-random-access-range</em> OutR,</span>
 <span id="cb97-9"><a href="#cb97-9" aria-hidden="true" tabindex="-1"></a>         class Proj = identity, indirect_unary_predicate&lt;projected&lt;iterator_t&lt;R&gt;, Proj&gt;&gt; Pred&gt;</span>
 <span id="cb97-10"><a href="#cb97-10" aria-hidden="true" tabindex="-1"></a>  requires indirectly_copyable&lt;iterator_t&lt;R&gt;, iterator_t&lt;OutR&gt;&gt;</span>
 <span id="cb97-11"><a href="#cb97-11" aria-hidden="true" tabindex="-1"></a>  ranges::copy_if_result&lt;borrowed_iterator_t&lt;R&gt;, borrowed_iterator_t&lt;OutR&gt;&gt;</span>
@@ -6728,6 +6731,13 @@ assignment takes place: <code class="sourceCode default">*(result + <em>N</em> -
 <p><span class="marginalizedparent"><a class="marginalized">x</a></span>
 <em>Returns</em>:
 <code class="sourceCode default">{<em>NEW_FIRST</em>, result + <em>N</em>}</code>.</p>
+<p><span class="note"><span>[ <em>Note:</em> </span>While the return
+type for the parallel and non-parallel algorithm overloads in the
+namespace <code class="sourceCode default">ranges</code> is the same the
+semantics is different because the parallel range algorithm overloads
+<code class="sourceCode default">result_last - result</code> can be
+insufficient to copy all data from the input.<span> — <em>end note</em>
+]</span></span></p>
 <p><span class="marginalizedparent"><a class="marginalized">x</a></span>
 <em>Complexity</em>: Exactly
 <em><code class="sourceCode default">N</code></em> assignments.</p>
@@ -6849,6 +6859,13 @@ such that for each non-negative integer
 assignment takes place: <code class="sourceCode default">*(result + i) = *(first + (i + (middle - first)) % <em>M</em>)</code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">x</a></span>
 <em>Returns</em>: <code class="sourceCode default">{first + (<em>N</em> + (middle - first)) % <em>M</em>, result + <em>N</em>}</code>.</p>
+<p><span class="note"><span>[ <em>Note:</em> </span>While the return
+type for the parallel and non-parallel algorithm overloads in the
+namespace <code class="sourceCode default">ranges</code> is the same the
+semantics is different because the parallel range algorithm overloads
+<code class="sourceCode default">result_last - result</code> can be
+insufficient to copy all data from the input.<span> — <em>end note</em>
+]</span></span></p>
 <p><span class="marginalizedparent"><a class="marginalized">x</a></span>
 <em>Complexity</em>: Exactly
 <em><code class="sourceCode default">N</code></em> assignments.</p>
@@ -6864,7 +6881,7 @@ assignment takes place: <code class="sourceCode default">*(result + i) = *(first
 <span id="cb141-2"><a href="#cb141-2" aria-hidden="true" tabindex="-1"></a>  requires indirectly_copyable&lt;iterator_t&lt;R&gt;, iterator_t&lt;OutR&gt;&gt;</span>
 <span id="cb141-3"><a href="#cb141-3" aria-hidden="true" tabindex="-1"></a>  ranges::rotate_copy_result&lt;borrowed_iterator_t&lt;R&gt;, borrowed_iterator_t&lt;OutR&gt;&gt;</span>
 <span id="cb141-4"><a href="#cb141-4" aria-hidden="true" tabindex="-1"></a>    ranges::rotate_copy(Ep&amp;&amp; exec, R&amp;&amp; r, iterator_t&lt;R&gt; middle, OutR&amp;&amp; result_r);</span></code></pre></div>
-<p><em>Effects</em>: Equivalent to: <code class="sourceCode default">return ranges::rotate_copy(std::forward&lt;Ep&gt;(exec), ranges::begin(r), middle, ranges::end(r), ranges::begin(result), ranges::end(result));</code></p>
+<p><em>Effects</em>: Equivalent to: <code class="sourceCode default">return ranges::rotate_copy(std::forward&lt;Ep&gt;(exec), ranges::begin(r), middle, ranges::end(r), ranges::begin(result_r), ranges::end(result_r));</code></p>
 </div>
 <h2 data-number="8.38" id="modify_shift"><span class="header-section-number">8.38</span> Modify <span><a href="https://wg21.link/alg.shift">[alg.shift]</a></span><a href="#modify_shift" class="self-link"></a></h2>
 <div class="sourceCode" id="cb142"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb142-1"><a href="#cb142-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>permutable I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S<span class="op">&gt;</span></span>
@@ -6896,17 +6913,16 @@ does nothing. Otherwise, moves the element from position <code class="sourceCode
 into position
 <code class="sourceCode cpp">first <span class="op">+</span> i</code>
 for each non-negative integer <code class="sourceCode cpp">i <span class="op">&lt;</span> <span class="op">(</span>last <span class="op">-</span> first<span class="op">)</span> <span class="op">-</span> n</code>.
-For the overloads without an <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span>
-template parameter</del></span><span class="add" style="color: #006e28"><ins>execution policy</ins></span>, does so in
-order starting from <code class="sourceCode cpp">i <span class="op">=</span> <span class="dv">0</span></code>
+For the <span class="add" style="color: #006e28"><ins>non-parallel
+algorithm</ins></span> overloads <span class="rm" style="color: #bf0303"><del>without an
+<span><code class="sourceCode default">ExecutionPolicy</code></span>
+template parameter</del></span>, does so in order starting from <code class="sourceCode cpp">i <span class="op">=</span> <span class="dv">0</span></code>
 and proceeding to <code class="sourceCode cpp">i <span class="op">=</span> <span class="op">(</span>last <span class="op">-</span> first<span class="op">)</span> <span class="op">-</span> n <span class="op">-</span> <span class="dv">1</span></code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">3</a></span>
 <em>Returns</em>: Let
 <em><code class="sourceCode cpp">NEW_LAST</code></em> be <code class="sourceCode cpp">first <span class="op">+</span> <span class="op">(</span>last <span class="op">-</span> first <span class="op">-</span> n<span class="op">)</span></code>
 if <code class="sourceCode cpp">n <span class="op">&lt;</span> last <span class="op">-</span> first</code>,
-otherwise <code class="sourceCode cpp">first</code>. <span class="draftnote" data-audience="&quot;LWG" style="color: #0000ff">[
-Drafting note for &quot;LWG: It seems that “Returns:” is missed at the end of
-the sentense. ]</span></p>
+otherwise <code class="sourceCode cpp">first</code>. <span class="add" style="color: #006e28"><ins>Returns:</ins></span></p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(3.1)</a></span>
 <em><code class="sourceCode cpp">NEW_LAST</code></em> for the overloads
@@ -6956,14 +6972,17 @@ and proceeding to <code class="sourceCode cpp">i <span class="op">=</span> <span
 if</p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(6.1)</a></span> for
-the overload in namespace <code class="sourceCode cpp">std</code>
-without an <code class="sourceCode cpp">ExecutionPolicy</code> template
-parameter, <code class="sourceCode cpp">ForwardIterator</code> meets the
+the <span class="add" style="color: #006e28"><ins>non-parallel
+algorithm</ins></span> overload in namespace
+<code class="sourceCode cpp">std</code> <span class="rm" style="color: #bf0303"><del>without an
+<span><code class="sourceCode default">ExecutionPolicy</code></span>
+template parameter</del></span>,
+<code class="sourceCode cpp">ForwardIterator</code> meets the
 <em>Cpp17BidirectionalIterator</em> requirements,</li>
 <li><span class="marginalizedparent"><a class="marginalized">(6.2)</a></span> for
-the overloads in namespace <code class="sourceCode cpp">ranges</code>
-<span class="add" style="color: #006e28"><ins>without an
-<em><span><code class="sourceCode default">execution-policy</code></span></em></ins></span>,
+the <span class="add" style="color: #006e28"><ins>non-parallel
+algorithm</ins></span> overloads in namespace
+<code class="sourceCode cpp">ranges</code>,
 <code class="sourceCode cpp">I</code> models
 <code class="sourceCode cpp">bidirectional_iterator</code>.</li>
 </ul>
@@ -6972,9 +6991,7 @@ the overloads in namespace <code class="sourceCode cpp">ranges</code>
 <em><code class="sourceCode cpp">NEW_FIRST</code></em> be
 <code class="sourceCode cpp">first <span class="op">+</span> n</code> if
 <code class="sourceCode cpp">n <span class="op">&lt;</span> last <span class="op">-</span> first</code>,
-otherwise <code class="sourceCode cpp">last</code>. <span class="draftnote" data-audience="&quot;LWG" style="color: #0000ff">[
-Drafting note for &quot;LWG: It seems that “Returns:” is missed at the end of
-the sentense. ]</span></p>
+otherwise <code class="sourceCode cpp">last</code>. <span class="add" style="color: #006e28"><ins>Returns:</ins></span></p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(7.1)</a></span>
 <em><code class="sourceCode cpp">NEW_FIRST</code></em> for the overloads
@@ -7035,9 +7052,7 @@ overloads in namespace <code class="sourceCode cpp">ranges</code>.</p>
 be
 <code class="sourceCode cpp">last <span class="op">-</span> first</code>.
 <code class="sourceCode cpp"><em>O</em><span class="op">(</span><em>N</em>log<em>N</em><span class="op">)</span></code>
-comparisons and projections. <span class="draftnote" data-audience="LWG" style="color: #0000ff">[ Drafting note for LWG: Should it be
-“<code class="sourceCode default"><em>O</em>(<em>N</em>log<em>N</em>)</code>
-comparisons, and twice as many projections as comparisons”? ]</span></p>
+comparisons and projections.</p>
 <h2 data-number="8.40" id="modify_stable_sort"><span class="header-section-number">8.40</span> Modify <span><a href="https://wg21.link/stable.sort">[stable.sort]</a></span><a href="#modify_stable_sort" class="self-link"></a></h2>
 <div class="sourceCode" id="cb148"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb148-1"><a href="#cb148-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>random_access_iterator I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S, <span class="kw">class</span> Comp <span class="op">=</span> ranges<span class="op">::</span>less,</span>
 <span id="cb148-2"><a href="#cb148-2" aria-hidden="true" tabindex="-1"></a>         <span class="kw">class</span> Proj <span class="op">=</span> identity<span class="op">&gt;</span></span>
@@ -7342,8 +7357,12 @@ is
 <em>Returns</em>: <code class="sourceCode cpp">last</code> for the
 overload in namespace <code class="sourceCode cpp">ranges</code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">5</a></span>
-<em>Complexity</em>: For the overloads with no <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>execution policy</ins></span>,
-linear on average. For the overloads with an <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>execution policy</ins></span>,
+<em>Complexity</em>: For the <span class="add" style="color: #006e28"><ins>non-parallel algorithm</ins></span>
+overloads <span class="rm" style="color: #bf0303"><del>with no
+<span><code class="sourceCode default">ExecutionPolicy</code></span></del></span>,
+linear on average. For the <span class="add" style="color: #006e28"><ins>parallel algorithm</ins></span> overloads
+<span class="rm" style="color: #bf0303"><del>with an
+<span><code class="sourceCode default">ExecutionPolicy</code></span></del></span>,
 <code class="sourceCode cpp"><em>O</em><span class="op">(</span><em>N</em><span class="op">)</span></code>
 applications of the predicate, and <code class="sourceCode cpp"><em>O</em><span class="op">(</span><em>N</em>log<em>N</em><span class="op">)</span></code>
 swaps, where <code class="sourceCode cpp"><em>N</em> <span class="op">=</span> last <span class="op">-</span> first</code>.</p>
@@ -7450,7 +7469,9 @@ for the overloads in namespace
 <em>Complexity</em>: Let <code class="sourceCode cpp"><em>N</em> <span class="op">=</span> last <span class="op">-</span> first</code>:</p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(8.1)</a></span> For
-the overload with no <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>execution policy</ins></span>,
+the <span class="add" style="color: #006e28"><ins>non-parallel
+algorithm</ins></span> overload<span class="add" style="color: #006e28"><ins>s</ins></span> <span class="rm" style="color: #bf0303"><del>with no
+<span><code class="sourceCode default">ExecutionPolicy</code></span></del></span>,
 exactly <em><code class="sourceCode cpp">N</code></em> applications of
 the predicate and projection. At most <code class="sourceCode cpp"><em>N</em> <span class="op">/</span> <span class="dv">2</span></code>
 swaps if the type of <code class="sourceCode cpp">first</code> meets the
@@ -7461,7 +7482,9 @@ overloads in namespace <code class="sourceCode cpp">ranges</code>, and
 at most <em><code class="sourceCode cpp">N</code></em> swaps
 otherwise.</li>
 <li><span class="marginalizedparent"><a class="marginalized">(8.2)</a></span> For
-the overload with an <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>execution policy</ins></span>,
+the <span class="add" style="color: #006e28"><ins>parallel
+algorithm</ins></span> overload<span class="add" style="color: #006e28"><ins>s</ins></span> <span class="rm" style="color: #bf0303"><del>with an
+<span><code class="sourceCode default">ExecutionPolicy</code></span></del></span>,
 <code class="sourceCode cpp"><em>O</em><span class="op">(</span><em>N</em>log<em>N</em><span class="op">)</span></code>
 swaps and <code class="sourceCode cpp"><em>O</em><span class="op">(</span><em>N</em><span class="op">)</span></code>
 applications of the predicate.</li>
@@ -7531,7 +7554,9 @@ for the overloads in namespace
 <em>Complexity</em>: Let <code class="sourceCode cpp"><em>N</em> <span class="op">=</span> last <span class="op">-</span> first</code>:</p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(13.1)</a></span> For
-the overloads with no <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>execution policy</ins></span>,
+the <span class="add" style="color: #006e28"><ins>non-parallel
+algorithm</ins></span> overloads <span class="rm" style="color: #bf0303"><del>with no
+<span><code class="sourceCode default">ExecutionPolicy</code></span></del></span>,
 at most
 <code class="sourceCode cpp"><em>N</em>log<sub>2</sub><em>N</em></code>
 swaps, but only <code class="sourceCode cpp"><em>O</em><span class="op">(</span><em>N</em><span class="op">)</span></code>
@@ -7539,8 +7564,9 @@ swaps if there is enough extra memory. Exactly
 <em><code class="sourceCode cpp">N</code></em> applications of the
 predicate and projection.</li>
 <li><span class="marginalizedparent"><a class="marginalized">(13.2)</a></span> For
-the overload<span class="add" style="color: #006e28"><ins>s</ins></span>
-with an <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>execution policy</ins></span>,
+the <span class="add" style="color: #006e28"><ins>parallel
+algorithm</ins></span> overload<span class="add" style="color: #006e28"><ins>s</ins></span> <span class="rm" style="color: #bf0303"><del>with an
+<span><code class="sourceCode default">ExecutionPolicy</code></span></del></span>,
 <code class="sourceCode cpp"><em>O</em><span class="op">(</span><em>N</em>log<em>N</em><span class="op">)</span></code>
 swaps and <code class="sourceCode cpp"><em>O</em><span class="op">(</span><em>N</em><span class="op">)</span></code>
 applications of the predicate.</li>
@@ -7695,8 +7721,7 @@ and <code class="sourceCode cpp">o2</code> <span class="rm" style="color: #bf030
 <span><code class="sourceCode default">out_false</code></span></del></span><span class="add" style="color: #006e28"><ins>be the iterator past the last
 copied element in the output range
 <span><code class="sourceCode default">[out_false, last_false)</code></span></ins></span>.
-Returns <span class="draftnote" data-audience="&quot;LWG" style="color: #0000ff">[ Drafting note for &quot;LWG: It seems that “:” is
-missed at the end of the paragraph, right after “Returns”. ]</span></p>
+Returns<span class="add" style="color: #006e28"><ins>:</ins></span></p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(18.1)</a></span>
 <code class="sourceCode cpp"><span class="op">{</span>o1, o2<span class="op">}</span></code>
@@ -7813,10 +7838,10 @@ are sorted with respect to <code class="sourceCode cpp">comp</code> and
 range does not overlap with either of the original ranges.</p>
 <p><span class="marginalizedparent"><a class="marginalized">3</a></span>
 <em>Effects</em>: Copies <span class="rm" style="color: #bf0303"><del>all the elements of the two
-ranges</del></span><span class="add" style="color: #006e28"><ins>first
-<span><code class="sourceCode default"><em>K</em></code></span> elements
-of the range</ins></span> <code class="sourceCode cpp"><span class="op">[</span>first1, last1<span class="op">)</span></code>
-and <span class="add" style="color: #006e28"><ins>first
+ranges</del></span><span class="add" style="color: #006e28"><ins>the
+first <span><code class="sourceCode default"><em>K</em></code></span>
+elements of the range</ins></span> <code class="sourceCode cpp"><span class="op">[</span>first1, last1<span class="op">)</span></code>
+and <span class="add" style="color: #006e28"><ins>the first
 <span><code class="sourceCode default"><em>N</em> - <em>K</em></code></span>
 elements of the range</ins></span> <code class="sourceCode cpp"><span class="op">[</span>first2, last2<span class="op">)</span></code>
 into the range <code class="sourceCode cpp"><span class="op">[</span>result, <span class="rm" style="color: #bf0303"><del>result_last</del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">result + <em>N</em></code></span></ins></span><span class="op">)</span></code><span class="rm" style="color: #bf0303"><del>, where
@@ -7847,12 +7872,16 @@ for the overloads in namespace
 <em>Complexity</em>:</p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(5.1)</a></span> For
-the overloads with no <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>execution policy</ins></span>,
+the <span class="add" style="color: #006e28"><ins>non-parallel
+algorithm</ins></span> overloads <span class="rm" style="color: #bf0303"><del>with no
+<span><code class="sourceCode default">ExecutionPolicy</code></span></del></span>,
 at most
 <code class="sourceCode cpp"><em>N</em> − <span class="dv">1</span></code>
 comparisons and applications of each projection.</li>
 <li><span class="marginalizedparent"><a class="marginalized">(5.2)</a></span> For
-the overloads with an <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>execution policy</ins></span>,
+the <span class="add" style="color: #006e28"><ins>parallel
+algorithm</ins></span> overloads <span class="rm" style="color: #bf0303"><del>with an
+<span><code class="sourceCode default">ExecutionPolicy</code></span></del></span>,
 <code class="sourceCode cpp"><em>O</em><span class="op">(</span><em>N</em><span class="op">)</span></code>
 comparisons <span class="add" style="color: #006e28"><ins>and
 applications of each projection</ins></span>.</li>
@@ -7904,7 +7933,9 @@ overload in namespace <code class="sourceCode cpp">ranges</code>.</p>
 <em>Complexity</em>: Let <code class="sourceCode cpp"><em>N</em> <span class="op">=</span> last <span class="op">-</span> first</code>:</p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(11.1)</a></span> For
-the overloads with no <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">ExecutionPolicy</code></span></del></span><span class="add" style="color: #006e28"><ins>execution policy</ins></span>,
+the <span class="add" style="color: #006e28"><ins>non-parallel
+algorithm</ins></span> overloads <span class="rm" style="color: #bf0303"><del>with no
+<span><code class="sourceCode default">ExecutionPolicy</code></span></del></span>,
 and if enough additional memory is available, exactly
 <code class="sourceCode cpp"><em>N</em> − <span class="dv">1</span></code>
 comparisons.</li>
@@ -8085,6 +8116,12 @@ end of the constructed range. Returns</del></span></p>
 <li><span class="marginalizedparent"><a class="marginalized">(4.1)</a></span>
 <code class="sourceCode cpp">result_last</code> for the overloads in
 namespace <code class="sourceCode cpp">std</code>.</li>
+<li><span class="marginalizedparent"><a class="marginalized">(4.x)</a></span>
+<span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">{last1, last2, result + <em>N</em>}</code></span>,
+if
+<span><code class="sourceCode default">result_last - result &gt;= <em>N</em></code></span>
+is
+<span><code class="sourceCode default">true</code></span>.</ins></span></li>
 <li><span class="marginalizedparent"><a class="marginalized">(4.2)</a></span>
 <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">{last1, last2, result_last}</code></span></del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">{j1, j2, result + <em>N</em>}</code></span></ins></span>
 for the overloads in namespace
@@ -8093,12 +8130,11 @@ for the overloads in namespace
 <span><code class="sourceCode default">j2</code></span> point to
 positions past the last copied or skipped elements in
 <span><code class="sourceCode default">[first1, last1)</code></span> and
-<span><code class="sourceCode default">[first2, last2)</code></span>
-respectively if
-<span><code class="sourceCode default">result + <em>N</em> == result_last</code></span>,
-and <span><code class="sourceCode default">j1 == last1</code></span>,
-<span><code class="sourceCode default">j2 == last2</code></span>
-otherwise</ins></span>.</li>
+<span><code class="sourceCode default">[first2, last2)</code></span>,
+respectively, if
+<span><code class="sourceCode default">result + <em>N</em> == result_last</code></span>
+is
+<span><code class="sourceCode default">true</code></span></ins></span>.</li>
 </ul>
 <p><span class="marginalizedparent"><a class="marginalized">5</a></span>
 <em>Complexity</em>: At most <code class="sourceCode cpp"><span class="dv">2</span> <span class="op">*</span> <span class="op">((</span>last1 <span class="op">-</span> first1<span class="op">)</span> <span class="op">+</span> <span class="op">(</span>last2 <span class="op">-</span> first2<span class="op">))</span> <span class="op">-</span> <span class="dv">1</span></code>
@@ -8202,6 +8238,12 @@ end of the constructed range. Returns</del></span></p>
 <li><span class="marginalizedparent"><a class="marginalized">(4.1)</a></span>
 <code class="sourceCode cpp">result_last</code> for the overloads in
 namespace <code class="sourceCode cpp">std</code>.</li>
+<li><span class="marginalizedparent"><a class="marginalized">(4.x)</a></span>
+<span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">{last1, last2, result + <em>N</em>}</code></span>,
+if
+<span><code class="sourceCode default">result_last - result &gt;= <em>N</em></code></span>
+is
+<span><code class="sourceCode default">true</code></span>.</ins></span></li>
 <li><span class="marginalizedparent"><a class="marginalized">(4.2)</a></span>
 <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">{last1, last2, result_last}</code></span></del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">{j1, j2, result + <em>N</em>}</code></span></ins></span>
 for the overloads in namespace
@@ -8210,12 +8252,11 @@ for the overloads in namespace
 <span><code class="sourceCode default">j2</code></span> point to
 positions past the last copied or skipped elements in
 <span><code class="sourceCode default">[first1, last1)</code></span> and
-<span><code class="sourceCode default">[first2, last2)</code></span>
-respectively if
-<span><code class="sourceCode default">result + <em>N</em> == result_last</code></span>,
-and <span><code class="sourceCode default">j1 == last1</code></span>,
-<span><code class="sourceCode default">j2 == last2</code></span>
-otherwise</ins></span>.</li>
+<span><code class="sourceCode default">[first2, last2)</code></span>,
+respectively, if
+<span><code class="sourceCode default">result + <em>N</em> == result_last</code></span>
+is
+<span><code class="sourceCode default">true</code></span></ins></span>.</li>
 </ul>
 <p><span class="marginalizedparent"><a class="marginalized">5</a></span>
 <em>Complexity</em>: At most <code class="sourceCode cpp"><span class="dv">2</span> <span class="op">*</span> <span class="op">((</span>last1 <span class="op">-</span> first1<span class="op">)</span> <span class="op">+</span> <span class="op">(</span>last2 <span class="op">-</span> first2<span class="op">))</span> <span class="op">-</span> <span class="dv">1</span></code>
@@ -8321,6 +8362,12 @@ end of the constructed range. Returns</del></span></p>
 <li><span class="marginalizedparent"><a class="marginalized">(4.1)</a></span>
 <code class="sourceCode cpp">result_last</code> for the overloads in
 namespace <code class="sourceCode cpp">std</code>.</li>
+<li><span class="marginalizedparent"><a class="marginalized">(4.x)</a></span>
+<span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">{last1, result + <em>N</em>}</code></span>,
+if
+<span><code class="sourceCode default">result_last - result &gt;= <em>N</em></code></span>
+is
+<span><code class="sourceCode default">true</code></span>.</ins></span></li>
 <li><span class="marginalizedparent"><a class="marginalized">(4.2)</a></span>
 <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">{last1, result_last}</code></span></del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">{j1, result + <em>N</em>}</code></span></ins></span>
 for the overloads in namespace
@@ -8328,9 +8375,9 @@ for the overloads in namespace
 <span><code class="sourceCode default">j1</code></span> points to the
 position past the last copied or skipped element in
 <span><code class="sourceCode default">[first1, last1)</code></span> if
-<span><code class="sourceCode default">result + <em>N</em> == result_last</code></span>,
-and <span><code class="sourceCode default">j1 == last1</code></span>
-otherwise</ins></span>.</li>
+<span><code class="sourceCode default">result + <em>N</em> == result_last</code></span>
+is
+<span><code class="sourceCode default">true</code></span></ins></span>.</li>
 </ul>
 <p><span class="marginalizedparent"><a class="marginalized">5</a></span>
 <em>Complexity</em>: At most <code class="sourceCode cpp"><span class="dv">2</span> <span class="op">*</span> <span class="op">((</span>last1 <span class="op">-</span> first1<span class="op">)</span> <span class="op">+</span> <span class="op">(</span>last2 <span class="op">-</span> first2<span class="op">))</span> <span class="op">-</span> <span class="dv">1</span></code>
@@ -8443,6 +8490,12 @@ end of the constructed range. Returns</del></span></p>
 <li><span class="marginalizedparent"><a class="marginalized">(4.1)</a></span>
 <code class="sourceCode cpp">result_last</code> for the overloads in
 namespace <code class="sourceCode cpp">std</code>.</li>
+<li><span class="marginalizedparent"><a class="marginalized">(4.x)</a></span>
+<span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">{last1, last2, result + <em>N</em>}</code></span>,
+if
+<span><code class="sourceCode default">result_last - result &gt;= <em>N</em></code></span>
+is
+<span><code class="sourceCode default">true</code></span>.</ins></span></li>
 <li><span class="marginalizedparent"><a class="marginalized">(4.2)</a></span>
 <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">{last1, last2, result_last}</code></span></del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">{j1, j2, result + <em>N</em>}</code></span></ins></span>
 for the overloads in namespace
@@ -8451,12 +8504,11 @@ for the overloads in namespace
 <span><code class="sourceCode default">j2</code></span> point to
 positions past the last copied or skipped elements in
 <span><code class="sourceCode default">[first1, last1)</code></span> and
-<span><code class="sourceCode default">[first2, last2)</code></span>
-respectively if
-<span><code class="sourceCode default">result + <em>N</em> == result_last</code></span>,
-and <span><code class="sourceCode default">j1 == last1</code></span>,
-<span><code class="sourceCode default">j2 == last2</code></span>
-otherwise</ins></span>.</li>
+<span><code class="sourceCode default">[first2, last2)</code></span>,
+respectively, if
+<span><code class="sourceCode default">result + <em>N</em> == result_last</code></span>
+is
+<span><code class="sourceCode default">true</code></span></ins></span>.</li>
 </ul>
 <p><span class="marginalizedparent"><a class="marginalized">5</a></span>
 <em>Complexity</em>: At most <code class="sourceCode cpp"><span class="dv">2</span> <span class="op">*</span> <span class="op">((</span>last1 <span class="op">-</span> first1<span class="op">)</span> <span class="op">+</span> <span class="op">(</span>last2 <span class="op">-</span> first2<span class="op">))</span> <span class="op">-</span> <span class="dv">1</span></code>
@@ -9572,7 +9624,7 @@ SA
 0
 </tr>
 </table>
-<h1 data-number="11" id="acknoledgements"><span class="header-section-number">11</span> Acknowledgments<a href="#acknoledgements" class="self-link"></a></h1>
+<h1 data-number="11" id="acknowledgements"><span class="header-section-number">11</span> Acknowledgments<a href="#acknowledgements" class="self-link"></a></h1>
 <ul>
 <li>Thanks to Jonathan Muller for the wording review and providing
 useful feedback.</li>
