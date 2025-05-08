@@ -8863,9 +8863,9 @@ be changed? ]</span></p>
 <div class="sourceCode" id="cb207"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb207-1"><a href="#cb207-1" aria-hidden="true" tabindex="-1"></a><em>// [specialized.algorithms], specialized algorithms</em></span>
 <span id="cb207-2"><a href="#cb207-2" aria-hidden="true" tabindex="-1"></a><em>// [special.mem.concepts], special memory concepts</em></span>
 <span id="cb207-3"><a href="#cb207-3" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> I<span class="op">&gt;</span></span>
-<span id="cb207-4"><a href="#cb207-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">concept</span> <em>nothrow-input-iterator</em> <span class="op">=</span> <em>see below</em>;       <em><code class="sourceCode cpp"><span class="co">// exposition only</span></code></em></span>
+<span id="cb207-4"><a href="#cb207-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">concept</span> <em>nothrow-input-iterator</em> <span class="op">=</span> <em>see below</em>;       <em>// exposition only</em></span>
 <span id="cb207-5"><a href="#cb207-5" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> I<span class="op">&gt;</span></span>
-<span id="cb207-6"><a href="#cb207-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">concept</span> <em>nothrow-forward-iterator</em> <span class="op">=</span> <em>see below</em>;     <em><code class="sourceCode cpp"><span class="co">// exposition only</span></code></em></span></code></pre></div>
+<span id="cb207-6"><a href="#cb207-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">concept</span> <em>nothrow-forward-iterator</em> <span class="op">=</span> <em>see below</em>;     <em>// exposition only</em></span></code></pre></div>
 <div class="add" style="color: #006e28">
 
 <div class="sourceCode" id="cb208"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb208-1"><a href="#cb208-1" aria-hidden="true" tabindex="-1"></a>template&lt;class I&gt;</span>
@@ -8875,7 +8875,7 @@ be changed? ]</span></p>
 
 </div>
 <div class="sourceCode" id="cb209"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb209-1"><a href="#cb209-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> S, <span class="kw">class</span> I<span class="op">&gt;</span></span>
-<span id="cb209-2"><a href="#cb209-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">concept</span> <em>nothrow-sentinel-for</em> <span class="op">=</span> <em>see below</em>;         <em><code class="sourceCode cpp"><span class="co">// exposition only</span></code></em></span></code></pre></div>
+<span id="cb209-2"><a href="#cb209-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">concept</span> <em>nothrow-sentinel-for</em> <span class="op">=</span> <em>see below</em>;         <em>// exposition only</em></span></code></pre></div>
 <div class="add" style="color: #006e28">
 
 <div class="sourceCode" id="cb210"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb210-1"><a href="#cb210-1" aria-hidden="true" tabindex="-1"></a>template&lt;class S, class I&gt;</span>
@@ -8883,9 +8883,9 @@ be changed? ]</span></p>
 
 </div>
 <div class="sourceCode" id="cb211"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb211-1"><a href="#cb211-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> R<span class="op">&gt;</span></span>
-<span id="cb211-2"><a href="#cb211-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">concept</span> <em>nothrow-input-range</em> <span class="op">=</span> <em>see below</em>;          <em><code class="sourceCode cpp"><span class="co">// exposition only</span></code></em></span>
+<span id="cb211-2"><a href="#cb211-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">concept</span> <em>nothrow-input-range</em> <span class="op">=</span> <em>see below</em>;          <em>// exposition only</em></span>
 <span id="cb211-3"><a href="#cb211-3" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> R<span class="op">&gt;</span></span>
-<span id="cb211-4"><a href="#cb211-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">concept</span> <em>nothrow-forward-range</em> <span class="op">=</span> <em>see below</em>;        <em><code class="sourceCode cpp"><span class="co">// exposition only</span></code></em></span></code></pre></div>
+<span id="cb211-4"><a href="#cb211-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">concept</span> <em>nothrow-forward-range</em> <span class="op">=</span> <em>see below</em>;        <em>// exposition only</em></span></code></pre></div>
 <div class="add" style="color: #006e28">
 
 <div class="sourceCode" id="cb212"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb212-1"><a href="#cb212-1" aria-hidden="true" tabindex="-1"></a>template&lt;class I&gt;</span>
@@ -8896,183 +8896,204 @@ be changed? ]</span></p>
 <span id="cb212-6"><a href="#cb212-6" aria-hidden="true" tabindex="-1"></a>  concept <em>nothrow-sized-random-access-range</em> = <em>see below</em>;     <em>// exposition only</em></span></code></pre></div>
 
 </div>
-<div class="sourceCode" id="cb213"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb213-1"><a href="#cb213-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><em>nothrow-forward-iterator</em> I, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>I<span class="op">&gt;</span> S<span class="op">&gt;</span></span>
-<span id="cb213-2"><a href="#cb213-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> default_initializable<span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>I<span class="op">&gt;&gt;</span></span>
-<span id="cb213-3"><a href="#cb213-3" aria-hidden="true" tabindex="-1"></a>    I uninitialized_default_construct<span class="op">(</span>I first, S last<span class="op">)</span>;                         <span class="co">// <em>freestanding</em></span></span>
-<span id="cb213-4"><a href="#cb213-4" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><em>nothrow-forward-range</em> R<span class="op">&gt;</span></span>
-<span id="cb213-5"><a href="#cb213-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> default_initializable<span class="op">&lt;</span>range_value_t<span class="op">&lt;</span>R<span class="op">&gt;&gt;</span></span>
-<span id="cb213-6"><a href="#cb213-6" aria-hidden="true" tabindex="-1"></a>    borrowed_iterator_t<span class="op">&lt;</span>R<span class="op">&gt;</span> uninitialized_default_construct<span class="op">(</span>R<span class="op">&amp;&amp;</span> r<span class="op">)</span>;              <span class="co">// <em>freestanding</em></span></span>
-<span id="cb213-7"><a href="#cb213-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb213-8"><a href="#cb213-8" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><em>nothrow-forward-iterator</em> I<span class="op">&gt;</span></span>
-<span id="cb213-9"><a href="#cb213-9" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> default_initializable<span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>I<span class="op">&gt;&gt;</span></span>
-<span id="cb213-10"><a href="#cb213-10" aria-hidden="true" tabindex="-1"></a>    I uninitialized_default_construct_n<span class="op">(</span>I first, iter_difference_t<span class="op">&lt;</span>I<span class="op">&gt;</span> n<span class="op">)</span>;       <span class="co">// <em>freestanding</em></span></span></code></pre></div>
-<div class="add" style="color: #006e28">
-
-<div class="sourceCode" id="cb214"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb214-1"><a href="#cb214-1" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, <em>nothrow-random-access-iterator</em> I, <em>nothrow-sized-sentinel-for</em>&lt;I&gt; S&gt;</span>
-<span id="cb214-2"><a href="#cb214-2" aria-hidden="true" tabindex="-1"></a>  requires default_initializable&lt;iter_value_t&lt;I&gt;&gt;</span>
-<span id="cb214-3"><a href="#cb214-3" aria-hidden="true" tabindex="-1"></a>  I uninitialized_default_construct(Ep&amp;&amp; exec, I first, S last); <em>// see [algorithms.parallel.overloads]</em></span>
-<span id="cb214-4"><a href="#cb214-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb214-5"><a href="#cb214-5" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, <em>nothrow-sized-random-access-range</em> R&gt;</span>
-<span id="cb214-6"><a href="#cb214-6" aria-hidden="true" tabindex="-1"></a>  requires default_initializable&lt;range_value_t&lt;R&gt;&gt;</span>
-<span id="cb214-7"><a href="#cb214-7" aria-hidden="true" tabindex="-1"></a>  borrowed_iterator_t&lt;R&gt; uninitialized_default_construct(Ep&amp;&amp; exec, R&amp;&amp; r); <em>// see [algorithms.parallel.overloads]</em></span>
-<span id="cb214-8"><a href="#cb214-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb214-9"><a href="#cb214-9" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, <em>nothrow-random-access-iterator</em> I&gt;</span>
-<span id="cb214-10"><a href="#cb214-10" aria-hidden="true" tabindex="-1"></a>  requires default_initializable&lt;iter_value_t&lt;I&gt;&gt;</span>
-<span id="cb214-11"><a href="#cb214-11" aria-hidden="true" tabindex="-1"></a>  I uninitialized_default_construct_n(Ep&amp;&amp; exec, I first, iter_difference_t&lt;I&gt; n); <em>// see [algorithms.parallel.overloads]</em></span></code></pre></div>
-
-</div>
-<div class="sourceCode" id="cb215"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb215-1"><a href="#cb215-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><em>nothrow-forward-iterator</em> I, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>I<span class="op">&gt;</span> S<span class="op">&gt;</span></span>
-<span id="cb215-2"><a href="#cb215-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> default_initializable<span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>I<span class="op">&gt;&gt;</span></span>
-<span id="cb215-3"><a href="#cb215-3" aria-hidden="true" tabindex="-1"></a>    I uninitialized_value_construct<span class="op">(</span>I first, S last<span class="op">)</span>;                           <em>// freestanding</em></span>
-<span id="cb215-4"><a href="#cb215-4" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><em>nothrow-forward-range</em> R<span class="op">&gt;</span></span>
-<span id="cb215-5"><a href="#cb215-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> default_initializable<span class="op">&lt;</span>range_value_t<span class="op">&lt;</span>R<span class="op">&gt;&gt;</span></span>
-<span id="cb215-6"><a href="#cb215-6" aria-hidden="true" tabindex="-1"></a>    borrowed_iterator_t<span class="op">&lt;</span>R<span class="op">&gt;</span> uninitialized_value_construct<span class="op">(</span>R<span class="op">&amp;&amp;</span> r<span class="op">)</span>;                <em>// freestanding</em></span>
-<span id="cb215-7"><a href="#cb215-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb215-8"><a href="#cb215-8" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><em>nothrow-forward-iterator</em> I<span class="op">&gt;</span></span>
-<span id="cb215-9"><a href="#cb215-9" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> default_initializable<span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>I<span class="op">&gt;&gt;</span></span>
-<span id="cb215-10"><a href="#cb215-10" aria-hidden="true" tabindex="-1"></a>    I uninitialized_value_construct_n<span class="op">(</span>I first, iter_difference_t<span class="op">&lt;</span>I<span class="op">&gt;</span> n<span class="op">)</span>;         <em>// freestanding</em></span></code></pre></div>
-<div class="add" style="color: #006e28">
-
-<div class="sourceCode" id="cb216"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb216-1"><a href="#cb216-1" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, <em>nothrow-random-access-iterator</em> I, <em>nothrow-sized-sentinel-for&lt;</em>I&gt; S&gt;</span>
-<span id="cb216-2"><a href="#cb216-2" aria-hidden="true" tabindex="-1"></a>  requires default_initializable&lt;iter_value_t&lt;I&gt;&gt;</span>
-<span id="cb216-3"><a href="#cb216-3" aria-hidden="true" tabindex="-1"></a>  I uninitialized_value_construct(Ep&amp;&amp; exec, I first, S last); <em>// see [algorithms.parallel.overloads]</em></span>
-<span id="cb216-4"><a href="#cb216-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb216-5"><a href="#cb216-5" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, <em>nothrow-sized-random-access-range</em> R&gt;</span>
-<span id="cb216-6"><a href="#cb216-6" aria-hidden="true" tabindex="-1"></a>  requires default_initializable&lt;range_value_t&lt;R&gt;&gt;</span>
-<span id="cb216-7"><a href="#cb216-7" aria-hidden="true" tabindex="-1"></a>  borrowed_iterator_t&lt;R&gt; uninitialized_value_construct(Ep&amp;&amp; exec, R&amp;&amp; r); <em>// see [algorithms.parallel.overloads]</em></span>
-<span id="cb216-8"><a href="#cb216-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb216-9"><a href="#cb216-9" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, <em>nothrow-random-access-iterator</em> I&gt;</span>
-<span id="cb216-10"><a href="#cb216-10" aria-hidden="true" tabindex="-1"></a>  requires default_initializable&lt;iter_value_t&lt;I&gt;&gt;</span>
-<span id="cb216-11"><a href="#cb216-11" aria-hidden="true" tabindex="-1"></a>  I uninitialized_value_construct_n(Ep&amp;&amp; exec, I first, iter_difference_t&lt;I&gt; n); <em>// see [algorithms.parallel.overloads]</em></span></code></pre></div>
-
-</div>
-<div class="sourceCode" id="cb217"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb217-1"><a href="#cb217-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>input_iterator I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S1,</span>
-<span id="cb217-2"><a href="#cb217-2" aria-hidden="true" tabindex="-1"></a>          <em>nothrow-forward-iterator</em> O, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>O<span class="op">&gt;</span> S2<span class="op">&gt;</span></span>
-<span id="cb217-3"><a href="#cb217-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> constructible_from<span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>O<span class="op">&gt;</span>, iter_reference_t<span class="op">&lt;</span>I<span class="op">&gt;&gt;</span></span>
-<span id="cb217-4"><a href="#cb217-4" aria-hidden="true" tabindex="-1"></a>    uninitialized_copy_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
-<span id="cb217-5"><a href="#cb217-5" aria-hidden="true" tabindex="-1"></a>      uninitialized_copy<span class="op">(</span>I ifirst, S1 ilast, O ofirst, S2 olast<span class="op">)</span>;               <em>// freestanding</em></span>
-<span id="cb217-6"><a href="#cb217-6" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>input_range IR, <em>nothrow-forward-range</em> OR<span class="op">&gt;</span></span>
-<span id="cb217-7"><a href="#cb217-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> constructible_from<span class="op">&lt;</span>range_value_t<span class="op">&lt;</span>OR<span class="op">&gt;</span>, range_reference_t<span class="op">&lt;</span>IR<span class="op">&gt;&gt;</span></span>
-<span id="cb217-8"><a href="#cb217-8" aria-hidden="true" tabindex="-1"></a>    uninitialized_copy_result<span class="op">&lt;</span>borrowed_iterator_t<span class="op">&lt;</span>IR<span class="op">&gt;</span>, borrowed_iterator_t<span class="op">&lt;</span>OR<span class="op">&gt;&gt;</span></span>
-<span id="cb217-9"><a href="#cb217-9" aria-hidden="true" tabindex="-1"></a>      uninitialized_copy<span class="op">(</span>IR<span class="op">&amp;&amp;</span> in_range, OR<span class="op">&amp;&amp;</span> out_range<span class="op">)</span>;                        <em>// freestanding</em></span>
-<span id="cb217-10"><a href="#cb217-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb217-11"><a href="#cb217-11" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> I, <span class="kw">class</span> O<span class="op">&gt;</span></span>
-<span id="cb217-12"><a href="#cb217-12" aria-hidden="true" tabindex="-1"></a>  <span class="kw">using</span> uninitialized_copy_n_result <span class="op">=</span> in_out_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span>;                      <em>// freestanding</em></span>
-<span id="cb217-13"><a href="#cb217-13" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>input_iterator I, <em>nothrow-forward-iterator</em> O, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>O<span class="op">&gt;</span> S<span class="op">&gt;</span></span>
-<span id="cb217-14"><a href="#cb217-14" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> constructible_from<span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>O<span class="op">&gt;</span>, iter_reference_t<span class="op">&lt;</span>I<span class="op">&gt;&gt;</span></span>
-<span id="cb217-15"><a href="#cb217-15" aria-hidden="true" tabindex="-1"></a>    uninitialized_copy_n_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
-<span id="cb217-16"><a href="#cb217-16" aria-hidden="true" tabindex="-1"></a>      uninitialized_copy_n<span class="op">(</span>I ifirst, iter_difference_t<span class="op">&lt;</span>I<span class="op">&gt;</span> n,                    <em>// freestanding</em></span>
-<span id="cb217-17"><a href="#cb217-17" aria-hidden="true" tabindex="-1"></a>                           O ofirst, S olast<span class="op">)</span>;</span></code></pre></div>
-<div class="add" style="color: #006e28">
-
-<div class="sourceCode" id="cb218"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb218-1"><a href="#cb218-1" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, random_access_iterator I, sized_sentinel_for&lt;I&gt; S1,</span>
-<span id="cb218-2"><a href="#cb218-2" aria-hidden="true" tabindex="-1"></a>         <em>nothrow-random-access-iterator</em> O, <em>nothrow-sized-sentinel-for</em>&lt;O&gt; S2&gt;</span>
-<span id="cb218-3"><a href="#cb218-3" aria-hidden="true" tabindex="-1"></a>  requires constructible_from&lt;iter_value_t&lt;O&gt;, iter_reference_t&lt;I&gt;&gt;</span>
-<span id="cb218-4"><a href="#cb218-4" aria-hidden="true" tabindex="-1"></a>    uninitialized_copy_result&lt;I, O&gt;</span>
-<span id="cb218-5"><a href="#cb218-5" aria-hidden="true" tabindex="-1"></a>      uninitialized_copy(Ep&amp;&amp; exec, I ifirst, S1 ilast, O ofirst, S2 olast); <em>// see [algorithms.parallel.overloads]</em></span>
-<span id="cb218-6"><a href="#cb218-6" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, <em>sized-random-access-range</em> IR, <em>nothrow-sized-random-access-range</em> OR&gt;</span>
-<span id="cb218-7"><a href="#cb218-7" aria-hidden="true" tabindex="-1"></a>  requires constructible_from&lt;range_value_t&lt;OR&gt;, range_reference_t&lt;IR&gt;&gt;</span>
-<span id="cb218-8"><a href="#cb218-8" aria-hidden="true" tabindex="-1"></a>    uninitialized_copy_result&lt;borrowed_iterator_t&lt;IR&gt;, borrowed_iterator_t&lt;OR&gt;&gt;</span>
-<span id="cb218-9"><a href="#cb218-9" aria-hidden="true" tabindex="-1"></a>      uninitialized_copy(Ep&amp;&amp; exec, IR&amp;&amp; in_range, OR&amp;&amp; out_range); <em>// see [algorithms.parallel.overloads]</em></span>
-<span id="cb218-10"><a href="#cb218-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb218-11"><a href="#cb218-11" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, random_access_iterator I, <em>nothrow-random-access-iterator</em> O,</span>
-<span id="cb218-12"><a href="#cb218-12" aria-hidden="true" tabindex="-1"></a>         <em>nothrow-sized-sentinel-for</em>&lt;O&gt; S&gt;</span>
-<span id="cb218-13"><a href="#cb218-13" aria-hidden="true" tabindex="-1"></a>  requires constructible_from&lt;iter_value_t&lt;O&gt;, iter_reference_t&lt;I&gt;&gt;</span>
-<span id="cb218-14"><a href="#cb218-14" aria-hidden="true" tabindex="-1"></a>    uninitialized_copy_n_result&lt;I, O&gt;</span>
-<span id="cb218-15"><a href="#cb218-15" aria-hidden="true" tabindex="-1"></a>      uninitialized_copy_n(Ep&amp;&amp; exec, I ifirst, iter_difference_t&lt;I&gt; n, <em>// see [algorithms.parallel.overloads]</em></span>
-<span id="cb218-16"><a href="#cb218-16" aria-hidden="true" tabindex="-1"></a>                           O ofirst, S olast);</span></code></pre></div>
-
-</div>
-<div class="sourceCode" id="cb219"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb219-1"><a href="#cb219-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>input_iterator I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S1,</span>
-<span id="cb219-2"><a href="#cb219-2" aria-hidden="true" tabindex="-1"></a>          <em>nothrow-forward-iterator</em> O, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>O<span class="op">&gt;</span> S2<span class="op">&gt;</span></span>
-<span id="cb219-3"><a href="#cb219-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> constructible_from<span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>O<span class="op">&gt;</span>, iter_rvalue_reference_t<span class="op">&lt;</span>I<span class="op">&gt;&gt;</span></span>
-<span id="cb219-4"><a href="#cb219-4" aria-hidden="true" tabindex="-1"></a>    uninitialized_move_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
-<span id="cb219-5"><a href="#cb219-5" aria-hidden="true" tabindex="-1"></a>      uninitialized_move<span class="op">(</span>I ifirst, S1 ilast, O ofirst, S2 olast<span class="op">)</span>;              <em>// freestanding</em></span>
-<span id="cb219-6"><a href="#cb219-6" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>input_range IR, <em>nothrow-forward-range</em> OR<span class="op">&gt;</span></span>
-<span id="cb219-7"><a href="#cb219-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> constructible_from<span class="op">&lt;</span>range_value_t<span class="op">&lt;</span>OR<span class="op">&gt;</span>, range_rvalue_reference_t<span class="op">&lt;</span>IR<span class="op">&gt;&gt;</span></span>
-<span id="cb219-8"><a href="#cb219-8" aria-hidden="true" tabindex="-1"></a>    uninitialized_move_result<span class="op">&lt;</span>borrowed_iterator_t<span class="op">&lt;</span>IR<span class="op">&gt;</span>, borrowed_iterator_t<span class="op">&lt;</span>OR<span class="op">&gt;&gt;</span></span>
-<span id="cb219-9"><a href="#cb219-9" aria-hidden="true" tabindex="-1"></a>      uninitialized_move<span class="op">(</span>IR<span class="op">&amp;&amp;</span> in_range, OR<span class="op">&amp;&amp;</span> out_range<span class="op">)</span>;                       <em>// freestanding</em></span>
-<span id="cb219-10"><a href="#cb219-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb219-11"><a href="#cb219-11" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>input_iterator I,</span>
-<span id="cb219-12"><a href="#cb219-12" aria-hidden="true" tabindex="-1"></a>          <em>nothrow-forward-iterator</em> O, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>O<span class="op">&gt;</span> S<span class="op">&gt;</span></span>
-<span id="cb219-13"><a href="#cb219-13" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> constructible_from<span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>O<span class="op">&gt;</span>, iter_rvalue_reference_t<span class="op">&lt;</span>I<span class="op">&gt;&gt;</span></span>
-<span id="cb219-14"><a href="#cb219-14" aria-hidden="true" tabindex="-1"></a>    uninitialized_move_n_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
-<span id="cb219-15"><a href="#cb219-15" aria-hidden="true" tabindex="-1"></a>      uninitialized_move_n<span class="op">(</span>I ifirst, iter_difference_t<span class="op">&lt;</span>I<span class="op">&gt;</span> n,                <em>// freestanding</em></span>
-<span id="cb219-16"><a href="#cb219-16" aria-hidden="true" tabindex="-1"></a>                           O ofirst, S olast<span class="op">)</span>;</span></code></pre></div>
-<div class="add" style="color: #006e28">
-
-<div class="sourceCode" id="cb220"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb220-1"><a href="#cb220-1" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, random_access_iterator I, sized_sentinel_for&lt;I&gt; S1,</span>
-<span id="cb220-2"><a href="#cb220-2" aria-hidden="true" tabindex="-1"></a>         <em>nothrow-random-access-iterator</em> O, <em>nothrow-sized-sentinel-for</em>&lt;O&gt; S2&gt;</span>
-<span id="cb220-3"><a href="#cb220-3" aria-hidden="true" tabindex="-1"></a>  requires constructible_from&lt;iter_value_t&lt;O&gt;, iter_rvalue_reference_t&lt;I&gt;&gt;</span>
-<span id="cb220-4"><a href="#cb220-4" aria-hidden="true" tabindex="-1"></a>    uninitialized_move_result&lt;I, O&gt;</span>
-<span id="cb220-5"><a href="#cb220-5" aria-hidden="true" tabindex="-1"></a>      uninitialized_move(Ep&amp;&amp; exec, I ifirst, S1 ilast, O ofirst, S2 olast); <em>// see [algorithms.parallel.overloads]</em></span>
-<span id="cb220-6"><a href="#cb220-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb220-7"><a href="#cb220-7" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, <em>sized-random-access-range</em> IR, <em>nothrow-sized-random-access-range</em> OR&gt;</span>
-<span id="cb220-8"><a href="#cb220-8" aria-hidden="true" tabindex="-1"></a>  requires constructible_from&lt;range_value_t&lt;OR&gt;, range_rvalue_reference_t&lt;IR&gt;&gt;</span>
-<span id="cb220-9"><a href="#cb220-9" aria-hidden="true" tabindex="-1"></a>    uninitialized_move_result&lt;borrowed_iterator_t&lt;IR&gt;, borrowed_iterator_t&lt;OR&gt;&gt;</span>
-<span id="cb220-10"><a href="#cb220-10" aria-hidden="true" tabindex="-1"></a>      uninitialized_move(Ep&amp;&amp; exec, IR&amp;&amp; in_range, OR&amp;&amp; out_range);        <em>// see [algorithms.parallel.overloads]</em></span>
-<span id="cb220-11"><a href="#cb220-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb220-12"><a href="#cb220-12" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, random_access_iterator I,</span>
-<span id="cb220-13"><a href="#cb220-13" aria-hidden="true" tabindex="-1"></a>    <em>nothrow-random-access-iterator</em> O, <em>nothrow-sized-sentinel-for</em>&lt;O&gt; S&gt;</span>
-<span id="cb220-14"><a href="#cb220-14" aria-hidden="true" tabindex="-1"></a>  requires constructible_from&lt;iter_value_t&lt;O&gt;, iter_rvalue_reference_t&lt;I&gt;&gt;</span>
-<span id="cb220-15"><a href="#cb220-15" aria-hidden="true" tabindex="-1"></a>    uninitialized_move_n_result&lt;I, O&gt;</span>
-<span id="cb220-16"><a href="#cb220-16" aria-hidden="true" tabindex="-1"></a>      uninitialized_move_n(Ep&amp;&amp; exec, I ifirst, iter_difference_t&lt;I&gt; n, <em>// see [algorithms.parallel.overloads]</em></span>
-<span id="cb220-17"><a href="#cb220-17" aria-hidden="true" tabindex="-1"></a>                           O ofirst, S olast);</span></code></pre></div>
-
-</div>
-<div class="sourceCode" id="cb221"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb221-1"><a href="#cb221-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><em>nothrow-forward-iterator</em> I, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>I<span class="op">&gt;</span> S, <span class="kw">class</span> T<span class="op">&gt;</span></span>
-<span id="cb221-2"><a href="#cb221-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> constructible_from<span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>I<span class="op">&gt;</span>, <span class="kw">const</span> T<span class="op">&amp;&gt;</span></span>
-<span id="cb221-3"><a href="#cb221-3" aria-hidden="true" tabindex="-1"></a>    I uninitialized_fill<span class="op">(</span>I first, S last, <span class="kw">const</span> T<span class="op">&amp;</span> x<span class="op">)</span>;                          <em>// freestanding</em></span>
-<span id="cb221-4"><a href="#cb221-4" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><em>nothrow-forward-range</em> R, <span class="kw">class</span> T<span class="op">&gt;</span></span>
-<span id="cb221-5"><a href="#cb221-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> constructible_from<span class="op">&lt;</span>range_value_t<span class="op">&lt;</span>R<span class="op">&gt;</span>, <span class="kw">const</span> T<span class="op">&amp;&gt;</span></span>
-<span id="cb221-6"><a href="#cb221-6" aria-hidden="true" tabindex="-1"></a>    borrowed_iterator_t<span class="op">&lt;</span>R<span class="op">&gt;</span> uninitialized_fill<span class="op">(</span>R<span class="op">&amp;&amp;</span> r, <span class="kw">const</span> T<span class="op">&amp;</span> x<span class="op">)</span>;               <em>// freestanding</em></span>
-<span id="cb221-7"><a href="#cb221-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb221-8"><a href="#cb221-8" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><em>nothrow-forward-iterator</em> I, <span class="kw">class</span> T<span class="op">&gt;</span></span>
-<span id="cb221-9"><a href="#cb221-9" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> constructible_from<span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>I<span class="op">&gt;</span>, <span class="kw">const</span> T<span class="op">&amp;&gt;</span></span>
-<span id="cb221-10"><a href="#cb221-10" aria-hidden="true" tabindex="-1"></a>    I uninitialized_fill_n<span class="op">(</span>I first, iter_difference_t<span class="op">&lt;</span>I<span class="op">&gt;</span> n, <span class="kw">const</span> T<span class="op">&amp;</span> x<span class="op">)</span>;        <em>// freestanding</em></span></code></pre></div>
-<div class="add" style="color: #006e28">
-
-<div class="sourceCode" id="cb222"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb222-1"><a href="#cb222-1" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, <em>nothrow-random-access-iterator</em> I, <em>nothrow-sized-sentinel-for</em>&lt;I&gt; S, class T&gt;</span>
-<span id="cb222-2"><a href="#cb222-2" aria-hidden="true" tabindex="-1"></a>  requires constructible_from&lt;iter_value_t&lt;I&gt;, const T&amp;&gt;</span>
-<span id="cb222-3"><a href="#cb222-3" aria-hidden="true" tabindex="-1"></a>    I uninitialized_fill(Ep&amp;&amp; exec, I first, S last, const T&amp; x);                <em>// see [algorithms.parallel.overloads]</em></span>
-<span id="cb222-4"><a href="#cb222-4" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, <em>nothrow-sized-random-access-range</em> R, class T&gt;</span>
-<span id="cb222-5"><a href="#cb222-5" aria-hidden="true" tabindex="-1"></a>  requires constructible_from&lt;range_value_t&lt;R&gt;, const T&amp;&gt;</span>
-<span id="cb222-6"><a href="#cb222-6" aria-hidden="true" tabindex="-1"></a>    borrowed_iterator_t&lt;R&gt; uninitialized_fill(Ep&amp;&amp; exec, R&amp;&amp; r, const T&amp; x);     <em>// see [algorithms.parallel.overloads]</em></span>
-<span id="cb222-7"><a href="#cb222-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb222-8"><a href="#cb222-8" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, <em>nothrow-random-access-iterator</em> I, class T&gt;</span>
-<span id="cb222-9"><a href="#cb222-9" aria-hidden="true" tabindex="-1"></a>  requires constructible_from&lt;iter_value_t&lt;I&gt;, const T&amp;&gt;</span>
-<span id="cb222-10"><a href="#cb222-10" aria-hidden="true" tabindex="-1"></a>    I uninitialized_fill_n(Ep&amp;&amp; exec, I first, iter_difference_t&lt;I&gt; n, const T&amp; x); <em>// see [algorithms.parallel.overloads]</em></span></code></pre></div>
-
-</div>
-<div class="sourceCode" id="cb223"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb223-1"><a href="#cb223-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><em>nothrow-input-iterator</em> I, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>I<span class="op">&gt;</span> S<span class="op">&gt;</span></span>
-<span id="cb223-2"><a href="#cb223-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> destructible<span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>I<span class="op">&gt;&gt;</span></span>
-<span id="cb223-3"><a href="#cb223-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">constexpr</span> I destroy<span class="op">(</span>I first, S last<span class="op">)</span> <span class="kw">noexcept</span>;                              <em>// freestanding</em></span>
-<span id="cb223-4"><a href="#cb223-4" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><em>nothrow-input-range</em> R<span class="op">&gt;</span></span>
-<span id="cb223-5"><a href="#cb223-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> destructible<span class="op">&lt;</span>range_value_t<span class="op">&lt;</span>R<span class="op">&gt;&gt;</span></span>
-<span id="cb223-6"><a href="#cb223-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">constexpr</span> borrowed_iterator_t<span class="op">&lt;</span>R<span class="op">&gt;</span> destroy<span class="op">(</span>R<span class="op">&amp;&amp;</span> r<span class="op">)</span> <span class="kw">noexcept</span>;                   <em>// freestanding</em></span>
-<span id="cb223-7"><a href="#cb223-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb223-8"><a href="#cb223-8" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><em>nothrow-input-iterator</em> I<span class="op">&gt;</span></span>
-<span id="cb223-9"><a href="#cb223-9" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> destructible<span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>I<span class="op">&gt;&gt;</span></span>
-<span id="cb223-10"><a href="#cb223-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">constexpr</span> I destroy_n<span class="op">(</span>I first, iter_difference_t<span class="op">&lt;</span>I<span class="op">&gt;</span> n<span class="op">)</span> <span class="kw">noexcept</span>;            <em>// freestanding</em></span></code></pre></div>
-<div class="add" style="color: #006e28">
-
-<div class="sourceCode" id="cb224"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb224-1"><a href="#cb224-1" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, <em>nothrow-random-access-iterator</em> I, <em>nothrow-sized-sentinel-for</em>&lt;I&gt; S&gt;</span>
-<span id="cb224-2"><a href="#cb224-2" aria-hidden="true" tabindex="-1"></a>  requires destructible&lt;iter_value_t&lt;I&gt;&gt;</span>
-<span id="cb224-3"><a href="#cb224-3" aria-hidden="true" tabindex="-1"></a>    I destroy(Ep&amp;&amp; exec, I first, S last) noexcept;                           <em>// see [algorithms.parallel.overloads]</em></span>
-<span id="cb224-4"><a href="#cb224-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb224-5"><a href="#cb224-5" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, <em>nothrow-sized-random-access-range</em> R&gt;</span>
-<span id="cb224-6"><a href="#cb224-6" aria-hidden="true" tabindex="-1"></a>  requires destructible&lt;range_value_t&lt;R&gt;&gt;</span>
-<span id="cb224-7"><a href="#cb224-7" aria-hidden="true" tabindex="-1"></a>    borrowed_iterator_t&lt;R&gt; destroy(Ep&amp;&amp; exec, R&amp;&amp; r) noexcept;                <em>// see [algorithms.parallel.overloads]</em></span>
-<span id="cb224-8"><a href="#cb224-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb224-9"><a href="#cb224-9" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, <em>nothrow-random-access-iterator</em> I&gt;</span>
-<span id="cb224-10"><a href="#cb224-10" aria-hidden="true" tabindex="-1"></a>  requires destructible&lt;iter_value_t&lt;I&gt;&gt;</span>
-<span id="cb224-11"><a href="#cb224-11" aria-hidden="true" tabindex="-1"></a>    I destroy_n(Ep&amp;&amp; exec, I first, iter_difference_t&lt;I&gt; n) noexcept;         <em>// see [algorithms.parallel.overloads]</em></span></code></pre></div>
-
+<div>
+<div class="sourceCode" id="cb213"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb213-1"><a href="#cb213-1" aria-hidden="true" tabindex="-1"></a>namespace ranges {</span>
+<span id="cb213-2"><a href="#cb213-2" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>nothrow-forward-iterator</em> I, <em>nothrow-sentinel-for</em>&lt;I&gt; S&gt;</span>
+<span id="cb213-3"><a href="#cb213-3" aria-hidden="true" tabindex="-1"></a>    requires default_initializable&lt;iter_value_t&lt;I&gt;&gt;</span>
+<span id="cb213-4"><a href="#cb213-4" aria-hidden="true" tabindex="-1"></a>      I uninitialized_default_construct(I first, S last);                         <em>// freestanding</em></span>
+<span id="cb213-5"><a href="#cb213-5" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>nothrow-forward-range</em> R&gt;</span>
+<span id="cb213-6"><a href="#cb213-6" aria-hidden="true" tabindex="-1"></a>    requires default_initializable&lt;range_value_t&lt;R&gt;&gt;</span>
+<span id="cb213-7"><a href="#cb213-7" aria-hidden="true" tabindex="-1"></a>      borrowed_iterator_t&lt;R&gt; uninitialized_default_construct(R&amp;&amp; r);              <em>// freestanding</em></span>
+<span id="cb213-8"><a href="#cb213-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb213-9"><a href="#cb213-9" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>nothrow-forward-iterator</em> I&gt;</span>
+<span id="cb213-10"><a href="#cb213-10" aria-hidden="true" tabindex="-1"></a>    requires default_initializable&lt;iter_value_t&lt;I&gt;&gt;</span>
+<span id="cb213-11"><a href="#cb213-11" aria-hidden="true" tabindex="-1"></a>      I uninitialized_default_construct_n(I first, iter_difference_t&lt;I&gt; n);       <em>// freestanding</em></span>
+<span id="cb213-12"><a href="#cb213-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb213-13"><a href="#cb213-13" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, <em>nothrow-random-access-iterator</em> I, <em>nothrow-sized-sentinel-for</em>&lt;I&gt; S&gt;</span></span>
+<span id="cb213-14"><a href="#cb213-14" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires default_initializable&lt;iter_value_t&lt;I&gt;&gt;</span></span>
+<span id="cb213-15"><a href="#cb213-15" aria-hidden="true" tabindex="-1"></a><span class="va">+      I uninitialized_default_construct(Ep&amp;&amp; exec,        <em>// freestanding-deleted</em>,</span></span>
+<span id="cb213-16"><a href="#cb213-16" aria-hidden="true" tabindex="-1"></a><span class="va">+                                        I first, S last); <em>// see [algorithms.parallel.overloads]</em></span></span>
+<span id="cb213-17"><a href="#cb213-17" aria-hidden="true" tabindex="-1"></a><span class="va">+</span></span>
+<span id="cb213-18"><a href="#cb213-18" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, <em>nothrow-sized-random-access-range</em> R&gt;</span></span>
+<span id="cb213-19"><a href="#cb213-19" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires default_initializable&lt;range_value_t&lt;R&gt;&gt;</span></span>
+<span id="cb213-20"><a href="#cb213-20" aria-hidden="true" tabindex="-1"></a><span class="va">+      borrowed_iterator_t&lt;R&gt; uninitialized_default_construct(Ep&amp;&amp; exec, <em>// freestanding-deleted</em>,</span></span>
+<span id="cb213-21"><a href="#cb213-21" aria-hidden="true" tabindex="-1"></a><span class="va">+                                                             R&amp;&amp; r);    <em>// see [algorithms.parallel.overloads]</em></span></span>
+<span id="cb213-22"><a href="#cb213-22" aria-hidden="true" tabindex="-1"></a><span class="va">+</span></span>
+<span id="cb213-23"><a href="#cb213-23" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, <em>nothrow-random-access-iterator</em> I&gt;</span></span>
+<span id="cb213-24"><a href="#cb213-24" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires default_initializable&lt;iter_value_t&lt;I&gt;&gt;</span></span>
+<span id="cb213-25"><a href="#cb213-25" aria-hidden="true" tabindex="-1"></a><span class="va">+      I uninitialized_default_construct_n(Ep&amp;&amp; exec, I first,      <em>// freestanding-deleted</em>,</span></span>
+<span id="cb213-26"><a href="#cb213-26" aria-hidden="true" tabindex="-1"></a><span class="va">+                                          iter_difference_t&lt;I&gt; n); <em>// see [algorithms.parallel.overloads]</em></span></span>
+<span id="cb213-27"><a href="#cb213-27" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb213-28"><a href="#cb213-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb213-29"><a href="#cb213-29" aria-hidden="true" tabindex="-1"></a>namespace ranges {</span>
+<span id="cb213-30"><a href="#cb213-30" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>nothrow-forward-iterator</em> I, <em>nothrow-sentinel-for</em>&lt;I&gt; S&gt;</span>
+<span id="cb213-31"><a href="#cb213-31" aria-hidden="true" tabindex="-1"></a>    requires default_initializable&lt;iter_value_t&lt;I&gt;&gt;</span>
+<span id="cb213-32"><a href="#cb213-32" aria-hidden="true" tabindex="-1"></a>      I uninitialized_value_construct(I first, S last);                           <em>// freestanding</em></span>
+<span id="cb213-33"><a href="#cb213-33" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>nothrow-forward-range</em> R&gt;</span>
+<span id="cb213-34"><a href="#cb213-34" aria-hidden="true" tabindex="-1"></a>    requires default_initializable&lt;range_value_t&lt;R&gt;&gt;</span>
+<span id="cb213-35"><a href="#cb213-35" aria-hidden="true" tabindex="-1"></a>      borrowed_iterator_t&lt;R&gt; uninitialized_value_construct(R&amp;&amp; r);                <em>// freestanding</em></span>
+<span id="cb213-36"><a href="#cb213-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb213-37"><a href="#cb213-37" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>nothrow-forward-iterator</em> I&gt;</span>
+<span id="cb213-38"><a href="#cb213-38" aria-hidden="true" tabindex="-1"></a>    requires default_initializable&lt;iter_value_t&lt;I&gt;&gt;</span>
+<span id="cb213-39"><a href="#cb213-39" aria-hidden="true" tabindex="-1"></a>      I uninitialized_value_construct_n(I first, iter_difference_t&lt;I&gt; n);         <em>// freestanding</em></span>
+<span id="cb213-40"><a href="#cb213-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb213-41"><a href="#cb213-41" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, <em>nothrow-random-access-iterator</em> I, <em>nothrow-sized-sentinel-for&lt;</em>I&gt; S&gt;</span></span>
+<span id="cb213-42"><a href="#cb213-42" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires default_initializable&lt;iter_value_t&lt;I&gt;&gt;</span></span>
+<span id="cb213-43"><a href="#cb213-43" aria-hidden="true" tabindex="-1"></a><span class="va">+      I uninitialized_value_construct(Ep&amp;&amp; exec,                      <em>// freestanding-deleted</em>,</span></span>
+<span id="cb213-44"><a href="#cb213-44" aria-hidden="true" tabindex="-1"></a><span class="va">+                                      I first, S last);               <em>// see [algorithms.parallel.overloads]</em></span></span>
+<span id="cb213-45"><a href="#cb213-45" aria-hidden="true" tabindex="-1"></a><span class="va">+</span></span>
+<span id="cb213-46"><a href="#cb213-46" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, <em>nothrow-sized-random-access-range</em> R&gt;</span></span>
+<span id="cb213-47"><a href="#cb213-47" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires default_initializable&lt;range_value_t&lt;R&gt;&gt;</span></span>
+<span id="cb213-48"><a href="#cb213-48" aria-hidden="true" tabindex="-1"></a><span class="va">+      borrowed_iterator_t&lt;R&gt; uninitialized_value_construct(Ep&amp;&amp; exec, <em>// freestanding-deleted</em>,</span></span>
+<span id="cb213-49"><a href="#cb213-49" aria-hidden="true" tabindex="-1"></a><span class="va">+                                                           R&amp;&amp; r);    <em>// see [algorithms.parallel.overloads]</em></span></span>
+<span id="cb213-50"><a href="#cb213-50" aria-hidden="true" tabindex="-1"></a><span class="va">+</span></span>
+<span id="cb213-51"><a href="#cb213-51" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, <em>nothrow-random-access-iterator</em> I&gt;</span></span>
+<span id="cb213-52"><a href="#cb213-52" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires default_initializable&lt;iter_value_t&lt;I&gt;&gt;</span></span>
+<span id="cb213-53"><a href="#cb213-53" aria-hidden="true" tabindex="-1"></a><span class="va">+      I uninitialized_value_construct_n(Ep&amp;&amp; exec, I first,           <em>// freestanding-deleted</em>,</span></span>
+<span id="cb213-54"><a href="#cb213-54" aria-hidden="true" tabindex="-1"></a><span class="va">+                                        iter_difference_t&lt;I&gt; n);      <em>// see [algorithms.parallel.overloads]</em></span></span>
+<span id="cb213-55"><a href="#cb213-55" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb213-56"><a href="#cb213-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb213-57"><a href="#cb213-57" aria-hidden="true" tabindex="-1"></a>namespace ranges {</span>
+<span id="cb213-58"><a href="#cb213-58" aria-hidden="true" tabindex="-1"></a>  template&lt;class I, class O&gt;</span>
+<span id="cb213-59"><a href="#cb213-59" aria-hidden="true" tabindex="-1"></a>    using uninitialized_copy_result = in_out_result&lt;I, O&gt;;                        <em>// freestanding</em></span>
+<span id="cb213-60"><a href="#cb213-60" aria-hidden="true" tabindex="-1"></a>  template&lt;input_iterator I, sentinel_for&lt;I&gt; S1,</span>
+<span id="cb213-61"><a href="#cb213-61" aria-hidden="true" tabindex="-1"></a>           <em>nothrow-forward-iterator</em> O, <em>nothrow-sentinel-for</em>&lt;O&gt; S2&gt;</span>
+<span id="cb213-62"><a href="#cb213-62" aria-hidden="true" tabindex="-1"></a>    requires constructible_from&lt;iter_value_t&lt;O&gt;, iter_reference_t&lt;I&gt;&gt;</span>
+<span id="cb213-63"><a href="#cb213-63" aria-hidden="true" tabindex="-1"></a>      uninitialized_copy_result&lt;I, O&gt;</span>
+<span id="cb213-64"><a href="#cb213-64" aria-hidden="true" tabindex="-1"></a>        uninitialized_copy(I ifirst, S1 ilast, O ofirst, S2 olast);               <em>// freestanding</em></span>
+<span id="cb213-65"><a href="#cb213-65" aria-hidden="true" tabindex="-1"></a>  template&lt;input_range IR, <em>nothrow-forward-range</em> OR&gt;</span>
+<span id="cb213-66"><a href="#cb213-66" aria-hidden="true" tabindex="-1"></a>    requires constructible_from&lt;range_value_t&lt;OR&gt;, range_reference_t&lt;IR&gt;&gt;</span>
+<span id="cb213-67"><a href="#cb213-67" aria-hidden="true" tabindex="-1"></a>      uninitialized_copy_result&lt;borrowed_iterator_t&lt;IR&gt;, borrowed_iterator_t&lt;OR&gt;&gt;</span>
+<span id="cb213-68"><a href="#cb213-68" aria-hidden="true" tabindex="-1"></a>        uninitialized_copy(IR&amp;&amp; in_range, OR&amp;&amp; out_range);                        <em>// freestanding</em></span>
+<span id="cb213-69"><a href="#cb213-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb213-70"><a href="#cb213-70" aria-hidden="true" tabindex="-1"></a>  template&lt;class I, class O&gt;</span>
+<span id="cb213-71"><a href="#cb213-71" aria-hidden="true" tabindex="-1"></a>    using uninitialized_copy_n_result = in_out_result&lt;I, O&gt;;                      <em>// freestanding</em></span>
+<span id="cb213-72"><a href="#cb213-72" aria-hidden="true" tabindex="-1"></a>  template&lt;input_iterator I, <em>nothrow-forward-iterator</em> O, <em>nothrow-sentinel-for</em>&lt;O&gt; S&gt;</span>
+<span id="cb213-73"><a href="#cb213-73" aria-hidden="true" tabindex="-1"></a>    requires constructible_from&lt;iter_value_t&lt;O&gt;, iter_reference_t&lt;I&gt;&gt;</span>
+<span id="cb213-74"><a href="#cb213-74" aria-hidden="true" tabindex="-1"></a>      uninitialized_copy_n_result&lt;I, O&gt;</span>
+<span id="cb213-75"><a href="#cb213-75" aria-hidden="true" tabindex="-1"></a>        uninitialized_copy_n(I ifirst, iter_difference_t&lt;I&gt; n,                    <em>// freestanding</em></span>
+<span id="cb213-76"><a href="#cb213-76" aria-hidden="true" tabindex="-1"></a>                             O ofirst, S olast);</span>
+<span id="cb213-77"><a href="#cb213-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb213-78"><a href="#cb213-78" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, random_access_iterator I, sized_sentinel_for&lt;I&gt; S1,</span></span>
+<span id="cb213-79"><a href="#cb213-79" aria-hidden="true" tabindex="-1"></a><span class="va">+           <em>nothrow-random-access-iterator</em> O, <em>nothrow-sized-sentinel-for</em>&lt;O&gt; S2&gt;</span></span>
+<span id="cb213-80"><a href="#cb213-80" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires constructible_from&lt;iter_value_t&lt;O&gt;, iter_reference_t&lt;I&gt;&gt;</span></span>
+<span id="cb213-81"><a href="#cb213-81" aria-hidden="true" tabindex="-1"></a><span class="va">+      uninitialized_copy_result&lt;I, O&gt;</span></span>
+<span id="cb213-82"><a href="#cb213-82" aria-hidden="true" tabindex="-1"></a><span class="va">+        uninitialized_copy(Ep&amp;&amp; exec, I ifirst, S1 ilast,       <em>// freestanding-deleted</em>,</span></span>
+<span id="cb213-83"><a href="#cb213-83" aria-hidden="true" tabindex="-1"></a><span class="va">+                           O ofirst, S2 olast);                 <em>// see [algorithms.parallel.overloads]</em></span></span>
+<span id="cb213-84"><a href="#cb213-84" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, <em>sized-random-access-range</em> IR, <em>nothrow-sized-random-access-range</em> OR&gt;</span></span>
+<span id="cb213-85"><a href="#cb213-85" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires constructible_from&lt;range_value_t&lt;OR&gt;, range_reference_t&lt;IR&gt;&gt;</span></span>
+<span id="cb213-86"><a href="#cb213-86" aria-hidden="true" tabindex="-1"></a><span class="va">+      uninitialized_copy_result&lt;borrowed_iterator_t&lt;IR&gt;, borrowed_iterator_t&lt;OR&gt;&gt;</span></span>
+<span id="cb213-87"><a href="#cb213-87" aria-hidden="true" tabindex="-1"></a><span class="va">+        uninitialized_copy(Ep&amp;&amp; exec, IR&amp;&amp; in_range,            <em>// freestanding-deleted</em>,</span></span>
+<span id="cb213-88"><a href="#cb213-88" aria-hidden="true" tabindex="-1"></a><span class="va">+                           OR&amp;&amp; out_range);                     <em>// see [algorithms.parallel.overloads]</em></span></span>
+<span id="cb213-89"><a href="#cb213-89" aria-hidden="true" tabindex="-1"></a><span class="va">+</span></span>
+<span id="cb213-90"><a href="#cb213-90" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, random_access_iterator I, <em>nothrow-random-access-iterator</em> O,</span></span>
+<span id="cb213-91"><a href="#cb213-91" aria-hidden="true" tabindex="-1"></a><span class="va">+          <em>nothrow-sized-sentinel-for</em>&lt;O&gt; S&gt;</span></span>
+<span id="cb213-92"><a href="#cb213-92" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires constructible_from&lt;iter_value_t&lt;O&gt;, iter_reference_t&lt;I&gt;&gt;</span></span>
+<span id="cb213-93"><a href="#cb213-93" aria-hidden="true" tabindex="-1"></a><span class="va">+      uninitialized_copy_n_result&lt;I, O&gt;</span></span>
+<span id="cb213-94"><a href="#cb213-94" aria-hidden="true" tabindex="-1"></a><span class="va">+        uninitialized_copy_n(Ep&amp;&amp; exec, I ifirst, iter_difference_t&lt;I&gt; n, <em>// freestanding-deleted</em>,</span></span>
+<span id="cb213-95"><a href="#cb213-95" aria-hidden="true" tabindex="-1"></a><span class="va">+                             O ofirst, S olast);                          <em>// see [algorithms.parallel.overloads]</em></span></span>
+<span id="cb213-96"><a href="#cb213-96" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb213-97"><a href="#cb213-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb213-98"><a href="#cb213-98" aria-hidden="true" tabindex="-1"></a>namespace ranges {</span>
+<span id="cb213-99"><a href="#cb213-99" aria-hidden="true" tabindex="-1"></a>  template&lt;class I, class O&gt;</span>
+<span id="cb213-100"><a href="#cb213-100" aria-hidden="true" tabindex="-1"></a>    using uninitialized_move_result = in_out_result&lt;I, O&gt;;                        <em>// freestanding</em></span>
+<span id="cb213-101"><a href="#cb213-101" aria-hidden="true" tabindex="-1"></a>  template&lt;input_iterator I, sentinel_for&lt;I&gt; S1,</span>
+<span id="cb213-102"><a href="#cb213-102" aria-hidden="true" tabindex="-1"></a>           <em>nothrow-forward-iterator</em> O, <em>nothrow-sentinel-for</em>&lt;O&gt; S2&gt;</span>
+<span id="cb213-103"><a href="#cb213-103" aria-hidden="true" tabindex="-1"></a>    requires constructible_from&lt;iter_value_t&lt;O&gt;, iter_rvalue_reference_t&lt;I&gt;&gt;</span>
+<span id="cb213-104"><a href="#cb213-104" aria-hidden="true" tabindex="-1"></a>      uninitialized_move_result&lt;I, O&gt;</span>
+<span id="cb213-105"><a href="#cb213-105" aria-hidden="true" tabindex="-1"></a>        uninitialized_move(I ifirst, S1 ilast, O ofirst, S2 olast);              <em>// freestanding</em></span>
+<span id="cb213-106"><a href="#cb213-106" aria-hidden="true" tabindex="-1"></a>  template&lt;input_range IR, <em>nothrow-forward-range</em> OR&gt;</span>
+<span id="cb213-107"><a href="#cb213-107" aria-hidden="true" tabindex="-1"></a>    requires constructible_from&lt;range_value_t&lt;OR&gt;, range_rvalue_reference_t&lt;IR&gt;&gt;</span>
+<span id="cb213-108"><a href="#cb213-108" aria-hidden="true" tabindex="-1"></a>      uninitialized_move_result&lt;borrowed_iterator_t&lt;IR&gt;, borrowed_iterator_t&lt;OR&gt;&gt;</span>
+<span id="cb213-109"><a href="#cb213-109" aria-hidden="true" tabindex="-1"></a>        uninitialized_move(IR&amp;&amp; in_range, OR&amp;&amp; out_range);                       <em>// freestanding</em></span>
+<span id="cb213-110"><a href="#cb213-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb213-111"><a href="#cb213-111" aria-hidden="true" tabindex="-1"></a>  template&lt;input_iterator I,</span>
+<span id="cb213-112"><a href="#cb213-112" aria-hidden="true" tabindex="-1"></a>            <em>nothrow-forward-iterator</em> O, <em>nothrow-sentinel-for</em>&lt;O&gt; S&gt;</span>
+<span id="cb213-113"><a href="#cb213-113" aria-hidden="true" tabindex="-1"></a>    requires constructible_from&lt;iter_value_t&lt;O&gt;, iter_rvalue_reference_t&lt;I&gt;&gt;</span>
+<span id="cb213-114"><a href="#cb213-114" aria-hidden="true" tabindex="-1"></a>      uninitialized_move_n_result&lt;I, O&gt;</span>
+<span id="cb213-115"><a href="#cb213-115" aria-hidden="true" tabindex="-1"></a>        uninitialized_move_n(I ifirst, iter_difference_t&lt;I&gt; n,                   <em>// freestanding</em></span>
+<span id="cb213-116"><a href="#cb213-116" aria-hidden="true" tabindex="-1"></a>                             O ofirst, S olast);</span>
+<span id="cb213-117"><a href="#cb213-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb213-118"><a href="#cb213-118" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, random_access_iterator I, sized_sentinel_for&lt;I&gt; S1,</span></span>
+<span id="cb213-119"><a href="#cb213-119" aria-hidden="true" tabindex="-1"></a><span class="va">+          <em>nothrow-random-access-iterator</em> O, <em>nothrow-sized-sentinel-for</em>&lt;O&gt; S2&gt;</span></span>
+<span id="cb213-120"><a href="#cb213-120" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires constructible_from&lt;iter_value_t&lt;O&gt;, iter_rvalue_reference_t&lt;I&gt;&gt;</span></span>
+<span id="cb213-121"><a href="#cb213-121" aria-hidden="true" tabindex="-1"></a><span class="va">+      uninitialized_move_result&lt;I, O&gt;</span></span>
+<span id="cb213-122"><a href="#cb213-122" aria-hidden="true" tabindex="-1"></a><span class="va">+        uninitialized_move(Ep&amp;&amp; exec, I ifirst, S1 ilast,  <em>// freestanding-deleted</em>,</span></span>
+<span id="cb213-123"><a href="#cb213-123" aria-hidden="true" tabindex="-1"></a><span class="va">+                           O ofirst, S2 olast);            <em>// see [algorithms.parallel.overloads]</em></span></span>
+<span id="cb213-124"><a href="#cb213-124" aria-hidden="true" tabindex="-1"></a><span class="va">+</span></span>
+<span id="cb213-125"><a href="#cb213-125" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, <em>sized-random-access-range</em> IR, <em>nothrow-sized-random-access-range</em> OR&gt;</span></span>
+<span id="cb213-126"><a href="#cb213-126" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires constructible_from&lt;range_value_t&lt;OR&gt;, range_rvalue_reference_t&lt;IR&gt;&gt;</span></span>
+<span id="cb213-127"><a href="#cb213-127" aria-hidden="true" tabindex="-1"></a><span class="va">+      uninitialized_move_result&lt;borrowed_iterator_t&lt;IR&gt;, borrowed_iterator_t&lt;OR&gt;&gt;</span></span>
+<span id="cb213-128"><a href="#cb213-128" aria-hidden="true" tabindex="-1"></a><span class="va">+        uninitialized_move(Ep&amp;&amp; exec, IR&amp;&amp; in_range,       <em>// freestanding-deleted</em>,</span></span>
+<span id="cb213-129"><a href="#cb213-129" aria-hidden="true" tabindex="-1"></a><span class="va">+                           OR&amp;&amp; out_range);                <em>// see [algorithms.parallel.overloads]</em></span></span>
+<span id="cb213-130"><a href="#cb213-130" aria-hidden="true" tabindex="-1"></a><span class="va">+</span></span>
+<span id="cb213-131"><a href="#cb213-131" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, random_access_iterator I,</span></span>
+<span id="cb213-132"><a href="#cb213-132" aria-hidden="true" tabindex="-1"></a><span class="va">+      <em>nothrow-random-access-iterator</em> O, <em>nothrow-sized-sentinel-for</em>&lt;O&gt; S&gt;</span></span>
+<span id="cb213-133"><a href="#cb213-133" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires constructible_from&lt;iter_value_t&lt;O&gt;, iter_rvalue_reference_t&lt;I&gt;&gt;</span></span>
+<span id="cb213-134"><a href="#cb213-134" aria-hidden="true" tabindex="-1"></a><span class="va">+      uninitialized_move_n_result&lt;I, O&gt;</span></span>
+<span id="cb213-135"><a href="#cb213-135" aria-hidden="true" tabindex="-1"></a><span class="va">+        uninitialized_move_n(Ep&amp;&amp; exec, I ifirst, iter_difference_t&lt;I&gt; n, <em>// freestanding-deleted</em>,</span></span>
+<span id="cb213-136"><a href="#cb213-136" aria-hidden="true" tabindex="-1"></a><span class="va">+                             O ofirst, S olast);                          <em>// see [algorithms.parallel.overloads]</em></span></span>
+<span id="cb213-137"><a href="#cb213-137" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb213-138"><a href="#cb213-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb213-139"><a href="#cb213-139" aria-hidden="true" tabindex="-1"></a>namespace ranges {</span>
+<span id="cb213-140"><a href="#cb213-140" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>nothrow-forward-iterator</em> I, <em>nothrow-sentinel-for</em>&lt;I&gt; S, class T&gt;</span>
+<span id="cb213-141"><a href="#cb213-141" aria-hidden="true" tabindex="-1"></a>    requires constructible_from&lt;iter_value_t&lt;I&gt;, const T&amp;&gt;</span>
+<span id="cb213-142"><a href="#cb213-142" aria-hidden="true" tabindex="-1"></a>      I uninitialized_fill(I first, S last, const T&amp; x);                          <em>// freestanding</em></span>
+<span id="cb213-143"><a href="#cb213-143" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>nothrow-forward-range</em> R, class T&gt;</span>
+<span id="cb213-144"><a href="#cb213-144" aria-hidden="true" tabindex="-1"></a>    requires constructible_from&lt;range_value_t&lt;R&gt;, const T&amp;&gt;</span>
+<span id="cb213-145"><a href="#cb213-145" aria-hidden="true" tabindex="-1"></a>      borrowed_iterator_t&lt;R&gt; uninitialized_fill(R&amp;&amp; r, const T&amp; x);               <em>// freestanding</em></span>
+<span id="cb213-146"><a href="#cb213-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb213-147"><a href="#cb213-147" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>nothrow-forward-iterator</em> I, class T&gt;</span>
+<span id="cb213-148"><a href="#cb213-148" aria-hidden="true" tabindex="-1"></a>    requires constructible_from&lt;iter_value_t&lt;I&gt;, const T&amp;&gt;</span>
+<span id="cb213-149"><a href="#cb213-149" aria-hidden="true" tabindex="-1"></a>      I uninitialized_fill_n(I first, iter_difference_t&lt;I&gt; n, const T&amp; x);        <em>// freestanding</em></span>
+<span id="cb213-150"><a href="#cb213-150" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb213-151"><a href="#cb213-151" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, <em>nothrow-random-access-iterator</em> I, <em>nothrow-sized-sentinel-for</em>&lt;I&gt; S, class T&gt;</span></span>
+<span id="cb213-152"><a href="#cb213-152" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires constructible_from&lt;iter_value_t&lt;I&gt;, const T&amp;&gt;</span></span>
+<span id="cb213-153"><a href="#cb213-153" aria-hidden="true" tabindex="-1"></a><span class="va">+      I uninitialized_fill(Ep&amp;&amp; exec, I first, S last,                      <em>// freestanding-deleted</em>,</span></span>
+<span id="cb213-154"><a href="#cb213-154" aria-hidden="true" tabindex="-1"></a><span class="va">+                           const T&amp; x);                                     <em>// see [algorithms.parallel.overloads]</em></span></span>
+<span id="cb213-155"><a href="#cb213-155" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, <em>nothrow-sized-random-access-range</em> R, class T&gt;</span></span>
+<span id="cb213-156"><a href="#cb213-156" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires constructible_from&lt;range_value_t&lt;R&gt;, const T&amp;&gt;</span></span>
+<span id="cb213-157"><a href="#cb213-157" aria-hidden="true" tabindex="-1"></a><span class="va">+      borrowed_iterator_t&lt;R&gt; uninitialized_fill(Ep&amp;&amp; exec, R&amp;&amp; r,           <em>// freestanding-deleted</em>,</span></span>
+<span id="cb213-158"><a href="#cb213-158" aria-hidden="true" tabindex="-1"></a><span class="va">+                                                const T&amp; x);                <em>// see [algorithms.parallel.overloads]</em></span></span>
+<span id="cb213-159"><a href="#cb213-159" aria-hidden="true" tabindex="-1"></a><span class="va">+</span></span>
+<span id="cb213-160"><a href="#cb213-160" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, <em>nothrow-random-access-iterator</em> I, class T&gt;</span></span>
+<span id="cb213-161"><a href="#cb213-161" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires constructible_from&lt;iter_value_t&lt;I&gt;, const T&amp;&gt;</span></span>
+<span id="cb213-162"><a href="#cb213-162" aria-hidden="true" tabindex="-1"></a><span class="va">+      I uninitialized_fill_n(Ep&amp;&amp; exec, I first,                            <em>// freestanding-deleted</em>,</span></span>
+<span id="cb213-163"><a href="#cb213-163" aria-hidden="true" tabindex="-1"></a><span class="va">+                             iter_difference_t&lt;I&gt; n, const T&amp; x);           <em>// see [algorithms.parallel.overloads]</em></span></span>
+<span id="cb213-164"><a href="#cb213-164" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb213-165"><a href="#cb213-165" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb213-166"><a href="#cb213-166" aria-hidden="true" tabindex="-1"></a>namespace ranges {</span>
+<span id="cb213-167"><a href="#cb213-167" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>nothrow-input-iterator</em> I, <em>nothrow-sentinel-for</em>&lt;I&gt; S&gt;</span>
+<span id="cb213-168"><a href="#cb213-168" aria-hidden="true" tabindex="-1"></a>    requires destructible&lt;iter_value_t&lt;I&gt;&gt;</span>
+<span id="cb213-169"><a href="#cb213-169" aria-hidden="true" tabindex="-1"></a>      constexpr I destroy(I first, S last) noexcept;                              <em>// freestanding</em></span>
+<span id="cb213-170"><a href="#cb213-170" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>nothrow-input-range</em> R&gt;</span>
+<span id="cb213-171"><a href="#cb213-171" aria-hidden="true" tabindex="-1"></a>    requires destructible&lt;range_value_t&lt;R&gt;&gt;</span>
+<span id="cb213-172"><a href="#cb213-172" aria-hidden="true" tabindex="-1"></a>      constexpr borrowed_iterator_t&lt;R&gt; destroy(R&amp;&amp; r) noexcept;                   <em>// freestanding</em></span>
+<span id="cb213-173"><a href="#cb213-173" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb213-174"><a href="#cb213-174" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>nothrow-input-iterator</em> I&gt;</span>
+<span id="cb213-175"><a href="#cb213-175" aria-hidden="true" tabindex="-1"></a>    requires destructible&lt;iter_value_t&lt;I&gt;&gt;</span>
+<span id="cb213-176"><a href="#cb213-176" aria-hidden="true" tabindex="-1"></a>      constexpr I destroy_n(I first, iter_difference_t&lt;I&gt; n) noexcept;            <em>// freestanding</em></span>
+<span id="cb213-177"><a href="#cb213-177" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb213-178"><a href="#cb213-178" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, <em>nothrow-random-access-iterator</em> I, <em>nothrow-sized-sentinel-for</em>&lt;I&gt; S&gt;</span></span>
+<span id="cb213-179"><a href="#cb213-179" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires destructible&lt;iter_value_t&lt;I&gt;&gt;</span></span>
+<span id="cb213-180"><a href="#cb213-180" aria-hidden="true" tabindex="-1"></a><span class="va">+      I destroy(Ep&amp;&amp; exec,                                           <em>// freestanding-deleted</em>,</span></span>
+<span id="cb213-181"><a href="#cb213-181" aria-hidden="true" tabindex="-1"></a><span class="va">+                I first, S last) noexcept;                           <em>// see [algorithms.parallel.overloads]</em></span></span>
+<span id="cb213-182"><a href="#cb213-182" aria-hidden="true" tabindex="-1"></a><span class="va">+</span></span>
+<span id="cb213-183"><a href="#cb213-183" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, <em>nothrow-sized-random-access-range</em> R&gt;</span></span>
+<span id="cb213-184"><a href="#cb213-184" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires destructible&lt;range_value_t&lt;R&gt;&gt;</span></span>
+<span id="cb213-185"><a href="#cb213-185" aria-hidden="true" tabindex="-1"></a><span class="va">+      borrowed_iterator_t&lt;R&gt; destroy(Ep&amp;&amp; exec,                      <em>// freestanding-deleted</em>,</span></span>
+<span id="cb213-186"><a href="#cb213-186" aria-hidden="true" tabindex="-1"></a><span class="va">+                                     R&amp;&amp; r) noexcept;                <em>// see [algorithms.parallel.overloads]</em></span></span>
+<span id="cb213-187"><a href="#cb213-187" aria-hidden="true" tabindex="-1"></a><span class="va">+</span></span>
+<span id="cb213-188"><a href="#cb213-188" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, <em>nothrow-random-access-iterator</em> I&gt;</span></span>
+<span id="cb213-189"><a href="#cb213-189" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires destructible&lt;iter_value_t&lt;I&gt;&gt;</span></span>
+<span id="cb213-190"><a href="#cb213-190" aria-hidden="true" tabindex="-1"></a><span class="va">+      I destroy_n(Ep&amp;&amp; exec, I first,                                <em>// freestanding-deleted</em>,</span></span>
+<span id="cb213-191"><a href="#cb213-191" aria-hidden="true" tabindex="-1"></a><span class="va">+                  iter_difference_t&lt;I&gt; n) noexcept;                  <em>// see [algorithms.parallel.overloads]</em></span></span>
+<span id="cb213-192"><a href="#cb213-192" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 <h2 data-number="8.56" id="modify_special_mem_concepts"><span class="header-section-number">8.56</span> Add exposition only concepts
 to <span><a href="https://wg21.link/special.mem.concepts">[special.mem.concepts]</a></span><a href="#modify_special_mem_concepts" class="self-link"></a></h2>
-<div class="sourceCode" id="cb225"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb225-1"><a href="#cb225-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> S, <span class="kw">class</span> I<span class="op">&gt;</span></span>
-<span id="cb225-2"><a href="#cb225-2" aria-hidden="true" tabindex="-1"></a><span class="kw">concept</span> <em>nothrow-sentinel-for</em> <span class="op">=</span> sentinel_for<span class="op">&lt;</span>S, I<span class="op">&gt;</span>; <em><code class="sourceCode cpp"><span class="co">// exposition only</span></code></em></span></code></pre></div>
+<div class="sourceCode" id="cb214"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb214-1"><a href="#cb214-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> S, <span class="kw">class</span> I<span class="op">&gt;</span></span>
+<span id="cb214-2"><a href="#cb214-2" aria-hidden="true" tabindex="-1"></a><span class="kw">concept</span> <em>nothrow-sentinel-for</em> <span class="op">=</span> sentinel_for<span class="op">&lt;</span>S, I<span class="op">&gt;</span>; <em>// exposition only</em></span></code></pre></div>
 <p>Types <code class="sourceCode cpp">S</code> and
 <code class="sourceCode cpp">I</code> model
 <code class="sourceCode cpp"><em>nothrow-sentinel-for</em></code> only
@@ -9086,10 +9107,10 @@ type <code class="sourceCode cpp">I</code> and
 note</em>]</p>
 <div class="add" style="color: #006e28">
 
-<div class="sourceCode" id="cb226"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb226-1"><a href="#cb226-1" aria-hidden="true" tabindex="-1"></a>template&lt;class S, class I&gt;</span>
-<span id="cb226-2"><a href="#cb226-2" aria-hidden="true" tabindex="-1"></a>concept <em>nothrow-sized-sentinel-for</em> = <em>// exposition only</em></span>
-<span id="cb226-3"><a href="#cb226-3" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-sentinel-for</em>&lt;S, I&gt; &amp;&amp;</span>
-<span id="cb226-4"><a href="#cb226-4" aria-hidden="true" tabindex="-1"></a>  sized_sentinel_for&lt;S, I&gt;;</span></code></pre></div>
+<div class="sourceCode" id="cb215"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb215-1"><a href="#cb215-1" aria-hidden="true" tabindex="-1"></a>template&lt;class S, class I&gt;</span>
+<span id="cb215-2"><a href="#cb215-2" aria-hidden="true" tabindex="-1"></a>concept <em>nothrow-sized-sentinel-for</em> = <em>// exposition only</em></span>
+<span id="cb215-3"><a href="#cb215-3" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-sentinel-for</em>&lt;S, I&gt; &amp;&amp;</span>
+<span id="cb215-4"><a href="#cb215-4" aria-hidden="true" tabindex="-1"></a>  sized_sentinel_for&lt;S, I&gt;;</span></code></pre></div>
 <p>Types <code class="sourceCode default">S</code> and
 <code class="sourceCode default">I</code> model
 <code class="sourceCode default"><em>nothrow-sized-sentinel-for</em></code>
@@ -9102,61 +9123,64 @@ type <code class="sourceCode default">I</code> and
 ([iterator.concept.sizedsentinel]) operations to throw exceptions. —
 <em>end note</em>]</p>
 </div>
-<div class="sourceCode" id="cb227"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb227-1"><a href="#cb227-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> I<span class="op">&gt;</span></span>
-<span id="cb227-2"><a href="#cb227-2" aria-hidden="true" tabindex="-1"></a><span class="kw">concept</span> <em>nothrow-forward-iterator</em> <span class="op">=</span> <em><code class="sourceCode cpp"><span class="co">// exposition only</span></code></em></span>
-<span id="cb227-3"><a href="#cb227-3" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-input-iterator</em><span class="op">&lt;</span>I<span class="op">&gt;</span> <span class="op">&amp;&amp;</span></span>
-<span id="cb227-4"><a href="#cb227-4" aria-hidden="true" tabindex="-1"></a>  forward_iterator<span class="op">&lt;</span>I<span class="op">&gt;</span> <span class="op">&amp;&amp;</span></span>
-<span id="cb227-5"><a href="#cb227-5" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-sentinel-for</em><span class="op">&lt;</span>I, I<span class="op">&gt;</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb216"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb216-1"><a href="#cb216-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> I<span class="op">&gt;</span></span>
+<span id="cb216-2"><a href="#cb216-2" aria-hidden="true" tabindex="-1"></a><span class="kw">concept</span> <em>nothrow-forward-iterator</em> <span class="op">=</span> <em>// exposition only</em></span>
+<span id="cb216-3"><a href="#cb216-3" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-input-iterator</em><span class="op">&lt;</span>I<span class="op">&gt;</span> <span class="op">&amp;&amp;</span></span>
+<span id="cb216-4"><a href="#cb216-4" aria-hidden="true" tabindex="-1"></a>  forward_iterator<span class="op">&lt;</span>I<span class="op">&gt;</span> <span class="op">&amp;&amp;</span></span>
+<span id="cb216-5"><a href="#cb216-5" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-sentinel-for</em><span class="op">&lt;</span>I, I<span class="op">&gt;</span>;</span></code></pre></div>
 <p>[<em>Note X</em>: This concept allows some
 <code class="sourceCode cpp">forward_iterator</code>
 ([iterator.concept.forward]) operations to throw exceptions. — <em>end
 note</em>]</p>
-<div class="sourceCode" id="cb228"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb228-1"><a href="#cb228-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> R<span class="op">&gt;</span></span>
-<span id="cb228-2"><a href="#cb228-2" aria-hidden="true" tabindex="-1"></a><span class="kw">concept</span> <em>nothrow-forward-range</em> <span class="op">=</span> <em><code class="sourceCode cpp"><span class="co">// exposition only</span></code></em></span>
-<span id="cb228-3"><a href="#cb228-3" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-input-range</em><span class="op">&lt;</span>R<span class="op">&gt;</span> <span class="op">&amp;&amp;</span></span>
-<span id="cb228-4"><a href="#cb228-4" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-forward-iterator</em><span class="op">&lt;</span>iterator_t<span class="op">&lt;</span>R<span class="op">&gt;&gt;</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb217"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb217-1"><a href="#cb217-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> R<span class="op">&gt;</span></span>
+<span id="cb217-2"><a href="#cb217-2" aria-hidden="true" tabindex="-1"></a><span class="kw">concept</span> <em>nothrow-forward-range</em> <span class="op">=</span> <em>// exposition only</em></span>
+<span id="cb217-3"><a href="#cb217-3" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-input-range</em><span class="op">&lt;</span>R<span class="op">&gt;</span> <span class="op">&amp;&amp;</span></span>
+<span id="cb217-4"><a href="#cb217-4" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-forward-iterator</em><span class="op">&lt;</span>iterator_t<span class="op">&lt;</span>R<span class="op">&gt;&gt;</span>;</span></code></pre></div>
 <div class="add" style="color: #006e28">
 
-<div class="sourceCode" id="cb229"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb229-1"><a href="#cb229-1" aria-hidden="true" tabindex="-1"></a>template&lt;class I&gt;</span>
-<span id="cb229-2"><a href="#cb229-2" aria-hidden="true" tabindex="-1"></a>concept <em>nothrow-bidirectional-iterator</em> = <em>// exposition only</em></span>
-<span id="cb229-3"><a href="#cb229-3" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-forward-iterator</em>&lt;I&gt; &amp;&amp;</span>
-<span id="cb229-4"><a href="#cb229-4" aria-hidden="true" tabindex="-1"></a>  bidirectional_iterator&lt;I&gt;;</span></code></pre></div>
+<div class="sourceCode" id="cb218"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb218-1"><a href="#cb218-1" aria-hidden="true" tabindex="-1"></a>template&lt;class I&gt;</span>
+<span id="cb218-2"><a href="#cb218-2" aria-hidden="true" tabindex="-1"></a>concept <em>nothrow-bidirectional-iterator</em> = <em>// exposition only</em></span>
+<span id="cb218-3"><a href="#cb218-3" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-forward-iterator</em>&lt;I&gt; &amp;&amp;</span>
+<span id="cb218-4"><a href="#cb218-4" aria-hidden="true" tabindex="-1"></a>  bidirectional_iterator&lt;I&gt;;</span></code></pre></div>
 <p>A type <code class="sourceCode default">I</code> models <code class="sourceCode default"><em>nothrow-bidirectional-iterator</em></code>
 only if no exceptions are thrown from decrementing valid iterators.</p>
 <p>[<em>Note X</em>: This concept allows some
 <code class="sourceCode default">bidirectional_iterator</code>
 ([iterator.concept.bidir]) operations to throw exceptions. — <em>end
 note</em>]</p>
-<div class="sourceCode" id="cb230"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb230-1"><a href="#cb230-1" aria-hidden="true" tabindex="-1"></a>template&lt;class R&gt;</span>
-<span id="cb230-2"><a href="#cb230-2" aria-hidden="true" tabindex="-1"></a>concept <em>nothrow-bidirectional-range</em> = <em>// exposition only</em></span>
-<span id="cb230-3"><a href="#cb230-3" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-forward-range</em>&lt;R&gt; &amp;&amp;</span>
-<span id="cb230-4"><a href="#cb230-4" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-bidirectional-iterator</em>&lt;iterator_t&lt;R&gt;&gt;;</span></code></pre></div>
-<div class="sourceCode" id="cb231"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb231-1"><a href="#cb231-1" aria-hidden="true" tabindex="-1"></a>template&lt;class I&gt;</span>
-<span id="cb231-2"><a href="#cb231-2" aria-hidden="true" tabindex="-1"></a>concept <em>nothrow-random-access-iterator</em> = <em>// exposition only</em></span>
-<span id="cb231-3"><a href="#cb231-3" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-bidirectional-iterator</em>&lt;I&gt; &amp;&amp;</span>
-<span id="cb231-4"><a href="#cb231-4" aria-hidden="true" tabindex="-1"></a>  random_access_iterator&lt;I&gt; &amp;&amp;</span>
-<span id="cb231-5"><a href="#cb231-5" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-sized-sentinel-for</em>&lt;I, I&gt;;</span></code></pre></div>
+<div class="sourceCode" id="cb219"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb219-1"><a href="#cb219-1" aria-hidden="true" tabindex="-1"></a>template&lt;class R&gt;</span>
+<span id="cb219-2"><a href="#cb219-2" aria-hidden="true" tabindex="-1"></a>concept <em>nothrow-bidirectional-range</em> = <em>// exposition only</em></span>
+<span id="cb219-3"><a href="#cb219-3" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-forward-range</em>&lt;R&gt; &amp;&amp;</span>
+<span id="cb219-4"><a href="#cb219-4" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-bidirectional-iterator</em>&lt;iterator_t&lt;R&gt;&gt;;</span></code></pre></div>
+<div class="sourceCode" id="cb220"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb220-1"><a href="#cb220-1" aria-hidden="true" tabindex="-1"></a>template&lt;class I&gt;</span>
+<span id="cb220-2"><a href="#cb220-2" aria-hidden="true" tabindex="-1"></a>concept <em>nothrow-random-access-iterator</em> = <em>// exposition only</em></span>
+<span id="cb220-3"><a href="#cb220-3" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-bidirectional-iterator</em>&lt;I&gt; &amp;&amp;</span>
+<span id="cb220-4"><a href="#cb220-4" aria-hidden="true" tabindex="-1"></a>  random_access_iterator&lt;I&gt; &amp;&amp;</span>
+<span id="cb220-5"><a href="#cb220-5" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-sized-sentinel-for</em>&lt;I, I&gt;;</span></code></pre></div>
 <p>A type <code class="sourceCode default">I</code> models <code class="sourceCode default"><em>nothrow-random-access-iterator</em></code>
-only if no exceptions are thrown from advancement with
-<code class="sourceCode default">+=</code>,
+only if no exceptions are thrown from comparisons of valid iterators, or
+the <code class="sourceCode default">-</code>,
 <code class="sourceCode default">+</code>,
-<code class="sourceCode default">-=</code>, and
-<code class="sourceCode default">-</code>, comparisons, or applying the
-<code class="sourceCode default">[]</code> subscript operator to valid
-iterators.</p>
+<code class="sourceCode default">-=</code>,
+<code class="sourceCode default">+=</code>,
+<code class="sourceCode default">[]</code> operators on valid values of
+type <code class="sourceCode default">I</code> and
+<code class="sourceCode default">iter_difference_t&lt;I&gt;</code>.</p>
 <p>[<em>Note X</em>: This concept allows some
 <code class="sourceCode default">random_access_iterator</code>
 ([iterator.concept.random.access]) operations to throw exceptions. —
 <em>end note</em>]</p>
-<div class="sourceCode" id="cb232"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb232-1"><a href="#cb232-1" aria-hidden="true" tabindex="-1"></a>template&lt;class R&gt;</span>
-<span id="cb232-2"><a href="#cb232-2" aria-hidden="true" tabindex="-1"></a>concept <em>nothrow-random-access-range</em> = <em>// exposition only</em></span>
-<span id="cb232-3"><a href="#cb232-3" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-bidirectional-range</em>&lt;R&gt; &amp;&amp;</span>
-<span id="cb232-4"><a href="#cb232-4" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-random-access-iterator</em>&lt;iterator_t&lt;R&gt;&gt;;</span>
-<span id="cb232-5"><a href="#cb232-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb232-6"><a href="#cb232-6" aria-hidden="true" tabindex="-1"></a>template&lt;class R&gt;</span>
-<span id="cb232-7"><a href="#cb232-7" aria-hidden="true" tabindex="-1"></a>concept <em>nothrow-sized-random-access-range</em> = <em>// exposition only</em></span>
-<span id="cb232-8"><a href="#cb232-8" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-random-access-range</em>&lt;R&gt; &amp;&amp; sized_range&lt;R&gt;;</span></code></pre></div>
-
+<div class="sourceCode" id="cb221"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb221-1"><a href="#cb221-1" aria-hidden="true" tabindex="-1"></a>template&lt;class R&gt;</span>
+<span id="cb221-2"><a href="#cb221-2" aria-hidden="true" tabindex="-1"></a>concept <em>nothrow-random-access-range</em> = <em>// exposition only</em></span>
+<span id="cb221-3"><a href="#cb221-3" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-bidirectional-range</em>&lt;R&gt; &amp;&amp;</span>
+<span id="cb221-4"><a href="#cb221-4" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-random-access-iterator</em>&lt;iterator_t&lt;R&gt;&gt;;</span>
+<span id="cb221-5"><a href="#cb221-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb221-6"><a href="#cb221-6" aria-hidden="true" tabindex="-1"></a>template&lt;class R&gt;</span>
+<span id="cb221-7"><a href="#cb221-7" aria-hidden="true" tabindex="-1"></a>concept <em>nothrow-sized-random-access-range</em> = <em>// exposition only</em></span>
+<span id="cb221-8"><a href="#cb221-8" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-random-access-range</em>&lt;R&gt; &amp;&amp; sized_range&lt;R&gt;;</span></code></pre></div>
+<p>A type <code class="sourceCode default">R</code> models <em><code class="sourceCode default">nothrow-sized-random-access-range</code></em>
+only if no exceptions are thrown from the call to ranges​::​size on an
+object of type <code class="sourceCode default">R</code>.</p>
 </div>
 <h1 data-number="9" id="revision_history"><span class="header-section-number">9</span> Revision history<a href="#revision_history" class="self-link"></a></h1>
 <h2 data-number="9.1" id="r6_r7"><span class="header-section-number">9.1</span> R6 =&gt; R7<a href="#r6_r7" class="self-link"></a></h2>
@@ -9626,7 +9650,7 @@ SA
 </table>
 <h1 data-number="11" id="acknowledgements"><span class="header-section-number">11</span> Acknowledgments<a href="#acknowledgements" class="self-link"></a></h1>
 <ul>
-<li>Thanks to Jonathan Muller for the wording review and providing
+<li>Thanks to Jonathan Mueller for the wording review and providing
 useful feedback.</li>
 <li>Thanks to Mikhail Dvorskiy for the implementation experience.</li>
 </ul>
