@@ -8081,18 +8081,20 @@ Let:</p>
 <code class="sourceCode default">identity{}</code> for the overloads
 with no parameters by those names;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(x.2)</a></span>
-<em><code class="sourceCode default">K</code></em> be the number of
-elements in <code class="sourceCode default">[first2, last2)</code> that
-are not present in
+<em><code class="sourceCode default">K</code></em> be
+<code class="sourceCode default">(last1 - first1)</code> plus the number
+of elements in <code class="sourceCode default">[first2, last2)</code>
+that are not present in
 <code class="sourceCode default">[first1, last1)</code>;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(x.3)</a></span>
-<code class="sourceCode default">result_last</code> be <code class="sourceCode default">result + (last1 - first1) + <em>K</em></code>
-for the overloads with no parameter
+<code class="sourceCode default">result_last</code> be
+<code class="sourceCode default">result + <em>K</em></code> for the
+overloads with no parameter
 <code class="sourceCode default">result_last</code> or
 <code class="sourceCode default">result_r</code>;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(x.4)</a></span>
 <em><code class="sourceCode default">N</code></em> be
-min(<code class="sourceCode default">(last1 - first1) + <em>K</em></code>,
+min(<code class="sourceCode default"><em>K</em></code>,
 <code class="sourceCode default">result_last - result</code>).</li>
 </ul>
 
@@ -8117,13 +8119,15 @@ end of the constructed range. Returns</del></span></p>
 <code class="sourceCode cpp">result_last</code> for the overloads in
 namespace <code class="sourceCode cpp">std</code>.</li>
 <li><span class="marginalizedparent"><a class="marginalized">(4.x)</a></span>
-<span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">{last1, last2, result + <em>N</em>}</code></span>,
-if
-<span><code class="sourceCode default">result_last - result &gt;= <em>N</em></code></span>
+<span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">{last1, last2, result + <em>K</em>}</code></span>
+for the overloads in namespace
+<span><code class="sourceCode default">ranges</code></span>, if
+<span><code class="sourceCode default">result_last - result &gt;= <em>K</em></code></span>
 is
 <span><code class="sourceCode default">true</code></span>.</ins></span></li>
 <li><span class="marginalizedparent"><a class="marginalized">(4.2)</a></span>
-<span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">{last1, last2, result_last}</code></span></del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">{j1, j2, result + <em>N</em>}</code></span></ins></span>
+<span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">{last1, last2, result_last}</code></span></del></span><span class="add" style="color: #006e28"><ins>Otherwise,
+<span><code class="sourceCode default">{j1, j2, result_last}</code></span></ins></span>
 for the overloads in namespace
 <code class="sourceCode cpp">ranges</code><span class="add" style="color: #006e28"><ins>, where the iterators
 <span><code class="sourceCode default">j1</code></span> and
@@ -8131,10 +8135,7 @@ for the overloads in namespace
 positions past the last copied or skipped elements in
 <span><code class="sourceCode default">[first1, last1)</code></span> and
 <span><code class="sourceCode default">[first2, last2)</code></span>,
-respectively, if
-<span><code class="sourceCode default">result + <em>N</em> == result_last</code></span>
-is
-<span><code class="sourceCode default">true</code></span></ins></span>.</li>
+respectively</ins></span>.</li>
 </ul>
 <p><span class="marginalizedparent"><a class="marginalized">5</a></span>
 <em>Complexity</em>: At most <code class="sourceCode cpp"><span class="dv">2</span> <span class="op">*</span> <span class="op">((</span>last1 <span class="op">-</span> first1<span class="op">)</span> <span class="op">+</span> <span class="op">(</span>last2 <span class="op">-</span> first2<span class="op">))</span> <span class="op">-</span> <span class="dv">1</span></code>
@@ -8239,13 +8240,15 @@ end of the constructed range. Returns</del></span></p>
 <code class="sourceCode cpp">result_last</code> for the overloads in
 namespace <code class="sourceCode cpp">std</code>.</li>
 <li><span class="marginalizedparent"><a class="marginalized">(4.x)</a></span>
-<span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">{last1, last2, result + <em>N</em>}</code></span>,
-if
-<span><code class="sourceCode default">result_last - result &gt;= <em>N</em></code></span>
+<span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">{last1, last2, result + <em>K</em>}</code></span>
+for the overloads in namespace
+<span><code class="sourceCode default">ranges</code></span>, if
+<span><code class="sourceCode default">result_last - result &gt;= <em>K</em></code></span>
 is
 <span><code class="sourceCode default">true</code></span>.</ins></span></li>
 <li><span class="marginalizedparent"><a class="marginalized">(4.2)</a></span>
-<span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">{last1, last2, result_last}</code></span></del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">{j1, j2, result + <em>N</em>}</code></span></ins></span>
+<span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">{last1, last2, result_last}</code></span></del></span><span class="add" style="color: #006e28"><ins>Otherwise,
+<span><code class="sourceCode default">{j1, j2, result_last}</code></span></ins></span>
 for the overloads in namespace
 <code class="sourceCode cpp">ranges</code><span class="add" style="color: #006e28"><ins>, where the iterators
 <span><code class="sourceCode default">j1</code></span> and
@@ -8253,10 +8256,7 @@ for the overloads in namespace
 positions past the last copied or skipped elements in
 <span><code class="sourceCode default">[first1, last1)</code></span> and
 <span><code class="sourceCode default">[first2, last2)</code></span>,
-respectively, if
-<span><code class="sourceCode default">result + <em>N</em> == result_last</code></span>
-is
-<span><code class="sourceCode default">true</code></span></ins></span>.</li>
+respectively</ins></span>.</li>
 </ul>
 <p><span class="marginalizedparent"><a class="marginalized">5</a></span>
 <em>Complexity</em>: At most <code class="sourceCode cpp"><span class="dv">2</span> <span class="op">*</span> <span class="op">((</span>last1 <span class="op">-</span> first1<span class="op">)</span> <span class="op">+</span> <span class="op">(</span>last2 <span class="op">-</span> first2<span class="op">))</span> <span class="op">-</span> <span class="dv">1</span></code>
@@ -8363,21 +8363,20 @@ end of the constructed range. Returns</del></span></p>
 <code class="sourceCode cpp">result_last</code> for the overloads in
 namespace <code class="sourceCode cpp">std</code>.</li>
 <li><span class="marginalizedparent"><a class="marginalized">(4.x)</a></span>
-<span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">{last1, result + <em>N</em>}</code></span>,
-if
-<span><code class="sourceCode default">result_last - result &gt;= <em>N</em></code></span>
+<span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">{last1, result + <em>K</em>}</code></span>
+for the overloads in namespace
+<span><code class="sourceCode default">ranges</code></span>, if
+<span><code class="sourceCode default">result_last - result &gt;= <em>K</em></code></span>
 is
 <span><code class="sourceCode default">true</code></span>.</ins></span></li>
 <li><span class="marginalizedparent"><a class="marginalized">(4.2)</a></span>
-<span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">{last1, result_last}</code></span></del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">{j1, result + <em>N</em>}</code></span></ins></span>
+<span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">{last1, result_last}</code></span></del></span><span class="add" style="color: #006e28"><ins>Otherwise,
+<span><code class="sourceCode default">{j1, result_last}</code></span></ins></span>
 for the overloads in namespace
 <code class="sourceCode cpp">ranges</code><span class="add" style="color: #006e28"><ins>, where the iterator
 <span><code class="sourceCode default">j1</code></span> points to the
 position past the last copied or skipped element in
-<span><code class="sourceCode default">[first1, last1)</code></span> if
-<span><code class="sourceCode default">result + <em>N</em> == result_last</code></span>
-is
-<span><code class="sourceCode default">true</code></span></ins></span>.</li>
+<span><code class="sourceCode default">[first1, last1)</code></span></ins></span>.</li>
 </ul>
 <p><span class="marginalizedparent"><a class="marginalized">5</a></span>
 <em>Complexity</em>: At most <code class="sourceCode cpp"><span class="dv">2</span> <span class="op">*</span> <span class="op">((</span>last1 <span class="op">-</span> first1<span class="op">)</span> <span class="op">+</span> <span class="op">(</span>last2 <span class="op">-</span> first2<span class="op">))</span> <span class="op">-</span> <span class="dv">1</span></code>
@@ -8491,13 +8490,15 @@ end of the constructed range. Returns</del></span></p>
 <code class="sourceCode cpp">result_last</code> for the overloads in
 namespace <code class="sourceCode cpp">std</code>.</li>
 <li><span class="marginalizedparent"><a class="marginalized">(4.x)</a></span>
-<span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">{last1, last2, result + <em>N</em>}</code></span>,
-if
-<span><code class="sourceCode default">result_last - result &gt;= <em>N</em></code></span>
+<span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">{last1, last2, result + <em>K</em> + <em>M</em>}</code></span>
+for the overloads in namespace
+<span><code class="sourceCode default">ranges</code></span>, if
+<span><code class="sourceCode default">result_last - result &gt;= <em>K</em> + <em>M</em></code></span>
 is
 <span><code class="sourceCode default">true</code></span>.</ins></span></li>
 <li><span class="marginalizedparent"><a class="marginalized">(4.2)</a></span>
-<span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">{last1, last2, result_last}</code></span></del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">{j1, j2, result + <em>N</em>}</code></span></ins></span>
+<span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">{last1, last2, result_last}</code></span></del></span><span class="add" style="color: #006e28"><ins>Otherwise,
+<span><code class="sourceCode default">{j1, j2, result_last}</code></span></ins></span>
 for the overloads in namespace
 <code class="sourceCode cpp">ranges</code><span class="add" style="color: #006e28"><ins>, where the iterators
 <span><code class="sourceCode default">j1</code></span> and
@@ -8505,10 +8506,7 @@ for the overloads in namespace
 positions past the last copied or skipped elements in
 <span><code class="sourceCode default">[first1, last1)</code></span> and
 <span><code class="sourceCode default">[first2, last2)</code></span>,
-respectively, if
-<span><code class="sourceCode default">result + <em>N</em> == result_last</code></span>
-is
-<span><code class="sourceCode default">true</code></span></ins></span>.</li>
+respectively</ins></span>.</li>
 </ul>
 <p><span class="marginalizedparent"><a class="marginalized">5</a></span>
 <em>Complexity</em>: At most <code class="sourceCode cpp"><span class="dv">2</span> <span class="op">*</span> <span class="op">((</span>last1 <span class="op">-</span> first1<span class="op">)</span> <span class="op">+</span> <span class="op">(</span>last2 <span class="op">-</span> first2<span class="op">))</span> <span class="op">-</span> <span class="dv">1</span></code>
