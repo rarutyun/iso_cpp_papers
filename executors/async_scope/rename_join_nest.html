@@ -475,24 +475,24 @@ and <code class="sourceCode cpp">nest</code> methods in
 <code class="sourceCode cpp">async_scope</code> proposal [P3149R9]</p>
 <h1 data-number="1" id="motivation"><span class="header-section-number">1</span> Motivation<a href="#motivation" class="self-link"></a></h1>
 <p><span class="citation" data-cites="P3149R9"><a href="https://wg21.link/p3149r9" role="doc-biblioref">[P3149R9]</a></span> provides a one of the
-important peaces peaces for <span><a href="https://wg21.link/exec">[exec]</a></span> (<span class="citation" data-cites="P2300R10"><a href="https://wg21.link/p2300r10" role="doc-biblioref">[P2300R10]</a></span> proposal) to complete a
-picture. The facilities there allow to group the work by associating it
-with asynchronous scopes and then wait at some point for all associated
-work to be completed. It a bridge from unstructured concurrency to
-structured one with saying that individual pieces of work (possibly on
-different execution contexts) become the one, combined work. The
-facilities also support</p>
+important peaces for <span><a href="https://wg21.link/exec">[exec]</a></span> (<span class="citation" data-cites="P2300R10"><a href="https://wg21.link/p2300r10" role="doc-biblioref">[P2300R10]</a></span> proposal) to complete a
+picture. The facilities allow to group the asynchronous work by
+associating it with scopes and then wait at some point for all
+associated work to be completed. It a bridge from the unstructured
+concurrency to the structured one with saying that individual pieces of
+work (possibly on different execution contexts) become the one, combined
+work. The facilities also support</p>
 <ul>
 <li>associating the work and run it (eager execution)</li>
 <li>associating the work but getting back a sender to run it later (lazy
 execution)</li>
 </ul>
 <p>Despite all the advantages, some names might be arguably misleading
-because they are either to not follow the existing practices or might
+because they are either not following the existing practices or might
 have a different meaning in the same or very close domains: concurrency
 and parallelism.</p>
 <p><span class="citation" data-cites="P3149R9"><a href="https://wg21.link/p3149r9" role="doc-biblioref">[P3149R9]</a></span> has a section that ruminates
-about naming. But this discussion never happened in LEWG and/or
+about naming. But this discussion never happened in LEWG and/or in
 reflector.</p>
 <p><span class="citation" data-cites="P3685R0"><a href="https://isocpp.org/files/papers/P3685R0.pdf" role="doc-biblioref">[P3685R0]</a></span> started making improvements by
 proposing <code class="sourceCode cpp">async_scope_token</code> -&gt;
@@ -501,7 +501,9 @@ make it even better with this proposal by renaming
 <code class="sourceCode cpp">join</code> and
 <code class="sourceCode cpp">nest</code>. There are other candidates to
 be renamed as well, however the existing names are also fine and authors
-cannot come up with better alternative, so those are out of scope for
+cannot come up with better alternative, so other than
+<code class="sourceCode cpp">join</code> and
+<code class="sourceCode cpp">nest</code> the rest is out of scope for
 this paper.</p>
 <h1 data-number="2" id="rename_join"><span class="header-section-number">2</span> Rename
 <code class="sourceCode cpp">join</code> member functions<a href="#rename_join" class="self-link"></a></h1>
@@ -587,15 +589,16 @@ does not block as some might expect. It returns a sender that can signal
 that the all associated work with the scope is completed. Somebody might
 argue that this is a quality of implementation: implementers can put
 <code class="sourceCode cpp"><span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span></code>
-attribute on the function and just see the warning. While this is true
-it does not eliminate the fact that the name itself it not helpful to
-recognize such a situation.</p>
+attribute on the function and emit a warning. While this is true it does
+not eliminate the fact that the name itself it not helpful to recognize
+such behavior.</p>
 <p>In <span class="citation" data-cites="libunifex"><a href="https://github.com/facebookexperimental/libunifex" role="doc-biblioref">[libunifex]</a></span> there is a v1 of
-<code class="sourceCode cpp">async_scope</code> (the latest one is v2)
-that call this function as <code class="sourceCode cpp">complete</code>.
-While this name is better in our opinion it does not give any clue that
-the function itself is not blocking.</p>
-<p>Together with authors or <span class="citation" data-cites="P3149R9"><a href="https://wg21.link/p3149r9" role="doc-biblioref">[P3149R9]</a></span> and some other people we
+<code class="sourceCode cpp">async_scope</code> (the latest one is v2 as
+far as we can tell) that names this function as
+<code class="sourceCode cpp">complete</code>. While this name is better
+in our opinion, it still does not give any clue that the function itself
+is non-blocking.</p>
+<p>Together with authors of <span class="citation" data-cites="P3149R9"><a href="https://wg21.link/p3149r9" role="doc-biblioref">[P3149R9]</a></span> and some other people we
 considered a bunch of names. For example,
 <code class="sourceCode cpp">complete</code>,
 <code class="sourceCode cpp">cleanup</code>,
@@ -605,44 +608,48 @@ considered a bunch of names. For example,
 <code class="sourceCode cpp">done</code>, etc.</p>
 <p>It seems like people converge to have
 <code class="sourceCode cpp">when_</code> prefix, similar to
-<code class="sourceCode cpp">when_all</code> and given that we mentioned
-a term <em>completion</em> several times in this paper, so we suggest to
+<code class="sourceCode cpp">when_all</code>. Given that we mentioned a
+term <em>completion</em> several times in this paper, we suggest to
 rename <code class="sourceCode cpp">join</code> function to
 <code class="sourceCode cpp">when_completed</code> because in our
-opinion it’s much clear and gives users better understanding of what’s
+opinion it’s much clearer and gives users better understanding of what’s
 going on.</p>
-<p>The last line of the code in the column with async scope looks like
-this with out proposal:</p>
+<p>The last line of the code in the column with
+<code class="sourceCode cpp">counting_scope</code> looks like this with
+out proposal:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>this_thread<span class="op">::</span>sync_wait<span class="op">(</span>scope<span class="op">.</span>when_completed<span class="op">())</span>;</span></code></pre></div>
 <h1 data-number="3" id="rename_nest"><span class="header-section-number">3</span> Rename
 <code class="sourceCode cpp">nest</code><a href="#rename_nest" class="self-link"></a></h1>
-<p>There is a term that is called <em>nested parallelism</em>. It
-basically means that people spawn more work from a parallel context.</p>
+<p>There is a term that is called <em>nested parallelism</em>. It means
+that some piece of work spawns more work from a asynchronous/parallel
+context.</p>
 <p>One of the APIs that creates a nested parallelism (or nested work) in
 <span class="citation" data-cites="P2300R10"><a href="https://wg21.link/p2300r10" role="doc-biblioref">[P2300R10]</a></span> is
 <code class="sourceCode cpp">let_value</code>. It, basically, runs the
 returned sender from the passed function and waits for its completion to
 send the computed values further. This
 returned-by-the-passed-function-sender is a nested work. <span class="citation" data-cites="P3149R9"><a href="https://wg21.link/p3149r9" role="doc-biblioref">[P3149R9]</a></span> itself contains the example
-with nested parallelism when shows handling a tree with
-<code class="sourceCode cpp">spawn_future</code>.</p>
+with nested parallelism in the example with handling a tree using
+<code class="sourceCode cpp">spawn_future</code> and
+<code class="sourceCode cpp">let_value</code>.</p>
 <p>However, <code class="sourceCode cpp">nest</code> name itself doesn’t
-have imply nested parallelism at all. That’s why it’s confusing. When
-users call <code class="sourceCode cpp">nest</code> they basically want
-to <code class="sourceCode cpp">associate</code> the piece of work with
-the scope, or <code class="sourceCode cpp">attach</code> the piece of
-work to the scope. The execution of the work is deferred. It might be
-also called like that by historical reasons: previously <span class="citation" data-cites="P3149R9"><a href="https://wg21.link/p3149r9" role="doc-biblioref">[P3149R9]</a></span> proposal had
+imply nested parallelism at all. That’s why it’s confusing. When users
+call <code class="sourceCode cpp">nest</code> they basically want to
+<code class="sourceCode cpp">associate</code> the piece of work with the
+scope, or <code class="sourceCode cpp">attach</code> the piece of work
+to the scope. The execution of the work is deferred.</p>
+<p>The API <code class="sourceCode cpp">nest</code> might be also called
+like that by historical reasons: previously <span class="citation" data-cites="P3149R9"><a href="https://wg21.link/p3149r9" role="doc-biblioref">[P3149R9]</a></span> proposal had
 <code class="sourceCode cpp">nest</code> as one of the required
 operations on scopes by <code class="sourceCode cpp">async_scope</code>
 concept. The current state is that the
 <code class="sourceCode cpp">async_scope</code> concept was replaced by
-lower level one named
+the lower level one named
 <code class="sourceCode cpp">async_scope_token</code> (hopefully, just
 <code class="sourceCode cpp">scope_token</code> after applying <span class="citation" data-cites="P3685R0"><a href="https://isocpp.org/files/papers/P3685R0.pdf" role="doc-biblioref">[P3685R0]</a></span>) with requiring
 <code class="sourceCode cpp">try_associate</code> and
 <code class="sourceCode cpp">deassociate</code> methods (plus
-<code class="sourceCode cpp">wrap</code>). Also v1
+<code class="sourceCode cpp">wrap</code>). Also, v1
 <code class="sourceCode cpp">async_scope</code> in <span class="citation" data-cites="libunifex"><a href="https://github.com/facebookexperimental/libunifex" role="doc-biblioref">[libunifex]</a></span> had the
 <code class="sourceCode cpp">attach</code> name instead of
 <code class="sourceCode cpp">nest</code>.</p>
@@ -651,9 +658,9 @@ previous experience we can recommend two names instead of
 <code class="sourceCode cpp">nest</code>. It’s either
 <code class="sourceCode cpp">associate</code> or
 <code class="sourceCode cpp">attach</code>. Given that <span class="citation" data-cites="P3149R9"><a href="https://wg21.link/p3149r9" role="doc-biblioref">[P3149R9]</a></span> talks about association a lot,
-this is the preferred option, unless authors of <span class="citation" data-cites="P3149R9"><a href="https://wg21.link/p3149r9" role="doc-biblioref">[P3149R9]</a></span> the similarity with
-<code class="sourceCode cpp">try_associate</code> is rather confusing
-than helpful. If this is the case then
+this is the preferred option, unless authors of <span class="citation" data-cites="P3149R9"><a href="https://wg21.link/p3149r9" role="doc-biblioref">[P3149R9]</a></span> think that the similarity to
+<code class="sourceCode cpp">try_associate</code> is more confusing than
+helpful. If this is the case then
 <code class="sourceCode cpp">attach</code> is also a good choice.</p>
 <h1 data-number="4" id="proposal"><span class="header-section-number">4</span> Proposal<a href="#proposal" class="self-link"></a></h1>
 <ul>
