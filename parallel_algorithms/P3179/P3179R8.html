@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2025-05-17" />
+  <meta name="dcterms.date" content="2025-05-18" />
   <title>C++ parallel range algorithms</title>
   <style>
       code{white-space: pre-wrap;}
@@ -466,7 +466,7 @@ algorithms</h1>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2025-05-17</td>
+    <td>2025-05-18</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -5808,8 +5808,10 @@ for binary transforms defined in namespace
 </ul>
 <p><span class="marginalizedparent"><a class="marginalized">2</a></span>
 <em>Preconditions</em>: <code class="sourceCode cpp">op</code> and
-<code class="sourceCode cpp">binary_op</code> do not invalidate
-iterators or subranges, nor modify elements in the ranges</p>
+<code class="sourceCode cpp">binary_op</code> <span class="add" style="color: #006e28"><ins>satisfy the requirements specified in
+<span><a href="https://wg21.link/algorithms.parallel.user">[algorithms.parallel.user]</a></span>,</ins></span>
+do not invalidate iterators or subranges, nor modify elements in the
+ranges</p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(2.1)</a></span>
 <code class="sourceCode cpp"><span class="op">[</span>first1, first1 <span class="op">+</span> <em>N</em><span class="op">]</span></code>,</li>
