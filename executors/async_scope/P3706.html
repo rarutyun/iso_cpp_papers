@@ -427,9 +427,9 @@ code.sourceCode > span { display: inline; }
   <tr>
     <td>Document #:</td>
     <td>
-      P3333R0
-      [<a href="https://wg21.link/P3333">Latest</a>]
-      [<a href="https://wg21.link/P3333/status">Status</a>]
+      P3706R0
+      [<a href="https://wg21.link/P3706">Latest</a>]
+      [<a href="https://wg21.link/P3706/status">Status</a>]
     </td>
   </tr>
   <tr>
@@ -443,7 +443,7 @@ code.sourceCode > span { display: inline; }
   <tr>
     <td style="vertical-align:top">Audience:</td>
     <td>
-      LEWG, LWG<br>
+      LEWG<br>
     </td>
   </tr>
   <tr>
@@ -472,7 +472,7 @@ functions<span></span></a></li>
 <h1 class="unnumbered unlisted" id="abstract">Abstract<a href="#abstract" class="self-link"></a></h1>
 <p>This paper proposes renaming <code class="sourceCode cpp">join</code>
 and <code class="sourceCode cpp">nest</code> methods in
-<code class="sourceCode cpp">async_scope</code> proposal [P3149R9]</p>
+<code class="sourceCode cpp">async_scope</code> proposal <span class="citation" data-cites="P3149R9"><a href="https://wg21.link/p3149r9" role="doc-biblioref">[P3149R9]</a></span></p>
 <h1 data-number="1" id="motivation"><span class="header-section-number">1</span> Motivation<a href="#motivation" class="self-link"></a></h1>
 <p><span class="citation" data-cites="P3149R9"><a href="https://wg21.link/p3149r9" role="doc-biblioref">[P3149R9]</a></span> provides a one of the
 important peaces for <span><a href="https://wg21.link/exec">[exec]</a></span> (<span class="citation" data-cites="P2300R10"><a href="https://wg21.link/p2300r10" role="doc-biblioref">[P2300R10]</a></span> proposal) to complete a
@@ -576,8 +576,8 @@ vs <code class="sourceCode cpp">counting_scope<span class="op">::</span>join</co
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co">// !!! Has no effect. Returns sender that is discarded</span></span>
 <span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>scope<span class="op">.</span>join<span class="op">()</span>;</span>
 <span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co">// Since join itself does not block, users should call</span></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co">// sync_wait explicitly with the returned sender</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co">// Users have to call sync_wait explicitly on the</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co">// returned sender by join to get the expected behavior</span></span>
 <span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>this_thread<span class="op">::</span>sync_wait<span class="op">(</span>scope<span class="op">.</span>join<span class="op">())</span>;</span></code></pre></div>
 
 </div></td>
