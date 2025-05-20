@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2025-05-18" />
+  <meta name="dcterms.date" content="2025-05-19" />
   <title>Rename `join` and `nest` in `async_scope` proposal</title>
   <style>
       code{white-space: pre-wrap;}
@@ -434,7 +434,7 @@ code.sourceCode > span { display: inline; }
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2025-05-18</td>
+    <td>2025-05-19</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -466,7 +466,8 @@ functions<span></span></a></li>
 <li><a href="#rename_nest" id="toc-rename_nest"><span class="toc-section-number">3</span> Rename
 <code class="sourceCode cpp">nest</code><span></span></a></li>
 <li><a href="#proposal" id="toc-proposal"><span class="toc-section-number">4</span> Proposal<span></span></a></li>
-<li><a href="#bibliography" id="toc-bibliography"><span class="toc-section-number">5</span> References<span></span></a></li>
+<li><a href="#wording" id="toc-wording"><span class="toc-section-number">5</span> Wording<span></span></a></li>
+<li><a href="#bibliography" id="toc-bibliography"><span class="toc-section-number">6</span> References<span></span></a></li>
 </ul>
 </div>
 <h1 class="unnumbered unlisted" id="abstract">Abstract<a href="#abstract" class="self-link"></a></h1>
@@ -475,7 +476,7 @@ and <code class="sourceCode cpp">nest</code> methods in
 <code class="sourceCode cpp">async_scope</code> proposal <span class="citation" data-cites="P3149R9"><a href="https://wg21.link/p3149r9" role="doc-biblioref">[P3149R9]</a></span></p>
 <h1 data-number="1" id="motivation"><span class="header-section-number">1</span> Motivation<a href="#motivation" class="self-link"></a></h1>
 <p><span class="citation" data-cites="P3149R9"><a href="https://wg21.link/p3149r9" role="doc-biblioref">[P3149R9]</a></span> provides a one of the
-important peaces for <span><a href="https://wg21.link/exec">[exec]</a></span> (<span class="citation" data-cites="P2300R10"><a href="https://wg21.link/p2300r10" role="doc-biblioref">[P2300R10]</a></span> proposal) to complete a
+important pieces for <span><a href="https://wg21.link/exec">[exec]</a></span> (<span class="citation" data-cites="P2300R10"><a href="https://wg21.link/p2300r10" role="doc-biblioref">[P2300R10]</a></span> proposal) to complete a
 picture. The facilities allow to group the asynchronous work by
 associating it with scopes and then wait at some point for all
 associated work to be completed. It a bridge from the unstructured
@@ -669,7 +670,13 @@ helpful. If this is the case then
 <li>Rename <code class="sourceCode cpp">nest</code> to
 <code class="sourceCode cpp">associate</code></li>
 </ul>
-<h1 data-number="5" id="bibliography"><span class="header-section-number">5</span> References<a href="#bibliography" class="self-link"></a></h1>
+<h1 data-number="5" id="wording"><span class="header-section-number">5</span> Wording<a href="#wording" class="self-link"></a></h1>
+<p>Since <span class="citation" data-cites="P3149R9"><a href="https://wg21.link/p3149r9" role="doc-biblioref">[P3149R9]</a></span> is still in active LWG review
+phase the wording for renaming does not make a lot of sense. We will
+need to work with <code class="sourceCode cpp">async_scope</code>
+authors to make sure that all the changes are incorporated from this
+proposal, if it passes.</p>
+<h1 data-number="6" id="bibliography"><span class="header-section-number">6</span> References<a href="#bibliography" class="self-link"></a></h1>
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="1" role="doc-bibliography">
 <div id="ref-libunifex" class="csl-entry" role="doc-biblioentry">
 [libunifex] libunifex. <a href="https://github.com/facebookexperimental/libunifex"><div class="csl-block">https://github.com/facebookexperimental/libunifex</div></a>
