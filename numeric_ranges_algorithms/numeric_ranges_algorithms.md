@@ -1,6 +1,6 @@
 
 ---
-title: Parallel numeric range algorithms
+title: Parallel and non-parallel numeric range algorithms
 document: DXXXXR0
 date: 2025-05-19
 audience: SG1,SG9,LEWG
