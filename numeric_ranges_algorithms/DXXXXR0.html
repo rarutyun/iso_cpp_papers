@@ -780,53 +780,95 @@ SG9 (Ranges Study Group) review.</li>
 ranges versions<a href="#algorithms-that-do-not-need-ranges-versions" class="self-link"></a></h3>
 <p>The following algorithms do not need ranges versions, since they can
 be replaced with existing views and ranges algorithms.</p>
-<ul>
-<li><p><code>inner_product</code> performs operations sequentially. It
-can be replaced with existing views and ranges algorithms, e.g.,
+<h4 data-number="4.3.4.1" id="inner_product"><span class="header-section-number">4.3.4.1</span>
+<code>inner_product</code><a href="#inner_product" class="self-link"></a></h4>
+<p><code>inner_product</code> performs operations sequentially. It can
+be replaced with existing views and ranges algorithms, e.g.,
 <code>ranges::fold_left(views::zip_transform(std::multiplies(), x, y), 0.0, std::plus())</code>.
 P2214R2 argues against adding a ranges analog of
 <code>inner_product</code>, because it is less fundamental than other
 algorithms, and because it’s not clear how to incorporate
-projections.</p></li>
-<li><p><code>adjacent_difference</code> can be replaced with a
-combination of <code>adjacent_transform_view</code> (which was adopted
-in C++23) and <code>ranges::copy</code>. In our experience, adjacent
-differences or their generalization are often used in combination with
-other ranges. For example, finite-difference methods for solving
-time-dependent differential equations may need to add together multiple
-ranges, each of which is an adjacent difference possibly composed with
-other functions. One could represent the spatial finite difference
-scheme for a partial differential equation as a weighted sum of adjacent
-differences in each spatial degree of freedom. Thus, for us a view would
-make more sense than a “terminal” algorithm. The actual algorithm is a
-transform or copy from a complicated view into an output range.</p></li>
-<li><p><code>transform_reduce</code>,
-<code>transform_inclusive_scan</code>, and
-<code>transform_exclusive_scan</code> can be replaced with a combination
-of <code>transform_view</code> and <code>reduce</code>,
-<code>inclusive_scan</code>, or <code>exclusive_scan</code>. P2214R2
-points out that
+projections.</p>
+<h4 data-number="4.3.4.2" id="adjacent_difference"><span class="header-section-number">4.3.4.2</span>
+<code>adjacent_difference</code><a href="#adjacent_difference" class="self-link"></a></h4>
+<p><code>adjacent_difference</code> can be replaced with a combination
+of <code>adjacent_transform_view</code> (which was adopted in C++23) and
+<code>ranges::copy</code>. In our experience, adjacent differences or
+their generalization are often used in combination with other ranges.
+For example, finite-difference methods for solving time-dependent
+differential equations may need to add together multiple ranges, each of
+which is an adjacent difference possibly composed with other functions.
+One could represent the spatial finite difference scheme for a partial
+differential equation as a weighted sum of adjacent differences in each
+spatial degree of freedom. Thus, for us a view would make more sense
+than a “terminal” algorithm. The actual algorithm is a transform or copy
+from a complicated view into an output range.</p>
+<h4 data-number="4.3.4.3" id="transform_"><span class="header-section-number">4.3.4.3</span> <code>transform_*</code><a href="#transform_" class="self-link"></a></h4>
+<p><code>transform_reduce</code>, <code>transform_inclusive_scan</code>,
+and <code>transform_exclusive_scan</code> can be replaced in two
+different ways: either</p>
+<ol type="1">
+<li>by a combination of <code>transform_view</code> and the
+non-<code>transform</code> algorithm; or</li>
+<li>by having the algorithm take an optional projection, as ranges
+algorithms typically do.</li>
+</ol>
+<p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4128.html#algorithms-should-take-invokable-projections">Section
+13.2 of N4128</a> explains why ranges algorithms take optional
+projections “everywhere it makes sense.”</p>
+<blockquote>
+<p>Wherever appropriate, algorithms should optionally take INVOKE-able
+<em>projections</em> that are applied to each element in the input
+sequence(s). This, in effect, allows users to trivially transform each
+input sequence for the sake of that single algorithm invocation.</p>
+</blockquote>
+<p>P2214R2 points out that
 <code>ranges::transform_inclusive_scan(r, o, f, g)</code> can be
 rewritten as
 <code>ranges::inclusive_scan(r | views::transform(g), o, f)</code>, and
 that the latter saves users from needing to remember which of
 <code>f</code> and <code>g</code> is the transform (unary) operation,
-and which is the binary operation.</p></li>
-</ul>
+and which is the binary operation. Making the ranges version of the
+algorithm take an optional projection would be exactly equivalent to
+adding a <code>transform_*</code> version that does not take a
+projection: e.g., <code>ranges::inclusive_scan(r, o, f, g)</code> with
+<code>g</code> as the projection would do exactly the same thing as
+<code>ranges::transform_inclusive_scan(r, o, f, g)</code> with
+<code>g</code> as the transform operation.</p>
 <h3 data-number="4.3.5" id="we-dont-propose-reduce_first"><span class="header-section-number">4.3.5</span> We don’t propose
 <code>reduce_first</code><a href="#we-dont-propose-reduce_first" class="self-link"></a></h3>
 <p><a href="https://wg21.link/P2760R1">P2760R1</a> additionally asks
 whether there should be a <code>reduce_first</code> algorithm, analogous
-to <code>fold_left_first</code>, for binary operations like
-<code>min</code> that lack a natural initial value. We do not propose
-this for three reasons. First, P3179R8 already proposes parallel ranges
-overloads of <code>min_element</code>, <code>max_element</code>, and
-<code>minmax_element</code>. Second, users can always extract the first
-element from the sequence and use it as the initial value in
-<code>reduce</code>. Third, sometimes users can pick a flag or identity
-initial value, like <code>-Inf</code> for <code>min</code> over
-floating-point values, that makes sense for use in
-<code>reduce</code>.</p>
+to <code>fold_left_first</code>, for binary operations that lack a
+natural identity element to serve as the initial value. An example would
+be <code>min</code> on a range of <code>int</code> values, where callers
+would have no way to tell if <code>INT_MAX</code> represents a value in
+the range, or an arbitrary stand-in for the (nonexistent) identity
+element. We do not propose <code>reduce_first</code> for the following
+reasons.</p>
+<ol type="1">
+<li><p>P3179R8 already proposes parallel ranges overloads of
+<code>min_element</code>, <code>max_element</code>, and
+<code>minmax_element</code>.</p></li>
+<li><p><code>fold_left_first</code> and <code>fold_right_last</code>
+makes more sense, because these algorithms are ordered. It matters which
+element of the sequence the user extracts. <code>reduce</code> is
+unordered, so there’s no reason to privilege one element over another.
+Why should it be the first one?</p></li>
+<li><p>Users can always extract the first element from the sequence and
+use it as the initial value in <code>reduce</code>.</p></li>
+</ol>
+<p>We have to decide in this proposal whether to add
+<code>reduce_first</code>, because of projections. As we explain below,
+it makes sense for <code>reduce</code> to take an optional projection.
+However, <code>reduce_first</code> could not straightforwardly support
+projections. If <code>reduce</code> takes an optional projection, then
+it would be inconsistent with <code>reduce_first</code>. The only reason
+<code>fold_left</code> and <code>fold_right</code> do not take
+projections is for consistency with <code>fold_left_first</code> and
+<code>fold_right_last</code>, which cannot take projections. The only
+way for us to leave <code>reduce_first</code> for a later proposal is if
+<code>reduce</code> does not take a projection.</p>
 <h3 data-number="4.3.6" id="algorithms-that-we-propose-here"><span class="header-section-number">4.3.6</span> Algorithms that we propose
 here<a href="#algorithms-that-we-propose-here" class="self-link"></a></h3>
 <p>This leaves three algorithms, which we propose here:
@@ -919,19 +961,25 @@ specify <code>ranges::reduce</code> just to return the value, not to
 return <code>in_value_result</code> like <code>fold_left</code>.</p>
 <h3 data-number="4.4.3" id="support-projections"><span class="header-section-number">4.4.3</span> Support projections<a href="#support-projections" class="self-link"></a></h3>
 <p>We propose that <code>ranges::reduce</code> take a projection
-parameter, unlike <code>ranges::fold_left</code>. Section 4.6 of
-<a href="https://wg21.link/P2322R6">P2322R6</a> explains that the only
-reason <code>ranges::fold_left</code> does <em>not</em> take a
-projection is for consistency with <code>ranges::fold_left_first</code>.
-The latter does not take a projection in order to avoid an extra copy of
-the leftmost value, that would be required in order to support
-projections with a range whose iterators yield proxy reference types
-like <code>tuple&lt;T&amp;&gt;</code> (as <code>views::zip</code> does).
+parameter, unlike <code>ranges::fold_left</code>.</p>
+<p>As we explain above, the optional projection makes
+<code>transform_*</code> versions of the algorithms superfluous. The
+projection <em>is</em> the transform function.</p>
+<p><code>ranges::fold_left</code> does not take a projection. Section
+4.6 of <a href="https://wg21.link/P2322R6">P2322R6</a> explains that the
+only reason for this is consistency with
+<code>ranges::fold_left_first</code>. The latter does not take a
+projection in order to avoid an extra copy of the leftmost value, that
+would be required in order to support projections with a range whose
+iterators yield proxy reference types like
+<code>tuple&lt;T&amp;&gt;</code> (as <code>views::zip</code> does).
 P2322R6 clarifies that <code>ranges::fold_left</code> does not have this
 problem, because it never needs to materialize an input value; it can
 just project each element at iterator <code>iter</code> via
 <code>invoke(proj, *iter)</code>, and feed that directly into the binary
-operation.</p>
+operation. If we never want a <code>ranges::reduce_first</code>, then
+<code>ranges::reduce</code> does not have <code>fold_left_first</code>’s
+design issue and can thus take a projection.</p>
 <h2 data-number="4.5" id="input-and-output-ranges"><span class="header-section-number">4.5</span> Input and output ranges<a href="#input-and-output-ranges" class="self-link"></a></h2>
 <p>We follow the approach of P3179R8. For existing non-ranges algorithms
 that take iterator pairs as input and return a value, their ranges

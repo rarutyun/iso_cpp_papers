@@ -135,15 +135,38 @@ The following algorithm has a proposal in flight to add a ranges analog.
 
 The following algorithms do not need ranges versions, since they can be replaced with existing views and ranges algorithms.
 
-* `inner_product` performs operations sequentially.  It can be replaced with existing views and ranges algorithms, e.g., `ranges::fold_left(views::zip_transform(std::multiplies(), x, y), 0.0, std::plus())`.  P2214R2 argues against adding a ranges analog of `inner_product`, because it is less fundamental than other algorithms, and because it's not clear how to incorporate projections.
+#### `inner_product`
 
-* `adjacent_difference` can be replaced with a combination of  `adjacent_transform_view` (which was adopted in C++23) and `ranges::copy`.  In our experience, adjacent differences or their generalization are often used in combination with other ranges.  For example, finite-difference methods for solving time-dependent differential equations may need to add together multiple ranges, each of which is an adjacent difference possibly composed with other functions.  One could represent the spatial finite difference scheme for a partial differential equation as a weighted sum of adjacent differences in each spatial degree of freedom.  Thus, for us a view would make more sense than a "terminal" algorithm.  The actual algorithm is a transform or copy from a complicated view into an output range.
+`inner_product` performs operations sequentially.  It can be replaced with existing views and ranges algorithms, e.g., `ranges::fold_left(views::zip_transform(std::multiplies(), x, y), 0.0, std::plus())`.  P2214R2 argues against adding a ranges analog of `inner_product`, because it is less fundamental than other algorithms, and because it's not clear how to incorporate projections.
 
-* `transform_reduce`, `transform_inclusive_scan`, and `transform_exclusive_scan` can be replaced with a combination of `transform_view` and `reduce`, `inclusive_scan`, or `exclusive_scan`.  P2214R2 points out that `ranges::transform_inclusive_scan(r, o, f, g)` can be rewritten as `ranges::inclusive_scan(r | views::transform(g), o, f)`, and that the latter saves users from needing to remember which of `f` and `g` is the transform (unary) operation, and which is the binary operation.
+#### `adjacent_difference`
+
+`adjacent_difference` can be replaced with a combination of  `adjacent_transform_view` (which was adopted in C++23) and `ranges::copy`.  In our experience, adjacent differences or their generalization are often used in combination with other ranges.  For example, finite-difference methods for solving time-dependent differential equations may need to add together multiple ranges, each of which is an adjacent difference possibly composed with other functions.  One could represent the spatial finite difference scheme for a partial differential equation as a weighted sum of adjacent differences in each spatial degree of freedom.  Thus, for us a view would make more sense than a "terminal" algorithm.  The actual algorithm is a transform or copy from a complicated view into an output range.
+
+#### `transform_*`
+
+`transform_reduce`, `transform_inclusive_scan`, and `transform_exclusive_scan` can be replaced in two different ways: either
+
+1. by a combination of `transform_view` and the non-`transform` algorithm; or
+2. by having the algorithm take an optional projection, as ranges algorithms typically do.
+
+<a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4128.html#algorithms-should-take-invokable-projections">Section 13.2 of N4128</a> explains why ranges algorithms take optional projections "everywhere it makes sense."
+
+> Wherever appropriate, algorithms should optionally take INVOKE-able *projections* that are applied to each element in the input sequence(s). This, in effect, allows users to trivially transform each input sequence for the sake of that single algorithm invocation.
+
+P2214R2 points out that `ranges::transform_inclusive_scan(r, o, f, g)` can be rewritten as `ranges::inclusive_scan(r | views::transform(g), o, f)`, and that the latter saves users from needing to remember which of `f` and `g` is the transform (unary) operation, and which is the binary operation.  Making the ranges version of the algorithm take an optional projection would be exactly equivalent to adding a `transform_*` version that does not take a projection: e.g., `ranges::inclusive_scan(r, o, f, g)` with `g` as the projection would do exactly the same thing as `ranges::transform_inclusive_scan(r, o, f, g)` with `g` as the transform operation.
 
 ### We don't propose `reduce_first`
 
-<a href="https://wg21.link/P2760R1">P2760R1</a> additionally asks whether there should be a `reduce_first` algorithm, analogous to `fold_left_first`, for binary operations like `min` that lack a natural initial value.  We do not propose this for three reasons.  First, P3179R8 already proposes parallel ranges overloads of `min_element`, `max_element`, and `minmax_element`.  Second, users can always extract the first element from the sequence and use it as the initial value in `reduce`.  Third, sometimes users can pick a flag or identity initial value, like `-Inf` for `min` over floating-point values, that makes sense for use in `reduce`.
+<a href="https://wg21.link/P2760R1">P2760R1</a> additionally asks whether there should be a `reduce_first` algorithm, analogous to `fold_left_first`, for binary operations that lack a natural identity element to serve as the initial value.  An example would be `min` on a range of `int` values, where callers would have no way to tell if `INT_MAX` represents a value in the range, or an arbitrary stand-in for the (nonexistent) identity element.  We do not propose `reduce_first` for the following reasons.
+
+1. P3179R8 already proposes parallel ranges overloads of `min_element`, `max_element`, and `minmax_element`.
+
+2. `fold_left_first` and `fold_right_last` makes more sense, because these algorithms are ordered.  It matters which element of the sequence the user extracts.  `reduce` is unordered, so there's no reason to privilege one element over another.  Why should it be the first one?
+
+3. Users can always extract the first element from the sequence and use it as the initial value in `reduce`.
+
+We have to decide in this proposal whether to add `reduce_first`, because of projections.  As we explain below, it makes sense for `reduce` to take an optional projection.  However, `reduce_first` could not straightforwardly support projections.  If `reduce` takes an optional projection, then it would be inconsistent with `reduce_first`.  The only reason `fold_left` and `fold_right` do not take projections is for consistency with `fold_left_first` and `fold_right_last`, which cannot take projections.  The only way for us to leave `reduce_first` for a later proposal is if `reduce` does not take a projection.
 
 ### Algorithms that we propose here
 
@@ -202,7 +225,11 @@ The reason for an algorithm to return the input iterator is because it's an `inp
 
 ### Support projections
 
-We propose that `ranges::reduce` take a projection parameter, unlike `ranges::fold_left`.  Section 4.6 of <a href="https://wg21.link/P2322R6">P2322R6</a> explains that the only reason `ranges::fold_left` does *not* take a projection is for consistency with `ranges::fold_left_first`.  The latter does not take a projection in order to avoid an extra copy of the leftmost value, that would be required in order to support projections with a range whose iterators yield proxy reference types like `tuple<T&>` (as `views::zip` does).  P2322R6 clarifies that `ranges::fold_left` does not have this problem, because it never needs to materialize an input value; it can just project each element at iterator `iter` via `invoke(proj, *iter)`, and feed that directly into the binary operation.
+We propose that `ranges::reduce` take a projection parameter, unlike `ranges::fold_left`.  
+
+As we explain above, the optional projection makes `transform_*` versions of the algorithms superfluous.  The projection *is* the transform function.
+
+`ranges::fold_left` does not take a projection.  Section 4.6 of <a href="https://wg21.link/P2322R6">P2322R6</a> explains that the only reason for this is consistency with `ranges::fold_left_first`.  The latter does not take a projection in order to avoid an extra copy of the leftmost value, that would be required in order to support projections with a range whose iterators yield proxy reference types like `tuple<T&>` (as `views::zip` does).  P2322R6 clarifies that `ranges::fold_left` does not have this problem, because it never needs to materialize an input value; it can just project each element at iterator `iter` via `invoke(proj, *iter)`, and feed that directly into the binary operation.  If we never want a `ranges::reduce_first`, then `ranges::reduce` does not have `fold_left_first`'s design issue and can thus take a projection.
 
 ## Input and output ranges
 
