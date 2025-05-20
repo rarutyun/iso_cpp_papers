@@ -321,7 +321,7 @@ The oneDPL library has deployment experience.
 
 > Add declarations of ranges overloads of `reduce`, `sum`, and `product` algorithms to [numeric.ops.overview] (the `<numeric>` header synopsis) as follows.
 
-TODO: Check that using `projected<I, Proj>` instead of `I` in _`indirectly-binary_foldable`_ is the right way to handle projections.
+TODO: Check that using `projected<I, Proj>` instead of `I` in _`indirectly-binary-foldable`_ is the right way to handle projections.
 
 ```
   template<class ExecutionPolicy, class ForwardIterator, class T, class BinaryOperation>
