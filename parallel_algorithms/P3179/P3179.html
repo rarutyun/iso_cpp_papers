@@ -459,7 +459,7 @@ algorithms</h1>
   <tr>
     <td>Document #:</td>
     <td>
-      P3179R8
+      D3179R9
       [<a href="https://wg21.link/P3179">Latest</a>]
       [<a href="https://wg21.link/P3179/status">Status</a>]
     </td>
@@ -699,14 +699,15 @@ in <span><span>[version.syn]</span></span><span></span></a></li>
 </ul></li>
 <li><a href="#revision_history" id="toc-revision_history"><span class="toc-section-number">9</span> Revision history<span></span></a>
 <ul>
-<li><a href="#r7_r8" id="toc-r7_r8"><span class="toc-section-number">9.1</span> R7 =&gt; R8<span></span></a></li>
-<li><a href="#r6_r7" id="toc-r6_r7"><span class="toc-section-number">9.2</span> R6 =&gt; R7<span></span></a></li>
-<li><a href="#r5_r6" id="toc-r5_r6"><span class="toc-section-number">9.3</span> R5 =&gt; R6<span></span></a></li>
-<li><a href="#r4_r5" id="toc-r4_r5"><span class="toc-section-number">9.4</span> R4 =&gt; R5<span></span></a></li>
-<li><a href="#r3_r4" id="toc-r3_r4"><span class="toc-section-number">9.5</span> R3 =&gt; R4<span></span></a></li>
-<li><a href="#r2_r3" id="toc-r2_r3"><span class="toc-section-number">9.6</span> R2 =&gt; R3<span></span></a></li>
-<li><a href="#r1_r2" id="toc-r1_r2"><span class="toc-section-number">9.7</span> R1 =&gt; R2<span></span></a></li>
-<li><a href="#r0_r1" id="toc-r0_r1"><span class="toc-section-number">9.8</span> R0 =&gt; R1<span></span></a></li>
+<li><a href="#r8_r9" id="toc-r8_r9"><span class="toc-section-number">9.1</span> R8 =&gt; R9<span></span></a></li>
+<li><a href="#r7_r8" id="toc-r7_r8"><span class="toc-section-number">9.2</span> R7 =&gt; R8<span></span></a></li>
+<li><a href="#r6_r7" id="toc-r6_r7"><span class="toc-section-number">9.3</span> R6 =&gt; R7<span></span></a></li>
+<li><a href="#r5_r6" id="toc-r5_r6"><span class="toc-section-number">9.4</span> R5 =&gt; R6<span></span></a></li>
+<li><a href="#r4_r5" id="toc-r4_r5"><span class="toc-section-number">9.5</span> R4 =&gt; R5<span></span></a></li>
+<li><a href="#r3_r4" id="toc-r3_r4"><span class="toc-section-number">9.6</span> R3 =&gt; R4<span></span></a></li>
+<li><a href="#r2_r3" id="toc-r2_r3"><span class="toc-section-number">9.7</span> R2 =&gt; R3<span></span></a></li>
+<li><a href="#r1_r2" id="toc-r1_r2"><span class="toc-section-number">9.8</span> R1 =&gt; R2<span></span></a></li>
+<li><a href="#r0_r1" id="toc-r0_r1"><span class="toc-section-number">9.9</span> R0 =&gt; R1<span></span></a></li>
 </ul></li>
 <li><a href="#polls" id="toc-polls"><span class="toc-section-number">10</span> Polls<span></span></a>
 <ul>
@@ -4474,8 +4475,8 @@ non-constant functions. — <em>end note</em>]</p>
 <p><em>Remarks</em>:</p>
 <ul>
 <li>If <code class="sourceCode default">f</code> returns a result, the
-result is ignored. Implementations do not have the freedom granted under
-<span><a href="https://wg21.link/algorithms.parallel.exec">[algorithms.parallel.exec]</a></span>
+result is ignored.</li>
+<li>Implementations do not have the freedom granted under <span><a href="https://wg21.link/algorithms.parallel.exec">[algorithms.parallel.exec]</a></span>
 to make arbitrary copies of elements from the input sequence.</li>
 <li><code class="sourceCode default">f</code> may modify objects via its
 arguments (<span><a href="https://wg21.link/algorithms.parallel.user">[algorithms.parallel.user]</a></span>).</li>
@@ -4527,8 +4528,8 @@ non-constant functions. — <em>end note</em>]</p>
 <p><em>Remarks</em>:</p>
 <ul>
 <li>If <code class="sourceCode default">f</code> returns a result, the
-result is ignored. Implementations do not have the freedom granted under
-<span><a href="https://wg21.link/algorithms.parallel.exec">[algorithms.parallel.exec]</a></span>
+result is ignored.</li>
+<li>Implementations do not have the freedom granted under <span><a href="https://wg21.link/algorithms.parallel.exec">[algorithms.parallel.exec]</a></span>
 to make arbitrary copies of elements from the input sequence.</li>
 <li><code class="sourceCode default">f</code> may modify objects via its
 arguments (<span><a href="https://wg21.link/algorithms.parallel.user">[algorithms.parallel.user]</a></span>).</li>
@@ -5505,11 +5506,12 @@ do not overlap.</p>
 <span><code class="sourceCode default">std</code></span></ins></span>,
 there <span class="rm" style="color: #bf0303"><del>might</del></span><span class="add" style="color: #006e28"><ins>can</ins></span> be a performance cost if
 <code class="sourceCode cpp">iterator_traits<span class="op">&lt;</span>ForwardIterator1<span class="op">&gt;::</span>value_type</code>
-is not <em>Cpp17MoveConstructible</em> (Table 31). <span class="add" style="color: #006e28"><ins>For the parallel algorithm overloads in
+<span class="rm" style="color: #bf0303"><del>is not</del></span><span class="add" style="color: #006e28"><ins>does not meet the</ins></span>
+<em>Cpp17MoveConstructible</em> (Table 31) <span class="add" style="color: #006e28"><ins>requirements</ins></span>. <span class="add" style="color: #006e28"><ins>For the parallel algorithm overloads in
 namespace <span><code class="sourceCode default">ranges</code></span>,
 there can be a performance cost if
 <span><code class="sourceCode default">iter_value_t&lt;I&gt;</code></span>
-is not
+does not model
 <span><code class="sourceCode default">move_constructible</code></span>.</ins></span>
 — <em>end note</em>]</p>
 <p><span class="marginalizedparent"><a class="marginalized">17</a></span>
@@ -6390,7 +6392,7 @@ parallel algorithm overloads in namespace
 <span><code class="sourceCode default">ranges</code></span>, there can
 be a performance cost if
 <span><code class="sourceCode default">iter_value_t&lt;I&gt;</code></span>
-is not
+does not model
 <span><code class="sourceCode default">move_constructible</code></span>.</ins></span>
 — <em>end note</em>]</p>
 <p><span class="marginalizedparent"><a class="marginalized">12</a></span>
@@ -6635,7 +6637,7 @@ overloads in namespace
 <span><code class="sourceCode default">ranges</code></span>, there can
 be a performance cost if
 <span><code class="sourceCode default">iter_value_t&lt;I&gt;</code></span>
-does not meet both the
+does not model both
 <span><code class="sourceCode default">copy_constructible</code></span>
 and
 <span><code class="sourceCode default">copy_assignable</code></span>. —
@@ -6646,7 +6648,7 @@ consecutive group<span class="add" style="color: #006e28"><ins>s</ins></span> of
 by the iterator <code class="sourceCode cpp">i</code> in the range <code class="sourceCode cpp"><span class="op">[</span>first <span class="add" style="color: #006e28"><ins>+ 1</ins></span>, last<span class="op">)</span></code>
 for which
 <code class="sourceCode cpp"><em>E</em><span class="add" style="color: #006e28"><ins>(i)</ins></span></code>
-holds <span class="add" style="color: #006e28"><ins>into a range
+holds <span class="add" style="color: #006e28"><ins>into the range
 <span><code class="sourceCode default">[result, result + <em>N</em>)</code></span></ins></span>.
 <!-- [Modifications in the middle of the sentence are to fix the wording by aligning with `unique`.]{.draftnote audience="LWG"} --></p>
 <p><span class="marginalizedparent"><a class="marginalized">10</a></span>
@@ -6793,11 +6795,11 @@ assignment takes place: <code class="sourceCode default">*(result + <em>N</em> -
 <code class="sourceCode default">{<em>NEW_FIRST</em>, result + <em>N</em>}</code>.</p>
 <p><span class="note"><span>[ <em>Note:</em> </span>While the return
 type for the parallel and non-parallel algorithm overloads in the
-namespace <code class="sourceCode default">ranges</code> is the same the
-semantics is different because the parallel range algorithm overloads
-<code class="sourceCode default">result_last - result</code> can be
-insufficient to copy all data from the input.<span> — <em>end note</em>
-]</span></span></p>
+namespace <code class="sourceCode default">ranges</code> is the same,
+the semantics is different because for the parallel range algorithm
+overloads <code class="sourceCode default">result_last - result</code>
+can be insufficient to copy all data from the input.<span> — <em>end
+note</em> ]</span></span></p>
 <p><span class="marginalizedparent"><a class="marginalized">x</a></span>
 <em>Complexity</em>: Exactly
 <em><code class="sourceCode default">N</code></em> assignments.</p>
@@ -6921,11 +6923,11 @@ assignment takes place: <code class="sourceCode default">*(result + i) = *(first
 <em>Returns</em>: <code class="sourceCode default">{first + (<em>N</em> + (middle - first)) % <em>M</em>, result + <em>N</em>}</code>.</p>
 <p><span class="note"><span>[ <em>Note:</em> </span>While the return
 type for the parallel and non-parallel algorithm overloads in the
-namespace <code class="sourceCode default">ranges</code> is the same the
-semantics is different because the parallel range algorithm overloads
-<code class="sourceCode default">result_last - result</code> can be
-insufficient to copy all data from the input.<span> — <em>end note</em>
-]</span></span></p>
+namespace <code class="sourceCode default">ranges</code> is the same,
+the semantics is different because for the parallel range algorithm
+overloads <code class="sourceCode default">result_last - result</code>
+can be insufficient to copy all data from the input.<span> — <em>end
+note</em> ]</span></span></p>
 <p><span class="marginalizedparent"><a class="marginalized">x</a></span>
 <em>Complexity</em>: Exactly
 <em><code class="sourceCode default">N</code></em> assignments.</p>
@@ -7756,9 +7758,9 @@ there <span class="rm" style="color: #bf0303"><del>might</del></span><span class
 namespace <span><code class="sourceCode default">ranges</code></span>,
 there can be a performance cost if
 <span><code class="sourceCode default">first</code></span>’s value type
-does not meet the
-<span><code class="sourceCode default">copy_constructible</code></span>
-requirements.</ins></span> — <em>end note</em>]</p>
+does not model
+<span><code class="sourceCode default">copy_constructible</code></span>.</ins></span>
+— <em>end note</em>]</p>
 <p><span class="marginalizedparent"><a class="marginalized">17</a></span>
 <em>Effects</em>: For each iterator
 <code class="sourceCode cpp">i</code> in <code class="sourceCode cpp"><span class="op">[</span>first, <span class="rm" style="color: #bf0303"><del>last</del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">first + <em>N</em></code></span></ins></span><span class="op">)</span></code>,
@@ -8423,8 +8425,8 @@ namespace <code class="sourceCode cpp">std</code>.</li>
 for the overloads in namespace
 <code class="sourceCode cpp">ranges</code><span class="add" style="color: #006e28"><ins>, if
 <em><span><code class="sourceCode default">N</code></span></em> is equal
-to <em><span><code class="sourceCode default">M</code></span></em> is
-<span><code class="sourceCode default">true</code></span></ins></span>.</li>
+to
+<em><span><code class="sourceCode default">M</code></span></em></ins></span>.</li>
 <li><span class="marginalizedparent"><a class="marginalized">(4.x)</a></span>
 <span class="add" style="color: #006e28"><ins>Otherwise,
 <span><code class="sourceCode default">{j1, result_last}</code></span>
@@ -8550,6 +8552,7 @@ namespace <code class="sourceCode cpp">std</code>.</li>
 for the overloads in namespace
 <code class="sourceCode cpp">ranges</code><span class="add" style="color: #006e28"><ins>, if
 <em><span><code class="sourceCode default">N</code></span></em> is equal
+to
 <span><code class="sourceCode default"><em>K</em> + <em>M</em></code></span></ins></span>.</li>
 <li><span class="marginalizedparent"><a class="marginalized">(4.x)</a></span>
 <span class="add" style="color: #006e28"><ins>Otherwise,
@@ -9227,16 +9230,21 @@ type <code class="sourceCode default">I</code> and
 <span id="cb224-7"><a href="#cb224-7" aria-hidden="true" tabindex="-1"></a>concept <em>nothrow-sized-random-access-range</em> = <em>// exposition only</em></span>
 <span id="cb224-8"><a href="#cb224-8" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-random-access-range</em>&lt;R&gt; &amp;&amp; sized_range&lt;R&gt;;</span></code></pre></div>
 <p>A type <code class="sourceCode default">R</code> models <em><code class="sourceCode default">nothrow-sized-random-access-range</code></em>
-only if no exceptions are thrown from the call to ranges​::​size on an
-object of type <code class="sourceCode default">R</code>.</p>
+only if no exceptions are thrown from the call to
+<code class="sourceCode default">ranges::size</code> on an object of
+type <code class="sourceCode default">R</code>.</p>
 </div>
 <h1 data-number="9" id="revision_history"><span class="header-section-number">9</span> Revision history<a href="#revision_history" class="self-link"></a></h1>
-<h2 data-number="9.1" id="r7_r8"><span class="header-section-number">9.1</span> R7 =&gt; R8<a href="#r7_r8" class="self-link"></a></h2>
+<h2 data-number="9.1" id="r8_r9"><span class="header-section-number">9.1</span> R8 =&gt; R9<a href="#r8_r9" class="self-link"></a></h2>
+<ul>
+<li>Make cosmetic improvements to formal wording</li>
+</ul>
+<h2 data-number="9.2" id="r7_r8"><span class="header-section-number">9.2</span> R7 =&gt; R8<a href="#r7_r8" class="self-link"></a></h2>
 <ul>
 <li>Significantly improve wording after multiple LWG review
 sessions</li>
 </ul>
-<h2 data-number="9.2" id="r6_r7"><span class="header-section-number">9.2</span> R6 =&gt; R7<a href="#r6_r7" class="self-link"></a></h2>
+<h2 data-number="9.3" id="r6_r7"><span class="header-section-number">9.3</span> R6 =&gt; R7<a href="#r6_r7" class="self-link"></a></h2>
 <ul>
 <li>Update the design description and the wording to reflect the LEWG
 decision on where algorithms with bounded output should stop</li>
@@ -9250,7 +9258,7 @@ exposition only concept to <em><code class="sourceCode cpp">sized<span class="op
 <li>Put the questions we have for LWG as drafting notes next to the
 relevant wording</li>
 </ul>
-<h2 data-number="9.3" id="r5_r6"><span class="header-section-number">9.3</span> R5 =&gt; R6<a href="#r5_r6" class="self-link"></a></h2>
+<h2 data-number="9.4" id="r5_r6"><span class="header-section-number">9.4</span> R5 =&gt; R6<a href="#r5_r6" class="self-link"></a></h2>
 <ul>
 <li>Add <code class="sourceCode cpp">rotate_copy</code> back into the
 scope</li>
@@ -9270,7 +9278,7 @@ values</li>
 <code class="sourceCode cpp">partition_copy</code></li>
 <li>Update analysis on using views in parallel context</li>
 </ul>
-<h2 data-number="9.4" id="r4_r5"><span class="header-section-number">9.4</span> R4 =&gt; R5<a href="#r4_r5" class="self-link"></a></h2>
+<h2 data-number="9.5" id="r4_r5"><span class="header-section-number">9.5</span> R4 =&gt; R5<a href="#r4_r5" class="self-link"></a></h2>
 <ul>
 <li>Add the necessary wording to <span><a href="https://wg21.link/algorithm.syn">[algorithm.syn]</a></span></li>
 <li>Add the contextual algorithms description to the wording, even if no
@@ -9300,7 +9308,7 @@ design overview</li>
 <li>Remove <code class="sourceCode cpp">rotate_copy</code> from scope
 due to design issues</li>
 </ul>
-<h2 data-number="9.5" id="r3_r4"><span class="header-section-number">9.5</span> R3 =&gt; R4<a href="#r3_r4" class="self-link"></a></h2>
+<h2 data-number="9.6" id="r3_r4"><span class="header-section-number">9.6</span> R3 =&gt; R4<a href="#r3_r4" class="self-link"></a></h2>
 <ul>
 <li>Revert back to range-as-the-output design aspect, change the formal
 wording accordingly</li>
@@ -9322,12 +9330,12 @@ overloads</li>
 <li>List range algorithms that are being excluded</li>
 </ul></li>
 </ul>
-<h2 data-number="9.6" id="r2_r3"><span class="header-section-number">9.6</span> R2 =&gt; R3<a href="#r2_r3" class="self-link"></a></h2>
+<h2 data-number="9.7" id="r2_r3"><span class="header-section-number">9.7</span> R2 =&gt; R3<a href="#r2_r3" class="self-link"></a></h2>
 <ul>
 <li>Use <code class="sourceCode cpp">iterator</code> as an output</li>
 <li>Add wording</li>
 </ul>
-<h2 data-number="9.7" id="r1_r2"><span class="header-section-number">9.7</span> R1 =&gt; R2<a href="#r1_r2" class="self-link"></a></h2>
+<h2 data-number="9.8" id="r1_r2"><span class="header-section-number">9.8</span> R1 =&gt; R2<a href="#r1_r2" class="self-link"></a></h2>
 <ul>
 <li>Summarize proposed differences from the serial range algorithms and
 from the non-range parallel algorithms</li>
@@ -9338,7 +9346,7 @@ from the non-range parallel algorithms</li>
 <li>Fix the signatures of <code class="sourceCode cpp">for_each</code>
 to match the proposed design</li>
 </ul>
-<h2 data-number="9.8" id="r0_r1"><span class="header-section-number">9.8</span> R0 =&gt; R1<a href="#r0_r1" class="self-link"></a></h2>
+<h2 data-number="9.9" id="r0_r1"><span class="header-section-number">9.9</span> R0 =&gt; R1<a href="#r0_r1" class="self-link"></a></h2>
 <ul>
 <li>Address the feedback from SG1 and SG9 review</li>
 <li>Add more information about iterator constraints</li>
