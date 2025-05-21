@@ -158,7 +158,7 @@ P2214R2 points out that `ranges::transform_inclusive_scan(r, o, f, g)` can be re
 
 ### We don't propose `reduce_first`
 
-<a href="https://wg21.link/P2760R1">P2760R1</a> additionally asks whether there should be a `reduce_first` algorithm, analogous to `fold_left_first`, for binary operations that lack a natural identity element to serve as the initial value.  An example would be `min` on a range of `int` values, where callers would have no way to tell if `INT_MAX` represents a value in the range, or an arbitrary stand-in for the (nonexistent) identity element.  We do not propose `reduce_first` for the following reasons.
+Section 5.1 of <a href="https://wg21.link/P2760R1">P2760R1</a> asks whether there should be a `reduce_first` algorithm, analogous to `fold_left_first`, for binary operations that lack a natural identity element to serve as the initial value.  An example would be `min` on a range of `int` values, where callers would have no way to tell if `INT_MAX` represents a value in the range, or an arbitrary stand-in for the (nonexistent) identity element.  We do not propose `reduce_first` for the following reasons.
 
 1. P3179R8 already proposes parallel ranges overloads of `min_element`, `max_element`, and `minmax_element`.
 
@@ -168,9 +168,47 @@ P2214R2 points out that `ranges::transform_inclusive_scan(r, o, f, g)` can be re
 
 We have to decide in this proposal whether to add `reduce_first`, because of projections.  As we explain below, it makes sense for `reduce` to take an optional projection.  However, `reduce_first` could not straightforwardly support projections.  If `reduce` takes an optional projection, then it would be inconsistent with `reduce_first`.  The only reason `fold_left` and `fold_right` do not take projections is for consistency with `fold_left_first` and `fold_right_last`, which cannot take projections.  The only way for us to leave `reduce_first` for a later proposal is if `reduce` does not take a projection.
 
+### We don't propose `reduce_with_iter`
+
+A `reduce_with_iter` algorithm would look like `fold_left_with_iter`, but would permit reordering of binary operations.  It would return both an iterator to one past the last element, and the computed value.  A hypothetical `reduce_with_iter` algorithm would also return an iterator to one past the last element, and the computed value, but would share `reduce`'s permission to reorder binary operations.
+
+We do not propose the analogous `reduce_with_iter` here, though we would not oppose someone else proposing it.  That algorithm would serve users who are writing code generic enough to work with single-pass input iterators, _and_ who want to expose potential binary operation reordering opportunities.
+
+Just like `fold_left`, the `reduce` algorithm should return just the computed value.  Section 4.4 of <a href="https://wg21.link/P2322R6">P2322R6</a> argues that this makes it easier to use, and improves consistency with other ranges algorithms like `ranges::count` and `ranges::any_of`.  It is also consistent with P3179R8.  The algorithms `fold_left_with_iter` and `fold_left_first_with_iter` exist for users who want both the iterator and the value.  Section 4.4 of P2322R6 further elaborates that `fold_left` should not be specified in terms of `fold_left_with_iter`, for performance reasons: it would "incur an extra move of the accumulated result, due to lack of copy elision (we have different return types)."  The `*_with_iter` algorithms are separate algorithms that need separate specifications.
+
 ### Algorithms that we propose here
 
 This leaves three algorithms, which we propose here: `reduce`, `inclusive_scan`, and `exclusive_scan`.  <a href="https://wg21.link/P2760R1">P2760R1</a> proposes convenience wrappers `ranges::sum(r)` as `ranges::reduce(r, plus{}, range_value_t<R>())` and `ranges::product(r)` as `ranges::reduce(r, multiplies{}, range_value_t<R>(1))`; we propose parallel and non-parallel overloads of these here as well.
+
+## Range categories and return types
+
+We make the parallel algorithms proposed here take sized random access ranges.  As a result, any parallel algorithms with an output range need to return an iterator to one past the last element of the input, in case there wasn't enough room in the output.  We make the non-parallel algorithms take (single-pass) sized `input_range` and `output_range`, for consistency with the C++17 parallel algorithms that only require _LegacyInputIterator_ and _LegacyOutputIterator_.  This suggests making the algorithms with output ranges -- `inclusive_scan` and `exclusive_scan` -- return both input and output iterators.  This is consistent both with the existing non-parallel ranges algorithms and with P3179R8 (e.g., `ranges::transform`).
+
+The `reduce` algorithm only takes an input range.  For the non-parallel overloads, this suggests that it should return both the computed value and the iterator to one past the last element of the input.  As we explain above, though, it would be more consistent with both the existing ranges algorithms and P3179R8 for `reduce` to return a single value.  We don't propose a separate algorithm `reduce_with_iter` here, though we would not oppose someone else doing so.
+
+P3179R8 does not aim for perfect consistency with the range categories accepted by existing ranges algorithms.  The algorithms proposed by P3179R8 differ in the following ways.
+
+1. P3179R8 uses a range, not an iterator, as the output parameter (see Section 2.7).
+
+2. P3179R8 requires that the ranges be sized (see Section 2.8).
+
+3. P3179R8 requires random access ranges (see Section 2.6).
+
+Of these differences, (1) and (2) could apply generally to all ranges algorithms, so we adopt them for this proposal.  This would make our proposal the first to add non-parallel range-as-output ranges algorithms to the Standard.  For arguments in favor of non-parallel algorithms taking a range as output, please refer to <a href="https://wg21.link/P3490R0">P3490R0</a>, "Justification for ranges as the output of parallel range algorithms."  (Despite the title, it has things to say about non-parallel algorithms too.)  Taking a range as output would prevent use of existing output-only iterators that do not have a separate sized sentinel type, like `std::back_insert_iterator`.  Such iterators would only work with the non-parallel algorithms.  P3490R0 shows that it is possible for both iterator-as-output and range-as-output overloads to coexist, so we follow P3179R8 by not proposing iterator-as-output algorithms here.
+
+Difference (1) relates to P3179R8 only proposing parallel algorithms.  It would make sense for us to relax this requirement for the non-parallel algorithms we propose.  This leaves us with two possibilities:
+
+* (single-pass) input and output ranges, the most general; or
+
+* (multipass) forward ranges.
+
+C++17's non-parallel `reduce` and `*_scan` only require (single-pass) input ranges.  One could argue that this is overly general.  Since `reduce` and `*_scan` permit reordering of binary operations, why should they permit iterators with a required or preferred ordering?  On the other hand, the point of using `reduce` is for the user to grant permission to reorder binary operations.  It's still _correct_ to call non-parallel `reduce` and `*_scan` with single-pass input ranges.  Users might write a generic function that could work with any input ranges, but they want to expose potential optimizations if they call it with random access ranges.
+
+The argument for non-parallel `reduce` and `*_scan` taking maximally generic range categories seems to contradict P3179R8's argument for making the parallel algorithms require random access ranges.  It's _correct_ to call C++17 parallel algorithms with forward iterators.  However, calling a parallel algorithm expresses a different set of expectations.  The kinds of users who explicitly opt into parallelism care more about performance, so they are more likely to be unhappy if opting in has a high risk of making their code slower.  Forward ranges require higher-overhead and therefore riskier parallelization strategies, like copying the range or per-element task parallelism.
+
+## Constexpr parallel algorithms?
+
+<a href="https://wg21.link/p2902r1">P2902R1</a> proposes to add `constexpr` to the parallel algorithms.  P3179R8 does not object to this; see Section 2.10.  We continue the approach of P3179R8 in not opposing P2902R1's approach, but also not depending on it.
 
 ## `ranges::reduce` design
 
@@ -230,14 +268,6 @@ We propose that `ranges::reduce` take a projection parameter, unlike `ranges::fo
 As we explain above, the optional projection makes `transform_*` versions of the algorithms superfluous.  The projection *is* the transform function.
 
 `ranges::fold_left` does not take a projection.  Section 4.6 of <a href="https://wg21.link/P2322R6">P2322R6</a> explains that the only reason for this is consistency with `ranges::fold_left_first`.  The latter does not take a projection in order to avoid an extra copy of the leftmost value, that would be required in order to support projections with a range whose iterators yield proxy reference types like `tuple<T&>` (as `views::zip` does).  P2322R6 clarifies that `ranges::fold_left` does not have this problem, because it never needs to materialize an input value; it can just project each element at iterator `iter` via `invoke(proj, *iter)`, and feed that directly into the binary operation.  If we never want a `ranges::reduce_first`, then `ranges::reduce` does not have `fold_left_first`'s design issue and can thus take a projection.
-
-## Input and output ranges
-
-We follow the approach of P3179R8.  For existing non-ranges algorithms that take iterator pairs as input and return a value, their ranges versions just return a value.  This covers `reduce`.  The non-ranges versions of `inclusive_scan` and `exclusive_scan` take an input range and an output iterator, and return an iterator to the element past the last element written.  This works more or less like `ranges::transform`, so we imitate the approach in P3179R8 by having those algorithms take an input range and an output range (both sized), and return an alias to `in_out_result`.  (If the output doesn't suffice to contain the input, then callers need to know what part of the input hasn't yet been processed.)  These algorithms have freedom to reorder binary operations and can copy the binary operator, so there is no value in returning it (as a way for callers to get at any of its modified state).
-
-## Constexpr parallel algorithms?
-
-<a href="https://wg21.link/p2902r1">P2902R1</a> proposes to add `constexpr` to the parallel algorithms.  P3179R8 does not object to this; see Section 2.10.  We continue the approach of P3179R8 in not opposing P2902R1's approach, but also not depending on it.
 
 # Implementation
 
