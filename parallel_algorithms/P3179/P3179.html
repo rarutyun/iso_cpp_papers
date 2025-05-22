@@ -5807,11 +5807,13 @@ for binary transforms defined in namespace
 </ul></li>
 </ul>
 <p><span class="marginalizedparent"><a class="marginalized">2</a></span>
-<em>Preconditions</em>: <code class="sourceCode cpp">op</code> and
-<code class="sourceCode cpp">binary_op</code> <span class="add" style="color: #006e28"><ins>satisfy the requirements specified in
-<span><a href="https://wg21.link/algorithms.parallel.user">[algorithms.parallel.user]</a></span>,</ins></span>
-do not invalidate iterators or subranges, nor modify elements in the
-ranges</p>
+<em>Preconditions</em>: <span class="add" style="color: #006e28"><ins>For parallel algorithm overloads
+<span><code class="sourceCode default">op</code></span> and
+<span><code class="sourceCode default">binary_op</code></span> satisfy
+the requirements specified in <span><a href="https://wg21.link/algorithms.parallel.user">[algorithms.parallel.user]</a></span>.</ins></span>
+<code class="sourceCode cpp">op</code> and
+<code class="sourceCode cpp">binary_op</code> do not invalidate
+iterators or subranges, nor modify elements in the ranges</p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(2.1)</a></span>
 <code class="sourceCode cpp"><span class="op">[</span>first1, first1 <span class="op">+</span> <em>N</em><span class="op">]</span></code>,</li>
