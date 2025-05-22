@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2025-05-18" />
+  <meta name="dcterms.date" content="2025-05-22" />
   <title>Reconsider parallel `ranges::rotate_copy` and
 `ranges::reverse_copy`</title>
   <style>
@@ -426,14 +426,14 @@ and <code class="sourceCode cpp">ranges<span class="op">::</span>reverse_copy</c
   <tr>
     <td>Document #:</td>
     <td>
-      P3709R0
+      P3709R1
       [<a href="https://wg21.link/P3709">Latest</a>]
       [<a href="https://wg21.link/P3709/status">Status</a>]
     </td>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2025-05-18</td>
+    <td>2025-05-22</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -467,9 +467,22 @@ design<span></span></a></li>
 design<span></span></a></li>
 <li><a href="#alternative_design" id="toc-alternative_design"><span class="toc-section-number">4</span> Alternative
 design<span></span></a></li>
-<li><a href="#acknowledgments" id="toc-acknowledgments"><span class="toc-section-number">5</span>
+<li><a href="#wording" id="toc-wording"><span class="toc-section-number">5</span> Wording<span></span></a>
+<ul>
+<li><a href="#modify_alg_syn" id="toc-modify_alg_syn"><span class="toc-section-number">5.1</span> Modify
+<span><span>[algorithm.syn]</span></span><span></span></a></li>
+<li><a href="#modify_reverse" id="toc-modify_reverse"><span class="toc-section-number">5.2</span> Modify
+<span><span>[alg.reverse]</span></span><span></span></a></li>
+<li><a href="#modify_rotate" id="toc-modify_rotate"><span class="toc-section-number">5.3</span> Modify
+<span><span>[alg.rotate]</span></span><span></span></a></li>
+</ul></li>
+<li><a href="#revision_history" id="toc-revision_history"><span class="toc-section-number">6</span> Revision history<span></span></a>
+<ul>
+<li><a href="#r0_r1" id="toc-r0_r1"><span class="toc-section-number">6.1</span> R0 =&gt; R1<span></span></a></li>
+</ul></li>
+<li><a href="#acknowledgments" id="toc-acknowledgments"><span class="toc-section-number">7</span>
 Acknowledgements<span></span></a></li>
-<li><a href="#bibliography" id="toc-bibliography"><span class="toc-section-number">6</span> References<span></span></a></li>
+<li><a href="#bibliography" id="toc-bibliography"><span class="toc-section-number">8</span> References<span></span></a></li>
 </ul>
 </div>
 <h1 class="unnumbered unlisted" id="abstract">Abstract<a href="#abstract" class="self-link"></a></h1>
@@ -1021,13 +1034,232 @@ it, so it likely means a different return type for serial “rangified”
 <p>If this proposal does not have a consensus, authors’ preference is to
 remove parallel <code class="sourceCode cpp">reverse_copy</code> and
 <code class="sourceCode cpp">rotate_copy</code> from <span class="citation" data-cites="P3179R7"><a href="https://wg21.link/p3179r7" role="doc-biblioref">[P3179R7]</a></span> and add them later.</p>
-<h1 data-number="5" id="acknowledgments"><span class="header-section-number">5</span> Acknowledgements<a href="#acknowledgments" class="self-link"></a></h1>
+<h1 data-number="5" id="wording"><span class="header-section-number">5</span> Wording<a href="#wording" class="self-link"></a></h1>
+<p>The diff is against P3709R9.</p>
+<h2 data-number="5.1" id="modify_alg_syn"><span class="header-section-number">5.1</span> Modify <span><a href="https://wg21.link/algorithm.syn">[algorithm.syn]</a></span><a href="#modify_alg_syn" class="self-link"></a></h2>
+<div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>namespace ranges {</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  template&lt;class I, class O&gt;</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    using reverse_copy_result = in_out_result&lt;I, O&gt;;</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;class I, class O&gt;</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="va">+    using reverse_copy_result = in_in_out_result&lt;I, I, O&gt;;</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  template&lt;bidirectional_iterator I, sentinel_for&lt;I&gt; S, weakly_incrementable O&gt;</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    requires indirectly_copyable&lt;I, O&gt;</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    constexpr reverse_copy_result&lt;I, O&gt;</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>      reverse_copy(I first, S last, O result);</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  template&lt;bidirectional_range R, weakly_incrementable O&gt;</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    requires indirectly_copyable&lt;iterator_t&lt;R&gt;, O&gt;</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    constexpr reverse_copy_result&lt;borrowed_iterator_t&lt;R&gt;, O&gt;</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>      reverse_copy(R&amp;&amp; r, O result);</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>execution-policy</em> Ep, random_access_iterator I, sized_sentinel_for&lt;I&gt; S,</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>            random_access_iterator O, sized_sentinel_for&lt;O&gt; OutS&gt;</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    requires indirectly_copyable&lt;I, O&gt;</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="st">-    reverse_copy_result&lt;I, O&gt;</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a><span class="va">+    reverse_copy_truncated_result&lt;I, O&gt;</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>      reverse_copy(Ep&amp;&amp; exec, I first, S last, O result, OutS result_last);    <em>// freestanding-deleted</em></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>execution-policy</em> Ep, <em>sized-random-access-range</em> R, <em>sized-random-access-range</em> OutR&gt;</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>    requires indirectly_copyable&lt;iterator_t&lt;R&gt;, iterator_t&lt;OutR&gt;&gt;</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a><span class="st">-    reverse_copy_result&lt;borrowed_iterator_t&lt;R&gt;, borrowed_iterator_t&lt;OutR&gt;&gt;</span></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a><span class="va">+    reverse_copy_truncated_result&lt;borrowed_iterator_t&lt;R&gt;, borrowed_iterator_t&lt;OutR&gt;&gt;</span></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>      reverse_copy(Ep&amp;&amp; exec, R&amp;&amp; r, OutR&amp;&amp; result_r);    <em>// freestanding-deleted</em></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>namespace ranges {</span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>  template&lt;class I, class O&gt;</span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>    using rotate_copy_result = in_out_result&lt;I, O&gt;;</span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;class I, class O&gt;</span></span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a><span class="va">+    using rotate_copy_truncated_result = in_in_out_result&lt;I, I, O&gt;;</span></span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>  template&lt;forward_iterator I, sentinel_for&lt;I&gt; S, weakly_incrementable O&gt;</span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>    requires indirectly_copyable&lt;I, O&gt;</span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>    constexpr rotate_copy_result&lt;I, O&gt;</span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>      rotate_copy(I first, I middle, S last, O result);</span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>  template&lt;forward_range R, weakly_incrementable O&gt;</span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>    requires indirectly_copyable&lt;iterator_t&lt;R&gt;, O&gt;</span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>    constexpr rotate_copy_result&lt;borrowed_iterator_t&lt;R&gt;, O&gt;</span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>      rotate_copy(R&amp;&amp; r, iterator_t&lt;R&gt; middle, O result);</span>
+<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>execution-policy</em> Ep, random_access_iterator I, sized_sentinel_for&lt;I&gt; S,</span>
+<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a>            random_access_iterator O, sized_sentinel_for&lt;O&gt; OutS&gt;</span>
+<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a>    requires indirectly_copyable&lt;I, O&gt;</span>
+<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a><span class="st">-    ranges::rotate_copy_result&lt;I, O&gt;</span></span>
+<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a><span class="va">+    ranges::rotate_copy_truncated_result&lt;I, O&gt;</span></span>
+<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a>      ranges::rotate_copy(Ep&amp;&amp; exec, I first, I middle, S last, O result, OutS result_last);    <em>// freestanding-deleted</em></span>
+<span id="cb12-50"><a href="#cb12-50" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>execution-policy</em> Ep, <em>sized-random-access-range</em> R, <em>sized-random-access-range</em> OutR&gt;</span>
+<span id="cb12-51"><a href="#cb12-51" aria-hidden="true" tabindex="-1"></a>    requires indirectly_copyable&lt;iterator_t&lt;R&gt;, iterator_t&lt;OutR&gt;&gt;</span>
+<span id="cb12-52"><a href="#cb12-52" aria-hidden="true" tabindex="-1"></a><span class="st">-    ranges::rotate_copy_result&lt;borrowed_iterator_t&lt;R&gt;, borrowed_iterator_t&lt;OutR&gt;&gt;</span></span>
+<span id="cb12-53"><a href="#cb12-53" aria-hidden="true" tabindex="-1"></a><span class="va">+    ranges::rotate_copy_truncated_result&lt;borrowed_iterator_t&lt;R&gt;, borrowed_iterator_t&lt;OutR&gt;&gt;</span></span>
+<span id="cb12-54"><a href="#cb12-54" aria-hidden="true" tabindex="-1"></a>      ranges::rotate_copy(Ep&amp;&amp; exec, R&amp;&amp; r, iterator_t&lt;R&gt; middle, OutR&amp;&amp; result_r);    <em>// freestanding-deleted</em></span>
+<span id="cb12-55"><a href="#cb12-55" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+<h2 data-number="5.2" id="modify_reverse"><span class="header-section-number">5.2</span> Modify <span><a href="https://wg21.link/alg.reverse">[alg.reverse]</a></span><a href="#modify_reverse" class="self-link"></a></h2>
+<div class="sourceCode" id="cb13"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>bidirectional_iterator I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S, weakly_incrementable O<span class="op">&gt;</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> indirectly_copyable<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> ranges<span class="op">::</span>reverse_copy_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    ranges<span class="op">::</span>reverse_copy<span class="op">(</span>I first, S last, O result<span class="op">)</span>;</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>bidirectional_range R, weakly_incrementable O<span class="op">&gt;</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> indirectly_copyable<span class="op">&lt;</span>iterator_t<span class="op">&lt;</span>R<span class="op">&gt;</span>, O<span class="op">&gt;</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> ranges<span class="op">::</span>reverse_copy_result<span class="op">&lt;</span>borrowed_iterator_t<span class="op">&lt;</span>R<span class="op">&gt;</span>, O<span class="op">&gt;</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    ranges<span class="op">::</span>reverse_copy<span class="op">(</span>R<span class="op">&amp;&amp;</span> r, O result<span class="op">)</span>;</span></code></pre></div>
+<p><span class="marginalizedparent"><a class="marginalized">5</a></span>
+Let <em><code class="sourceCode cpp">N</code></em> be
+<code class="sourceCode cpp">last <span class="op">-</span> first</code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">6</a></span>
+<em>Preconditions</em>: The ranges <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+and <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <em>N</em><span class="op">)</span></code>
+do not overlap.</p>
+<p><span class="marginalizedparent"><a class="marginalized">7</a></span>
+<em>Effects</em>: Copies the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+to the range <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <em>N</em><span class="op">)</span></code>
+such that for every non-negative integer
+<code class="sourceCode cpp">i <span class="op">&lt;</span> <em>N</em></code>
+the following assignment takes place: <code class="sourceCode cpp"><span class="op">*(</span>result <span class="op">+</span> <em>N</em> <span class="op">-</span> <span class="dv">1</span> <span class="op">-</span> i<span class="op">)</span> <span class="op">=</span> <span class="op">*(</span>first <span class="op">+</span> i<span class="op">)</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">8</a></span>
+<em>Returns</em>:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(8.1)</a></span>
+<code class="sourceCode cpp">result <span class="op">+</span> <em>N</em></code>
+for the overloads in namespace
+<code class="sourceCode cpp">std</code>.</li>
+<li><span class="marginalizedparent"><a class="marginalized">(8.2)</a></span>
+<code class="sourceCode cpp"><span class="op">{</span>last, result <span class="op">+</span> <em>N</em><span class="op">}</span></code>
+for the overloads in namespace
+<code class="sourceCode cpp">ranges</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">9</a></span>
+<em>Complexity</em>: Exactly
+<em><code class="sourceCode cpp">N</code></em> assignments.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><em>execution-policy</em> Ep, random_access_iterator I, sized_sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S,</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>         random_access_iterator O, sized_sentinel_for<span class="op">&lt;</span>O<span class="op">&gt;</span> OutS<span class="op">&gt;</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> indirectly_copyable<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  ranges<span class="op">::</span>reverse_copy_<span class="add" style="color: #006e28"><ins>truncated_</ins></span>result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    ranges<span class="op">::</span>reverse_copy<span class="op">(</span>Ep<span class="op">&amp;&amp;</span> exec, I first, S last, O result, OutS result_last<span class="op">)</span>;</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><em>execution-policy</em> Ep, <em>sized-random-access-range</em> R, <em>sized-random-access-range</em> OutR<span class="op">&gt;</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> indirectly_copyable<span class="op">&lt;</span>iterator_t<span class="op">&lt;</span>R<span class="op">&gt;</span>, iterator_t<span class="op">&lt;</span>OutR<span class="op">&gt;&gt;</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  ranges<span class="op">::</span>reverse_copy_<span class="add" style="color: #006e28"><ins>truncated_</ins></span>result<span class="op">&lt;</span>borrowed_iterator_t<span class="op">&lt;</span>R<span class="op">&gt;</span>, borrowed_iterator_t<span class="op">&lt;</span>OutR<span class="op">&gt;&gt;</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    ranges<span class="op">::</span>reverse_copy<span class="op">(</span>Ep<span class="op">&amp;&amp;</span> exec, R<span class="op">&amp;&amp;</span> r, OutR<span class="op">&amp;&amp;</span> result_r<span class="op">)</span>;</span></code></pre></div>
+<p><span class="marginalizedparent"><a class="marginalized">x</a></span>
+Let <em><code class="sourceCode cpp">N</code></em> be
+min(<code class="sourceCode cpp">last <span class="op">-</span> first</code>,
+<code class="sourceCode cpp">result_last <span class="op">-</span> result</code>),
+and let <em><code class="sourceCode cpp">NEW_FIRST</code></em> be <code class="sourceCode cpp">first <span class="op">+</span> <span class="op">(</span>last <span class="op">-</span> first<span class="op">)</span> <span class="op">-</span> <em>N</em></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">x</a></span>
+<em>Preconditions</em>: The ranges <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+and <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <em>N</em><span class="op">)</span></code>
+do not overlap.</p>
+<p><span class="marginalizedparent"><a class="marginalized">x</a></span>
+<em>Effects</em>: Copies the range <code class="sourceCode cpp"><span class="op">[</span><em>NEW_FIRST</em>, last<span class="op">)</span></code>
+to the range <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <em>N</em><span class="op">)</span></code>
+such that for every non-negative integer
+<code class="sourceCode cpp">i <span class="op">&lt;</span> <em>N</em></code>
+the following assignment takes place: <code class="sourceCode cpp"><span class="op">*(</span>result <span class="op">+</span> <em>N</em> <span class="op">-</span> <span class="dv">1</span> <span class="op">-</span> i<span class="op">)</span> <span class="op">=</span> <span class="op">*(</span><em>NEW_FIRST</em> <span class="op">+</span> i<span class="op">)</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">x</a></span>
+<em>Returns</em>: <code class="sourceCode cpp">{<span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">last,</code></span></ins></span> <span class="citation" data-cites="*NEW_FIRST"><em>NEW_FIRST</span></em>, <span class="citation" data-cites="result">result</span> + <em>N</em>}</code>.</p>
+<p><span class="rm" style="color: #bf0303"><del><span class="note"><span>[ <em>Note:</em> </span>While the return type for the
+parallel and non-parallel algorithm overloads in the namespace
+<span><code class="sourceCode default">ranges</code></span> is the same
+the semantics is different because the parallel range algorithm
+overloads
+<span><code class="sourceCode default">result_last - result</code></span>
+can be insufficient to copy all data from the input.<span> — <em>end
+note</em> ]</span></span></del></span></p>
+<p><span class="marginalizedparent"><a class="marginalized">x</a></span>
+<em>Complexity</em>: Exactly
+<em><code class="sourceCode cpp">N</code></em> assignments.</p>
+<h2 data-number="5.3" id="modify_rotate"><span class="header-section-number">5.3</span> Modify <span><a href="https://wg21.link/alg.rotate">[alg.rotate]</a></span><a href="#modify_rotate" class="self-link"></a></h2>
+<div class="sourceCode" id="cb15"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>forward_iterator I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S, weakly_incrementable O<span class="op">&gt;</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> indirectly_copyable<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">constexpr</span> ranges<span class="op">::</span>rotate_copy_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>      ranges<span class="op">::</span>rotate_copy<span class="op">(</span>I first, I middle, S last, O result<span class="op">)</span>;</span></code></pre></div>
+<p><span class="marginalizedparent"><a class="marginalized">6</a></span>
+Let <em><code class="sourceCode cpp">N</code></em> be
+<code class="sourceCode cpp">last <span class="op">-</span> first</code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">7</a></span>
+<em>Preconditions</em>: <code class="sourceCode cpp"><span class="op">[</span>first, middle<span class="op">)</span></code>
+and <code class="sourceCode cpp"><span class="op">[</span>middle, last<span class="op">)</span></code>
+are valid ranges. The ranges <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+and <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <em>N</em><span class="op">)</span></code>
+do not overlap.</p>
+<p><span class="marginalizedparent"><a class="marginalized">8</a></span>
+<em>Effects</em>: Copies the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+to the range <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <em>N</em><span class="op">)</span></code>
+such that for each non-negative integer
+<code class="sourceCode cpp">i <span class="op">&lt;</span> <em>N</em></code>
+the following assignment takes place: <code class="sourceCode cpp"><span class="op">*(</span>result <span class="op">+</span> i<span class="op">)</span> <span class="op">=</span> <span class="op">*(</span>first <span class="op">+</span> <span class="op">(</span>i <span class="op">+</span> <span class="op">(</span>middle <span class="op">-</span> first<span class="op">))</span> <span class="op">%</span> <em>N</em><span class="op">)</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">9</a></span>
+<em>Returns</em>:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(9.1)</a></span>
+<code class="sourceCode cpp">result <span class="op">+</span> <em>N</em></code>
+for the overloads in namespace
+<code class="sourceCode cpp">std</code>.</li>
+<li><span class="marginalizedparent"><a class="marginalized">(9.2)</a></span>
+<code class="sourceCode cpp"><span class="op">{</span>last, result <span class="op">+</span> <em>N</em><span class="op">}</span></code>
+for the overload in namespace
+<code class="sourceCode cpp">ranges</code>.</li>
+</ul>
+<p><span class="marginalizedparent"><a class="marginalized">10</a></span>
+<em>Complexity</em>: Exactly
+<em><code class="sourceCode cpp">N</code></em> assignments.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><em>execution-policy</em> Ep, random_access_iterator I, sized_sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S,</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>         random_access_iterator O, sized_sentinel_for<span class="op">&lt;</span>O<span class="op">&gt;</span> OutS<span class="op">&gt;</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> indirectly_copyable<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  ranges<span class="op">::</span>rotate_copy_<span class="add" style="color: #006e28"><ins>truncated_</ins></span>result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    ranges<span class="op">::</span>rotate_copy<span class="op">(</span>Ep<span class="op">&amp;&amp;</span> exec, I first, I middle, S last, O result, OutS result_last<span class="op">)</span>;</span></code></pre></div>
+<p><span class="marginalizedparent"><a class="marginalized">x</a></span>
+Let <em><code class="sourceCode cpp">M</code></em> be
+<code class="sourceCode cpp">last <span class="op">-</span> first</code>
+and <em><code class="sourceCode cpp">N</code></em> be
+min(<em><code class="sourceCode cpp">M</code></em>, <code class="sourceCode cpp">result_last <span class="op">-</span> result</code>).</p>
+<p><span class="marginalizedparent"><a class="marginalized">x</a></span>
+<em>Preconditions</em>: <code class="sourceCode cpp"><span class="op">[</span>first, middle<span class="op">)</span></code>
+and <code class="sourceCode cpp"><span class="op">[</span>middle, last<span class="op">)</span></code>
+are valid ranges. The ranges <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+and <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <em>N</em><span class="op">)</span></code>
+do not overlap.</p>
+<p><span class="marginalizedparent"><a class="marginalized">x</a></span>
+<em>Effects</em>: Copies the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+to the range <code class="sourceCode cpp"><span class="op">[</span>result, result <span class="op">+</span> <em>N</em><span class="op">)</span></code>
+such that for each non-negative integer
+<code class="sourceCode cpp">i <span class="op">&lt;</span> <em>N</em></code>
+the following assignment takes place: <code class="sourceCode cpp"><span class="op">*(</span>result <span class="op">+</span> i<span class="op">)</span> <span class="op">=</span> <span class="op">*(</span>first <span class="op">+</span> <span class="op">(</span>i <span class="op">+</span> <span class="op">(</span>middle <span class="op">-</span> first<span class="op">))</span> <span class="op">%</span> <em>M</em><span class="op">)</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">x</a></span>
+<em>Returns</em>: <code class="sourceCode cpp"><span class="op">{</span><span class="add" style="color: #006e28"><ins>last,</ins></span> first <span class="op">+</span> <span class="op">(</span><em>N</em> <span class="op">+</span> <span class="op">(</span>middle <span class="op">-</span> first<span class="op">))</span> <span class="op">%</span> <em>M</em>, result <span class="op">+</span> <em>N</em><span class="op">}</span></code>.</p>
+<p><span class="rm" style="color: #bf0303"><del><span class="note"><span>[ <em>Note:</em> </span>While the return type for the
+parallel and non-parallel algorithm overloads in the namespace
+<span><code class="sourceCode default">ranges</code></span> is the same
+the semantics is different because the parallel range algorithm
+overloads
+<span><code class="sourceCode default">result_last - result</code></span>
+can be insufficient to copy all data from the input.<span> — <em>end
+note</em> ]</span></span></del></span></p>
+<p><span class="marginalizedparent"><a class="marginalized">x</a></span>
+<em>Complexity</em>: Exactly
+<em><code class="sourceCode cpp">N</code></em> assignments.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>forward_range R, weakly_incrementable O<span class="op">&gt;</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> indirectly_copyable<span class="op">&lt;</span>iterator_t<span class="op">&lt;</span>R<span class="op">&gt;</span>, O<span class="op">&gt;</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> ranges<span class="op">::</span>rotate_copy_result<span class="op">&lt;</span>borrowed_iterator_t<span class="op">&lt;</span>R<span class="op">&gt;</span>, O<span class="op">&gt;</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    ranges<span class="op">::</span>rotate_copy<span class="op">(</span>R<span class="op">&amp;&amp;</span> r, iterator_t<span class="op">&lt;</span>R<span class="op">&gt;</span> middle, O result<span class="op">)</span>;</span></code></pre></div>
+<p><em>Effects</em>: Equivalent to: <code class="sourceCode cpp"><span class="cf">return</span> ranges<span class="op">::</span>rotate_copy<span class="op">(</span>ranges<span class="op">::</span>begin<span class="op">(</span>r<span class="op">)</span>, middle, ranges<span class="op">::</span>end<span class="op">(</span>r<span class="op">)</span>, std<span class="op">::</span>move<span class="op">(</span>result<span class="op">))</span>;</code></p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><em>execution-policy</em> Ep, <em>sized-random-access-range</em> R, <em>sized-random-access-range</em> OutR<span class="op">&gt;</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> indirectly_copyable<span class="op">&lt;</span>iterator_t<span class="op">&lt;</span>R<span class="op">&gt;</span>, iterator_t<span class="op">&lt;</span>OutR<span class="op">&gt;&gt;</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  ranges<span class="op">::</span>rotate_copy_<span class="add" style="color: #006e28"><ins>truncated_</ins></span>result<span class="op">&lt;</span>borrowed_iterator_t<span class="op">&lt;</span>R<span class="op">&gt;</span>, borrowed_iterator_t<span class="op">&lt;</span>OutR<span class="op">&gt;&gt;</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    ranges<span class="op">::</span>rotate_copy<span class="op">(</span>Ep<span class="op">&amp;&amp;</span> exec, R<span class="op">&amp;&amp;</span> r, iterator_t<span class="op">&lt;</span>R<span class="op">&gt;</span> middle, OutR<span class="op">&amp;&amp;</span> result_r<span class="op">)</span>;</span></code></pre></div>
+<p><em>Effects</em>: Equivalent to: <code class="sourceCode cpp"><span class="cf">return</span> ranges<span class="op">::</span>rotate_copy<span class="op">(</span>std<span class="op">::</span>forward<span class="op">&lt;</span>Ep<span class="op">&gt;(</span>exec<span class="op">)</span>, ranges<span class="op">::</span>begin<span class="op">(</span>r<span class="op">)</span>, middle, ranges<span class="op">::</span>end<span class="op">(</span>r<span class="op">)</span>, ranges<span class="op">::</span>begin<span class="op">(</span>result_r<span class="op">)</span>, ranges<span class="op">::</span>end<span class="op">(</span>result_r<span class="op">))</span>;</code></p>
+<h1 data-number="6" id="revision_history"><span class="header-section-number">6</span> Revision history<a href="#revision_history" class="self-link"></a></h1>
+<h2 data-number="6.1" id="r0_r1"><span class="header-section-number">6.1</span> R0 =&gt; R1<a href="#r0_r1" class="self-link"></a></h2>
+<ul>
+<li>Add wording</li>
+</ul>
+<h1 data-number="7" id="acknowledgments"><span class="header-section-number">7</span> Acknowledgements<a href="#acknowledgments" class="self-link"></a></h1>
 <ul>
 <li>Thanks to Jonathan Mueller for having a fruitful discussion on
 <code class="sourceCode cpp">reverse_copy</code> and
 <code class="sourceCode cpp">rotate_copy</code> return type.</li>
 </ul>
-<h1 data-number="6" id="bibliography"><span class="header-section-number">6</span> References<a href="#bibliography" class="self-link"></a></h1>
+<h1 data-number="8" id="bibliography"><span class="header-section-number">8</span> References<a href="#bibliography" class="self-link"></a></h1>
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="1" role="doc-bibliography">
 <div id="ref-P1061R10" class="csl-entry" role="doc-biblioentry">
 [P1061R10] Barry Revzin, Jonathan Wakely. 2024-11-24. Structured
