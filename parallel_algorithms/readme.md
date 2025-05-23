@@ -9,7 +9,9 @@ At the F2F meeting in February 2025, LEWG forwarded P3179R6 to LWG for C++26.
 
 ### Revisions
 
-- R7 - in progress: https://github.com/rarutyun/iso_cpp_papers/pull/19
+- R9 - in progress: https://github.com/rarutyun/iso_cpp_papers/pull/25
+- R8: https://wg21.link/p3179r8
+- R7: https://wg21.link/p3179r7
 - R6: https://wg21.link/p3179r6
 - R5: https://wg21.link/p3179r5
 - R4: https://wg21.link/p3179r4
