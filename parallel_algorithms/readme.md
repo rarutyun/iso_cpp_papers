@@ -28,4 +28,14 @@ The proposed design was approved by SG9 and merged into P3179.
 
 [Source code](P3490/P3490.md) (for mpark/wg21)
 
-R0: https://wg21.link/p3490r0
+- R0: https://wg21.link/p3490r0
+
+## P3709
+**Reconsider parallel `ranges::rotate_copy` and `ranges::reverse_copy`**
+
+The paper proposes reconsidering the design for return values of parallel `ranges::rotate_copy` and `ranges::reverse_copy`.
+
+[Source code](P3709/P3709.md) (for mpark/wg21)
+
+- R1 - in progress: https://github.com/rarutyun/iso_cpp_papers/pull/27
+- R0: https://wg21.link/p3709r0
