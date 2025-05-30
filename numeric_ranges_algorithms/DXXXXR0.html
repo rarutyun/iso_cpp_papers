@@ -1237,18 +1237,15 @@ way for us to leave <code>reduce_first</code> for a later proposal is if
 <code>reduce</code> does not take a projection.</p>
 <h3 data-number="4.1.8" id="we-dont-propose-reduce_with_iter"><span class="header-section-number">4.1.8</span> We don’t propose
 <code>reduce_with_iter</code><a href="#we-dont-propose-reduce_with_iter" class="self-link"></a></h3>
-<p>A <code>reduce_with_iter</code> algorithm would look like
-<code>fold_left_with_iter</code>, but would permit reordering of binary
-operations. It would return both an iterator to one past the last
-element, and the computed value. A hypothetical
-<code>reduce_with_iter</code> algorithm would also return an iterator to
-one past the last element, and the computed value, but would share
-<code>reduce</code>’s permission to reorder binary operations.</p>
-<p>We do not propose the analogous <code>reduce_with_iter</code> here,
-though we would not oppose someone else proposing it. That algorithm
-would serve users who are writing code generic enough to work with
-single-pass input iterators, <em>and</em> who want to expose potential
-binary operation reordering opportunities.</p>
+<p>A hypothetical <code>reduce_with_iter</code> algorithm would look
+like <code>fold_left_with_iter</code>, but would permit reordering of
+binary operations. It would return both an iterator to one past the last
+input element, and the computed value. The only reason for a reduction
+to return an iterator would be if the input range is single-pass.
+However, users who have a single-pass input range really should be using
+one of the <code>fold*</code> algorithms instead of
+<code>reduce*</code>. As a result, we do not propose the analogous
+<code>reduce_with_iter</code> here.</p>
 <p>Just like <code>fold_left</code>, the <code>reduce</code> algorithm
 should return just the computed value. Section 4.4 of
 <a href="https://wg21.link/P2322R6">P2322R6</a> argues that this makes

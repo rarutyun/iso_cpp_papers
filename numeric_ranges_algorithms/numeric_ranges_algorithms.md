@@ -499,9 +499,7 @@ The decision to add `reduce_first` depends on whether `reduce` takes a projectio
 
 ### We don't propose `reduce_with_iter`
 
-A `reduce_with_iter` algorithm would look like `fold_left_with_iter`, but would permit reordering of binary operations.  It would return both an iterator to one past the last element, and the computed value.  A hypothetical `reduce_with_iter` algorithm would also return an iterator to one past the last element, and the computed value, but would share `reduce`'s permission to reorder binary operations.
-
-We do not propose the analogous `reduce_with_iter` here, though we would not oppose someone else proposing it.  That algorithm would serve users who are writing code generic enough to work with single-pass input iterators, _and_ who want to expose potential binary operation reordering opportunities.
+A hypothetical `reduce_with_iter` algorithm would look like `fold_left_with_iter`, but would permit reordering of binary operations.  It would return both an iterator to one past the last input element, and the computed value.  The only reason for a reduction to return an iterator would be if the input range is single-pass.  However, users who have a single-pass input range really should be using one of the `fold*` algorithms instead of `reduce*`.  As a result, we do not propose the analogous `reduce_with_iter` here.
 
 Just like `fold_left`, the `reduce` algorithm should return just the computed value.  Section 4.4 of <a href="https://wg21.link/P2322R6">P2322R6</a> argues that this makes it easier to use, and improves consistency with other ranges algorithms like `ranges::count` and `ranges::any_of`.  It is also consistent with P3179R8.  The algorithms `fold_left_with_iter` and `fold_left_first_with_iter` exist for users who want both the iterator and the value.  Section 4.4 of P2322R6 further elaborates that `fold_left` should not be specified in terms of `fold_left_with_iter`, for performance reasons: it would "incur an extra move of the accumulated result, due to lack of copy elision (we have different return types)."  The `*_with_iter` algorithms are separate algorithms that need separate specifications.
 
