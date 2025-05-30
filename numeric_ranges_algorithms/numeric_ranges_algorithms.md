@@ -295,6 +295,7 @@ std::vector<std::pair<std::string, int>> v2{
 const int init = 3; 
 std::vector<int> out(std::from_range, std::views::repeat(0, 3));
 
+// reduce with zip_transform_view
 auto result_bztv = std::ranges::reduce(
   std::views::zip_transform(std::multiplies{},
     std::views::transform(v1, get_element<0>{}),
@@ -302,6 +303,7 @@ auto result_bztv = std::ranges::reduce(
   init, std::plus{});
 assert(result_bztv == 396);
 
+// binary transform_reduce
 auto result_no_proj = std::ranges::transform_reduce(
   std::views::transform(v1, get_element<0>{}),
   std::views::transform(v2, get_element<1>{}),
