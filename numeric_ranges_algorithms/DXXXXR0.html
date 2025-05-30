@@ -1547,8 +1547,8 @@ result(s) in terms of <em>GENERALIZED_SUM</em>. Those algorithms do that
 because they need to constrain the precision of intermediate terms in
 the sum (so they need to define those terms). In our case, the Standard
 already uses <em>GENERALIZED_SUM</em> and
-<em>GENERALIZED_NONCOMMUTATIVE_SUM</em> to define ranges algorithms like
-<code>reduce</code>, <code>inclusive_scan</code>, and
+<em>GENERALIZED_NONCOMMUTATIVE_SUM</em> to define iterator-based C++17
+algorithms like <code>reduce</code>, <code>inclusive_scan</code>, and
 <code>exclusive_scan</code>. We can just adapt this wording to talk
 about ranges instead of iterators. This lets us imitate the approach of
 <a href="https://isocpp.org/files/papers/P3179R8.html">P3179R8</a> in
