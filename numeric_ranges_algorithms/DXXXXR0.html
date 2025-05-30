@@ -1180,15 +1180,16 @@ incorporate projections.</p>
 <code>adjacent_difference</code><a href="#adjacent_difference" class="self-link"></a></h4>
 <p><code>adjacent_difference</code> can be replaced with a combination
 of <code>adjacent_transform_view</code> (which was adopted in C++23) and
-<code>ranges::copy</code>. On the other hand, we argue elsewhere in this
-proposal that views (such as <code>adjacent_transform_view</code>) that
-use a <em><code>movable-box</code></em><code>&lt;F&gt;</code> member to
+<code>ranges::copy</code>. We argue elsewhere in this proposal that
+views (such as <code>adjacent_transform_view</code>) that use a
+<em><code>movable-box</code></em><code>&lt;F&gt;</code> member to
 represent a function object may have performance issues, due to
-<em><code>movable-box&lt;F&gt;</code></em> being not trivially copyable
-even for some cases where <code>F</code> is trivially copyable. On the
-other hand, the existing <code>adjacent_difference</code> use case could
-be covered with the trivially copyable <code>std::minus</code> function
-object.</p>
+<em><code>movable-box</code></em><code>&lt;F&gt;</code> being not
+trivially copyable even for some cases where <code>F</code> is trivially
+copyable. On the other hand, the existing
+<code>adjacent_difference</code> with the default binary operation
+(subtraction) could be covered with the trivially copyable
+<code>std::minus</code> function object.</p>
 <p>In our experience, adjacent differences or their generalization are
 often used in combination with other ranges. For example,
 finite-difference methods (such as Runge-Kutta schemes) for solving
