@@ -517,6 +517,8 @@ We propose providing parallel and non-parallel overloads of
   
 ## Range categories and return types
 
+We propose the following.
+
 * Our parallel algorithms take sized random access ranges.
 
 * Our non-parallel algorithms take sized forward ranges.
