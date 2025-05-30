@@ -179,7 +179,7 @@ std::vector<int> out(std::from_range, std::views::repeat(0, 3));
 
 // Without projections: Big, opaque lambda
 std::ranges::transform(v1, v2, out.begin(),
-  [] (auto x, auto y) { return get<0>(x) + get<0>(y); });
+  [] (auto x, auto y) { return get<0>(x) * get<0>(y); });
 
 std::vector<int> expected{65, 119, 209};
 assert(out == expected);
