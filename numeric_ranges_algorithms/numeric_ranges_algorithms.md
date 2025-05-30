@@ -197,7 +197,7 @@ std::vector<int> out(std::from_range, std::views::repeat(0, 3));
 
 // With projections: More readable
 std::ranges::transform(v1, v2, out.begin(),
-  std::plus{}, get_element<0>{}, get_element<0>{});
+  std::multiplies{}, get_element<0>{}, get_element<0>{});
 
 std::vector<int> expected{65, 119, 209};
 assert(out == expected);
