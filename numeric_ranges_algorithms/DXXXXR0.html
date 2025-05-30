@@ -1213,30 +1213,69 @@ natural identity element to serve as the initial value. An example would
 be <code>min</code> on a range of <code>int</code> values, where callers
 would have no way to tell if <code>INT_MAX</code> represents a value in
 the range, or an arbitrary stand-in for the (nonexistent) identity
-element. We do not propose <code>reduce_first</code> for the following
-reasons.</p>
+element. A <code>reduce_first</code> algorithm would use the first
+element in the range as the initial value.</p>
+<p>We do not propose <code>reduce_first</code> here. We outline
+arguments against and for it, and then explain that a reasonable
+parallel generalization of <code>reduce_first</code> would actually be a
+different algorithm that can start with any element in the range. We do
+not propose that generalization here, but would not oppose such a
+proposal.</p>
+<h4 data-number="4.1.7.1" id="arguments-against-reduce_first"><span class="header-section-number">4.1.7.1</span> Arguments against
+<code>reduce_first</code><a href="#arguments-against-reduce_first" class="self-link"></a></h4>
 <ol type="1">
 <li><p>P3179R8 already proposes parallel ranges overloads of
 <code>min_element</code>, <code>max_element</code>, and
-<code>minmax_element</code>.</p></li>
-<li><p><code>fold_left_first</code> and <code>fold_right_last</code>
-makes more sense, because these algorithms are ordered. It matters which
-element of the sequence the user extracts. <code>reduce</code> is
-unordered, so there’s no reason to privilege one element over another.
-Why should it be the first one?</p></li>
-<li><p>Users can always extract the first element from the sequence and
-use it as the initial value in <code>reduce</code>.</p></li>
+<code>minmax_element</code>. Minima and maxima are the main use cases
+that lack a natural identity element.</p></li>
+<li><p>A parallel <code>reduce_first</code> (or even the parallel analog
+described in (3)) would have potential performance issues. Its
+computational loop would be less uniform. This could introduce branches
+and data misalignment. Fetching the first element of the entire range on
+all processors executing the reduction would reduce spatial
+locality.</p></li>
+<li><p>Existing parallel programming frameworks like OpenMP require an
+identity element or at least an initial value for the reduction
+operation, so they could not be used to implement
+<code>reduce_first</code>. OpenMP permits custom reduction operations,
+so it would be a good candidate for implementing Standard parallel
+algorithms. Hand-rolling <code>reduce_first</code> out of other OpenMP
+components would add implementation effort and could hinder compiler
+optimizations.</p></li>
+<li><p>Users could always implement <code>reduce_first</code>
+themselves, by extracting the first element from the sequence and using
+it as the initial value in <code>reduce</code>.</p></li>
 </ol>
-<p>The decision to add <code>reduce_first</code> depends on whether
-<code>reduce</code> takes a projection. The <code>reduce_first</code>
-algorithm could not straightforwardly support projections. If
-<code>reduce</code> takes a projection, then it would be inconsistent
-with <code>reduce_first</code>. The only reason <code>fold_left</code>
-and <code>fold_right</code> do not take projections is for consistency
-with <code>fold_left_first</code>, <code>fold_left_with_iter</code>, and
-<code>fold_right_last</code>, which cannot take projections. The only
-way for us to leave <code>reduce_first</code> for a later proposal is if
-<code>reduce</code> does not take a projection.</p>
+<h4 data-number="4.1.7.2" id="arguments-for-reduce_first"><span class="header-section-number">4.1.7.2</span> Arguments for
+<code>reduce_first</code><a href="#arguments-for-reduce_first" class="self-link"></a></h4>
+<p>Users often want to combine multiple reductions into a single pass,
+where some of the reductions are min and/or max, while others have a
+natural identity. For example, users may want the minimum of an array of
+integers (with no natural identity), along with the least index of the
+array element with the minimum value (whose natural identity is zero).
+This happens often enough that MPI (the Message Passing Interface for
+distributed-memory parallel computing) has predefined reduction
+operations for minimum and its index (<code>MINLOC</code>) and maximum
+and its index (<code>MAXLOC</code>).</p>
+<h4 data-number="4.1.7.3" id="a-good-parallel-reduce_first-is-actually-a-different-algorithm"><span class="header-section-number">4.1.7.3</span> A good parallel
+<code>reduce_first</code> is actually a different algorithm<a href="#a-good-parallel-reduce_first-is-actually-a-different-algorithm" class="self-link"></a></h4>
+<p>A reasonable parallel generalization of <code>reduce_first</code>
+would be a different algorithm, because it would want to preserve
+implementation freedom to start with <em>any</em> element. For example,
+for a reduction on <span class="math inline"><em>N</em> ⋅ <em>P</em></span> elements over <span class="math inline"><em>P</em></span> processors, each of the <span class="math inline"><em>P</em></span> processors would need to
+initialize a local accumulator. Doing so with the first element in that
+processor’s subrange, rather than the first element of the entire range,
+would better preserve spatial locality and give a fully independent
+mapping of elements to processors. One could imagine calling this
+algorithm <code>reduce_any</code> or <code>reduce_one</code>.</p>
+<p>This generalization of <code>reduce_first</code> would be consistent
+with the implementation freedom that <code>reduce</code> has over
+<code>fold_left_first</code> and <code>fold_right_last</code>. The
+<code>fold_left_first</code> and <code>fold_right_last</code> algorithms
+are ordered, so it matters which element of the sequence starts the
+fold. The <code>reduce*</code> algorithms are unordered, so there’s no
+functional correctness reason to privilege the first element over any
+other.</p>
 <h3 data-number="4.1.8" id="we-dont-propose-reduce_with_iter"><span class="header-section-number">4.1.8</span> We don’t propose
 <code>reduce_with_iter</code><a href="#we-dont-propose-reduce_with_iter" class="self-link"></a></h3>
 <p>A hypothetical <code>reduce_with_iter</code> algorithm would look

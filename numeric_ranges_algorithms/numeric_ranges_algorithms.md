@@ -489,15 +489,29 @@ In our experience, adjacent differences or their generalization are often used i
 
 ### We don't propose `reduce_first`
 
-Section 5.1 of <a href="https://wg21.link/P2760R1">P2760R1</a> asks whether there should be a `reduce_first` algorithm, analogous to `fold_left_first`, for binary operations that lack a natural identity element to serve as the initial value.  An example would be `min` on a range of `int` values, where callers would have no way to tell if `INT_MAX` represents a value in the range, or an arbitrary stand-in for the (nonexistent) identity element.  We do not propose `reduce_first` for the following reasons.
+Section 5.1 of <a href="https://wg21.link/P2760R1">P2760R1</a> asks whether there should be a `reduce_first` algorithm, analogous to `fold_left_first`, for binary operations that lack a natural identity element to serve as the initial value.  An example would be `min` on a range of `int` values, where callers would have no way to tell if `INT_MAX` represents a value in the range, or an arbitrary stand-in for the (nonexistent) identity element.  A `reduce_first` algorithm would use the first element in the range as the initial value.
 
-1. P3179R8 already proposes parallel ranges overloads of `min_element`, `max_element`, and `minmax_element`.
+We do not propose `reduce_first` here.  We outline arguments against and for it, and then explain that a reasonable parallel generalization of `reduce_first` would actually be a different algorithm that can start with any element in the range.  We do not propose that generalization here, but would not oppose such a proposal.
 
-2. `fold_left_first` and `fold_right_last` makes more sense, because these algorithms are ordered.  It matters which element of the sequence the user extracts.  `reduce` is unordered, so there's no reason to privilege one element over another.  Why should it be the first one?
+#### Arguments against `reduce_first`
 
-3. Users can always extract the first element from the sequence and use it as the initial value in `reduce`.
+1. P3179R8 already proposes parallel ranges overloads of `min_element`, `max_element`, and `minmax_element`.  Minima and maxima are the main use cases that lack a natural identity element.
 
-The decision to add `reduce_first` depends on whether `reduce` takes a projection.  The `reduce_first` algorithm could not straightforwardly support projections.  If `reduce` takes a projection, then it would be inconsistent with `reduce_first`.  The only reason `fold_left` and `fold_right` do not take projections is for consistency with `fold_left_first`, `fold_left_with_iter`, and `fold_right_last`, which cannot take projections.  The only way for us to leave `reduce_first` for a later proposal is if `reduce` does not take a projection.
+2. A parallel `reduce_first` (or even the parallel analog described in (3)) would have potential performance issues.  Its computational loop would be less uniform.  This could introduce branches and data misalignment.  Fetching the first element of the entire range on all processors executing the reduction would reduce spatial locality.
+
+3. Existing parallel programming frameworks like OpenMP require an identity element or at least an initial value for the reduction operation, so they could not be used to implement `reduce_first`.  OpenMP permits custom reduction operations, so it would be a good candidate for implementing Standard parallel algorithms.  Hand-rolling `reduce_first` out of other OpenMP components would add implementation effort and could hinder compiler optimizations.
+
+4. Users could always implement `reduce_first` themselves, by extracting the first element from the sequence and using it as the initial value in `reduce`.
+
+#### Arguments for `reduce_first`
+
+Users often want to combine multiple reductions into a single pass, where some of the reductions are min and/or max, while others have a natural identity.  For example, users may want the minimum of an array of integers (with no natural identity), along with the least index of the array element with the minimum value (whose natural identity is zero).  This happens often enough that MPI (the Message Passing Interface for distributed-memory parallel computing) has predefined reduction operations for minimum and its index (`MINLOC`) and maximum and its index (`MAXLOC`).
+
+#### A good parallel `reduce_first` is actually a different algorithm
+
+A reasonable parallel generalization of `reduce_first` would be a different algorithm, because it would want to preserve implementation freedom to start with *any* element.  For example, for a reduction on $N \cdot P$ elements over $P$ processors, each of the $P$ processors would need to initialize a local accumulator.  Doing so with the first element in that processor's subrange, rather than the first element of the entire range, would better preserve spatial locality and give a fully independent mapping of elements to processors.  One could imagine calling this algorithm `reduce_any` or `reduce_one`.
+
+This generalization of `reduce_first` would be consistent with the implementation freedom that `reduce` has over `fold_left_first` and `fold_right_last`.  The `fold_left_first` and `fold_right_last` algorithms are ordered, so it matters which element of the sequence starts the fold.  The `reduce*` algorithms are unordered, so there's no functional correctness reason to privilege the first element over any other.
 
 ### We don't propose `reduce_with_iter`
 
