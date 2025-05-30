@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2025-05-19" />
+  <meta name="dcterms.date" content="2025-05-30" />
   <title>Parallel and non-parallel numeric range algorithms</title>
   <style>
 code{white-space: pre-wrap;}
@@ -425,7 +425,7 @@ numeric range algorithms</h1>
   </tr>
   <tr>
     <td>Date: </td>
-    <td>2025-05-19</td>
+    <td>2025-05-30</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project: </td>
@@ -462,18 +462,18 @@ numeric range algorithms</h1>
 algorithms</a></li>
 <li><a href="#transform_-algorithms-andor-projections" id="toc-transform_-algorithms-andor-projections"><span class="toc-section-number">4.1.3</span> <code>transform_*</code>
 algorithms (and/or projections)</a></li>
-<li><a href="#the-lost-algorithm-noncommutative-parallel-reduction" id="toc-the-lost-algorithm-noncommutative-parallel-reduction"><span class="toc-section-number">4.1.4</span> “The lost algorithm”:
-Noncommutative parallel reduction?</a></li>
-<li><a href="#algorithms-with-a-ranges-proposal-in-flight" id="toc-algorithms-with-a-ranges-proposal-in-flight"><span class="toc-section-number">4.1.5</span> Algorithms with a ranges
-proposal in flight</a></li>
-<li><a href="#algorithms-that-do-not-need-ranges-versions" id="toc-algorithms-that-do-not-need-ranges-versions"><span class="toc-section-number">4.1.6</span> Algorithms that do not need
-ranges versions</a></li>
-<li><a href="#we-dont-propose-reduce_first" id="toc-we-dont-propose-reduce_first"><span class="toc-section-number">4.1.7</span> We don’t propose
+<li><a href="#we-propose-convenience-wrappers-to-replace-some-algorithms" id="toc-we-propose-convenience-wrappers-to-replace-some-algorithms"><span class="toc-section-number">4.1.4</span> We propose convenience wrappers
+to replace some algorithms</a></li>
+<li><a href="#existing-views-replace-some-other-algorithms" id="toc-existing-views-replace-some-other-algorithms"><span class="toc-section-number">4.1.5</span> Existing views replace some
+other algorithms</a></li>
+<li><a href="#we-dont-propose-the-lost-algorithm-noncommutative-parallel-reduce" id="toc-we-dont-propose-the-lost-algorithm-noncommutative-parallel-reduce"><span class="toc-section-number">4.1.6</span> We don’t propose “the lost
+algorithm” (noncommutative parallel reduce)</a></li>
+<li><a href="#we-dont-propose-partial_sum" id="toc-we-dont-propose-partial_sum"><span class="toc-section-number">4.1.7</span> We don’t propose
+<code>partial_sum</code></a></li>
+<li><a href="#we-dont-propose-reduce_first" id="toc-we-dont-propose-reduce_first"><span class="toc-section-number">4.1.8</span> We don’t propose
 <code>reduce_first</code></a></li>
-<li><a href="#we-dont-propose-reduce_with_iter" id="toc-we-dont-propose-reduce_with_iter"><span class="toc-section-number">4.1.8</span> We don’t propose
+<li><a href="#we-dont-propose-reduce_with_iter" id="toc-we-dont-propose-reduce_with_iter"><span class="toc-section-number">4.1.9</span> We don’t propose
 <code>reduce_with_iter</code></a></li>
-<li><a href="#summary-algorithms-that-we-propose-here" id="toc-summary-algorithms-that-we-propose-here"><span class="toc-section-number">4.1.9</span> Summary: Algorithms that we
-propose here</a></li>
 </ul></li>
 <li><a href="#range-categories-and-return-types" id="toc-range-categories-and-return-types"><span class="toc-section-number">4.2</span> Range categories and return
 types</a></li>
@@ -523,36 +523,48 @@ algorithms</a></li>
 </ul>
 <h1 data-number="3" id="abstract"><span class="header-section-number">3</span> Abstract<a href="#abstract" class="self-link"></a></h1>
 <p>We propose ranges overloads (both parallel and nonparallel) of the
-following algorithms.</p>
+following algorithms:</p>
 <ul>
 <li><p><code>reduce</code>, unary <code>transform_reduce</code>, and
-binary <code>transform_reduce</code></p></li>
+binary <code>transform_reduce</code>;</p></li>
 <li><p><code>inclusive_scan</code> and
-<code>transform_inclusive_scan</code></p></li>
+<code>transform_inclusive_scan</code>; and</p></li>
 <li><p><code>exclusive_scan</code> and
 <code>transform_exclusive_scan</code></p></li>
 </ul>
-<p>We also propose adding convenience wrappers <code>ranges::sum</code>
-and <code>ranges::product</code> for special cases of
-<code>reduce</code> with addition and multiplication, respectively.</p>
+<p>We also propose adding parallel and non-parallel convenience
+wrappers:</p>
+<ul>
+<li><p><code>ranges::sum</code> and <code>ranges::product</code> for
+special cases of <code>reduce</code> with addition and multiplication,
+respectively; and</p></li>
+<li><p><code>ranges::dot</code> for the special case of binary
+<code>transform_reduce</code> with transform <code>plus</code> and
+reduction <code>multiplies</code>.</p></li>
+</ul>
 <h1 data-number="4" id="design"><span class="header-section-number">4</span> Design<a href="#design" class="self-link"></a></h1>
 <h2 data-number="4.1" id="what-algorithms-to-include"><span class="header-section-number">4.1</span> What algorithms to include?<a href="#what-algorithms-to-include" class="self-link"></a></h2>
 <h3 data-number="4.1.1" id="what-we-propose"><span class="header-section-number">4.1.1</span> What we propose<a href="#what-we-propose" class="self-link"></a></h3>
 <p>We propose ranges overloads (both parallel and nonparallel) of the
-following algorithms.</p>
+following algorithms:</p>
 <ul>
 <li><p><code>reduce</code>, unary <code>transform_reduce</code>, and
-binary <code>transform_reduce</code></p></li>
+binary <code>transform_reduce</code>;</p></li>
 <li><p><code>inclusive_scan</code> and
-<code>transform_inclusive_scan</code></p></li>
+<code>transform_inclusive_scan</code>; and</p></li>
 <li><p><code>exclusive_scan</code> and
-<code>transform_exclusive_scan</code></p></li>
+<code>transform_exclusive_scan</code>.</p></li>
 </ul>
-<p>We also propose parallel and non-parallel convenience wrappers
-<code>ranges::sum(r)</code> as
-<code>ranges::reduce(r, plus{}, range_value_t&lt;R&gt;())</code> and
-<code>ranges::product(r)</code> as
-<code>ranges::reduce(r, multiplies{}, range_value_t&lt;R&gt;(1))</code>.</p>
+<p>We also propose adding parallel and non-parallel convenience
+wrappers:</p>
+<ul>
+<li><p><code>ranges::sum</code> and <code>ranges::product</code> for
+special cases of <code>reduce</code> with addition and multiplication,
+respectively; and</p></li>
+<li><p><code>ranges::dot</code> for the special case of binary
+<code>transform_reduce</code> with transform <code>plus</code> and
+reduction <code>multiplies</code>.</p></li>
+</ul>
 <p>The following sections explain why we propose these algorithms and
 not others. This relates to other aspects of the design besides
 algorithm selection, such as whether to include optional projection
@@ -1080,15 +1092,87 @@ so we provide <code>ranges::transform_{in,ex}clusive_scan</code> as well
 as <code>ranges::{in,ex}clusive_scan</code>, and do not provide
 projections for any of them.</p></li>
 </ol>
-<h3 data-number="4.1.4" id="the-lost-algorithm-noncommutative-parallel-reduction"><span class="header-section-number">4.1.4</span> “The lost algorithm”:
-Noncommutative parallel reduction?<a href="#the-lost-algorithm-noncommutative-parallel-reduction" class="self-link"></a></h3>
+<h3 data-number="4.1.4" id="we-propose-convenience-wrappers-to-replace-some-algorithms"><span class="header-section-number">4.1.4</span> We propose convenience
+wrappers to replace some algorithms<a href="#we-propose-convenience-wrappers-to-replace-some-algorithms" class="self-link"></a></h3>
+<h4 data-number="4.1.4.1" id="accumulate"><span class="header-section-number">4.1.4.1</span> <code>accumulate</code><a href="#accumulate" class="self-link"></a></h4>
+<p>The <code>accumulate</code> algorithm performs operations
+sequentially. Users who want that left-to-right sequential behavior can
+call C++23’s <code>fold_left</code>. For users who are not concerned
+about the order of operations and who want <code>accumulate</code>’s
+default binary operation, we propose parallel and non-parallel
+convenience wrappers <code>ranges::sum</code>.</p>
+<h4 data-number="4.1.4.2" id="inner_product"><span class="header-section-number">4.1.4.2</span>
+<code>inner_product</code><a href="#inner_product" class="self-link"></a></h4>
+<p>The <code>inner_product</code> algorithm performs operations
+sequentially. Users who want that left-to-right sequential behavior can
+call <code>fold_left</code>. Note that P2214R2 argues specifically
+against adding a ranges analog of <code>inner_product</code>, because it
+is less fundamental than other algorithms.</p>
+<p>For users who are not concerned about the order of operations and who
+want the default binary operations used by <code>inner_product</code>,
+we propose parallel and non-parallel convenience wrappers
+<code>ranges::dot</code>. We call them <code>dot</code> and not
+<code>inner_product</code> because inner products are mathematically
+more general. We specifically mean not just any inner product, but the
+inner product that is the dot product. Calling them <code>dot</code> has
+the added benefit that they represent the same mathematical computation
+as <code>std::linalg::dot</code>.</p>
+<h3 data-number="4.1.5" id="existing-views-replace-some-other-algorithms"><span class="header-section-number">4.1.5</span> Existing views replace some
+other algorithms<a href="#existing-views-replace-some-other-algorithms" class="self-link"></a></h3>
+<p>We do not propose ranges versions of the following numeric
+algorithms, since they can be replaced with existing views and ranges
+algorithms.</p>
+<h4 data-number="4.1.5.1" id="iota"><span class="header-section-number">4.1.5.1</span> <code>iota</code><a href="#iota" class="self-link"></a></h4>
+<p>C++23 has <code>iota_view</code>, the view version of
+<code>iota</code>. One can replace the <code>iota</code> algorithm with
+<code>iota_view</code> and <code>ranges::copy</code>. In fact, one could
+argue that <code>iota_view</code> is the perfect use case for a view:
+instead of storing the entire range, users can represent it compactly
+with two integers. There also should be no optimization concerns with
+parallel algorithms over an <code>iota_view</code>. For example, the
+Standard specifies <code>iota_view</code> in a way that does not hinder
+it from being trivially copyable, as long as its input types are. The
+iterator type of <code>iota_view</code> is a random access iterator for
+reasonable lower bound types (e.g., integers).</p>
+<h4 data-number="4.1.5.2" id="adjacent_difference"><span class="header-section-number">4.1.5.2</span>
+<code>adjacent_difference</code><a href="#adjacent_difference" class="self-link"></a></h4>
+<p>The <code>adjacent_difference</code> algorithm can be replaced with a
+combination of <code>adjacent_transform_view</code> (which was adopted
+in C++23) and <code>ranges::copy</code>. We argue elsewhere in this
+proposal that views (such as <code>adjacent_transform_view</code>) that
+use a <em><code>movable-box</code></em><code>&lt;F&gt;</code> member to
+represent a function object may have performance issues, due to
+<em><code>movable-box</code></em><code>&lt;F&gt;</code> being not
+trivially copyable even for some cases where <code>F</code> is trivially
+copyable. On the other hand, the existing
+<code>adjacent_difference</code> with the default binary operation
+(subtraction) could be covered with the trivially copyable
+<code>std::minus</code> function object.</p>
+<p>In our experience, adjacent differences or their generalization are
+often used in combination with other ranges. For example,
+finite-difference methods (such as Runge-Kutta schemes) for solving
+time-dependent differential equations may need to add together multiple
+ranges, each of which is an adjacent difference possibly composed with
+other functions. If users want to express that as a one-pass algorithm,
+they might need to combine more than two input ranges, possibly using a
+combination of <code>transform_view</code>s and
+<code>adjacent_transform_view</code>s. This ultimately would be hard to
+express as a single “<code>ranges::adjacent_transform</code>” algorithm
+invocation. Furthermore, <code>ranges::adjacent_transform</code> is
+necessarily single-dimensional. It could not be used straightforwardly
+for finite-difference methods for solving partial differential
+equations, for example. All this makes an
+<code>adjacent_transform</code> algorithm a lower-priority task.</p>
+<h3 data-number="4.1.6" id="we-dont-propose-the-lost-algorithm-noncommutative-parallel-reduce"><span class="header-section-number">4.1.6</span> We don’t propose “the lost
+algorithm” (noncommutative parallel reduce)<a href="#we-dont-propose-the-lost-algorithm-noncommutative-parallel-reduce" class="self-link"></a></h3>
 <p>The Standard lacks an analog of <code>reduce</code> that can assume
 associativity but not commutativity of binary operations. One author of
 this proposal refers to this as “the lost algorithm” (in e.g.,
 <a href="https://adspthepodcast.com/2021/05/14/Episode-25.html">Episode
-25 of “ASDP: The Podcast”</a>). To elaborate: The current numeric
-algorithms express a variety of permissions to reorder binary
-operations.</p>
+25 of “ASDP: The Podcast”</a>). We do not propose this algorithm, but we
+would welcome a separate proposal to do so.</p>
+<p>The current numeric algorithms express a variety of permissions to
+reorder binary operations.</p>
 <ol type="1">
 <li><p><code>accumulate</code> and <code>partial_sum</code> both
 precisely specify the order of binary operations as sequential, from
@@ -1136,76 +1220,26 @@ think the right way would be to propose a new algorithm with a distinct
 name. A reasonable choice of name would be <code>fold</code> (just
 <code>fold</code> by itself, not <code>fold_left</code> or
 <code>fold_right</code>).</p>
-<h3 data-number="4.1.5" id="algorithms-with-a-ranges-proposal-in-flight"><span class="header-section-number">4.1.5</span> Algorithms with a ranges
-proposal in flight<a href="#algorithms-with-a-ranges-proposal-in-flight" class="self-link"></a></h3>
-<p>We do not propose a <code>partial_sum</code> algorithm. This
-algorithm performs operations sequentially. Its parallel analogs are
-<code>inclusive_scan</code> and <code>exclusive_scan</code>, which we
-propose here. For the non-parallel ranges version that returns a
-stateful binary operator,
+<h3 data-number="4.1.7" id="we-dont-propose-partial_sum"><span class="header-section-number">4.1.7</span> We don’t propose
+<code>partial_sum</code><a href="#we-dont-propose-partial_sum" class="self-link"></a></h3>
+<p>The <code>partial_sum</code> algorithm performs operations
+sequentially. The existing ranges library does not have an equivalent
+algorithm with this left-to-right sequential behavior, nor do we propose
+such an algorithm. For users who want this behavior,
 <a href="https://wg21.link/P2760R1">P2760R1</a> suggests a view instead
 of an algorithm. <a href="https://wg21.link/P3351R2">P3351R2</a>,
 “<code>views::scan</code>,” proposes this view. P3351R2 is currently in
 SG9 (Ranges Study Group) review.</p>
-<h3 data-number="4.1.6" id="algorithms-that-do-not-need-ranges-versions"><span class="header-section-number">4.1.6</span> Algorithms that do not need
-ranges versions<a href="#algorithms-that-do-not-need-ranges-versions" class="self-link"></a></h3>
-<p>The following algorithms do not need ranges versions, since they can
-be replaced with existing views and ranges algorithms.</p>
-<h4 data-number="4.1.6.1" id="iota"><span class="header-section-number">4.1.6.1</span> <code>iota</code><a href="#iota" class="self-link"></a></h4>
-<p>C++23 has <code>iota_view</code>, the view version of
-<code>iota</code>. One can replace the <code>iota</code> algorithm with
-<code>iota_view</code> and <code>ranges::copy</code>. In fact, one could
-argue that <code>iota_view</code> is the perfect use case for a view:
-instead of storing the entire range, users can represent it compactly
-with two integers. There also should be no optimization concerns with
-parallel algorithms over an <code>iota_view</code>. For example, the
-Standard specifies <code>iota_view</code> in a way that does not hinder
-it from being trivially copyable, as long as its input types are. The
-iterator type of <code>iota_view</code> is a random access iterator for
-reasonable lower bound types (e.g., integers).</p>
-<h4 data-number="4.1.6.2" id="accumulate"><span class="header-section-number">4.1.6.2</span> <code>accumulate</code><a href="#accumulate" class="self-link"></a></h4>
-<p>The <code>accumulate</code> algorithm performs operations
-sequentially. Its parallel version is <code>reduce</code>, which we
-propose here. The non-parallel version has been translated in C++23 into
-<code>fold_left</code>.</p>
-<h4 data-number="4.1.6.3" id="inner_product"><span class="header-section-number">4.1.6.3</span>
-<code>inner_product</code><a href="#inner_product" class="self-link"></a></h4>
-<p>The <code>inner_product</code> algorithm performs operations
-sequentially. It can be replaced with a ranges version of
-<code>transform_reduce</code>. P2214R2 argues specifically against
-adding a ranges analog of <code>inner_product</code>, because it is less
-fundamental than other algorithms, and because it’s not clear how to
-incorporate projections.</p>
-<h4 data-number="4.1.6.4" id="adjacent_difference"><span class="header-section-number">4.1.6.4</span>
-<code>adjacent_difference</code><a href="#adjacent_difference" class="self-link"></a></h4>
-<p><code>adjacent_difference</code> can be replaced with a combination
-of <code>adjacent_transform_view</code> (which was adopted in C++23) and
-<code>ranges::copy</code>. We argue elsewhere in this proposal that
-views (such as <code>adjacent_transform_view</code>) that use a
-<em><code>movable-box</code></em><code>&lt;F&gt;</code> member to
-represent a function object may have performance issues, due to
-<em><code>movable-box</code></em><code>&lt;F&gt;</code> being not
-trivially copyable even for some cases where <code>F</code> is trivially
-copyable. On the other hand, the existing
-<code>adjacent_difference</code> with the default binary operation
-(subtraction) could be covered with the trivially copyable
-<code>std::minus</code> function object.</p>
-<p>In our experience, adjacent differences or their generalization are
-often used in combination with other ranges. For example,
-finite-difference methods (such as Runge-Kutta schemes) for solving
-time-dependent differential equations may need to add together multiple
-ranges, each of which is an adjacent difference possibly composed with
-other functions. If users want to express that as a one-pass algorithm,
-they might need to combine more than two input ranges, possibly using a
-combination of <code>transform_view</code>s and
-<code>adjacent_transform_view</code>s. This ultimately would be hard to
-express as a single “<code>ranges::adjacent_transform</code>” algorithm
-invocation. Furthermore, <code>ranges::adjacent_transform</code> is
-necessarily single-dimensional. It could not be used straightforwardly
-for finite-difference methods for solving partial differential
-equations, for example. All this makes an
-<code>adjacent_transform</code> algorithm a lower-priority task.</p>
-<h3 data-number="4.1.7" id="we-dont-propose-reduce_first"><span class="header-section-number">4.1.7</span> We don’t propose
+<p>Users of <code>partial_sum</code> who are not concerned about the
+order of operations can call <code>inclusive_scan</code> instead, which
+we propose here. We considered adding a convenience wrapper for the same
+special case of an inclusive prefix plus-scan that
+<code>partial_sum</code> supports. However, names like
+<code>partial_sum</code> or <code>prefix_sum</code> would obscure
+whether this is an inclusive or exclusive scan. We think it’s not a very
+convenient convenience wrapper if users have to look this up every time
+they use it.</p>
+<h3 data-number="4.1.8" id="we-dont-propose-reduce_first"><span class="header-section-number">4.1.8</span> We don’t propose
 <code>reduce_first</code><a href="#we-dont-propose-reduce_first" class="self-link"></a></h3>
 <p>Section 5.1 of <a href="https://wg21.link/P2760R1">P2760R1</a> asks
 whether there should be a <code>reduce_first</code> algorithm, analogous
@@ -1222,7 +1256,7 @@ parallel generalization of <code>reduce_first</code> would actually be a
 different algorithm that can start with any element in the range. We do
 not propose that generalization here, but would not oppose such a
 proposal.</p>
-<h4 data-number="4.1.7.1" id="arguments-against-reduce_first"><span class="header-section-number">4.1.7.1</span> Arguments against
+<h4 data-number="4.1.8.1" id="arguments-against-reduce_first"><span class="header-section-number">4.1.8.1</span> Arguments against
 <code>reduce_first</code><a href="#arguments-against-reduce_first" class="self-link"></a></h4>
 <ol type="1">
 <li><p>P3179R8 already proposes parallel ranges overloads of
@@ -1247,7 +1281,7 @@ optimizations.</p></li>
 themselves, by extracting the first element from the sequence and using
 it as the initial value in <code>reduce</code>.</p></li>
 </ol>
-<h4 data-number="4.1.7.2" id="arguments-for-reduce_first"><span class="header-section-number">4.1.7.2</span> Arguments for
+<h4 data-number="4.1.8.2" id="arguments-for-reduce_first"><span class="header-section-number">4.1.8.2</span> Arguments for
 <code>reduce_first</code><a href="#arguments-for-reduce_first" class="self-link"></a></h4>
 <p>Users often want to combine multiple reductions into a single pass,
 where some of the reductions are min and/or max, while others have a
@@ -1258,7 +1292,7 @@ This happens often enough that MPI (the Message Passing Interface for
 distributed-memory parallel computing) has predefined reduction
 operations for minimum and its index (<code>MINLOC</code>) and maximum
 and its index (<code>MAXLOC</code>).</p>
-<h4 data-number="4.1.7.3" id="a-good-parallel-reduce_first-is-actually-a-different-algorithm"><span class="header-section-number">4.1.7.3</span> A good parallel
+<h4 data-number="4.1.8.3" id="a-good-parallel-reduce_first-is-actually-a-different-algorithm"><span class="header-section-number">4.1.8.3</span> A good parallel
 <code>reduce_first</code> is actually a different algorithm<a href="#a-good-parallel-reduce_first-is-actually-a-different-algorithm" class="self-link"></a></h4>
 <p>A reasonable parallel generalization of <code>reduce_first</code>
 would be a different algorithm, because it would want to preserve
@@ -1277,7 +1311,7 @@ are ordered, so it matters which element of the sequence starts the
 fold. The <code>reduce*</code> algorithms are unordered, so there’s no
 functional correctness reason to privilege the first element over any
 other.</p>
-<h3 data-number="4.1.8" id="we-dont-propose-reduce_with_iter"><span class="header-section-number">4.1.8</span> We don’t propose
+<h3 data-number="4.1.9" id="we-dont-propose-reduce_with_iter"><span class="header-section-number">4.1.9</span> We don’t propose
 <code>reduce_with_iter</code><a href="#we-dont-propose-reduce_with_iter" class="self-link"></a></h3>
 <p>A hypothetical <code>reduce_with_iter</code> algorithm would look
 like <code>fold_left_with_iter</code>, but would permit reordering of
@@ -1293,30 +1327,11 @@ should return just the computed value. Section 4.4 of
 <a href="https://wg21.link/P2322R6">P2322R6</a> argues that this makes
 it easier to use, and improves consistency with other ranges algorithms
 like <code>ranges::count</code> and <code>ranges::any_of</code>. It is
-also consistent with P3179R8. The algorithms
-<code>fold_left_with_iter</code> and
-<code>fold_left_first_with_iter</code> exist for users who want both the
-iterator and the value. Section 4.4 of P2322R6 further elaborates that
-<code>fold_left</code> should not be specified in terms of
-<code>fold_left_with_iter</code>, for performance reasons: it would
-“incur an extra move of the accumulated result, due to lack of copy
-elision (we have different return types).” The <code>*_with_iter</code>
-algorithms are separate algorithms that need separate
-specifications.</p>
-<h3 data-number="4.1.9" id="summary-algorithms-that-we-propose-here"><span class="header-section-number">4.1.9</span> Summary: Algorithms that we
-propose here<a href="#summary-algorithms-that-we-propose-here" class="self-link"></a></h3>
-<p>We propose providing parallel and non-parallel overloads of</p>
-<ul>
-<li><p>unary and binary <code>ranges::transform_reduce</code> as well as
-<code>ranges::reduce</code>,</p></li>
-<li><p><code>ranges::transform_{in,ex}clusive_scan</code> as well as
-<code>ranges::{in,ex}clusive_scan</code>, and</p></li>
-<li><p>the convenience wrappers <code>ranges::sum(r)</code> as
-<code>ranges::reduce(r, plus{}, range_value_t&lt;R&gt;())</code> and
-<code>ranges::product(r)</code> as
-<code>ranges::reduce(r, multiplies{}, range_value_t&lt;R&gt;(1))</code>,
-as proposed in <a href="https://wg21.link/P2760R1">P2760R1</a>.</p></li>
-</ul>
+also consistent with P3179R8. Furthermore, even if a
+<code>reduce_with_iter</code> algorithm were to exist,
+<code>reduce</code> should not be specified in terms of it. This is for
+performance reasons, as Section 4.4 of P2322R6 elaborates for
+<code>fold_left</code> and <code>fold_left_with_iter</code>.</p>
 <h2 data-number="4.2" id="range-categories-and-return-types"><span class="header-section-number">4.2</span> Range categories and return
 types<a href="#range-categories-and-return-types" class="self-link"></a></h2>
 <p>We propose the following.</p>
@@ -1400,13 +1415,19 @@ propose.</p>
 take a default binary operation <em>nor</em> a default initial
 parameter. The user needs to supply both.</p>
 </blockquote>
-<p>This motivates the convenience wrappers</p>
+<p>This motivates the following convenience wrappers:</p>
 <ul>
-<li><p><code>ranges::sum(r)</code> for
-<code>ranges::reduce(r, plus{}, range_value_t&lt;R&gt;())</code>,
-and</p></li>
-<li><p><code>ranges::product(r)</code> for
-<code>ranges::reduce(r, multiplies{}, range_value_t&lt;R&gt;(1))</code>.</p></li>
+<li><p><code>ranges::sum(r)</code> for <code>ranges::reduce</code> with
+<code>init = range_value_t&lt;R&gt;()</code> and <code>plus{}</code> as
+the reduce operation;</p></li>
+<li><p><code>ranges::product(r)</code> for <code>ranges::reduce</code>
+with <code>init = range_value_t&lt;R&gt;(1))</code> and
+<code>multiplies{}</code> as the reduce operation; and</p></li>
+<li><p><code>ranges::dot(x, y)</code> for binary
+<code>ranges::transform_reduce</code> with <code>init = T()</code> where
+<code>T = decltype(declval&lt;range_value_t&lt;X&gt;&gt;() * declval&lt;range_value_t&lt;Y&gt;&gt;())</code>,
+<code>plus{}</code> as the reduce operation, and
+<code>multiplies{}</code> as the transform operation.</p></li>
 </ul>
 <p>One argument <em>for</em> a default initial value in
 <code>std::reduce</code> is that <code>int</code> literals like

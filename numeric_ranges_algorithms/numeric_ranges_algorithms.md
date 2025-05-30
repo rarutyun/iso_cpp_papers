@@ -2,7 +2,7 @@
 ---
 title: Parallel and non-parallel numeric range algorithms
 document: DXXXXR0
-date: 2025-05-19
+date: 2025-05-30
 audience: SG1,SG9,LEWG
 author:
   - name: Ruslan Arutyunyan
@@ -40,15 +40,19 @@ toc: true
 
 # Abstract
 
-We propose ranges overloads (both parallel and nonparallel) of the following algorithms.
+We propose ranges overloads (both parallel and nonparallel) of the following algorithms:
 
-* `reduce`, unary `transform_reduce`, and binary `transform_reduce`
+* `reduce`, unary `transform_reduce`, and binary `transform_reduce`;
 
-* `inclusive_scan` and `transform_inclusive_scan`
+* `inclusive_scan` and `transform_inclusive_scan`; and
 
 * `exclusive_scan` and `transform_exclusive_scan`
 
-We also propose adding convenience wrappers `ranges::sum` and `ranges::product` for special cases of `reduce` with addition and multiplication, respectively.
+We also propose adding parallel and non-parallel convenience wrappers:
+
+* `ranges::sum` and `ranges::product` for special cases of `reduce` with addition and multiplication, respectively; and
+
+* `ranges::dot` for the special case of binary `transform_reduce` with transform `plus` and reduction `multiplies`.
 
 # Design
 
@@ -56,15 +60,19 @@ We also propose adding convenience wrappers `ranges::sum` and `ranges::product` 
 
 ### What we propose
 
-We propose ranges overloads (both parallel and nonparallel) of the following algorithms.
+We propose ranges overloads (both parallel and nonparallel) of the following algorithms:
 
-* `reduce`, unary `transform_reduce`, and binary `transform_reduce`
+* `reduce`, unary `transform_reduce`, and binary `transform_reduce`;
 
-* `inclusive_scan` and `transform_inclusive_scan`
+* `inclusive_scan` and `transform_inclusive_scan`; and
 
-* `exclusive_scan` and `transform_exclusive_scan`
+* `exclusive_scan` and `transform_exclusive_scan`.
 
-We also propose parallel and non-parallel convenience wrappers `ranges::sum(r)` as `ranges::reduce(r, plus{}, range_value_t<R>())` and `ranges::product(r)` as `ranges::reduce(r, multiplies{}, range_value_t<R>(1))`.
+We also propose adding parallel and non-parallel convenience wrappers:
+
+* `ranges::sum` and `ranges::product` for special cases of `reduce` with addition and multiplication, respectively; and
+
+* `ranges::dot` for the special case of binary `transform_reduce` with transform `plus` and reduction `multiplies`.
 
 The following sections explain why we propose these algorithms and not others.  This relates to other aspects of the design besides algorithm selection, such as whether to include optional projection parameters.
 
@@ -443,9 +451,37 @@ We conclude this based on a chain of reasoning, starting with binary `transform_
 
 6. It's more consistent for the various `*scan` algorithms to look and act like their `*reduce` counterparts, so we provide `ranges::transform_{in,ex}clusive_scan` as well as `ranges::{in,ex}clusive_scan`, and do not provide projections for any of them.
 
-### "The lost algorithm": Noncommutative parallel reduction?
+### We propose convenience wrappers to replace some algorithms
 
-The Standard lacks an analog of `reduce` that can assume associativity but not commutativity of binary operations.  One author of this proposal refers to this as "the lost algorithm" (in e.g., <a href="https://adspthepodcast.com/2021/05/14/Episode-25.html">Episode 25 of "ASDP: The Podcast"</a>).  To elaborate: The current numeric algorithms express a variety of permissions to reorder binary operations.
+#### `accumulate`
+
+The `accumulate` algorithm performs operations sequentially.  Users who want that left-to-right sequential behavior can call C++23's `fold_left`.  For users who are not concerned about the order of operations and who want `accumulate`'s default binary operation, we propose parallel and non-parallel convenience wrappers `ranges::sum`.
+
+#### `inner_product`
+
+The `inner_product` algorithm performs operations sequentially.  Users who want that left-to-right sequential behavior can call `fold_left`.  Note that P2214R2 argues specifically against adding a ranges analog of `inner_product`, because it is less fundamental than other algorithms.
+
+For users who are not concerned about the order of operations and who want the default binary operations used by `inner_product`, we propose parallel and non-parallel convenience wrappers `ranges::dot`.  We call them `dot` and not `inner_product` because inner products are mathematically more general.  We specifically mean not just any inner product, but the inner product that is the dot product.  Calling them `dot` has the added benefit that they represent the same mathematical computation as `std::linalg::dot`.
+
+### Existing views replace some other algorithms
+
+We do not propose ranges versions of the following numeric algorithms, since they can be replaced with existing views and ranges algorithms.
+
+#### `iota`
+
+C++23 has `iota_view`, the view version of `iota`.  One can replace the `iota` algorithm with `iota_view` and `ranges::copy`.  In fact, one could argue that `iota_view` is the perfect use case for a view: instead of storing the entire range, users can represent it compactly with two integers.  There also should be no optimization concerns with parallel algorithms over an `iota_view`.  For example, the Standard specifies `iota_view` in a way that does not hinder it from being trivially copyable, as long as its input types are.  The iterator type of `iota_view` is a random access iterator for reasonable lower bound types (e.g., integers).
+
+#### `adjacent_difference`
+
+The `adjacent_difference` algorithm can be replaced with a combination of `adjacent_transform_view` (which was adopted in C++23) and `ranges::copy`.  We argue elsewhere in this proposal that views (such as `adjacent_transform_view`) that use a _`movable-box`_`<F>` member to represent a function object may have performance issues, due to _`movable-box`_`<F>` being not trivially copyable even for some cases where `F` is trivially copyable.  On the other hand, the existing `adjacent_difference` with the default binary operation (subtraction) could be covered with the trivially copyable `std::minus` function object.
+
+In our experience, adjacent differences or their generalization are often used in combination with other ranges.  For example, finite-difference methods (such as Runge-Kutta schemes) for solving time-dependent differential equations may need to add together multiple ranges, each of which is an adjacent difference possibly composed with other functions.  If users want to express that as a one-pass algorithm, they might need to combine more than two input ranges, possibly using a combination of `transform_view`s and `adjacent_transform_view`s.  This ultimately would be hard to express as a single "`ranges::adjacent_transform`" algorithm invocation.  Furthermore, `ranges::adjacent_transform` is necessarily single-dimensional.  It could not be used straightforwardly for finite-difference methods for solving partial differential equations, for example.  All this makes an `adjacent_transform` algorithm a lower-priority task.
+
+### We don't propose "the lost algorithm" (noncommutative parallel reduce)
+
+The Standard lacks an analog of `reduce` that can assume associativity but not commutativity of binary operations.  One author of this proposal refers to this as "the lost algorithm" (in e.g., <a href="https://adspthepodcast.com/2021/05/14/Episode-25.html">Episode 25 of "ASDP: The Podcast"</a>).  We do not propose this algorithm, but we would welcome a separate proposal to do so.
+
+The current numeric algorithms express a variety of permissions to reorder binary operations.
 
 1. `accumulate` and `partial_sum` both precisely specify the order of binary operations as sequential, from left to right.  This works even if the binary operation is neither associative nor commutative.
 
@@ -461,31 +497,11 @@ A concepts-based approach like P1813R0's could permit specializing `reduce` on w
 
 This proposal does not attempt to fill this gap in the Standard parallel algorithms, but would welcome a separate proposal to do so.  We think the right way would be to propose a new algorithm with a distinct name.  A reasonable choice of name would be `fold` (just `fold` by itself, not `fold_left` or `fold_right`).
 
-### Algorithms with a ranges proposal in flight
+### We don't propose `partial_sum`
 
-We do not propose a `partial_sum` algorithm.  This algorithm performs operations sequentially.  Its parallel analogs are `inclusive_scan` and `exclusive_scan`, which we propose here.  For the non-parallel ranges version that returns a stateful binary operator, <a href="https://wg21.link/P2760R1">P2760R1</a> suggests a view instead of an algorithm.  <a href="https://wg21.link/P3351R2">P3351R2</a>, "`views::scan`," proposes this view.  P3351R2 is currently in SG9 (Ranges Study Group) review.
+The `partial_sum` algorithm performs operations sequentially.  The existing ranges library does not have an equivalent algorithm with this left-to-right sequential behavior, nor do we propose such an algorithm.  For users who want this behavior, <a href="https://wg21.link/P2760R1">P2760R1</a> suggests a view instead of an algorithm.  <a href="https://wg21.link/P3351R2">P3351R2</a>, "`views::scan`," proposes this view.  P3351R2 is currently in SG9 (Ranges Study Group) review.
 
-### Algorithms that do not need ranges versions
-
-The following algorithms do not need ranges versions, since they can be replaced with existing views and ranges algorithms.
-
-#### `iota`
-
-C++23 has `iota_view`, the view version of `iota`.  One can replace the `iota` algorithm with `iota_view` and `ranges::copy`.  In fact, one could argue that `iota_view` is the perfect use case for a view: instead of storing the entire range, users can represent it compactly with two integers.  There also should be no optimization concerns with parallel algorithms over an `iota_view`.  For example, the Standard specifies `iota_view` in a way that does not hinder it from being trivially copyable, as long as its input types are.  The iterator type of `iota_view` is a random access iterator for reasonable lower bound types (e.g., integers).
-
-#### `accumulate`
-
-The `accumulate` algorithm performs operations sequentially.  Its parallel version is `reduce`, which we propose here.  The non-parallel version has been translated in C++23 into `fold_left`.
-
-#### `inner_product`
-
-The `inner_product` algorithm performs operations sequentially.  It can be replaced with a ranges version of `transform_reduce`.  P2214R2 argues specifically against adding a ranges analog of `inner_product`, because it is less fundamental than other algorithms, and because it's not clear how to incorporate projections.
-
-#### `adjacent_difference`
-
-`adjacent_difference` can be replaced with a combination of `adjacent_transform_view` (which was adopted in C++23) and `ranges::copy`.  We argue elsewhere in this proposal that views (such as `adjacent_transform_view`) that use a _`movable-box`_`<F>` member to represent a function object may have performance issues, due to _`movable-box`_`<F>` being not trivially copyable even for some cases where `F` is trivially copyable.  On the other hand, the existing `adjacent_difference` with the default binary operation (subtraction) could be covered with the trivially copyable `std::minus` function object.
-
-In our experience, adjacent differences or their generalization are often used in combination with other ranges.  For example, finite-difference methods (such as Runge-Kutta schemes) for solving time-dependent differential equations may need to add together multiple ranges, each of which is an adjacent difference possibly composed with other functions.  If users want to express that as a one-pass algorithm, they might need to combine more than two input ranges, possibly using a combination of `transform_view`s and `adjacent_transform_view`s.  This ultimately would be hard to express as a single "`ranges::adjacent_transform`" algorithm invocation.  Furthermore, `ranges::adjacent_transform` is necessarily single-dimensional.  It could not be used straightforwardly for finite-difference methods for solving partial differential equations, for example.  All this makes an `adjacent_transform` algorithm a lower-priority task.
+Users of `partial_sum` who are not concerned about the order of operations can call `inclusive_scan` instead, which we propose here.  We considered adding a convenience wrapper for the same special case of an inclusive prefix plus-scan that `partial_sum` supports.  However, names like `partial_sum` or `prefix_sum` would obscure whether this is an inclusive or exclusive scan.  We think it's not a very convenient convenience wrapper if users have to look this up every time they use it.
 
 ### We don't propose `reduce_first`
 
@@ -517,18 +533,8 @@ This generalization of `reduce_first` would be consistent with the implementatio
 
 A hypothetical `reduce_with_iter` algorithm would look like `fold_left_with_iter`, but would permit reordering of binary operations.  It would return both an iterator to one past the last input element, and the computed value.  The only reason for a reduction to return an iterator would be if the input range is single-pass.  However, users who have a single-pass input range really should be using one of the `fold*` algorithms instead of `reduce*`.  As a result, we do not propose the analogous `reduce_with_iter` here.
 
-Just like `fold_left`, the `reduce` algorithm should return just the computed value.  Section 4.4 of <a href="https://wg21.link/P2322R6">P2322R6</a> argues that this makes it easier to use, and improves consistency with other ranges algorithms like `ranges::count` and `ranges::any_of`.  It is also consistent with P3179R8.  The algorithms `fold_left_with_iter` and `fold_left_first_with_iter` exist for users who want both the iterator and the value.  Section 4.4 of P2322R6 further elaborates that `fold_left` should not be specified in terms of `fold_left_with_iter`, for performance reasons: it would "incur an extra move of the accumulated result, due to lack of copy elision (we have different return types)."  The `*_with_iter` algorithms are separate algorithms that need separate specifications.
+Just like `fold_left`, the `reduce` algorithm should return just the computed value.  Section 4.4 of <a href="https://wg21.link/P2322R6">P2322R6</a> argues that this makes it easier to use, and improves consistency with other ranges algorithms like `ranges::count` and `ranges::any_of`.  It is also consistent with P3179R8.  Furthermore, even if a `reduce_with_iter` algorithm were to exist, `reduce` should not be specified in terms of it.  This is for performance reasons, as Section 4.4 of P2322R6 elaborates for `fold_left` and `fold_left_with_iter`.
 
-### Summary: Algorithms that we propose here
-
-We propose providing parallel and non-parallel overloads of
-
-* unary and binary `ranges::transform_reduce` as well as `ranges::reduce`,
-
-* `ranges::transform_{in,ex}clusive_scan` as well as `ranges::{in,ex}clusive_scan`, and
-
-* the convenience wrappers `ranges::sum(r)` as `ranges::reduce(r, plus{}, range_value_t<R>())` and `ranges::product(r)` as `ranges::reduce(r, multiplies{}, range_value_t<R>(1))`, as proposed in <a href="https://wg21.link/P2760R1">P2760R1</a>.
-  
 ## Range categories and return types
 
 We propose the following.
@@ -577,11 +583,13 @@ Section 5.1 of P2760R1 states:
 
 > One thing is clear: `ranges::reduce` should *not* take a default binary operation *nor* a default initial parameter. The user needs to supply both.
 
-This motivates the convenience wrappers
+This motivates the following convenience wrappers:
 
-* `ranges::sum(r)` for `ranges::reduce(r, plus{}, range_value_t<R>())`, and
+* `ranges::sum(r)` for `ranges::reduce` with `init = range_value_t<R>()` and `plus{}` as the reduce operation;
 
-* `ranges::product(r)` for `ranges::reduce(r, multiplies{}, range_value_t<R>(1))`.
+* `ranges::product(r)` for `ranges::reduce` with `init = range_value_t<R>(1))` and `multiplies{}` as the reduce operation; and
+
+* `ranges::dot(x, y)` for binary `ranges::transform_reduce` with `init = T()` where `T = decltype(declval<range_value_t<X>>() * declval<range_value_t<Y>>())`, `plus{}` as the reduce operation, and `multiplies{}` as the transform operation.
 
 One argument *for* a default initial value in `std::reduce` is that `int` literals like `0` or `1` do not behave in the expected way with a sequence of `float` or `double`.  For `ranges::reduce`, however, making its return value type imitate `ranges::fold_left` instead of `std::reduce` fixes that.
 
