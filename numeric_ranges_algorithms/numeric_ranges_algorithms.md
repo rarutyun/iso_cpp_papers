@@ -482,6 +482,8 @@ The `partial_sum` algorithm performs operations sequentially.  The existing rang
 
 Users of `partial_sum` who are not concerned about the order of operations can call `inclusive_scan` instead, which we propose here.  We considered adding a convenience wrapper for the same special case of an inclusive prefix plus-scan that `partial_sum` supports.  However, names like `partial_sum` or `prefix_sum` would obscure whether this is an inclusive or exclusive scan.  We think it's not a very convenient convenience wrapper if users have to look this up every time they use it.
 
+If WG21 did want a convenience wrapper, one option would be to give this common use case a longer but more explicit name, like `inclusive_sum_scan`.
+
 ### We don't propose `reduce_first`
 
 Section 5.1 of <a href="https://wg21.link/P2760R1">P2760R1</a> asks whether there should be a `reduce_first` algorithm, analogous to `fold_left_first`, for binary operations that lack a natural identity element to serve as the initial value.  An example would be `min` on a range of `int` values, where callers would have no way to tell if `INT_MAX` represents a value in the range, or an arbitrary stand-in for the (nonexistent) identity element.  A `reduce_first` algorithm would use the first element in the range as the initial value.
