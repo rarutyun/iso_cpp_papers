@@ -22,6 +22,10 @@ author:
 toc: true
 ---
 
+# Abstract {- .unlisted}
+
+We propose `ranges` algorithm overloads (both parallel and nonparallel) for `<numeric>` header.
+
 # Authors
 
 * Ruslan Arutyunyan (Intel)
@@ -38,29 +42,13 @@ toc: true
 
 * Revision 0 to be submitted 2025-??-??
 
-# Abstract
-
-We propose ranges overloads (both parallel and nonparallel) of the following algorithms:
-
-* `reduce`, unary `transform_reduce`, and binary `transform_reduce`;
-
-* `inclusive_scan` and `transform_inclusive_scan`; and
-
-* `exclusive_scan` and `transform_exclusive_scan`
-
-We also propose adding parallel and non-parallel convenience wrappers:
-
-* `ranges::sum` and `ranges::product` for special cases of `reduce` with addition and multiplication, respectively; and
-
-* `ranges::dot` for the special case of binary `transform_reduce` with transform `plus` and reduction `multiplies`.
-
 # Design
 
 ## What algorithms to include?
 
 ### What we propose
 
-We propose ranges overloads (both parallel and nonparallel) of the following algorithms:
+We propose `ranges` overloads (both parallel and nonparallel) of the following algorithms:
 
 * `reduce`, unary `transform_reduce`, and binary `transform_reduce`;
 
@@ -78,7 +66,7 @@ The following sections explain why we propose these algorithms and not others.  
 
 ### Current set of numeric algorithms
 
-<a href="https://isocpp.org/files/papers/P3179R8.html">P3179R8</a>, "C++ Parallel Range Algorithms," is in the last stages of wording review as of the publication date.  P3179R8 explicitly defers adding ranges versions of the numeric algorithms.  This proposal does that.  As such, we focus on the numeric algorithms, that is, the 11 algorithms in <a href="https://eel.is/c++draft/numeric.ops">[numeric.ops]</a>.
+[@P3179R8]</a>, "C++ Parallel Range Algorithms," is in the last stages of wording review as of the publication date. [@P3179R8] explicitly defers adding `ranges` versions of the numeric algorithms.  This proposal does that.  As such, we focus on the numeric algorithms, that is, the 11 algorithms in [numeric.ops]{- .sref}.
 
 * `iota`
 
@@ -102,7 +90,7 @@ The following sections explain why we propose these algorithms and not others.  
 
 * `transform_exclusive_scan`
 
-We don't have to add ranges versions of all these algorithms.  Several already have a ranges version in C++23, possibly with a different name.  Some others could be omitted because they have straightforward replacements using existing views and other ranges algorithms.  We carefully read the two proposals <a href="https://wg21.link/P2214R2">P2214R2</a>, "A Plan for C++23 Ranges," and <a href="https://wg21.link/P2760R1">P2760R1</a>, "A Plan for C++26 Ranges," in order to inform our algorithm selections.  In some cases that we will explain below, usability and performance concerns led us to disagree with their conclusions.
+We don't have to add ranges versions of all these algorithms.  Several already have a ranges version in C++23, possibly with a different name.  Some others could be omitted because they have straightforward replacements using existing views and other ranges algorithms.  We carefully read the two proposals [@P2214R2], "A Plan for C++23 Ranges," and [@P2760R1], "A Plan for C++26 Ranges," in order to inform our algorithm selections.  In some cases that we will explain below, usability and performance concerns led us to disagree with their conclusions.
 
 ### `transform_*` algorithms (and/or projections)
 
@@ -132,7 +120,7 @@ The above two questions are related, since a projection can have the same effect
 
 > Wherever appropriate, algorithms should optionally take *INVOKE*-able *projections* that are applied to each element in the input sequence(s). This, in effect, allows users to trivially transform each input sequence for the sake of that single algorithm invocation.
 
-Projecting the input of `reduce` has the same effect as unary `transform_reduce`.  Here is an example, in which `get_element` is a customization point object like the one proposed in <a href="https://wg21.link/p2769r3">P2769R3</a>, such that `get_element<k>` gets the `k`-th element of an object that participates in the tuple or structured binding protocol.
+Projecting the input of `reduce` has the same effect as unary `transform_reduce`.  Here is an example, in which `get_element` is a customization point object like the one proposed in [@P2769R3], such that `get_element<k>` gets the `k`-th element of an object that participates in the tuple or structured binding protocol.
 
 ```c++
 struct foo {};
@@ -175,8 +163,16 @@ Questions about transforms and projections suggest studying `ranges::transform` 
 
 2. If binary transform is equivalent to unary transform of a `zip_transform_view`, then why does binary `std::ranges::transform` exist?
 
-It can help to look at examples.  Here is a binary transform example without projections, that uses a single big lambda.  Users have to read the big lambda to see what it does.  So does the compiler, which can hinder optimization if it's not good at inlining.
+It can help to look at examples.  Here is a binary transform example without projections, that uses a single big lambda.  Users have to read the big lambda to see what it does.  So does the compiler, which can hinder optimization if it's not good
+at inlining. Contrast the code on the left (below) with use of projections.  Users can read out loud what this does.  It also separates the "selection" or "query" part of the transform from the "arithmetic" or "computation" part.
+The power of the ranges abstraction is that users can factor computation on a range from the logic to iterate over that range.  It's natural to extend this separation to selection logic as well.
 
+
+::: cmptable
+
+> `transform` without and with projection
+
+### Without projections
 ```c++
 struct foo {};
 std::vector<std::tuple<int, foo, std::string>> v1{
@@ -193,8 +189,7 @@ std::vector<int> expected{65, 119, 209};
 assert(out == expected);
 ```
 
-Constrast this with use of projections.  Users can read out loud what this does.  It also separates the "selection" or "query" part of the transform from the "arithmetic" or "computation" part.  The power of the ranges abstraction is that users can factor computation on a range from the logic to iterate over that range.  It's natural to extend this separation to selection logic as well.
-
+### With projections
 ```c++
 struct foo {};
 std::vector<std::tuple<int, foo, std::string>> v1{
@@ -210,6 +205,7 @@ std::ranges::transform(v1, v2, out.begin(),
 std::vector<int> expected{65, 119, 209};
 assert(out == expected);
 ```
+:::
 
 It's harder to avoid a lambda in the unary transform case.  Most of the named C++ Standard Library arithmetic function objects are binary.  Currying them into unary functions in C++ requires either making a lambda (which defeats the purpose somewhat) or using something like `std::bind` (which is verbose).  On the other hand, using a projection still has the benefit of separating the "selection" part of the transform from the "computation" part.
 
@@ -300,7 +296,7 @@ std::vector<std::tuple<int, foo, std::string>> v1{
   {5, {}, "five"}, {7, {}, "seven"}, {11, {}, "eleven"}};
 std::vector<std::pair<std::string, int>> v2{
   {"thirteen", 13}, {"seventeen", 17}, {"nineteen", 19}};
-const int init = 3; 
+const int init = 3;
 std::vector<int> out(std::from_range, std::views::repeat(0, 3));
 
 // reduce with zip_transform_view
@@ -329,7 +325,7 @@ std::vector<std::tuple<int, foo, std::string>> v1{
   {5, {}, "five"}, {7, {}, "seven"}, {11, {}, "eleven"}};
 std::vector<std::pair<std::string, int>> v2{
   {"thirteen", 13}, {"seventeen", 17}, {"nineteen", 19}};
-const int init = 3; 
+const int init = 3;
 std::vector<int> out(std::from_range, std::views::repeat(0, 3));
 
 // With projections
@@ -376,14 +372,14 @@ int main() {
   std::vector v{1, 2, 3};
 
   // operator= is defaulted; lambda type is trivially copyable
-  auto f1 = [] (auto x) { 
+  auto f1 = [] (auto x) {
     return x + 1;
   };
   static_assert(std::is_trivially_copyable_v<decltype(f1)>);
 
   // Capture means that lambda's operator= is deleted,
   // but lambda type is still trivially copyable
-  auto f2 = [y = 1] (auto x) { 
+  auto f2 = [y = 1] (auto x) {
     return x + y;
   };
   static_assert(std::is_trivially_copyable_v<decltype(f2)>);
@@ -393,7 +389,7 @@ int main() {
   static_assert(std::is_trivially_copyable_v<decltype(view1)>);
 
   // decltype(view2) is NOT trivially copyable, even though f2 is
-  auto view2 = v | std::views::transform(f2); 
+  auto view2 = v | std::views::transform(f2);
   static_assert(!std::is_trivially_copyable_v<decltype(view2)>);
 
   // view3 is trivally copyable, though it behaves just like view2.
@@ -405,7 +401,7 @@ int main() {
 }
 ```
 
-Both lambdas `f1` and `f2` are trivially copyable, but `std::views::transform(f2)` is *not* trivally copyable.  The wording for both `transform_view` and `zip_transform_view` expresses the input function object of type `F` as stored in an exposition-only _`movable-box<F>`_ member.  `f2` has a capture that gives it a `=delete`d copy assignment operator.  Nevertheless, `f2` is still trivially copyable, because each of its default copy and move operations is either trivial or deleted, and its destructor is nontrivial and deleted.  
+Both lambdas `f1` and `f2` are trivially copyable, but `std::views::transform(f2)` is *not* trivally copyable.  The wording for both `transform_view` and `zip_transform_view` expresses the input function object of type `F` as stored in an exposition-only _`movable-box<F>`_ member.  `f2` has a capture that gives it a `=delete`d copy assignment operator.  Nevertheless, `f2` is still trivially copyable, because each of its default copy and move operations is either trivial or deleted, and its destructor is nontrivial and deleted.
 
 The problem is _`movable-box`_.  As [range.move.wrap] 1.3 explains, since `copyable<decltype(f2)>` is not modeled, _`movable-box`_`<decltype(f2)>` provides a nontrivial, not deleted copy assignment operator.  This makes _`movable-box`_`<decltype(f2)>`, and therefore `transform_view` and `zip_transform_view`, not trivially copyable.
 
@@ -620,7 +616,7 @@ int main() {
     static_assert(std::is_same_v<decltype(r), double>);
     assert(r == 2.0);
   }
-  return 0;  
+  return 0;
 }
 ```
 
@@ -640,7 +636,7 @@ It's notable that `reduce`-like `mdspan` algorithms in [linalg] -- `dot`, `vecto
 
 WG21 did not have time to propose ranges-based numeric algorithms with the initial set of ranges algorithms in C++20.  <a href="https://wg21.link/P1813R0">P1813R0</a>, "A Concept Design for the Numeric Algorithms," points out the challenge of defining ranges versions of the existing parallel numeric algorithms.  What makes this task less straightforward is that the specification of the parallel numeric algorithms permits them to reorder binary operations like addition.  This matters because many useful number types do not have associative addition.  Lack of associativity is not just a floating-point rounding error issue; one example is saturating integer arithmetic.  Ranges algorithms are constrained by concepts, but it's not clear even if it's a good idea to define concepts that can express permission to reorder terms in a sum.
 
-C++17 takes the approach of saying that parallel numeric algorithms can reorder the binary operations however they like, but does not say whether any reordering would give the same results as any other reordering.  The Standard expresses this through the wording "macros" *GENERALIZED_NONCOMMUTATIVE_SUM* and *GENERALIZED_SUM*.  (A wording macro is a parameterized abbreviation for a longer sequence of wording in the Standard.  We put "macros" in double quotes because they are not necessarily preprocessor macros.  They might not even be implementable as such.)  Algorithms become ill-formed, no diagnostic required (IFNDR) if the element types do not define the required operations.  P1813R0 instead defines C++ concepts that represent algebraic structures, all of which involve a set with a closed binary operation.  Some of the structures require that the operation be associative and/or commutative.  P1813R0 uses those concepts to constrain the algorithms.  This means that the algorithms will not be selected for overload resolution if the element types do not define the required operations.  It further means that algorithms could (at least in theory) dispatch based on properties like whether the element type's binary operation is commutative.  The concepts include both syntactic and semantic constraints.  
+C++17 takes the approach of saying that parallel numeric algorithms can reorder the binary operations however they like, but does not say whether any reordering would give the same results as any other reordering.  The Standard expresses this through the wording "macros" *GENERALIZED_NONCOMMUTATIVE_SUM* and *GENERALIZED_SUM*.  (A wording macro is a parameterized abbreviation for a longer sequence of wording in the Standard.  We put "macros" in double quotes because they are not necessarily preprocessor macros.  They might not even be implementable as such.)  Algorithms become ill-formed, no diagnostic required (IFNDR) if the element types do not define the required operations.  P1813R0 instead defines C++ concepts that represent algebraic structures, all of which involve a set with a closed binary operation.  Some of the structures require that the operation be associative and/or commutative.  P1813R0 uses those concepts to constrain the algorithms.  This means that the algorithms will not be selected for overload resolution if the element types do not define the required operations.  It further means that algorithms could (at least in theory) dispatch based on properties like whether the element type's binary operation is commutative.  The concepts include both syntactic and semantic constraints.
 
 WG21 has not expressed a consensus on P1813R0's approach.  LEWGI reviewed P1813R0 at the Belfast meeting in November 2019, but did not forward the proposal and wanted to see it again.  Two other proposals express something more like WG21's consensus on constraining the numeric algorithms: <a href="https://wg21.link/P2214R2">P2214R2</a>, "A Plan for C++23 Ranges," and <a href="https://wg21.link/P1673R13">P1673R13</a>, "A free function linear algebra interface based on the BLAS," which defines mdspan-based analogs of the numeric algorithms.  Section 5.1.1 of P2214R2 points out that P1813R0's approach would overconstrain `fold`; P2214R2 instead suggests just constraining the operation to be binary invocable.  This was ultimately the approach taken by the Standard through the exposition-only concepts _`indirectly-binary-left-foldable`_ and _`indirectly-binary-right-foldable`_.  Section 5.1.2 of P2214R2 says that `reduce` "calls for the kinds of constraints that P1813R0 is proposing."
 
