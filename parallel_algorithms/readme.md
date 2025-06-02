@@ -41,5 +41,5 @@ The paper proposes changing the return value type for parallel `ranges::rotate_c
 
 [Source code](P3709/P3709.md) (for mpark/wg21)
 
-- R1 - in progress: https://github.com/rarutyun/iso_cpp_papers/pull/27
+- R1: https://isocpp.org/files/papers/P3709R1.html
 - R0: https://wg21.link/p3709r0
