@@ -543,8 +543,8 @@ wrappers:</p>
 special cases of <code>reduce</code> with addition and multiplication,
 respectively; and</p></li>
 <li><p><code>ranges::dot</code> for the special case of binary
-<code>transform_reduce</code> with transform <code>plus</code> and
-reduction <code>multiplies</code>.</p></li>
+<code>transform_reduce</code> with transform <code>multiplies{}</code>
+and reduction <code>plus{}</code>.</p></li>
 </ul>
 <p>The following sections explain why we propose these algorithms and
 not others. This relates to other aspects of the design besides
@@ -1402,8 +1402,8 @@ with <code>init = range_value_t&lt;R&gt;(1))</code> and
 <li><p><code>ranges::dot(x, y)</code> for binary
 <code>ranges::transform_reduce</code> with <code>init = T()</code> where
 <code>T = decltype(declval&lt;range_value_t&lt;X&gt;&gt;() * declval&lt;range_value_t&lt;Y&gt;&gt;())</code>,
-<code>plus{}</code> as the reduce operation, and
-<code>multiplies{}</code> as the transform operation.</p></li>
+<code>multiplies{}</code> as the transform operation, and
+<code>plus{}</code> as the reduce operation.</p></li>
 </ul>
 <p>One argument <em>for</em> a default initial value in
 <code>std::reduce</code> is that <code>int</code> literals like
