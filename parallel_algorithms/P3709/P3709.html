@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2025-05-28" />
+  <meta name="dcterms.date" content="2025-06-02" />
   <title>Reconsider parallel `ranges::rotate_copy` and
 `ranges::reverse_copy`</title>
   <style>
@@ -433,7 +433,7 @@ and <code class="sourceCode cpp">ranges<span class="op">::</span>reverse_copy</c
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2025-05-28</td>
+    <td>2025-06-02</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -486,16 +486,16 @@ Acknowledgements<span></span></a></li>
 </ul>
 </div>
 <h1 class="unnumbered unlisted" id="abstract">Abstract<a href="#abstract" class="self-link"></a></h1>
-<p>This paper proposes reconsidering the design for parallel <code class="sourceCode cpp">ranges<span class="op">::</span>rotate_copy</code>
+<p>This paper proposes changing the return value type for parallel <code class="sourceCode cpp">ranges<span class="op">::</span>rotate_copy</code>
 and <code class="sourceCode cpp">ranges<span class="op">::</span>reverse_copy</code>
 in <span class="citation" data-cites="P3179R9"><a href="https://isocpp.org/files/papers/P3179R9.html" role="doc-biblioref">[P3179R9]</a></span>.</p>
 <h1 data-number="1" id="introduction"><span class="header-section-number">1</span> Introduction<a href="#introduction" class="self-link"></a></h1>
 <p>LEWG approved the “range-as-the-output” design aspect for our
-parallel range algorithms proposal <span class="citation" data-cites="P3179R9"><a href="https://isocpp.org/files/papers/P3179R9.html" role="doc-biblioref">[P3179R9]</a></span>. It introduces
-“range-as-the-output” with its own bound, taking into account that the
-output size may be less than the input size. A common questions for such
-algorithms is what to return for the input when the output size is not
-sufficient to hold the processed data?</p>
+parallel range algorithms proposal <span class="citation" data-cites="P3179R9"><a href="https://isocpp.org/files/papers/P3179R9.html" role="doc-biblioref">[P3179R9]</a></span>. It introduces the use of a
+range with its own bound as the output sequence, taking into account
+that the output size may be less than the input size. A common questions
+for such algorithms is which iterator to return for the input when the
+output size is not sufficient to hold the processed data?</p>
 <p>For most cases the answer is pretty simple: we return the iterator
 which points to the position right after the last processed element, or
 <em>one past the last</em>. Consider <code class="sourceCode cpp">std<span class="op">::</span>ranges<span class="op">::</span>copy</code>
@@ -511,7 +511,7 @@ as an example:</p>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> res2 <span class="op">=</span> std<span class="op">::</span>ranges<span class="op">::</span>copy<span class="op">(</span>std<span class="op">::</span>execution<span class="op">::</span>par, input, smaller_output<span class="op">)</span>;</span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co">// after copy invocation res2.in == input.begin() + 3 is true</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co">// res2.in point to the element equal to 4</span></span></code></pre></div>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co">// res2.in points to the element equal to 4</span></span></code></pre></div>
 <p>It gives us consistent behavior with serial range algorithms when the
 output size is sufficient, and returns the <em>stop point</em> in the
 input when the output size is insufficient.</p>
@@ -527,8 +527,8 @@ consequences:</p>
 order, so the one past the last iterator for the input never equals to
 <code class="sourceCode cpp">last</code>, unless the output range is
 empty.</li>
-<li><code class="sourceCode cpp">rotate_copy</code> uses two subranges
-within the input range, split by
+<li><code class="sourceCode cpp">rotate_copy</code> goes over two
+subranges within the input range, starting from
 <code class="sourceCode cpp">middle</code>. The one past the last
 iterator for the input also never equals to
 <code class="sourceCode cpp">last</code>: it’s one of the iterators in
@@ -554,12 +554,12 @@ design in the future, where it is appropriate to return both the
 was calculated.</li>
 </ul>
 <p>To elaborate more on serial range algorithms: the current strategy
-for the vast majority of them is returning as much information as
+for the vast majority of them is returning as much calculated data as
 possible. For example, <code class="sourceCode cpp">ranges<span class="op">::</span>for_each</code>
 returns the iterator equal to <code class="sourceCode cpp">last</code>
 because that is what the algorithm calculated besides applying a
 callable object element-wise. This is useful information because users
-might not have such an iterator before the algorithm call, they might
+might not have such an iterator before the algorithm call; they might
 only have a sentinel.</p>
 <p>Furthermore, in the future we expect serial range algorithms with
 “range-as-the-output” that support not only
@@ -577,7 +577,7 @@ up returning something different from parallel ones. Thus, the design of
 the parallel range algorithms needs to accept that they should return
 more information for <code class="sourceCode cpp">random_access_<span class="op">&lt;</span>iterator<span class="op">|</span>range<span class="op">&gt;</span></code>
 than seems necessary.</p>
-<p>As a reminder, one of the design goals for <span class="citation" data-cites="P3179R9"><a href="https://isocpp.org/files/papers/P3179R9.html" role="doc-biblioref">[P3179R9]</a></span> was to keep the same return
+<p>One of the design goals for <span class="citation" data-cites="P3179R9"><a href="https://isocpp.org/files/papers/P3179R9.html" role="doc-biblioref">[P3179R9]</a></span> is to keep the same return
 type for the proposed algorithms compared to existing range algorithms,
 where possible. However, there is a clear indication that we need to do
 something different for <code class="sourceCode cpp">reverse_copy</code>
@@ -586,7 +586,7 @@ and <code class="sourceCode cpp">rotate_copy</code>.</p>
 <code class="sourceCode cpp">rotate_copy</code> recommended design<a href="#rotate_copy_design" class="self-link"></a></h1>
 <p>In <span class="citation" data-cites="P3179R9"><a href="https://isocpp.org/files/papers/P3179R9.html" role="doc-biblioref">[P3179R9]</a></span>
 <code class="sourceCode cpp">rotate_copy</code> returns the iterator
-past the last copied element for input. By design, it never returns
+past the last copied element for the input. By design, it never returns
 <code class="sourceCode cpp">last</code>, and it returns
 <code class="sourceCode cpp">middle</code> for two scenarios:</p>
 <ul>
@@ -595,8 +595,11 @@ input.</li>
 <li>the output range is empty.</li>
 </ul>
 <p>The raised concern is that users might be surprised at runtime by a
-completely different return value while just changing how the output
-range is passed in. Consider the following example:</p>
+completely different return value after switching to parallel execution.
+Moreover, the actual reason for the different value is not an execution
+policy but the way how the output range is passed in, which might be
+viewed as a purely syntactical modification. Consider the following
+example:</p>
 <table>
 <caption><blockquote>
 <p>Variations of <code class="sourceCode cpp">rotate_copy</code></p>
@@ -615,11 +618,11 @@ range is passed in. Consider the following example:</p>
 <tr class="odd">
 <td><div>
 
-<div class="sourceCode" id="cb2"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>list in_v<span class="op">{</span><span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span><span class="op">}</span>;</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> out_v<span class="op">(</span><span class="dv">6</span><span class="op">)</span>;</span>
+<div class="sourceCode" id="cb2"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>list in<span class="op">{</span><span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span><span class="op">}</span>;</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> out<span class="op">(</span><span class="dv">6</span><span class="op">)</span>;</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">// in_view is not common_range</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> in_view <span class="op">=</span> std<span class="op">::</span>views<span class="op">::</span>counted<span class="op">(</span>in_v<span class="op">.</span>begin<span class="op">()</span>, <span class="dv">6</span><span class="op">)</span>;</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> in_view <span class="op">=</span> std<span class="op">::</span>views<span class="op">::</span>counted<span class="op">(</span>in<span class="op">.</span>begin<span class="op">()</span>, <span class="dv">6</span><span class="op">)</span>;</span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="kw">static_assert</span><span class="op">(!</span>std<span class="op">::</span>ranges<span class="op">::</span>common_range<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span>in_view<span class="op">)&gt;)</span>;</span>
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
@@ -627,7 +630,7 @@ range is passed in. Consider the following example:</p>
 <span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>ranges<span class="op">::</span>advance<span class="op">(</span>middle, <span class="dv">3</span><span class="op">)</span>;</span>
 <span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co">// iterator as the output</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> res <span class="op">=</span> std<span class="op">::</span>ranges<span class="op">::</span>rotate_copy<span class="op">(</span>in_view, middle, out_v<span class="op">.</span>begin<span class="op">())</span>;</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> res <span class="op">=</span> std<span class="op">::</span>ranges<span class="op">::</span>rotate_copy<span class="op">(</span>in_view, middle, out<span class="op">.</span>begin<span class="op">())</span>;</span>
 <span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co">// res.in compares equal to in_view.end()</span></span>
 <span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
@@ -638,11 +641,11 @@ range is passed in. Consider the following example:</p>
 </div></td>
 <td><div>
 
-<div class="sourceCode" id="cb3"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>list in_v<span class="op">{</span><span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span><span class="op">}</span>;</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> out_v<span class="op">(</span><span class="dv">6</span><span class="op">)</span>;</span>
+<div class="sourceCode" id="cb3"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>list in<span class="op">{</span><span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span><span class="op">}</span>;</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> out<span class="op">(</span><span class="dv">6</span><span class="op">)</span>;</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">// in_view is not common_range</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> in_view <span class="op">=</span> std<span class="op">::</span>views<span class="op">::</span>counted<span class="op">(</span>in_v<span class="op">.</span>begin<span class="op">()</span>, <span class="dv">6</span><span class="op">)</span>;</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> in_view <span class="op">=</span> std<span class="op">::</span>views<span class="op">::</span>counted<span class="op">(</span>in<span class="op">.</span>begin<span class="op">()</span>, <span class="dv">6</span><span class="op">)</span>;</span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="kw">static_assert</span><span class="op">(!</span>std<span class="op">::</span>ranges<span class="op">::</span>common_range<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span>in_view<span class="op">)&gt;)</span>;</span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
@@ -650,7 +653,7 @@ range is passed in. Consider the following example:</p>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>ranges<span class="op">::</span>advance<span class="op">(</span>middle, <span class="dv">3</span><span class="op">)</span>;</span>
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">// range as the output</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> res <span class="op">=</span> std<span class="op">::</span>ranges<span class="op">::</span>rotate_copy<span class="op">(</span>in_view, middle, out_v<span class="op">)</span>;</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> res <span class="op">=</span> std<span class="op">::</span>ranges<span class="op">::</span>rotate_copy<span class="op">(</span>in_view, middle, out<span class="op">)</span>;</span>
 <span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">// res.in equals to middle</span></span>
 <span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
@@ -664,16 +667,13 @@ range is passed in. Consider the following example:</p>
 </table>
 <p>Please note, that in the table above we don’t use algorithm overloads
 with execution policy. Instead, we show the future serial range
-algorithms with “range-as-the-output”. The reasons for that are:</p>
-<ul>
-<li>we need a non-<code class="sourceCode cpp">common_range</code>,
+algorithms with “range-as-the-output”. That’s because we want to use a
+non-<code class="sourceCode cpp">common_range</code>,
 non-<code class="sourceCode cpp">random_access_range</code>, so that
-calculating <code class="sourceCode cpp">last</code> would make
-sense.</li>
-<li>parallel range algorithms require
+calculating <code class="sourceCode cpp">last</code> would make sense.
+Parallel range algorithms require
 <code class="sourceCode cpp">random_access_range</code>, so the code
-would fail to compile.</li>
-</ul>
+would fail to compile if written with execution policy.</p>
 <p>While we could address the concern for
 <code class="sourceCode cpp">rotate_copy</code> if we jump to the end to
 return <code class="sourceCode cpp">last</code> when the output size is
@@ -695,7 +695,7 @@ algorithms as
 so the names of the publicly accessible fields should also be different
 for the result type of the “range-as-the-output”
 <code class="sourceCode cpp">rotate_copy</code>.</p>
-<p>Since <code class="sourceCode cpp">rotate_copy</code> has two
+<p>Since <code class="sourceCode cpp">rotate_copy</code> “swaps” two
 subranges - from <code class="sourceCode cpp">middle</code> to
 <code class="sourceCode cpp">last</code> and from
 <code class="sourceCode cpp">first</code> to
@@ -717,7 +717,8 @@ the algorithms with two input ranges. However, we don’t see a reason to
 introduce yet another type since we think that
 <code class="sourceCode cpp">in_in_out_result</code> is perfectly
 applicable for the discovered use case.</p>
-<p>The updated signatures are below:</p>
+<p>The updated signatures for parallel <code class="sourceCode cpp">ranges<span class="op">::</span>rotate_copy</code>
+are:</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> In, <span class="kw">class</span> Out<span class="op">&gt;</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> rotate_copy_truncated_result <span class="op">=</span> std<span class="op">::</span>ranges<span class="op">::</span>in_in_out_result<span class="op">&lt;</span>In, In, Out<span class="op">&gt;</span>;</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -742,7 +743,7 @@ are <code class="sourceCode cpp">in1</code> and
 code to fail to compile when one uses the output and switches to the
 parallel overload, even if users store the result as
 <code class="sourceCode cpp"><span class="kw">auto</span></code> type
-(see a caveat below).</li>
+(but see a caveat below).</li>
 <li>it takes into account future serial range algorithms with
 “range-as-the-output”, for which
 <code class="sourceCode cpp">rotate_copy</code> returns
@@ -792,8 +793,9 @@ than the input one.</li>
 <span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
 <span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span>
 <span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a><span class="kw">inline</span> <span class="kw">constexpr</span> rotate_copy_fn rotate_copy <span class="op">{}</span>;</span></code></pre></div>
-<p>Please note that we propose:</p>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a><span class="kw">inline</span> <span class="kw">constexpr</span> rotate_copy_fn rotate_copy<span class="op">{}</span>;</span></code></pre></div>
+<p>Please note that we propose the following order for returned
+iterators:</p>
 <ul>
 <li><code class="sourceCode cpp">in1</code> as a stop point in
 [<code class="sourceCode cpp">middle</code>,
@@ -910,16 +912,16 @@ information.</li>
 <tr class="odd">
 <td><div>
 
-<div class="sourceCode" id="cb8"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>list in_v<span class="op">{</span><span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span><span class="op">}</span>;</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> out_v<span class="op">(</span><span class="dv">6</span><span class="op">)</span>;</span>
+<div class="sourceCode" id="cb8"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>list in<span class="op">{</span><span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span><span class="op">}</span>;</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> out<span class="op">(</span><span class="dv">6</span><span class="op">)</span>;</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">// in_view is not common_range</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> in_view <span class="op">=</span> std<span class="op">::</span>views<span class="op">::</span>counted<span class="op">(</span>in_v<span class="op">.</span>begin<span class="op">()</span>, <span class="dv">6</span><span class="op">)</span>;</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> in_view <span class="op">=</span> std<span class="op">::</span>views<span class="op">::</span>counted<span class="op">(</span>in<span class="op">.</span>begin<span class="op">()</span>, <span class="dv">6</span><span class="op">)</span>;</span>
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="kw">static_assert</span><span class="op">(!</span>std<span class="op">::</span>ranges<span class="op">::</span>common_range<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span>in_view<span class="op">)&gt;)</span>;</span>
 <span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">// iterator as the output</span></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> res <span class="op">=</span> std<span class="op">::</span>ranges<span class="op">::</span>reverse_copy<span class="op">(</span>in_view, out_v<span class="op">.</span>begin<span class="op">())</span>;</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> res <span class="op">=</span> std<span class="op">::</span>ranges<span class="op">::</span>reverse_copy<span class="op">(</span>in_view, out<span class="op">.</span>begin<span class="op">())</span>;</span>
 <span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co">// res.in compares equal to in_view.end()</span></span>
 <span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
@@ -930,16 +932,16 @@ information.</li>
 </div></td>
 <td><div>
 
-<div class="sourceCode" id="cb9"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>list in_v<span class="op">{</span><span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span><span class="op">}</span>;</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> out_v<span class="op">(</span><span class="dv">6</span><span class="op">)</span>;</span>
+<div class="sourceCode" id="cb9"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>list in<span class="op">{</span><span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span><span class="op">}</span>;</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> out<span class="op">(</span><span class="dv">6</span><span class="op">)</span>;</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">// in_view is not common_range</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> in_view <span class="op">=</span> std<span class="op">::</span>views<span class="op">::</span>counted<span class="op">(</span>in_v<span class="op">.</span>begin<span class="op">()</span>, <span class="dv">6</span><span class="op">)</span>;</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> in_view <span class="op">=</span> std<span class="op">::</span>views<span class="op">::</span>counted<span class="op">(</span>in<span class="op">.</span>begin<span class="op">()</span>, <span class="dv">6</span><span class="op">)</span>;</span>
 <span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="kw">static_assert</span><span class="op">(!</span>std<span class="op">::</span>ranges<span class="op">::</span>common_range<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span>in_view<span class="op">)&gt;)</span>;</span>
 <span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">// range as the output</span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> res <span class="op">=</span> std<span class="op">::</span>ranges<span class="op">::</span>reverse_copy<span class="op">(</span>in_view, out_v<span class="op">)</span>;</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> res <span class="op">=</span> std<span class="op">::</span>ranges<span class="op">::</span>reverse_copy<span class="op">(</span>in_view, out<span class="op">)</span>;</span>
 <span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">// res.in equals to in_view.begin()</span></span>
 <span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
@@ -970,7 +972,8 @@ to <code class="sourceCode cpp">last</code>.</li>
 <li><code class="sourceCode cpp">in2</code> represents the stop point,
 as proposed in <span class="citation" data-cites="P3179R9"><a href="https://isocpp.org/files/papers/P3179R9.html" role="doc-biblioref">[P3179R9]</a></span>.</li>
 </ul>
-<p>The updated signatures are below:</p>
+<p>The updated signatures for parallel <code class="sourceCode cpp">ranges<span class="op">::</span>reverse_copy</code>
+are:</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> In, <span class="kw">class</span> Out<span class="op">&gt;</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> reverse_copy_truncated_result <span class="op">=</span> std<span class="op">::</span>ranges<span class="op">::</span>in_in_out_result<span class="op">&lt;</span>In, In, Out<span class="op">&gt;</span>;</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1014,7 +1017,7 @@ as proposed in <span class="citation" data-cites="P3179R9"><a href="https://isoc
 <span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
 <span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span>
 <span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a><span class="kw">inline</span> <span class="kw">constexpr</span> reverse_copy_fn reverse_copy <span class="op">{}</span>;</span></code></pre></div>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a><span class="kw">inline</span> <span class="kw">constexpr</span> reverse_copy_fn reverse_copy<span class="op">{}</span>;</span></code></pre></div>
 <h1 data-number="4" id="alternative_design"><span class="header-section-number">4</span> Alternative design<a href="#alternative_design" class="self-link"></a></h1>
 <p>There are the following alternatives to the proposed design:</p>
 <ul>
@@ -1246,7 +1249,7 @@ the following assignment takes place: <code class="sourceCode cpp"><span class="
 
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(x.1)</a></span>
-<code class="sourceCode default">{middle + <em>N</em>, first, return + <em>N</em>}</code>
+<code class="sourceCode default">{middle + <em>N</em>, first, result + <em>N</em>}</code>
 if <em><code class="sourceCode default">N</code></em> is less than
 <code class="sourceCode default">last - middle</code>.</li>
 <li><span class="marginalizedparent"><a class="marginalized">(x.2)</a></span>
@@ -1278,11 +1281,12 @@ note</em> ]</span></span></del></span></p>
 <h1 data-number="6" id="revision_history"><span class="header-section-number">6</span> Revision history<a href="#revision_history" class="self-link"></a></h1>
 <h2 data-number="6.1" id="r0_r1"><span class="header-section-number">6.1</span> R0 =&gt; R1<a href="#r0_r1" class="self-link"></a></h2>
 <ul>
-<li>Add formal wording</li>
+<li>Editorial changes and fixes</li>
+<li>Add the formal wording</li>
 </ul>
 <h1 data-number="7" id="acknowledgments"><span class="header-section-number">7</span> Acknowledgements<a href="#acknowledgments" class="self-link"></a></h1>
 <ul>
-<li>Thanks to Jonathan Mueller for having a fruitful discussion on
+<li>Thanks to Jonathan Mueller for a fruitful discussion on
 <code class="sourceCode cpp">reverse_copy</code> and
 <code class="sourceCode cpp">rotate_copy</code> return type.</li>
 </ul>
