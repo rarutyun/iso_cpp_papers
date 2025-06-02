@@ -452,63 +452,65 @@ numeric range algorithms</h1>
 <ul>
 <li><a href="#authors" id="toc-authors"><span class="toc-section-number">1</span> Authors</a></li>
 <li><a href="#revision-history" id="toc-revision-history"><span class="toc-section-number">2</span> Revision history</a></li>
-<li><a href="#abstract" id="toc-abstract"><span class="toc-section-number">3</span> Abstract</a></li>
-<li><a href="#design" id="toc-design"><span class="toc-section-number">4</span> Design</a>
+<li><a href="#design" id="toc-design"><span class="toc-section-number">3</span> Design</a>
 <ul>
-<li><a href="#what-algorithms-to-include" id="toc-what-algorithms-to-include"><span class="toc-section-number">4.1</span> What algorithms to include?</a>
+<li><a href="#what-algorithms-to-include" id="toc-what-algorithms-to-include"><span class="toc-section-number">3.1</span> What algorithms to include?</a>
 <ul>
-<li><a href="#what-we-propose" id="toc-what-we-propose"><span class="toc-section-number">4.1.1</span> What we propose</a></li>
-<li><a href="#current-set-of-numeric-algorithms" id="toc-current-set-of-numeric-algorithms"><span class="toc-section-number">4.1.2</span> Current set of numeric
+<li><a href="#what-we-propose" id="toc-what-we-propose"><span class="toc-section-number">3.1.1</span> What we propose</a></li>
+<li><a href="#current-set-of-numeric-algorithms" id="toc-current-set-of-numeric-algorithms"><span class="toc-section-number">3.1.2</span> Current set of numeric
 algorithms</a></li>
-<li><a href="#transform_-algorithms-andor-projections" id="toc-transform_-algorithms-andor-projections"><span class="toc-section-number">4.1.3</span> <code>transform_*</code>
+<li><a href="#transform_-algorithms-andor-projections" id="toc-transform_-algorithms-andor-projections"><span class="toc-section-number">3.1.3</span> <code>transform_*</code>
 algorithms (and/or projections)</a></li>
-<li><a href="#we-propose-convenience-wrappers-to-replace-some-algorithms" id="toc-we-propose-convenience-wrappers-to-replace-some-algorithms"><span class="toc-section-number">4.1.4</span> We propose convenience wrappers
+<li><a href="#we-propose-convenience-wrappers-to-replace-some-algorithms" id="toc-we-propose-convenience-wrappers-to-replace-some-algorithms"><span class="toc-section-number">3.1.6</span> We propose convenience wrappers
 to replace some algorithms</a></li>
-<li><a href="#existing-views-replace-some-other-algorithms" id="toc-existing-views-replace-some-other-algorithms"><span class="toc-section-number">4.1.5</span> Existing views replace some
+<li><a href="#existing-views-replace-some-other-algorithms" id="toc-existing-views-replace-some-other-algorithms"><span class="toc-section-number">3.1.7</span> Existing views replace some
 other algorithms</a></li>
-<li><a href="#we-dont-propose-the-lost-algorithm-noncommutative-parallel-reduce" id="toc-we-dont-propose-the-lost-algorithm-noncommutative-parallel-reduce"><span class="toc-section-number">4.1.6</span> We don’t propose “the lost
+<li><a href="#we-dont-propose-the-lost-algorithm-noncommutative-parallel-reduce" id="toc-we-dont-propose-the-lost-algorithm-noncommutative-parallel-reduce"><span class="toc-section-number">3.1.8</span> We don’t propose “the lost
 algorithm” (noncommutative parallel reduce)</a></li>
-<li><a href="#we-dont-propose-partial_sum" id="toc-we-dont-propose-partial_sum"><span class="toc-section-number">4.1.7</span> We don’t propose
+<li><a href="#we-dont-propose-partial_sum" id="toc-we-dont-propose-partial_sum"><span class="toc-section-number">3.1.9</span> We don’t propose
 <code>partial_sum</code></a></li>
-<li><a href="#we-dont-propose-reduce_first" id="toc-we-dont-propose-reduce_first"><span class="toc-section-number">4.1.8</span> We don’t propose
+<li><a href="#we-dont-propose-reduce_first" id="toc-we-dont-propose-reduce_first"><span class="toc-section-number">3.1.10</span> We don’t propose
 <code>reduce_first</code></a></li>
-<li><a href="#we-dont-propose-reduce_with_iter" id="toc-we-dont-propose-reduce_with_iter"><span class="toc-section-number">4.1.9</span> We don’t propose
+<li><a href="#we-dont-propose-reduce_with_iter" id="toc-we-dont-propose-reduce_with_iter"><span class="toc-section-number">3.1.11</span> We don’t propose
 <code>reduce_with_iter</code></a></li>
 </ul></li>
-<li><a href="#range-categories-and-return-types" id="toc-range-categories-and-return-types"><span class="toc-section-number">4.2</span> Range categories and return
+<li><a href="#range-categories-and-return-types" id="toc-range-categories-and-return-types"><span class="toc-section-number">3.2</span> Range categories and return
 types</a></li>
-<li><a href="#constexpr-parallel-algorithms" id="toc-constexpr-parallel-algorithms"><span class="toc-section-number">4.3</span> Constexpr parallel
+<li><a href="#constexpr-parallel-algorithms" id="toc-constexpr-parallel-algorithms"><span class="toc-section-number">3.3</span> Constexpr parallel
 algorithms?</a></li>
-<li><a href="#rangesreduce-design" id="toc-rangesreduce-design"><span class="toc-section-number">4.4</span> <code>ranges::reduce</code>
+<li><a href="#rangesreduce-design" id="toc-rangesreduce-design"><span class="toc-section-number">3.4</span> <code>ranges::reduce</code>
 design</a>
 <ul>
-<li><a href="#no-default-parameters" id="toc-no-default-parameters"><span class="toc-section-number">4.4.1</span> No default parameters</a></li>
-<li><a href="#for-return-type-imitate-rangesfold_left-not-stdreduce" id="toc-for-return-type-imitate-rangesfold_left-not-stdreduce"><span class="toc-section-number">4.4.2</span> For return type, imitate
+<li><a href="#no-default-parameters" id="toc-no-default-parameters"><span class="toc-section-number">3.4.1</span> No default parameters</a></li>
+<li><a href="#for-return-type-imitate-rangesfold_left-not-stdreduce" id="toc-for-return-type-imitate-rangesfold_left-not-stdreduce"><span class="toc-section-number">3.4.2</span> For return type, imitate
 <code>ranges::fold_left</code>, not <code>std::reduce</code></a></li>
 </ul></li>
-<li><a href="#constraining-parallel-ranges-numeric-algorithms" id="toc-constraining-parallel-ranges-numeric-algorithms"><span class="toc-section-number">4.5</span> Constraining parallel ranges
+<li><a href="#constraining-parallel-ranges-numeric-algorithms" id="toc-constraining-parallel-ranges-numeric-algorithms"><span class="toc-section-number">3.5</span> Constraining parallel ranges
 numeric algorithms</a></li>
 </ul></li>
-<li><a href="#implementation" id="toc-implementation"><span class="toc-section-number">5</span> Implementation</a></li>
-<li><a href="#wording" id="toc-wording"><span class="toc-section-number">6</span> Wording</a>
+<li><a href="#implementation" id="toc-implementation"><span class="toc-section-number">4</span> Implementation</a></li>
+<li><a href="#wording" id="toc-wording"><span class="toc-section-number">5</span> Wording</a>
 <ul>
-<li><a href="#update-feature-test-macro" id="toc-update-feature-test-macro"><span class="toc-section-number">6.1</span> Update feature test macro</a></li>
-<li><a href="#change-numeric.ops.overview" id="toc-change-numeric.ops.overview"><span class="toc-section-number">6.2</span> Change [numeric.ops.overview]</a>
+<li><a href="#update-feature-test-macro" id="toc-update-feature-test-macro"><span class="toc-section-number">5.1</span> Update feature test macro</a></li>
+<li><a href="#change-numeric.ops.overview" id="toc-change-numeric.ops.overview"><span class="toc-section-number">5.2</span> Change [numeric.ops.overview]</a>
 <ul>
-<li><a href="#add-declaration-of-exposition-only-concepts" id="toc-add-declaration-of-exposition-only-concepts"><span class="toc-section-number">6.2.1</span> Add declaration of
+<li><a href="#add-declaration-of-exposition-only-concepts" id="toc-add-declaration-of-exposition-only-concepts"><span class="toc-section-number">5.2.1</span> Add declaration of
 exposition-only concepts</a></li>
-<li><a href="#add-declarations-of-parallel-ranges-reduce-overloads" id="toc-add-declarations-of-parallel-ranges-reduce-overloads"><span class="toc-section-number">6.2.2</span> Add declarations of parallel
+<li><a href="#add-declarations-of-parallel-ranges-reduce-overloads" id="toc-add-declarations-of-parallel-ranges-reduce-overloads"><span class="toc-section-number">5.2.2</span> Add declarations of parallel
 ranges <code>reduce</code> overloads</a></li>
-<li><a href="#add-declarations-of-parallel-ranges-inclusive_scan" id="toc-add-declarations-of-parallel-ranges-inclusive_scan"><span class="toc-section-number">6.2.3</span> Add declarations of parallel
+<li><a href="#add-declarations-of-parallel-ranges-inclusive_scan" id="toc-add-declarations-of-parallel-ranges-inclusive_scan"><span class="toc-section-number">5.2.3</span> Add declarations of parallel
 ranges <code>inclusive_scan</code></a></li>
-<li><a href="#add-declarations-of-parallel-ranges-exclusive_scan" id="toc-add-declarations-of-parallel-ranges-exclusive_scan"><span class="toc-section-number">6.2.4</span> Add declarations of parallel
+<li><a href="#add-declarations-of-parallel-ranges-exclusive_scan" id="toc-add-declarations-of-parallel-ranges-exclusive_scan"><span class="toc-section-number">5.2.4</span> Add declarations of parallel
 ranges <code>exclusive_scan</code></a></li>
-<li><a href="#add-wording-for-algorithms" id="toc-add-wording-for-algorithms"><span class="toc-section-number">6.2.5</span> Add wording for
+<li><a href="#add-wording-for-algorithms" id="toc-add-wording-for-algorithms"><span class="toc-section-number">5.2.5</span> Add wording for
 algorithms</a></li>
 </ul></li>
 </ul></li>
 </ul>
 </div>
+<h1 class="unnumbered unlisted" id="abstract">Abstract<a href="#abstract" class="self-link"></a></h1>
+<p>We propose <code>ranges</code> algorithm overloads (both parallel and
+nonparallel) for <code>&lt;numeric&gt;</code> header.</p>
 <h1 data-number="1" id="authors"><span class="header-section-number">1</span> Authors<a href="#authors" class="self-link"></a></h1>
 <ul>
 <li><p>Ruslan Arutyunyan (Intel)</p></li>
@@ -521,32 +523,11 @@ algorithms</a></li>
 <ul>
 <li>Revision 0 to be submitted 2025-??-??</li>
 </ul>
-<h1 data-number="3" id="abstract"><span class="header-section-number">3</span> Abstract<a href="#abstract" class="self-link"></a></h1>
-<p>We propose ranges overloads (both parallel and nonparallel) of the
-following algorithms:</p>
-<ul>
-<li><p><code>reduce</code>, unary <code>transform_reduce</code>, and
-binary <code>transform_reduce</code>;</p></li>
-<li><p><code>inclusive_scan</code> and
-<code>transform_inclusive_scan</code>; and</p></li>
-<li><p><code>exclusive_scan</code> and
-<code>transform_exclusive_scan</code></p></li>
-</ul>
-<p>We also propose adding parallel and non-parallel convenience
-wrappers:</p>
-<ul>
-<li><p><code>ranges::sum</code> and <code>ranges::product</code> for
-special cases of <code>reduce</code> with addition and multiplication,
-respectively; and</p></li>
-<li><p><code>ranges::dot</code> for the special case of binary
-<code>transform_reduce</code> with transform <code>plus</code> and
-reduction <code>multiplies</code>.</p></li>
-</ul>
-<h1 data-number="4" id="design"><span class="header-section-number">4</span> Design<a href="#design" class="self-link"></a></h1>
-<h2 data-number="4.1" id="what-algorithms-to-include"><span class="header-section-number">4.1</span> What algorithms to include?<a href="#what-algorithms-to-include" class="self-link"></a></h2>
-<h3 data-number="4.1.1" id="what-we-propose"><span class="header-section-number">4.1.1</span> What we propose<a href="#what-we-propose" class="self-link"></a></h3>
-<p>We propose ranges overloads (both parallel and nonparallel) of the
-following algorithms:</p>
+<h1 data-number="3" id="design"><span class="header-section-number">3</span> Design<a href="#design" class="self-link"></a></h1>
+<h2 data-number="3.1" id="what-algorithms-to-include"><span class="header-section-number">3.1</span> What algorithms to include?<a href="#what-algorithms-to-include" class="self-link"></a></h2>
+<h3 data-number="3.1.1" id="what-we-propose"><span class="header-section-number">3.1.1</span> What we propose<a href="#what-we-propose" class="self-link"></a></h3>
+<p>We propose <code>ranges</code> overloads (both parallel and
+nonparallel) of the following algorithms:</p>
 <ul>
 <li><p><code>reduce</code>, unary <code>transform_reduce</code>, and
 binary <code>transform_reduce</code>;</p></li>
@@ -569,14 +550,14 @@ reduction <code>multiplies</code>.</p></li>
 not others. This relates to other aspects of the design besides
 algorithm selection, such as whether to include optional projection
 parameters.</p>
-<h3 data-number="4.1.2" id="current-set-of-numeric-algorithms"><span class="header-section-number">4.1.2</span> Current set of numeric
+<h3 data-number="3.1.2" id="current-set-of-numeric-algorithms"><span class="header-section-number">3.1.2</span> Current set of numeric
 algorithms<a href="#current-set-of-numeric-algorithms" class="self-link"></a></h3>
 <p><a href="https://isocpp.org/files/papers/P3179R8.html">P3179R8</a>,
 “C++ Parallel Range Algorithms,” is in the last stages of wording review
-as of the publication date. P3179R8 explicitly defers adding ranges
-versions of the numeric algorithms. This proposal does that. As such, we
-focus on the numeric algorithms, that is, the 11 algorithms in
-<a href="https://eel.is/c++draft/numeric.ops">[numeric.ops]</a>.</p>
+as of the publication date. P3179R8 explicitly defers adding
+<code>ranges</code> versions of the numeric algorithms. This proposal
+does that. As such, we focus on the numeric algorithms, that is, the 11
+algorithms in <span class="unnumbered sref">numeric.ops</span>.</p>
 <ul>
 <li><p><code>iota</code></p></li>
 <li><p><code>accumulate</code></p></li>
@@ -595,14 +576,14 @@ already have a ranges version in C++23, possibly with a different name.
 Some others could be omitted because they have straightforward
 replacements using existing views and other ranges algorithms. We
 carefully read the two proposals
-<a href="https://wg21.link/P2214R2">P2214R2</a>, “A Plan for C++23
-Ranges,” and <a href="https://wg21.link/P2760R1">P2760R1</a>, “A Plan
+<a href="https://wg21.link/p2214r2">P2214R2</a>, “A Plan for C++23
+Ranges,” and <a href="https://wg21.link/p2760r1">P2760R1</a>, “A Plan
 for C++26 Ranges,” in order to inform our algorithm selections. In some
 cases that we will explain below, usability and performance concerns led
 us to disagree with their conclusions.</p>
-<h3 data-number="4.1.3" id="transform_-algorithms-andor-projections"><span class="header-section-number">4.1.3</span> <code>transform_*</code>
+<h3 data-number="3.1.3" id="transform_-algorithms-andor-projections"><span class="header-section-number">3.1.3</span> <code>transform_*</code>
 algorithms (and/or projections)<a href="#transform_-algorithms-andor-projections" class="self-link"></a></h3>
-<h4 data-number="4.1.3.1" id="summary"><span class="header-section-number">4.1.3.1</span> Summary<a href="#summary" class="self-link"></a></h4>
+<h4 data-number="3.1.3.1" id="summary"><span class="header-section-number">3.1.3.1</span> Summary<a href="#summary" class="self-link"></a></h4>
 <p>We propose</p>
 <ul>
 <li><p>providing both unary and binary
@@ -613,7 +594,7 @@ well as <code>ranges::{in,ex}clusive_scan</code>, and</p></li>
 <li><p><em>not</em> providing projections for any of these
 algorithms.</p></li>
 </ul>
-<h4 data-number="4.1.3.2" id="do-we-want-transform_-algorithms-andor-projections"><span class="header-section-number">4.1.3.2</span> Do we want
+<h4 data-number="3.1.3.2" id="do-we-want-transform_-algorithms-andor-projections"><span class="header-section-number">3.1.3.2</span> Do we want
 <code>transform_*</code> algorithms and/or projections?<a href="#do-we-want-transform_-algorithms-andor-projections" class="self-link"></a></h4>
 <p>We start with two questions.</p>
 <ol type="1">
@@ -633,7 +614,7 @@ projections for functional completeness. These questions are about
 usability and optimization, including the way that certain kinds of
 ranges constructs can hinder parallelization on different kinds of
 hardware.</p>
-<h4 data-number="4.1.3.3" id="unary-transforms-projections-and-transform_view-are-functionally-equivalent"><span class="header-section-number">4.1.3.3</span> Unary transforms,
+<h4 data-number="3.1.3.3" id="unary-transforms-projections-and-transform_view-are-functionally-equivalent"><span class="header-section-number">3.1.3.3</span> Unary transforms,
 projections, and <code>transform_view</code> are functionally
 equivalent<a href="#unary-transforms-projections-and-transform_view-are-functionally-equivalent" class="self-link"></a></h4>
 <p>The above two questions are related, since a projection can have the
@@ -675,7 +656,7 @@ non-<code>transform</code> algorithm.</p>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> result_tv <span class="op">=</span> std<span class="op">::</span>ranges<span class="op">::</span>reduce<span class="op">(</span></span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>views<span class="op">::</span>transform<span class="op">(</span>v1, get_element<span class="op">&lt;</span><span class="dv">0</span><span class="op">&gt;{})</span>, init, std<span class="op">::</span>plus<span class="op">{})</span>;</span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>result_tv <span class="op">==</span> <span class="dv">26</span><span class="op">)</span>;</span></code></pre></div>
-<h4 data-number="4.1.3.4" id="scan-algorithms-work-like-unary-transform_reduce"><span class="header-section-number">4.1.3.4</span> Scan algorithms work like
+<h4 data-number="3.1.3.4" id="scan-algorithms-work-like-unary-transform_reduce"><span class="header-section-number">3.1.3.4</span> Scan algorithms work like
 unary <code>transform_reduce</code><a href="#scan-algorithms-work-like-unary-transform_reduce" class="self-link"></a></h4>
 <p>Regarding scan algorithms,
 <a href="https://wg21.link/p2214r2">P2214R2</a> points out that
@@ -691,13 +672,13 @@ projection: e.g., <code>ranges::inclusive_scan(r, o, f, g)</code> with
 <code>g</code> as the projection would do exactly the same thing as
 <code>ranges::transform_inclusive_scan(r, o, f, g)</code> with
 <code>g</code> as the transform operation.</p>
-<h4 data-number="4.1.3.5" id="binary-transform_reduce-is-functionally-equivalent-to-reduce-and-zip_transform_view"><span class="header-section-number">4.1.3.5</span> Binary
+<h4 data-number="3.1.3.5" id="binary-transform_reduce-is-functionally-equivalent-to-reduce-and-zip_transform_view"><span class="header-section-number">3.1.3.5</span> Binary
 <code>transform_reduce</code> is functionally equivalent to
 <code>reduce</code> and <code>zip_transform_view</code><a href="#binary-transform_reduce-is-functionally-equivalent-to-reduce-and-zip_transform_view" class="self-link"></a></h4>
 <p>Expressing binary <code>transform_reduce</code> using only
 <code>reduce</code> requires <code>zip_transform_view</code> or
 something like it.</p>
-<h4 data-number="4.1.3.6" id="study-rangestransform-for-design-hints"><span class="header-section-number">4.1.3.6</span> Study
+<h4 data-number="3.1.3.6" id="study-rangestransform-for-design-hints"><span class="header-section-number">3.1.3.6</span> Study
 <code>ranges::transform</code> for design hints<a href="#study-rangestransform-for-design-hints" class="self-link"></a></h4>
 <p>Questions about transforms and projections suggest studying
 <code>ranges::transform</code> for design hints. This leads us to two
@@ -713,7 +694,18 @@ projection?</p></li>
 <p>It can help to look at examples. Here is a binary transform example
 without projections, that uses a single big lambda. Users have to read
 the big lambda to see what it does. So does the compiler, which can
-hinder optimization if it’s not good at inlining.</p>
+hinder optimization if it’s not good at inlining. Contrast the code on
+the left (below) with use of projections. Users can read out loud what
+this does. It also separates the “selection” or “query” part of the
+transform from the “arithmetic” or “computation” part. The power of the
+ranges abstraction is that users can factor computation on a range from
+the logic to iterate over that range. It’s natural to extend this
+separation to selection logic as well.</p>
+<div class="cmptable">
+<blockquote>
+<p><code>transform</code> without and with projection</p>
+</blockquote>
+<h3 data-number="3.1.4" id="without-projections"><span class="header-section-number">3.1.4</span> Without projections<a href="#without-projections" class="self-link"></a></h3>
 <div class="sourceCode" id="cb3"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> foo <span class="op">{}</span>;</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span>std<span class="op">::</span>tuple<span class="op">&lt;</span><span class="dt">int</span>, foo, std<span class="op">::</span>string<span class="op">&gt;&gt;</span> v1<span class="op">{</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span><span class="dv">5</span>, <span class="op">{}</span>, <span class="st">&quot;five&quot;</span><span class="op">}</span>, <span class="op">{</span><span class="dv">7</span>, <span class="op">{}</span>, <span class="st">&quot;seven&quot;</span><span class="op">}</span>, <span class="op">{</span><span class="dv">11</span>, <span class="op">{}</span>, <span class="st">&quot;eleven&quot;</span><span class="op">}}</span>;</span>
@@ -727,12 +719,7 @@ hinder optimization if it’s not good at inlining.</p>
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> expected<span class="op">{</span><span class="dv">65</span>, <span class="dv">119</span>, <span class="dv">209</span><span class="op">}</span>;</span>
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>out <span class="op">==</span> expected<span class="op">)</span>;</span></code></pre></div>
-<p>Constrast this with use of projections. Users can read out loud what
-this does. It also separates the “selection” or “query” part of the
-transform from the “arithmetic” or “computation” part. The power of the
-ranges abstraction is that users can factor computation on a range from
-the logic to iterate over that range. It’s natural to extend this
-separation to selection logic as well.</p>
+<h3 data-number="3.1.5" id="with-projections"><span class="header-section-number">3.1.5</span> With projections<a href="#with-projections" class="self-link"></a></h3>
 <div class="sourceCode" id="cb4"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> foo <span class="op">{}</span>;</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span>std<span class="op">::</span>tuple<span class="op">&lt;</span><span class="dt">int</span>, foo, std<span class="op">::</span>string<span class="op">&gt;&gt;</span> v1<span class="op">{</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span><span class="dv">5</span>, <span class="op">{}</span>, <span class="st">&quot;five&quot;</span><span class="op">}</span>, <span class="op">{</span><span class="dv">7</span>, <span class="op">{}</span>, <span class="st">&quot;seven&quot;</span><span class="op">}</span>, <span class="op">{</span><span class="dv">11</span>, <span class="op">{}</span>, <span class="st">&quot;eleven&quot;</span><span class="op">}}</span>;</span>
@@ -746,6 +733,7 @@ separation to selection logic as well.</p>
 <span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> expected<span class="op">{</span><span class="dv">65</span>, <span class="dv">119</span>, <span class="dv">209</span><span class="op">}</span>;</span>
 <span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>out <span class="op">==</span> expected<span class="op">)</span>;</span></code></pre></div>
+</div>
 <p>It’s harder to avoid a lambda in the unary transform case. Most of
 the named C++ Standard Library arithmetic function objects are binary.
 Currying them into unary functions in C++ requires either making a
@@ -770,11 +758,11 @@ the transform from the “computation” part.</p>
 <span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="co">// Unary transform with projection and &quot;curried&quot; plus</span></span>
 <span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>ranges<span class="op">::</span>transform<span class="op">(</span>v1, out<span class="op">.</span>begin<span class="op">()</span>, std<span class="op">::</span>bind<span class="op">(</span>std<span class="op">::</span>plus<span class="op">{}</span>, <span class="dv">1</span><span class="op">)</span>, get_element<span class="op">&lt;</span><span class="dv">0</span><span class="op">&gt;{})</span>;</span>
 <span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>out <span class="op">==</span> expected<span class="op">)</span>;</span></code></pre></div>
-<h4 data-number="4.1.3.7" id="reduce-transforms-and-projections"><span class="header-section-number">4.1.3.7</span> <code>reduce</code>:
+<h4 data-number="3.1.5.1" id="reduce-transforms-and-projections"><span class="header-section-number">3.1.5.1</span> <code>reduce</code>:
 transforms and projections<a href="#reduce-transforms-and-projections" class="self-link"></a></h4>
 <p>We return to the <code>reduce</code> examples we showed above, but
 this time, we focus on their readability.</p>
-<h5 data-number="4.1.3.7.1" id="unary-transform_reduce"><span class="header-section-number">4.1.3.7.1</span> Unary
+<h5 data-number="3.1.5.1.1" id="unary-transform_reduce"><span class="header-section-number">3.1.5.1.1</span> Unary
 <code>transform_reduce</code><a href="#unary-transform_reduce" class="self-link"></a></h5>
 <p>A <code>ranges::reduce</code> that takes a projection is functionally
 equivalent to unary <code>transform_reduce</code> without a projection.
@@ -833,7 +821,7 @@ readability.</p>
 <span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> result_no_proj <span class="op">=</span> std<span class="op">::</span>ranges<span class="op">::</span>transform_reduce<span class="op">(</span></span>
 <span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>  v, init, std<span class="op">::</span>plus<span class="op">{}</span>, getter<span class="op">)</span>;</span>
 <span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>result_no_proj <span class="op">==</span> <span class="dv">52</span><span class="op">)</span>;</span></code></pre></div>
-<h5 data-number="4.1.3.7.2" id="binary-transform_reduce"><span class="header-section-number">4.1.3.7.2</span> Binary
+<h5 data-number="3.1.5.1.2" id="binary-transform_reduce"><span class="header-section-number">3.1.5.1.2</span> Binary
 <code>transform_reduce</code><a href="#binary-transform_reduce" class="self-link"></a></h5>
 <p>Expressing binary <code>transform_reduce</code> using only
 <code>reduce</code> requires <code>zip_transform_view</code> or
@@ -850,7 +838,7 @@ example.</p>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span><span class="dv">5</span>, <span class="op">{}</span>, <span class="st">&quot;five&quot;</span><span class="op">}</span>, <span class="op">{</span><span class="dv">7</span>, <span class="op">{}</span>, <span class="st">&quot;seven&quot;</span><span class="op">}</span>, <span class="op">{</span><span class="dv">11</span>, <span class="op">{}</span>, <span class="st">&quot;eleven&quot;</span><span class="op">}}</span>;</span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span>std<span class="op">::</span>pair<span class="op">&lt;</span>std<span class="op">::</span>string, <span class="dt">int</span><span class="op">&gt;&gt;</span> v2<span class="op">{</span></span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span><span class="st">&quot;thirteen&quot;</span>, <span class="dv">13</span><span class="op">}</span>, <span class="op">{</span><span class="st">&quot;seventeen&quot;</span>, <span class="dv">17</span><span class="op">}</span>, <span class="op">{</span><span class="st">&quot;nineteen&quot;</span>, <span class="dv">19</span><span class="op">}}</span>;</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="dt">int</span> init <span class="op">=</span> <span class="dv">3</span>; </span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="dt">int</span> init <span class="op">=</span> <span class="dv">3</span>;</span>
 <span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> out<span class="op">(</span>std<span class="op">::</span>from_range, std<span class="op">::</span>views<span class="op">::</span>repeat<span class="op">(</span><span class="dv">0</span>, <span class="dv">3</span><span class="op">))</span>;</span>
 <span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">// reduce with zip_transform_view</span></span>
@@ -888,7 +876,7 @@ what.</p>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span><span class="dv">5</span>, <span class="op">{}</span>, <span class="st">&quot;five&quot;</span><span class="op">}</span>, <span class="op">{</span><span class="dv">7</span>, <span class="op">{}</span>, <span class="st">&quot;seven&quot;</span><span class="op">}</span>, <span class="op">{</span><span class="dv">11</span>, <span class="op">{}</span>, <span class="st">&quot;eleven&quot;</span><span class="op">}}</span>;</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span>std<span class="op">::</span>pair<span class="op">&lt;</span>std<span class="op">::</span>string, <span class="dt">int</span><span class="op">&gt;&gt;</span> v2<span class="op">{</span></span>
 <span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span><span class="st">&quot;thirteen&quot;</span>, <span class="dv">13</span><span class="op">}</span>, <span class="op">{</span><span class="st">&quot;seventeen&quot;</span>, <span class="dv">17</span><span class="op">}</span>, <span class="op">{</span><span class="st">&quot;nineteen&quot;</span>, <span class="dv">19</span><span class="op">}}</span>;</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="dt">int</span> init <span class="op">=</span> <span class="dv">3</span>; </span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="dt">int</span> init <span class="op">=</span> <span class="dv">3</span>;</span>
 <span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> out<span class="op">(</span>std<span class="op">::</span>from_range, std<span class="op">::</span>views<span class="op">::</span>repeat<span class="op">(</span><span class="dv">0</span>, <span class="dv">3</span><span class="op">))</span>;</span>
 <span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">// With projections</span></span>
@@ -902,7 +890,7 @@ what.</p>
 <span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>views<span class="op">::</span>transform<span class="op">(</span>v2, get_element<span class="op">&lt;</span><span class="dv">1</span><span class="op">&gt;{})</span>,</span>
 <span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>  out<span class="op">.</span>begin<span class="op">()</span>, init, std<span class="op">::</span>plus<span class="op">{}</span>, std<span class="op">::</span>multiplies<span class="op">{})</span>;</span>
 <span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>result_no_proj <span class="op">==</span> <span class="dv">396</span><span class="op">)</span>;</span></code></pre></div>
-<h4 data-number="4.1.3.8" id="mixed-guidance-from-the-current-ranges-library"><span class="header-section-number">4.1.3.8</span> Mixed guidance from the
+<h4 data-number="3.1.5.2" id="mixed-guidance-from-the-current-ranges-library"><span class="header-section-number">3.1.5.2</span> Mixed guidance from the
 current ranges library<a href="#mixed-guidance-from-the-current-ranges-library" class="self-link"></a></h4>
 <p>The current ranges library offers only mixed guidance for deciding
 whether <code>*reduce</code> algorithms should take projections.</p>
@@ -929,7 +917,7 @@ interface.</p>
 that would be less of a concern here. However, if we ever wanted a
 <code>ranges::reduce_first</code> algorithm, then the consistency
 argument would arise.</p>
-<h4 data-number="4.1.3.9" id="transform_view-not-always-trivially-copyable-even-when-function-object-is"><span class="header-section-number">4.1.3.9</span>
+<h4 data-number="3.1.5.3" id="transform_view-not-always-trivially-copyable-even-when-function-object-is"><span class="header-section-number">3.1.5.3</span>
 <code>*transform_view</code> not always trivially copyable even when
 function object is<a href="#transform_view-not-always-trivially-copyable-even-when-function-object-is" class="self-link"></a></h4>
 <p>Use of <code>transform_view</code> and
@@ -958,14 +946,14 @@ link</a>).</p>
 <span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>vector v<span class="op">{</span><span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span><span class="op">}</span>;</span>
 <span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>  <span class="co">// operator= is defaulted; lambda type is trivially copyable</span></span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>  <span class="kw">auto</span> f1 <span class="op">=</span> <span class="op">[]</span> <span class="op">(</span><span class="kw">auto</span> x<span class="op">)</span> <span class="op">{</span> </span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>  <span class="kw">auto</span> f1 <span class="op">=</span> <span class="op">[]</span> <span class="op">(</span><span class="kw">auto</span> x<span class="op">)</span> <span class="op">{</span></span>
 <span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> x <span class="op">+</span> <span class="dv">1</span>;</span>
 <span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span>
 <span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>  <span class="kw">static_assert</span><span class="op">(</span>std<span class="op">::</span>is_trivially_copyable_v<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span>f1<span class="op">)&gt;)</span>;</span>
 <span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Capture means that lambda&#39;s operator= is deleted,</span></span>
 <span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>  <span class="co">// but lambda type is still trivially copyable</span></span>
-<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>  <span class="kw">auto</span> f2 <span class="op">=</span> <span class="op">[</span>y <span class="op">=</span> <span class="dv">1</span><span class="op">]</span> <span class="op">(</span><span class="kw">auto</span> x<span class="op">)</span> <span class="op">{</span> </span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>  <span class="kw">auto</span> f2 <span class="op">=</span> <span class="op">[</span>y <span class="op">=</span> <span class="dv">1</span><span class="op">]</span> <span class="op">(</span><span class="kw">auto</span> x<span class="op">)</span> <span class="op">{</span></span>
 <span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> x <span class="op">+</span> y;</span>
 <span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span>
 <span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>  <span class="kw">static_assert</span><span class="op">(</span>std<span class="op">::</span>is_trivially_copyable_v<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span>f2<span class="op">)&gt;)</span>;</span>
@@ -975,7 +963,7 @@ link</a>).</p>
 <span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>  <span class="kw">static_assert</span><span class="op">(</span>std<span class="op">::</span>is_trivially_copyable_v<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span>view1<span class="op">)&gt;)</span>;</span>
 <span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>  <span class="co">// decltype(view2) is NOT trivially copyable, even though f2 is</span></span>
-<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>  <span class="kw">auto</span> view2 <span class="op">=</span> v <span class="op">|</span> std<span class="op">::</span>views<span class="op">::</span>transform<span class="op">(</span>f2<span class="op">)</span>; </span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>  <span class="kw">auto</span> view2 <span class="op">=</span> v <span class="op">|</span> std<span class="op">::</span>views<span class="op">::</span>transform<span class="op">(</span>f2<span class="op">)</span>;</span>
 <span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>  <span class="kw">static_assert</span><span class="op">(!</span>std<span class="op">::</span>is_trivially_copyable_v<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span>view2<span class="op">)&gt;)</span>;</span>
 <span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>  <span class="co">// view3 is trivally copyable, though it behaves just like view2.</span></span>
@@ -1029,7 +1017,7 @@ third-party ranges implementation for their views. Parallel algorithm
 implementers generally prefer to minimize coupling of actual parallel
 algorithms with Standard Library features that don’t directly relate to
 parallel execution.</p>
-<h4 data-number="4.1.3.10" id="review"><span class="header-section-number">4.1.3.10</span> Review<a href="#review" class="self-link"></a></h4>
+<h4 data-number="3.1.5.4" id="review"><span class="header-section-number">3.1.5.4</span> Review<a href="#review" class="self-link"></a></h4>
 <p>Let’s review what we learned from the above discussion.</p>
 <ol type="1">
 <li><p>In general and particularly for <code>ranges::transform</code>,
@@ -1055,7 +1043,7 @@ projections. However, a version without projections would need
 <code>transform_view</code> in order to offer the same functionality.
 This potentially hinders performance.</p></li>
 </ol>
-<h4 data-number="4.1.3.11" id="conclusions"><span class="header-section-number">4.1.3.11</span> Conclusions<a href="#conclusions" class="self-link"></a></h4>
+<h4 data-number="3.1.5.5" id="conclusions"><span class="header-section-number">3.1.5.5</span> Conclusions<a href="#conclusions" class="self-link"></a></h4>
 <p>We propose</p>
 <ul>
 <li><p>providing both unary and binary
@@ -1092,16 +1080,16 @@ so we provide <code>ranges::transform_{in,ex}clusive_scan</code> as well
 as <code>ranges::{in,ex}clusive_scan</code>, and do not provide
 projections for any of them.</p></li>
 </ol>
-<h3 data-number="4.1.4" id="we-propose-convenience-wrappers-to-replace-some-algorithms"><span class="header-section-number">4.1.4</span> We propose convenience
+<h3 data-number="3.1.6" id="we-propose-convenience-wrappers-to-replace-some-algorithms"><span class="header-section-number">3.1.6</span> We propose convenience
 wrappers to replace some algorithms<a href="#we-propose-convenience-wrappers-to-replace-some-algorithms" class="self-link"></a></h3>
-<h4 data-number="4.1.4.1" id="accumulate"><span class="header-section-number">4.1.4.1</span> <code>accumulate</code><a href="#accumulate" class="self-link"></a></h4>
+<h4 data-number="3.1.6.1" id="accumulate"><span class="header-section-number">3.1.6.1</span> <code>accumulate</code><a href="#accumulate" class="self-link"></a></h4>
 <p>The <code>accumulate</code> algorithm performs operations
 sequentially. Users who want that left-to-right sequential behavior can
 call C++23’s <code>fold_left</code>. For users who are not concerned
 about the order of operations and who want <code>accumulate</code>’s
 default binary operation, we propose parallel and non-parallel
 convenience wrappers <code>ranges::sum</code>.</p>
-<h4 data-number="4.1.4.2" id="inner_product"><span class="header-section-number">4.1.4.2</span>
+<h4 data-number="3.1.6.2" id="inner_product"><span class="header-section-number">3.1.6.2</span>
 <code>inner_product</code><a href="#inner_product" class="self-link"></a></h4>
 <p>The <code>inner_product</code> algorithm performs operations
 sequentially. Users who want that left-to-right sequential behavior can
@@ -1117,12 +1105,12 @@ more general. We specifically mean not just any inner product, but the
 inner product that is the dot product. Calling them <code>dot</code> has
 the added benefit that they represent the same mathematical computation
 as <code>std::linalg::dot</code>.</p>
-<h3 data-number="4.1.5" id="existing-views-replace-some-other-algorithms"><span class="header-section-number">4.1.5</span> Existing views replace some
+<h3 data-number="3.1.7" id="existing-views-replace-some-other-algorithms"><span class="header-section-number">3.1.7</span> Existing views replace some
 other algorithms<a href="#existing-views-replace-some-other-algorithms" class="self-link"></a></h3>
 <p>We do not propose ranges versions of the following numeric
 algorithms, since they can be replaced with existing views and ranges
 algorithms.</p>
-<h4 data-number="4.1.5.1" id="iota"><span class="header-section-number">4.1.5.1</span> <code>iota</code><a href="#iota" class="self-link"></a></h4>
+<h4 data-number="3.1.7.1" id="iota"><span class="header-section-number">3.1.7.1</span> <code>iota</code><a href="#iota" class="self-link"></a></h4>
 <p>C++23 has <code>iota_view</code>, the view version of
 <code>iota</code>. One can replace the <code>iota</code> algorithm with
 <code>iota_view</code> and <code>ranges::copy</code>. In fact, one could
@@ -1134,7 +1122,7 @@ Standard specifies <code>iota_view</code> in a way that does not hinder
 it from being trivially copyable, as long as its input types are. The
 iterator type of <code>iota_view</code> is a random access iterator for
 reasonable lower bound types (e.g., integers).</p>
-<h4 data-number="4.1.5.2" id="adjacent_difference"><span class="header-section-number">4.1.5.2</span>
+<h4 data-number="3.1.7.2" id="adjacent_difference"><span class="header-section-number">3.1.7.2</span>
 <code>adjacent_difference</code><a href="#adjacent_difference" class="self-link"></a></h4>
 <p>The <code>adjacent_difference</code> algorithm can be replaced with a
 combination of <code>adjacent_transform_view</code> (which was adopted
@@ -1163,7 +1151,7 @@ necessarily single-dimensional. It could not be used straightforwardly
 for finite-difference methods for solving partial differential
 equations, for example. All this makes an
 <code>adjacent_transform</code> algorithm a lower-priority task.</p>
-<h3 data-number="4.1.6" id="we-dont-propose-the-lost-algorithm-noncommutative-parallel-reduce"><span class="header-section-number">4.1.6</span> We don’t propose “the lost
+<h3 data-number="3.1.8" id="we-dont-propose-the-lost-algorithm-noncommutative-parallel-reduce"><span class="header-section-number">3.1.8</span> We don’t propose “the lost
 algorithm” (noncommutative parallel reduce)<a href="#we-dont-propose-the-lost-algorithm-noncommutative-parallel-reduce" class="self-link"></a></h3>
 <p>The Standard lacks an analog of <code>reduce</code> that can assume
 associativity but not commutativity of binary operations. One author of
@@ -1220,7 +1208,7 @@ think the right way would be to propose a new algorithm with a distinct
 name. A reasonable choice of name would be <code>fold</code> (just
 <code>fold</code> by itself, not <code>fold_left</code> or
 <code>fold_right</code>).</p>
-<h3 data-number="4.1.7" id="we-dont-propose-partial_sum"><span class="header-section-number">4.1.7</span> We don’t propose
+<h3 data-number="3.1.9" id="we-dont-propose-partial_sum"><span class="header-section-number">3.1.9</span> We don’t propose
 <code>partial_sum</code><a href="#we-dont-propose-partial_sum" class="self-link"></a></h3>
 <p>The <code>partial_sum</code> algorithm performs operations
 sequentially. The existing ranges library does not have an equivalent
@@ -1239,7 +1227,7 @@ special case of an inclusive prefix plus-scan that
 whether this is an inclusive or exclusive scan. We think it’s not a very
 convenient convenience wrapper if users have to look this up every time
 they use it.</p>
-<h3 data-number="4.1.8" id="we-dont-propose-reduce_first"><span class="header-section-number">4.1.8</span> We don’t propose
+<h3 data-number="3.1.10" id="we-dont-propose-reduce_first"><span class="header-section-number">3.1.10</span> We don’t propose
 <code>reduce_first</code><a href="#we-dont-propose-reduce_first" class="self-link"></a></h3>
 <p>Section 5.1 of <a href="https://wg21.link/P2760R1">P2760R1</a> asks
 whether there should be a <code>reduce_first</code> algorithm, analogous
@@ -1256,7 +1244,7 @@ parallel generalization of <code>reduce_first</code> would actually be a
 different algorithm that can start with any element in the range. We do
 not propose that generalization here, but would not oppose such a
 proposal.</p>
-<h4 data-number="4.1.8.1" id="arguments-against-reduce_first"><span class="header-section-number">4.1.8.1</span> Arguments against
+<h4 data-number="3.1.10.1" id="arguments-against-reduce_first"><span class="header-section-number">3.1.10.1</span> Arguments against
 <code>reduce_first</code><a href="#arguments-against-reduce_first" class="self-link"></a></h4>
 <ol type="1">
 <li><p>P3179R8 already proposes parallel ranges overloads of
@@ -1281,7 +1269,7 @@ optimizations.</p></li>
 themselves, by extracting the first element from the sequence and using
 it as the initial value in <code>reduce</code>.</p></li>
 </ol>
-<h4 data-number="4.1.8.2" id="arguments-for-reduce_first"><span class="header-section-number">4.1.8.2</span> Arguments for
+<h4 data-number="3.1.10.2" id="arguments-for-reduce_first"><span class="header-section-number">3.1.10.2</span> Arguments for
 <code>reduce_first</code><a href="#arguments-for-reduce_first" class="self-link"></a></h4>
 <p>Users often want to combine multiple reductions into a single pass,
 where some of the reductions are min and/or max, while others have a
@@ -1292,7 +1280,7 @@ This happens often enough that MPI (the Message Passing Interface for
 distributed-memory parallel computing) has predefined reduction
 operations for minimum and its index (<code>MINLOC</code>) and maximum
 and its index (<code>MAXLOC</code>).</p>
-<h4 data-number="4.1.8.3" id="a-good-parallel-reduce_first-is-actually-a-different-algorithm"><span class="header-section-number">4.1.8.3</span> A good parallel
+<h4 data-number="3.1.10.3" id="a-good-parallel-reduce_first-is-actually-a-different-algorithm"><span class="header-section-number">3.1.10.3</span> A good parallel
 <code>reduce_first</code> is actually a different algorithm<a href="#a-good-parallel-reduce_first-is-actually-a-different-algorithm" class="self-link"></a></h4>
 <p>A reasonable parallel generalization of <code>reduce_first</code>
 would be a different algorithm, because it would want to preserve
@@ -1311,7 +1299,7 @@ are ordered, so it matters which element of the sequence starts the
 fold. The <code>reduce*</code> algorithms are unordered, so there’s no
 functional correctness reason to privilege the first element over any
 other.</p>
-<h3 data-number="4.1.9" id="we-dont-propose-reduce_with_iter"><span class="header-section-number">4.1.9</span> We don’t propose
+<h3 data-number="3.1.11" id="we-dont-propose-reduce_with_iter"><span class="header-section-number">3.1.11</span> We don’t propose
 <code>reduce_with_iter</code><a href="#we-dont-propose-reduce_with_iter" class="self-link"></a></h3>
 <p>A hypothetical <code>reduce_with_iter</code> algorithm would look
 like <code>fold_left_with_iter</code>, but would permit reordering of
@@ -1332,7 +1320,7 @@ also consistent with P3179R8. Furthermore, even if a
 <code>reduce</code> should not be specified in terms of it. This is for
 performance reasons, as Section 4.4 of P2322R6 elaborates for
 <code>fold_left</code> and <code>fold_left_with_iter</code>.</p>
-<h2 data-number="4.2" id="range-categories-and-return-types"><span class="header-section-number">4.2</span> Range categories and return
+<h2 data-number="3.2" id="range-categories-and-return-types"><span class="header-section-number">3.2</span> Range categories and return
 types<a href="#range-categories-and-return-types" class="self-link"></a></h2>
 <p>We propose the following.</p>
 <ul>
@@ -1397,18 +1385,18 @@ has the benefit of letting us specify <code>ranges::reduce</code> to
 return just the value. We don’t propose a separate algorithm
 <code>reduce_with_iter</code>, as we explain elsewhere in this
 proposal.</p>
-<h2 data-number="4.3" id="constexpr-parallel-algorithms"><span class="header-section-number">4.3</span> Constexpr parallel
+<h2 data-number="3.3" id="constexpr-parallel-algorithms"><span class="header-section-number">3.3</span> Constexpr parallel
 algorithms?<a href="#constexpr-parallel-algorithms" class="self-link"></a></h2>
 <p><a href="https://wg21.link/p2902r1">P2902R1</a> proposes to add
 <code>constexpr</code> to the parallel algorithms. P3179R8 does not
 object to this; see Section 2.10. We continue the approach of P3179R8 in
 not opposing P2902R1’s approach, but also not depending on it.</p>
-<h2 data-number="4.4" id="rangesreduce-design"><span class="header-section-number">4.4</span> <code>ranges::reduce</code>
+<h2 data-number="3.4" id="rangesreduce-design"><span class="header-section-number">3.4</span> <code>ranges::reduce</code>
 design<a href="#rangesreduce-design" class="self-link"></a></h2>
 <p>In this section, we focus on <code>ranges::reduce</code>’s design.
 The discussion here applies generally to the other algorithms we
 propose.</p>
-<h3 data-number="4.4.1" id="no-default-parameters"><span class="header-section-number">4.4.1</span> No default parameters<a href="#no-default-parameters" class="self-link"></a></h3>
+<h3 data-number="3.4.1" id="no-default-parameters"><span class="header-section-number">3.4.1</span> No default parameters<a href="#no-default-parameters" class="self-link"></a></h3>
 <p>Section 5.1 of P2760R1 states:</p>
 <blockquote>
 <p>One thing is clear: <code>ranges::reduce</code> should <em>not</em>
@@ -1436,7 +1424,7 @@ a sequence of <code>float</code> or <code>double</code>. For
 <code>ranges::reduce</code>, however, making its return value type
 imitate <code>ranges::fold_left</code> instead of
 <code>std::reduce</code> fixes that.</p>
-<h3 data-number="4.4.2" id="for-return-type-imitate-rangesfold_left-not-stdreduce"><span class="header-section-number">4.4.2</span> For return type, imitate
+<h3 data-number="3.4.2" id="for-return-type-imitate-rangesfold_left-not-stdreduce"><span class="header-section-number">3.4.2</span> For return type, imitate
 <code>ranges::fold_left</code>, not <code>std::reduce</code><a href="#for-return-type-imitate-rangesfold_left-not-stdreduce" class="self-link"></a></h3>
 <p>Both <code>std::reduce</code> and <code>std::ranges::fold_left</code>
 return the reduction result as a single value. However, they deduce the
@@ -1473,7 +1461,7 @@ link</a>).</p>
 <span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">static_assert</span><span class="op">(</span>std<span class="op">::</span>is_same_v<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span>r<span class="op">)</span>, <span class="dt">double</span><span class="op">&gt;)</span>;</span>
 <span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>    <span class="ot">assert</span><span class="op">(</span>r <span class="op">==</span> <span class="fl">2.0</span><span class="op">)</span>;</span>
 <span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="dv">0</span>;  </span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="dv">0</span>;</span>
 <span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <p>The <code>std::reduce</code> part of the example expresses a common
 user error. <code>ranges::fold_*</code> instead returns “the decayed
@@ -1497,7 +1485,7 @@ are all floating-point types or specializations of <code>complex</code>.
 (See e.g., [linalg.algs.blas1.dot] 7.) For ranges reduction algorithms,
 we expect a larger audience of users and thus prefer consistency with
 <code>fold_*</code>’s return type.</p>
-<h2 data-number="4.5" id="constraining-parallel-ranges-numeric-algorithms"><span class="header-section-number">4.5</span> Constraining parallel ranges
+<h2 data-number="3.5" id="constraining-parallel-ranges-numeric-algorithms"><span class="header-section-number">3.5</span> Constraining parallel ranges
 numeric algorithms<a href="#constraining-parallel-ranges-numeric-algorithms" class="self-link"></a></h2>
 <ol type="1">
 <li><p>We use the same constraints as <code>fold_left</code> and
@@ -1624,10 +1612,10 @@ that if the binary operation is called with an argument of the initial
 value’s type <code>T</code>, then that argument can be in either the
 first or second position.) We express what <code>reduce</code> does
 using <em>GENERALIZED_SUM</em>.</p>
-<h1 data-number="5" id="implementation"><span class="header-section-number">5</span> Implementation<a href="#implementation" class="self-link"></a></h1>
+<h1 data-number="4" id="implementation"><span class="header-section-number">4</span> Implementation<a href="#implementation" class="self-link"></a></h1>
 <p>TODO</p>
 <p>The oneDPL library has deployment experience.</p>
-<h1 data-number="6" id="wording"><span class="header-section-number">6</span> Wording<a href="#wording" class="self-link"></a></h1>
+<h1 data-number="5" id="wording"><span class="header-section-number">5</span> Wording<a href="#wording" class="self-link"></a></h1>
 <blockquote>
 <p>Text in blockquotes is not proposed wording, but rather instructions
 for generating proposed wording.</p>
@@ -1635,7 +1623,7 @@ for generating proposed wording.</p>
 <a href="https://isocpp.org/files/papers/P3179R8.html">P3179R8</a> has
 been applied to the Working Draft.</p>
 </blockquote>
-<h2 data-number="6.1" id="update-feature-test-macro"><span class="header-section-number">6.1</span> Update feature test macro<a href="#update-feature-test-macro" class="self-link"></a></h2>
+<h2 data-number="5.1" id="update-feature-test-macro"><span class="header-section-number">5.1</span> Update feature test macro<a href="#update-feature-test-macro" class="self-link"></a></h2>
 <blockquote>
 <p>In [version.syn], increase the value of the
 <code>__cpp_lib_parallel_algorithm</code> macro by replacing YYYMML
@@ -1643,12 +1631,12 @@ below with the integer literal encoding the appropriate year (YYYY) and
 month (MM).</p>
 </blockquote>
 <div class="sourceCode" id="cb12"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#define __cpp_lib_parallel_algorithm </span>YYYYMML<span class="pp"> </span><span class="co">// also in &lt;algorithm&gt;</span></span></code></pre></div>
-<h2 data-number="6.2" id="change-numeric.ops.overview"><span class="header-section-number">6.2</span> Change [numeric.ops.overview]<a href="#change-numeric.ops.overview" class="self-link"></a></h2>
+<h2 data-number="5.2" id="change-numeric.ops.overview"><span class="header-section-number">5.2</span> Change [numeric.ops.overview]<a href="#change-numeric.ops.overview" class="self-link"></a></h2>
 <blockquote>
 <p>Change [numeric.ops.overview] (the <code>&lt;numeric&gt;</code>
 header synopsis) as follows.</p>
 </blockquote>
-<h3 data-number="6.2.1" id="add-declaration-of-exposition-only-concepts"><span class="header-section-number">6.2.1</span> Add declaration of
+<h3 data-number="5.2.1" id="add-declaration-of-exposition-only-concepts"><span class="header-section-number">5.2.1</span> Add declaration of
 exposition-only concepts<a href="#add-declaration-of-exposition-only-concepts" class="self-link"></a></h3>
 <blockquote>
 <p>Add declarations of exposition-only concepts
@@ -1704,7 +1692,7 @@ synopsis) as follows.</p>
 <div class="sourceCode" id="cb17"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>    template&lt;input_iterator I, sentinel_for&lt;I&gt; S, class T = iter_value_t&lt;I&gt;,</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>             indirectly-binary-left-foldable&lt;T, I&gt; F&gt;</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>      constexpr auto fold_left(I first, S last, T init, F f);</span></code></pre></div>
-<h3 data-number="6.2.2" id="add-declarations-of-parallel-ranges-reduce-overloads"><span class="header-section-number">6.2.2</span> Add declarations of parallel
+<h3 data-number="5.2.2" id="add-declarations-of-parallel-ranges-reduce-overloads"><span class="header-section-number">5.2.2</span> Add declarations of parallel
 ranges <code>reduce</code> overloads<a href="#add-declarations-of-parallel-ranges-reduce-overloads" class="self-link"></a></h3>
 <blockquote>
 <p>Add declarations of ranges overloads of <code>reduce</code>,
@@ -1828,13 +1816,13 @@ the right way to handle projections.</p>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  template&lt;class InputIterator1, class InputIterator2, class T&gt;</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    constexpr T inner_product(InputIterator1 first1, InputIterator1 last1,</span>
 <span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>                              InputIterator2 first2, T init);</span></code></pre></div>
-<h3 data-number="6.2.3" id="add-declarations-of-parallel-ranges-inclusive_scan"><span class="header-section-number">6.2.3</span> Add declarations of parallel
+<h3 data-number="5.2.3" id="add-declarations-of-parallel-ranges-inclusive_scan"><span class="header-section-number">5.2.3</span> Add declarations of parallel
 ranges <code>inclusive_scan</code><a href="#add-declarations-of-parallel-ranges-inclusive_scan" class="self-link"></a></h3>
 <p>TODO</p>
-<h3 data-number="6.2.4" id="add-declarations-of-parallel-ranges-exclusive_scan"><span class="header-section-number">6.2.4</span> Add declarations of parallel
+<h3 data-number="5.2.4" id="add-declarations-of-parallel-ranges-exclusive_scan"><span class="header-section-number">5.2.4</span> Add declarations of parallel
 ranges <code>exclusive_scan</code><a href="#add-declarations-of-parallel-ranges-exclusive_scan" class="self-link"></a></h3>
 <p>TODO</p>
-<h3 data-number="6.2.5" id="add-wording-for-algorithms"><span class="header-section-number">6.2.5</span> Add wording for algorithms<a href="#add-wording-for-algorithms" class="self-link"></a></h3>
+<h3 data-number="5.2.5" id="add-wording-for-algorithms"><span class="header-section-number">5.2.5</span> Add wording for algorithms<a href="#add-wording-for-algorithms" class="self-link"></a></h3>
 <p>TODO</p>
 </div>
 </div>

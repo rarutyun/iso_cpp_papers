@@ -66,7 +66,7 @@ The following sections explain why we propose these algorithms and not others.  
 
 ### Current set of numeric algorithms
 
-[@P3179R8]</a>, "C++ Parallel Range Algorithms," is in the last stages of wording review as of the publication date. [@P3179R8] explicitly defers adding `ranges` versions of the numeric algorithms.  This proposal does that.  As such, we focus on the numeric algorithms, that is, the 11 algorithms in [numeric.ops]{- .sref}.
+<a href="https://isocpp.org/files/papers/P3179R8.html">P3179R8</a>, "C++ Parallel Range Algorithms," is in the last stages of wording review as of the publication date. P3179R8 explicitly defers adding `ranges` versions of the numeric algorithms.  This proposal does that.  As such, we focus on the numeric algorithms, that is, the 11 algorithms in [numeric.ops]{- .sref}.
 
 * `iota`
 
@@ -90,7 +90,7 @@ The following sections explain why we propose these algorithms and not others.  
 
 * `transform_exclusive_scan`
 
-We don't have to add ranges versions of all these algorithms.  Several already have a ranges version in C++23, possibly with a different name.  Some others could be omitted because they have straightforward replacements using existing views and other ranges algorithms.  We carefully read the two proposals [@P2214R2], "A Plan for C++23 Ranges," and [@P2760R1], "A Plan for C++26 Ranges," in order to inform our algorithm selections.  In some cases that we will explain below, usability and performance concerns led us to disagree with their conclusions.
+We don't have to add ranges versions of all these algorithms.  Several already have a ranges version in C++23, possibly with a different name.  Some others could be omitted because they have straightforward replacements using existing views and other ranges algorithms.  We carefully read the two proposals <a href="https://wg21.link/p2214r2">P2214R2</a>, "A Plan for C++23 Ranges," and <a href="https://wg21.link/p2760r1">P2760R1</a>, "A Plan for C++26 Ranges," in order to inform our algorithm selections.  In some cases that we will explain below, usability and performance concerns led us to disagree with their conclusions.
 
 ### `transform_*` algorithms (and/or projections)
 
@@ -120,7 +120,7 @@ The above two questions are related, since a projection can have the same effect
 
 > Wherever appropriate, algorithms should optionally take *INVOKE*-able *projections* that are applied to each element in the input sequence(s). This, in effect, allows users to trivially transform each input sequence for the sake of that single algorithm invocation.
 
-Projecting the input of `reduce` has the same effect as unary `transform_reduce`.  Here is an example, in which `get_element` is a customization point object like the one proposed in [@P2769R3], such that `get_element<k>` gets the `k`-th element of an object that participates in the tuple or structured binding protocol.
+Projecting the input of `reduce` has the same effect as unary `transform_reduce`.  Here is an example, in which `get_element` is a customization point object like the one proposed in <a href="https://wg21.link/p2769r3">P2769R3</a>, such that `get_element<k>` gets the `k`-th element of an object that participates in the tuple or structured binding protocol.
 
 ```c++
 struct foo {};
