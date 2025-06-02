@@ -486,29 +486,93 @@ If WG21 did want a convenience wrapper, one option would be to give this common 
 
 ### We don't propose `reduce_first`
 
-Section 5.1 of <a href="https://wg21.link/P2760R1">P2760R1</a> asks whether there should be a `reduce_first` algorithm, analogous to `fold_left_first`, for binary operations that lack a natural identity element to serve as the initial value.  An example would be `min` on a range of `int` values, where callers would have no way to tell if `INT_MAX` represents a value in the range, or an arbitrary stand-in for the (nonexistent) identity element.  A `reduce_first` algorithm would use the first element in the range as the initial value.
+Section 5.1 of <a href="https://wg21.link/P2760R1">P2760R1</a> asks whether the Standard Library should have a `reduce_first` algorithm.  Analogously to `fold_left_first`, `reduce_first` would use the first element of the range as the initial value of the reduction operation.  One application of `reduce_first` is to support binary operations that lack a natural identity element to serve as the initial value.  An example would be `min` on a range of `int` values, where callers would have no way to tell if `INT_MAX` represents an actual value in the range, or a fake "identity" element (that callers get as a result because the range is empty).
 
-We do not propose `reduce_first` here.  We outline arguments against and for it, and then explain that a reasonable parallel generalization of `reduce_first` would actually be a different algorithm that can start with any element in the range.  We do not propose that generalization here, but would not oppose such a proposal.
+We do not propose `reduce_first` here.  We first explain how `reduce_first` relates to the difference between a reduction's initial value and its identity element.  We then list designs of other parallel programming models, and outline arguments against and for `reduce_first`.
+
+#### Reduction's initial value vs. its identity
+
+It's important to distinguish between a reduction's initial value, and its identity element.  C++17's `std::reduce` takes an optional initial value `T init` that is included in the terms of the reduction.  This is not necessarily the same as the identity element for a reduction, which is a value that does not change the reduction's result, no matter how many times it is included in the sum.  The following example illustrates.
+
+```c++
+std::vector<float> v{5.0f, 7.0f, 11.0f};
+
+// Default initial value is float{}, which is 0.0f.
+float result = std::reduce(v.begin(), v.end());
+assert(result == 23.0f);
+
+// Initial value happens to be the identity in this case.
+result = std::reduce(v.begin(), v.end(), 0.0f);
+assert(result == 23.0f);
+
+// Initial value is NOT the identity in this case.
+float result_plus_3 = std::reduce(v.begin(), v.end(), 3.0f);
+assert(result_plus_3 == 26.0f);
+
+// Including arbitrarily many copies of the identity element
+// does not change the reduction result.
+std::vector<float> v2{5.0f, 0.0f, 7.0f, 0.0f, 0.0f, 11.0f, 0.0f};
+result = std::reduce(v.begin(), v.end());
+assert(result == 23.0f);
+result = std::reduce(v.begin(), v.end(), 0.0f);
+assert(result == 23.0f);
+```
+
+Both the initial value and the identity have a purpose in parallelization.  If an identity `id` for a binary operator `op` is known, then here is a natural way to parallelize `reduce(`$R$`, init, op)` over $P$ processors.
+
+1. Partition the range $R$ into $P$ distinct subranges $R_p$
+
+2. Compute a local result $L_p$ `= reduce(`$R_p$`, id, op)` (with `id` as the initial value) on each processor $p$
+
+3. Reduce over the range of $L_p$ local results with `init` as the initial value
+
+The initial value parameter of `reduce` also lets users express a "running reduction" where the whole range is not available all at once and users need to call `reduce` repeatedly.
+
+#### Parallelization needs `reduce_first` anyway
+
+What happens to a parallel implementation of C++17 `std::reduce` with a user-defined binary operation, where the Standard offers no way to know the operation's identity, if it exists?  Each processor must be able to compute its subrange's local result by starting with the first element of the subrange.  That is, each processor must do the equivalent of `reduce_first`.  That results in the following parallelization approach.
+
+1. Partition the range $R$ into $P$ distinct subranges $R_p$
+
+2. Compute a local result $L_p$ `= reduce_first(`$R_p$`, op)` on each processor $p$
+
+3. Reduce over the range of $L_p$ local results with `init` as the initial value
+
+#### Other parallel programming models
+
+Other parallel programming models provide all combinations of design options.  Some compute only `reduce_first`, some only `reduce`, and some compute both.  Some have a way to specify only an identity element, some only an initial value, and some both.
+
+MPI (the Message Passing Interface for distributed-memory parallel communication) has reductions and lets users define custom binary operations.  MPI's reductions compute the analog of `reduce_first`.  Users have no way to specify either an initial value or an identity for their custom operations.
+
+In the <a href="https://j3-fortran.org/doc/year/23/23-007r1.pdf">Draft Fortran 2023 Standard</a>, the `REDUCE` clause permits specification of an identity element.
+
+OpenMP lets users specify the identity value (via an _initializer-clause_ `initializer(`_initializer-expr_`)`), which is "used as the initializer for private copies of reduction list items" (see the relevant section of the <a href="https://www.openmp.org/spec-html/5.0/openmpsu107.html">OpenMP 5.0 specification</a>).
+
+Kokkos lets users define the identity value for custom reduction result types, by giving the reducer class an `init(value_type& value)` member function that sets `value` to the identity.  (Please see the <a href="https://kokkos.org/kokkos-core-wiki/ProgrammingGuide/Custom-Reductions-Custom-Reducers.html">section on custom reducers in the Kokkos Programming Guide</a>.)
+
+The `std::linalg` linear algebra library in the Working Draft for C++26 says, "A value-initialized object of linear algebra value type shall act as the additive identity" ([linalg.reqs.val] 3).
+
+In Python's NumPy library, <a href="https://numpy.org/doc/stable/reference/generated/numpy.ufunc.reduce.html">`numpy.ufunc.reduce`</a> takes optional initial values.  If not provided and the binary operation (a "universal function" (ufunc), effectively an elementwise binary operation on a possibly multidimensional array) has an identity, then the initial values default to the identity.  If the binary operation has no identity or the initial values are `None`, then this works like `reduce_first`.
 
 #### Arguments against `reduce_first`
 
 1. P3179R8 already proposes parallel ranges overloads of `min_element`, `max_element`, and `minmax_element`.  Minima and maxima are the main use cases that lack a natural identity element.
 
-2. A parallel `reduce_first` (or even the parallel analog described in (3)) would have potential performance issues.  Its computational loop would be less uniform.  This could introduce branches and data misalignment.  Fetching the first element of the entire range on all processors executing the reduction would reduce spatial locality.
+2. In practice, most custom binary operations have some value that can work like an identity element, even if it's not mathematically the identity.
 
-3. Existing parallel programming frameworks like OpenMP require an identity element or at least an initial value for the reduction operation, so they could not be used to implement `reduce_first`.  OpenMP permits custom reduction operations, so it would be a good candidate for implementing Standard parallel algorithms.  Hand-rolling `reduce_first` out of other OpenMP components would add implementation effort and could hinder compiler optimizations.
+3. Users could always implement `reduce_first` themselves, by extracting the first element from the sequence and using it as the initial value in `reduce`.
 
-4. Users could always implement `reduce_first` themselves, by extracting the first element from the sequence and using it as the initial value in `reduce`.
+4. Unlike `fold_left_first*` and `fold_right_last`, the `*reduce` algorithms are unordered.  As a result, there is no reason to privilege the first (or last) element of the range.  One could imagine an algorithm `reduce_any` that uses any element of the range as its initial value.
+
+5. A parallel `reduce_first` would have potential performance issues.  Its computational loop would be less uniform.  This could introduce branches and data misalignment.
 
 #### Arguments for `reduce_first`
 
-Users often want to combine multiple reductions into a single pass, where some of the reductions are min and/or max, while others have a natural identity.  For example, users may want the minimum of an array of integers (with no natural identity), along with the least index of the array element with the minimum value (whose natural identity is zero).  This happens often enough that MPI (the Message Passing Interface for distributed-memory parallel computing) has predefined reduction operations for minimum and its index (`MINLOC`) and maximum and its index (`MAXLOC`).
+1. Parallelization of C++17 `std::reduce` requires the equivalent of `reduce_first` anyway.
 
-#### A good parallel `reduce_first` is actually a different algorithm
+2. Even though `min_element`, `max_element`, and `minmax_element` exist, users may still want to combine multiple reductions into a single pass, where some of the reductions are min and/or max, while others have a natural identity.
 
-A reasonable parallel generalization of `reduce_first` would be a different algorithm, because it would want to preserve implementation freedom to start with *any* element.  For example, for a reduction on $N \cdot P$ elements over $P$ processors, each of the $P$ processors would need to initialize a local accumulator.  Doing so with the first element in that processor's subrange, rather than the first element of the entire range, would better preserve spatial locality and give a fully independent mapping of elements to processors.  One could imagine calling this algorithm `reduce_any` or `reduce_one`.
-
-This generalization of `reduce_first` would be consistent with the implementation freedom that `reduce` has over `fold_left_first` and `fold_right_last`.  The `fold_left_first` and `fold_right_last` algorithms are ordered, so it matters which element of the sequence starts the fold.  The `reduce*` algorithms are unordered, so there's no functional correctness reason to privilege the first element over any other.
+As an example of (2), users may want the minimum of an array of integers (with no natural identity), along with the least index of the array element with the minimum value (whose natural identity is zero).  This happens often enough that MPI (the Message Passing Interface for distributed-memory parallel computing) has predefined reduction operations for minimum and its index (`MINLOC`) and maximum and its index (`MAXLOC`).  On the other hand, even `MINLOC` and `MAXLOC` have reasonable choices of fake "identity" elements that work in practice, e.g., for `MINLOC`, `INT_MAX` for the minimum value and `INT_MAX` for the least array index (where users are responsible for testing that the returned array index is in bounds).
 
 ### We don't propose `reduce_with_iter`
 
