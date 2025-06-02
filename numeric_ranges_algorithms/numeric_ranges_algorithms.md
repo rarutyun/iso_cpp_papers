@@ -528,6 +528,12 @@ Both the initial value and the identity have a purpose in parallelization.  If a
 
 The initial value parameter of `reduce` also lets users express a "running reduction" where the whole range is not available all at once and users need to call `reduce` repeatedly.
 
+#### C++ types already have a natural default identity
+
+The `std::linalg` linear algebra library in the Working Draft for C++26 says, "A value-initialized object of linear algebra value type shall act as the additive identity" ([linalg.reqs.val] 3).  That is, `T{}` is the natural default identity value for a custom reduction over `T`.
+
+This is C++, not C or Fortran 77.  We have constructors!  We can define types that wrap other types.  If `U`'s default constructor doesn't have the desired behavior, we can wrap it in `T` and make `T`'s default constructor have the desired behavior.
+
 #### Parallelization needs `reduce_first` anyway
 
 What happens to a parallel implementation of C++17 `std::reduce` with a user-defined binary operation, where the Standard offers no way to know the operation's identity, if it exists?  Each processor must be able to compute its subrange's local result by starting with the first element of the subrange.  That is, each processor must do the equivalent of `reduce_first`.  That results in the following parallelization approach.
@@ -626,7 +632,7 @@ In this section, we focus on `ranges::reduce`'s design.  The discussion here app
 
 Section 5.1 of P2760R1 states:
 
-> One thing is clear: `ranges::reduce` should *not* take a default binary operation *nor* a default initial parameter. The user needs to supply both.
+> One thing is clear: `ranges::reduce` should *not* take a default binary operation *nor* a default initial [value] parameter. The user needs to supply both.
 
 This motivates the following convenience wrappers:
 

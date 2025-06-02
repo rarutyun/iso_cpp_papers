@@ -1283,7 +1283,18 @@ with <code>init</code> as the initial value</p></li>
 <p>The initial value parameter of <code>reduce</code> also lets users
 express a “running reduction” where the whole range is not available all
 at once and users need to call <code>reduce</code> repeatedly.</p>
-<h4 data-number="3.1.8.2" id="parallelization-needs-reduce_first-anyway"><span class="header-section-number">3.1.8.2</span> Parallelization needs
+<h4 data-number="3.1.8.2" id="c-types-already-have-a-natural-default-identity"><span class="header-section-number">3.1.8.2</span> C++ types already have a
+natural default identity<a href="#c-types-already-have-a-natural-default-identity" class="self-link"></a></h4>
+<p>The <code>std::linalg</code> linear algebra library in the Working
+Draft for C++26 says, “A value-initialized object of linear algebra
+value type shall act as the additive identity” ([linalg.reqs.val] 3).
+That is, <code>T{}</code> is the natural default identity value for a
+custom reduction over <code>T</code>.</p>
+<p>This is C++, not C or Fortran 77. We have constructors! We can define
+types that wrap other types. If <code>U</code>’s default constructor
+doesn’t have the desired behavior, we can wrap it in <code>T</code> and
+make <code>T</code>’s default constructor have the desired behavior.</p>
+<h4 data-number="3.1.8.3" id="parallelization-needs-reduce_first-anyway"><span class="header-section-number">3.1.8.3</span> Parallelization needs
 <code>reduce_first</code> anyway<a href="#parallelization-needs-reduce_first-anyway" class="self-link"></a></h4>
 <p>What happens to a parallel implementation of C++17
 <code>std::reduce</code> with a user-defined binary operation, where the
@@ -1302,7 +1313,7 @@ on each processor <span class="math inline"><em>p</em></span></p></li>
 <li><p>Reduce over the range of <span class="math inline"><em>L</em><sub><em>p</em></sub></span> local results
 with <code>init</code> as the initial value</p></li>
 </ol>
-<h4 data-number="3.1.8.3" id="other-parallel-programming-models"><span class="header-section-number">3.1.8.3</span> Other parallel programming
+<h4 data-number="3.1.8.4" id="other-parallel-programming-models"><span class="header-section-number">3.1.8.4</span> Other parallel programming
 models<a href="#other-parallel-programming-models" class="self-link"></a></h4>
 <p>Other parallel programming models provide all combinations of design
 options. Some compute only <code>reduce_first</code>, some only
@@ -1342,7 +1353,7 @@ operation on a possibly multidimensional array) has an identity, then
 the initial values default to the identity. If the binary operation has
 no identity or the initial values are <code>None</code>, then this works
 like <code>reduce_first</code>.</p>
-<h4 data-number="3.1.8.4" id="arguments-against-reduce_first"><span class="header-section-number">3.1.8.4</span> Arguments against
+<h4 data-number="3.1.8.5" id="arguments-against-reduce_first"><span class="header-section-number">3.1.8.5</span> Arguments against
 <code>reduce_first</code><a href="#arguments-against-reduce_first" class="self-link"></a></h4>
 <ol type="1">
 <li><p>P3179R8 already proposes parallel ranges overloads of
@@ -1365,7 +1376,7 @@ initial value.</p></li>
 performance issues. Its computational loop would be less uniform. This
 could introduce branches and data misalignment.</p></li>
 </ol>
-<h4 data-number="3.1.8.5" id="arguments-for-reduce_first"><span class="header-section-number">3.1.8.5</span> Arguments for
+<h4 data-number="3.1.8.6" id="arguments-for-reduce_first"><span class="header-section-number">3.1.8.6</span> Arguments for
 <code>reduce_first</code><a href="#arguments-for-reduce_first" class="self-link"></a></h4>
 <ol type="1">
 <li><p>Parallelization of C++17 <code>std::reduce</code> requires the
@@ -1488,7 +1499,7 @@ propose.</p>
 <p>Section 5.1 of P2760R1 states:</p>
 <blockquote>
 <p>One thing is clear: <code>ranges::reduce</code> should <em>not</em>
-take a default binary operation <em>nor</em> a default initial
+take a default binary operation <em>nor</em> a default initial [value]
 parameter. The user needs to supply both.</p>
 </blockquote>
 <p>This motivates the following convenience wrappers:</p>
