@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2025-05-30" />
+  <meta name="dcterms.date" content="2025-06-02" />
   <title>Parallel and non-parallel numeric range algorithms</title>
   <style>
 code{white-space: pre-wrap;}
@@ -425,7 +425,7 @@ numeric range algorithms</h1>
   </tr>
   <tr>
     <td>Date: </td>
-    <td>2025-05-30</td>
+    <td>2025-06-02</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project: </td>
@@ -461,17 +461,17 @@ numeric range algorithms</h1>
 algorithms</a></li>
 <li><a href="#transform_-algorithms-andor-projections" id="toc-transform_-algorithms-andor-projections"><span class="toc-section-number">3.1.3</span> <code>transform_*</code>
 algorithms (and/or projections)</a></li>
-<li><a href="#we-propose-convenience-wrappers-to-replace-some-algorithms" id="toc-we-propose-convenience-wrappers-to-replace-some-algorithms"><span class="toc-section-number">3.1.6</span> We propose convenience wrappers
+<li><a href="#we-propose-convenience-wrappers-to-replace-some-algorithms" id="toc-we-propose-convenience-wrappers-to-replace-some-algorithms"><span class="toc-section-number">3.1.4</span> We propose convenience wrappers
 to replace some algorithms</a></li>
-<li><a href="#existing-views-replace-some-other-algorithms" id="toc-existing-views-replace-some-other-algorithms"><span class="toc-section-number">3.1.7</span> Existing views replace some
+<li><a href="#existing-views-replace-some-other-algorithms" id="toc-existing-views-replace-some-other-algorithms"><span class="toc-section-number">3.1.5</span> Existing views replace some
 other algorithms</a></li>
-<li><a href="#we-dont-propose-the-lost-algorithm-noncommutative-parallel-reduce" id="toc-we-dont-propose-the-lost-algorithm-noncommutative-parallel-reduce"><span class="toc-section-number">3.1.8</span> We don’t propose “the lost
+<li><a href="#we-dont-propose-the-lost-algorithm-noncommutative-parallel-reduce" id="toc-we-dont-propose-the-lost-algorithm-noncommutative-parallel-reduce"><span class="toc-section-number">3.1.6</span> We don’t propose “the lost
 algorithm” (noncommutative parallel reduce)</a></li>
-<li><a href="#we-dont-propose-partial_sum" id="toc-we-dont-propose-partial_sum"><span class="toc-section-number">3.1.9</span> We don’t propose
+<li><a href="#we-dont-propose-partial_sum" id="toc-we-dont-propose-partial_sum"><span class="toc-section-number">3.1.7</span> We don’t propose
 <code>partial_sum</code></a></li>
-<li><a href="#we-dont-propose-reduce_first" id="toc-we-dont-propose-reduce_first"><span class="toc-section-number">3.1.10</span> We don’t propose
+<li><a href="#we-dont-propose-reduce_first" id="toc-we-dont-propose-reduce_first"><span class="toc-section-number">3.1.8</span> We don’t propose
 <code>reduce_first</code></a></li>
-<li><a href="#we-dont-propose-reduce_with_iter" id="toc-we-dont-propose-reduce_with_iter"><span class="toc-section-number">3.1.11</span> We don’t propose
+<li><a href="#we-dont-propose-reduce_with_iter" id="toc-we-dont-propose-reduce_with_iter"><span class="toc-section-number">3.1.9</span> We don’t propose
 <code>reduce_with_iter</code></a></li>
 </ul></li>
 <li><a href="#range-categories-and-return-types" id="toc-range-categories-and-return-types"><span class="toc-section-number">3.2</span> Range categories and return
@@ -691,49 +691,37 @@ projection?</p></li>
 <code>zip_transform_view</code>, then why does binary
 <code>std::ranges::transform</code> exist?</p></li>
 </ol>
-<p>It can help to look at examples. Here is a binary transform example
-without projections, that uses a single big lambda. Users have to read
-the big lambda to see what it does. So does the compiler, which can
-hinder optimization if it’s not good at inlining. Contrast the code on
-the left (below) with use of projections. Users can read out loud what
-this does. It also separates the “selection” or “query” part of the
-transform from the “arithmetic” or “computation” part. The power of the
-ranges abstraction is that users can factor computation on a range from
-the logic to iterate over that range. It’s natural to extend this
-separation to selection logic as well.</p>
-<div class="cmptable">
-<blockquote>
-<p><code>transform</code> without and with projection</p>
-</blockquote>
-<h3 data-number="3.1.4" id="without-projections"><span class="header-section-number">3.1.4</span> Without projections<a href="#without-projections" class="self-link"></a></h3>
+<h5 data-number="3.1.3.6.1" id="binary-transform"><span class="header-section-number">3.1.3.6.1</span> Binary transform<a href="#binary-transform" class="self-link"></a></h5>
+<p>It can help to look at examples. The code below shows the same binary
+transform computation done in two different ways: first, without
+projections, and second, with projections. The code without projections
+using a single big lambda to express the binary operation. Users have to
+read the big lambda to see what it does. So does the compiler, which can
+hinder optimization if it’s not good at inlining. In contrast, the
+version with projections lets users read out loud what it does. It also
+separates the “selection” or “query” part of the transform from the
+“arithmetic” or “computation” part. The power of the ranges abstraction
+is that users can factor computation on a range from the logic to
+iterate over that range. It’s natural to extend this separation to
+selection logic as well.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> foo <span class="op">{}</span>;</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span>std<span class="op">::</span>tuple<span class="op">&lt;</span><span class="dt">int</span>, foo, std<span class="op">::</span>string<span class="op">&gt;&gt;</span> v1<span class="op">{</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span><span class="dv">5</span>, <span class="op">{}</span>, <span class="st">&quot;five&quot;</span><span class="op">}</span>, <span class="op">{</span><span class="dv">7</span>, <span class="op">{}</span>, <span class="st">&quot;seven&quot;</span><span class="op">}</span>, <span class="op">{</span><span class="dv">11</span>, <span class="op">{}</span>, <span class="st">&quot;eleven&quot;</span><span class="op">}}</span>;</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span>std<span class="op">::</span>pair<span class="op">&lt;</span><span class="dt">int</span>, std<span class="op">::</span>string<span class="op">&gt;&gt;</span> v2<span class="op">{</span></span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span><span class="dv">13</span>, <span class="st">&quot;thirteen&quot;</span><span class="op">}</span>, <span class="op">{</span><span class="dv">17</span>, <span class="st">&quot;seventeen&quot;</span><span class="op">}</span>, <span class="op">{</span><span class="dv">19</span>, <span class="st">&quot;nineteen&quot;</span><span class="op">}}</span>;</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> out<span class="op">(</span>std<span class="op">::</span>from_range, std<span class="op">::</span>views<span class="op">::</span>repeat<span class="op">(</span><span class="dv">0</span>, <span class="dv">3</span><span class="op">))</span>;</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">// Without projections: Big, opaque lambda</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>ranges<span class="op">::</span>transform<span class="op">(</span>v1, v2, out<span class="op">.</span>begin<span class="op">()</span>,</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="op">[]</span> <span class="op">(</span><span class="kw">auto</span> x, <span class="kw">auto</span> y<span class="op">)</span> <span class="op">{</span> <span class="cf">return</span> get<span class="op">&lt;</span><span class="dv">0</span><span class="op">&gt;(</span>x<span class="op">)</span> <span class="op">*</span> get<span class="op">&lt;</span><span class="dv">0</span><span class="op">&gt;(</span>y<span class="op">)</span>; <span class="op">})</span>;</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> expected<span class="op">{</span><span class="dv">65</span>, <span class="dv">119</span>, <span class="dv">209</span><span class="op">}</span>;</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>out <span class="op">==</span> expected<span class="op">)</span>;</span></code></pre></div>
-<h3 data-number="3.1.5" id="with-projections"><span class="header-section-number">3.1.5</span> With projections<a href="#with-projections" class="self-link"></a></h3>
-<div class="sourceCode" id="cb4"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> foo <span class="op">{}</span>;</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span>std<span class="op">::</span>tuple<span class="op">&lt;</span><span class="dt">int</span>, foo, std<span class="op">::</span>string<span class="op">&gt;&gt;</span> v1<span class="op">{</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span><span class="dv">5</span>, <span class="op">{}</span>, <span class="st">&quot;five&quot;</span><span class="op">}</span>, <span class="op">{</span><span class="dv">7</span>, <span class="op">{}</span>, <span class="st">&quot;seven&quot;</span><span class="op">}</span>, <span class="op">{</span><span class="dv">11</span>, <span class="op">{}</span>, <span class="st">&quot;eleven&quot;</span><span class="op">}}</span>;</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span>std<span class="op">::</span>pair<span class="op">&lt;</span><span class="dt">int</span>, std<span class="op">::</span>string<span class="op">&gt;&gt;</span> v2<span class="op">{</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span><span class="dv">13</span>, <span class="st">&quot;thirteen&quot;</span><span class="op">}</span>, <span class="op">{</span><span class="dv">17</span>, <span class="st">&quot;seventeen&quot;</span><span class="op">}</span>, <span class="op">{</span><span class="dv">19</span>, <span class="st">&quot;nineteen&quot;</span><span class="op">}}</span>;</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> out<span class="op">(</span>std<span class="op">::</span>from_range, std<span class="op">::</span>views<span class="op">::</span>repeat<span class="op">(</span><span class="dv">0</span>, <span class="dv">3</span><span class="op">))</span>;</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">// With projections: More readable</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>ranges<span class="op">::</span>transform<span class="op">(</span>v1, v2, out<span class="op">.</span>begin<span class="op">()</span>,</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>multiplies<span class="op">{}</span>, get_element<span class="op">&lt;</span><span class="dv">0</span><span class="op">&gt;{}</span>, get_element<span class="op">&lt;</span><span class="dv">0</span><span class="op">&gt;{})</span>;</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> expected<span class="op">{</span><span class="dv">65</span>, <span class="dv">119</span>, <span class="dv">209</span><span class="op">}</span>;</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>out <span class="op">==</span> expected<span class="op">)</span>;</span></code></pre></div>
-</div>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> out<span class="op">(</span>std<span class="op">::</span>from_range, std<span class="op">::</span>views<span class="op">::</span>repeat<span class="op">(</span><span class="dv">0</span>, <span class="dv">3</span><span class="op">))</span>;;</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> expected<span class="op">{</span><span class="dv">65</span>, <span class="dv">119</span>, <span class="dv">209</span><span class="op">}</span>;</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">// Without projections: Big, opaque lambda</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>ranges<span class="op">::</span>transform<span class="op">(</span>v1, v2, out<span class="op">.</span>begin<span class="op">()</span>,</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="op">[]</span> <span class="op">(</span><span class="kw">auto</span> x, <span class="kw">auto</span> y<span class="op">)</span> <span class="op">{</span> <span class="cf">return</span> get<span class="op">&lt;</span><span class="dv">0</span><span class="op">&gt;(</span>x<span class="op">)</span> <span class="op">*</span> get<span class="op">&lt;</span><span class="dv">0</span><span class="op">&gt;(</span>y<span class="op">)</span>; <span class="op">})</span>;</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>out <span class="op">==</span> expected<span class="op">)</span>;</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co">// With projections: More readable</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>ranges<span class="op">::</span>transform<span class="op">(</span>v1, v2, out<span class="op">.</span>begin<span class="op">()</span>,</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>multiplies<span class="op">{}</span>, get_element<span class="op">&lt;</span><span class="dv">0</span><span class="op">&gt;{}</span>, get_element<span class="op">&lt;</span><span class="dv">0</span><span class="op">&gt;{})</span>;</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>out2 <span class="op">==</span> expected<span class="op">)</span>;</span></code></pre></div>
+<h5 data-number="3.1.3.6.2" id="unary-transform"><span class="header-section-number">3.1.3.6.2</span> Unary transform<a href="#unary-transform" class="self-link"></a></h5>
 <p>It’s harder to avoid a lambda in the unary transform case. Most of
 the named C++ Standard Library arithmetic function objects are binary.
 Currying them into unary functions in C++ requires either making a
@@ -741,28 +729,28 @@ lambda (which defeats the purpose somewhat) or using something like
 <code>std::bind</code> (which is verbose). On the other hand, using a
 projection still has the benefit of separating the “selection” part of
 the transform from the “computation” part.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> foo <span class="op">{}</span>;</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span>std<span class="op">::</span>tuple<span class="op">&lt;</span><span class="dt">int</span>, foo, std<span class="op">::</span>string<span class="op">&gt;&gt;</span> v1<span class="op">{</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span><span class="dv">5</span>, <span class="op">{}</span>, <span class="st">&quot;five&quot;</span><span class="op">}</span>, <span class="op">{</span><span class="dv">7</span>, <span class="op">{}</span>, <span class="st">&quot;seven&quot;</span><span class="op">}</span>, <span class="op">{</span><span class="dv">11</span>, <span class="op">{}</span>, <span class="st">&quot;eleven&quot;</span><span class="op">}}</span>;</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> out<span class="op">(</span>std<span class="op">::</span>from_range, std<span class="op">::</span>views<span class="op">::</span>repeat<span class="op">(</span><span class="dv">0</span>, <span class="dv">3</span><span class="op">))</span>;</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> expected<span class="op">{</span><span class="dv">6</span>, <span class="dv">8</span>, <span class="dv">12</span><span class="op">}</span>;</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">// Unary transform without projection</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>ranges<span class="op">::</span>transform<span class="op">(</span>v1, out<span class="op">.</span>begin<span class="op">()</span>, <span class="op">[]</span> <span class="op">(</span><span class="kw">auto</span> x<span class="op">)</span> <span class="op">{</span> <span class="cf">return</span> get<span class="op">&lt;</span><span class="dv">0</span><span class="op">&gt;(</span>x<span class="op">)</span> <span class="op">+</span> <span class="dv">1</span>; <span class="op">})</span>;</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>out <span class="op">==</span> expected<span class="op">)</span>;</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co">// Unary transform with projection</span></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>ranges<span class="op">::</span>transform<span class="op">(</span>v1, out<span class="op">.</span>begin<span class="op">()</span>, <span class="op">[]</span> <span class="op">(</span><span class="kw">auto</span> x<span class="op">)</span> <span class="op">{</span> <span class="cf">return</span> x <span class="op">+</span> <span class="dv">1</span>; <span class="op">}</span>, get_element<span class="op">&lt;</span><span class="dv">0</span><span class="op">&gt;{})</span>;</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>out <span class="op">==</span> expected<span class="op">)</span>;</span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="co">// Unary transform with projection and &quot;curried&quot; plus</span></span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>ranges<span class="op">::</span>transform<span class="op">(</span>v1, out<span class="op">.</span>begin<span class="op">()</span>, std<span class="op">::</span>bind<span class="op">(</span>std<span class="op">::</span>plus<span class="op">{}</span>, <span class="dv">1</span><span class="op">)</span>, get_element<span class="op">&lt;</span><span class="dv">0</span><span class="op">&gt;{})</span>;</span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>out <span class="op">==</span> expected<span class="op">)</span>;</span></code></pre></div>
-<h4 data-number="3.1.5.1" id="reduce-transforms-and-projections"><span class="header-section-number">3.1.5.1</span> <code>reduce</code>:
+<div class="sourceCode" id="cb4"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> foo <span class="op">{}</span>;</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span>std<span class="op">::</span>tuple<span class="op">&lt;</span><span class="dt">int</span>, foo, std<span class="op">::</span>string<span class="op">&gt;&gt;</span> v1<span class="op">{</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span><span class="dv">5</span>, <span class="op">{}</span>, <span class="st">&quot;five&quot;</span><span class="op">}</span>, <span class="op">{</span><span class="dv">7</span>, <span class="op">{}</span>, <span class="st">&quot;seven&quot;</span><span class="op">}</span>, <span class="op">{</span><span class="dv">11</span>, <span class="op">{}</span>, <span class="st">&quot;eleven&quot;</span><span class="op">}}</span>;</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> out<span class="op">(</span>std<span class="op">::</span>from_range, std<span class="op">::</span>views<span class="op">::</span>repeat<span class="op">(</span><span class="dv">0</span>, <span class="dv">3</span><span class="op">))</span>;</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> expected<span class="op">{</span><span class="dv">6</span>, <span class="dv">8</span>, <span class="dv">12</span><span class="op">}</span>;</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">// Unary transform without projection</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>ranges<span class="op">::</span>transform<span class="op">(</span>v1, out<span class="op">.</span>begin<span class="op">()</span>, <span class="op">[]</span> <span class="op">(</span><span class="kw">auto</span> x<span class="op">)</span> <span class="op">{</span> <span class="cf">return</span> get<span class="op">&lt;</span><span class="dv">0</span><span class="op">&gt;(</span>x<span class="op">)</span> <span class="op">+</span> <span class="dv">1</span>; <span class="op">})</span>;</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>out <span class="op">==</span> expected<span class="op">)</span>;</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co">// Unary transform with projection</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>ranges<span class="op">::</span>transform<span class="op">(</span>v1, out<span class="op">.</span>begin<span class="op">()</span>, <span class="op">[]</span> <span class="op">(</span><span class="kw">auto</span> x<span class="op">)</span> <span class="op">{</span> <span class="cf">return</span> x <span class="op">+</span> <span class="dv">1</span>; <span class="op">}</span>, get_element<span class="op">&lt;</span><span class="dv">0</span><span class="op">&gt;{})</span>;</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>out <span class="op">==</span> expected<span class="op">)</span>;</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co">// Unary transform with projection and &quot;curried&quot; plus</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>ranges<span class="op">::</span>transform<span class="op">(</span>v1, out<span class="op">.</span>begin<span class="op">()</span>, std<span class="op">::</span>bind<span class="op">(</span>std<span class="op">::</span>plus<span class="op">{}</span>, <span class="dv">1</span><span class="op">)</span>, get_element<span class="op">&lt;</span><span class="dv">0</span><span class="op">&gt;{})</span>;</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>out <span class="op">==</span> expected<span class="op">)</span>;</span></code></pre></div>
+<h4 data-number="3.1.3.7" id="reduce-transforms-and-projections"><span class="header-section-number">3.1.3.7</span> <code>reduce</code>:
 transforms and projections<a href="#reduce-transforms-and-projections" class="self-link"></a></h4>
 <p>We return to the <code>reduce</code> examples we showed above, but
 this time, we focus on their readability.</p>
-<h5 data-number="3.1.5.1.1" id="unary-transform_reduce"><span class="header-section-number">3.1.5.1.1</span> Unary
+<h5 data-number="3.1.3.7.1" id="unary-transform_reduce"><span class="header-section-number">3.1.3.7.1</span> Unary
 <code>transform_reduce</code><a href="#unary-transform_reduce" class="self-link"></a></h5>
 <p>A <code>ranges::reduce</code> that takes a projection is functionally
 equivalent to unary <code>transform_reduce</code> without a projection.
@@ -773,25 +761,25 @@ projection. Either way – <code>reduce</code> with projection, or unary
 <code>transform_reduce</code> – is straightforward to read, and
 separates selection (<code>get_element&lt;0&gt;</code>) from computation
 (<code>std::plus</code>).</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> foo <span class="op">{}</span>;</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span>std<span class="op">::</span>tuple<span class="op">&lt;</span><span class="dt">int</span>, foo, std<span class="op">::</span>string<span class="op">&gt;&gt;</span> v1<span class="op">{</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span><span class="dv">5</span>, <span class="op">{}</span>, <span class="st">&quot;five&quot;</span><span class="op">}</span>, <span class="op">{</span><span class="dv">7</span>, <span class="op">{}</span>, <span class="st">&quot;seven&quot;</span><span class="op">}</span>, <span class="op">{</span><span class="dv">11</span>, <span class="op">{}</span>, <span class="st">&quot;eleven&quot;</span><span class="op">}}</span>;</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="dt">int</span> init <span class="op">=</span> <span class="dv">3</span>;</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co">// reduce with projection get_element&lt;0&gt;</span></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> result_proj <span class="op">=</span></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>ranges<span class="op">::</span>reduce<span class="op">(</span>v1, init, std<span class="op">::</span>plus<span class="op">{}</span>, get_element<span class="op">&lt;</span><span class="dv">0</span><span class="op">&gt;{})</span>;</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>result_proj <span class="op">==</span> <span class="dv">26</span><span class="op">)</span>;</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co">// transform_reduce with transform get_element&lt;0&gt;</span></span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> result_xform <span class="op">=</span></span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>ranges<span class="op">::</span>transform_reduce<span class="op">(</span>v1, init, std<span class="op">::</span>plus<span class="op">{}</span>, get_element<span class="op">&lt;</span><span class="dv">0</span><span class="op">&gt;{})</span>;</span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>result_xform <span class="op">==</span> <span class="dv">26</span><span class="op">)</span>;</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co">// reduce with transform_view (no projection)</span></span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> result_xv <span class="op">=</span> std<span class="op">::</span>ranges<span class="op">::</span>reduce<span class="op">(</span></span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>views<span class="op">::</span>transform<span class="op">(</span>v1, get_element<span class="op">&lt;</span><span class="dv">0</span><span class="op">&gt;{})</span>, init, std<span class="op">::</span>plus<span class="op">{})</span>;</span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>result_xv <span class="op">==</span> <span class="dv">26</span><span class="op">)</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> foo <span class="op">{}</span>;</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span>std<span class="op">::</span>tuple<span class="op">&lt;</span><span class="dt">int</span>, foo, std<span class="op">::</span>string<span class="op">&gt;&gt;</span> v1<span class="op">{</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span><span class="dv">5</span>, <span class="op">{}</span>, <span class="st">&quot;five&quot;</span><span class="op">}</span>, <span class="op">{</span><span class="dv">7</span>, <span class="op">{}</span>, <span class="st">&quot;seven&quot;</span><span class="op">}</span>, <span class="op">{</span><span class="dv">11</span>, <span class="op">{}</span>, <span class="st">&quot;eleven&quot;</span><span class="op">}}</span>;</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="dt">int</span> init <span class="op">=</span> <span class="dv">3</span>;</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">// reduce with projection get_element&lt;0&gt;</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> result_proj <span class="op">=</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>ranges<span class="op">::</span>reduce<span class="op">(</span>v1, init, std<span class="op">::</span>plus<span class="op">{}</span>, get_element<span class="op">&lt;</span><span class="dv">0</span><span class="op">&gt;{})</span>;</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>result_proj <span class="op">==</span> <span class="dv">26</span><span class="op">)</span>;</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co">// transform_reduce with transform get_element&lt;0&gt;</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> result_xform <span class="op">=</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>ranges<span class="op">::</span>transform_reduce<span class="op">(</span>v1, init, std<span class="op">::</span>plus<span class="op">{}</span>, get_element<span class="op">&lt;</span><span class="dv">0</span><span class="op">&gt;{})</span>;</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>result_xform <span class="op">==</span> <span class="dv">26</span><span class="op">)</span>;</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="co">// reduce with transform_view (no projection)</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> result_xv <span class="op">=</span> std<span class="op">::</span>ranges<span class="op">::</span>reduce<span class="op">(</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>views<span class="op">::</span>transform<span class="op">(</span>v1, get_element<span class="op">&lt;</span><span class="dv">0</span><span class="op">&gt;{})</span>, init, std<span class="op">::</span>plus<span class="op">{})</span>;</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>result_xv <span class="op">==</span> <span class="dv">26</span><span class="op">)</span>;</span></code></pre></div>
 <p>On the other hand, ranges algorithms take projections whenever
 possible, and <code>std::ranges::transform</code> takes a projection.
 Why can’t <code>transform_reduce</code> take a projection? For unary
@@ -799,29 +787,29 @@ Why can’t <code>transform_reduce</code> take a projection? For unary
 operations less clear. The projection happens first, but most users
 would have to think about that. A lambda or named function would improve
 readability.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> bar <span class="op">{</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>string s;</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> i;</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span>std<span class="op">::</span>tuple<span class="op">&lt;</span><span class="dt">int</span>, std<span class="op">::</span>string, bar<span class="op">&gt;&gt;</span> v<span class="op">{</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span> <span class="dv">5</span>,   <span class="st">&quot;five&quot;</span>, <span class="op">{</span><span class="st">&quot;x&quot;</span>, <span class="dv">13</span><span class="op">}}</span>,</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span> <span class="dv">7</span>,  <span class="st">&quot;seven&quot;</span>, <span class="op">{</span><span class="st">&quot;y&quot;</span>, <span class="dv">17</span><span class="op">}}</span>,</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span><span class="dv">11</span>, <span class="st">&quot;eleven&quot;</span>, <span class="op">{</span><span class="st">&quot;z&quot;</span>, <span class="dv">19</span><span class="op">}}}</span>;</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="dt">int</span> init <span class="op">=</span> <span class="dv">3</span>;</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co">// first get bar, then get bar::i</span></span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> result_proj <span class="op">=</span> std<span class="op">::</span>ranges<span class="op">::</span>transform_reduce<span class="op">(</span></span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  v, init, std<span class="op">::</span>plus<span class="op">{}</span>, get_element<span class="op">&lt;</span><span class="dv">1</span><span class="op">&gt;{}</span>, get_element<span class="op">&lt;</span><span class="dv">2</span><span class="op">&gt;{})</span>;</span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>result_proj <span class="op">==</span> <span class="dv">52</span><span class="op">)</span>;</span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="co">// first get bar, then get bar::i</span></span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> getter <span class="op">=</span> <span class="op">[]</span> <span class="op">(</span><span class="kw">auto</span> t<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> get_element<span class="op">&lt;</span><span class="dv">1</span><span class="op">&gt;{}(</span>get_element<span class="op">&lt;</span><span class="dv">2</span><span class="op">&gt;{}(</span>t<span class="op">))</span>;</span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> result_no_proj <span class="op">=</span> std<span class="op">::</span>ranges<span class="op">::</span>transform_reduce<span class="op">(</span></span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>  v, init, std<span class="op">::</span>plus<span class="op">{}</span>, getter<span class="op">)</span>;</span>
-<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>result_no_proj <span class="op">==</span> <span class="dv">52</span><span class="op">)</span>;</span></code></pre></div>
-<h5 data-number="3.1.5.1.2" id="binary-transform_reduce"><span class="header-section-number">3.1.5.1.2</span> Binary
+<div class="sourceCode" id="cb6"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> bar <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>string s;</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> i;</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span>std<span class="op">::</span>tuple<span class="op">&lt;</span><span class="dt">int</span>, std<span class="op">::</span>string, bar<span class="op">&gt;&gt;</span> v<span class="op">{</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span> <span class="dv">5</span>,   <span class="st">&quot;five&quot;</span>, <span class="op">{</span><span class="st">&quot;x&quot;</span>, <span class="dv">13</span><span class="op">}}</span>,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span> <span class="dv">7</span>,  <span class="st">&quot;seven&quot;</span>, <span class="op">{</span><span class="st">&quot;y&quot;</span>, <span class="dv">17</span><span class="op">}}</span>,</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span><span class="dv">11</span>, <span class="st">&quot;eleven&quot;</span>, <span class="op">{</span><span class="st">&quot;z&quot;</span>, <span class="dv">19</span><span class="op">}}}</span>;</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="dt">int</span> init <span class="op">=</span> <span class="dv">3</span>;</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co">// first get bar, then get bar::i</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> result_proj <span class="op">=</span> std<span class="op">::</span>ranges<span class="op">::</span>transform_reduce<span class="op">(</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  v, init, std<span class="op">::</span>plus<span class="op">{}</span>, get_element<span class="op">&lt;</span><span class="dv">1</span><span class="op">&gt;{}</span>, get_element<span class="op">&lt;</span><span class="dv">2</span><span class="op">&gt;{})</span>;</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>result_proj <span class="op">==</span> <span class="dv">52</span><span class="op">)</span>;</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co">// first get bar, then get bar::i</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> getter <span class="op">=</span> <span class="op">[]</span> <span class="op">(</span><span class="kw">auto</span> t<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> get_element<span class="op">&lt;</span><span class="dv">1</span><span class="op">&gt;{}(</span>get_element<span class="op">&lt;</span><span class="dv">2</span><span class="op">&gt;{}(</span>t<span class="op">))</span>;</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> result_no_proj <span class="op">=</span> std<span class="op">::</span>ranges<span class="op">::</span>transform_reduce<span class="op">(</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>  v, init, std<span class="op">::</span>plus<span class="op">{}</span>, getter<span class="op">)</span>;</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>result_no_proj <span class="op">==</span> <span class="dv">52</span><span class="op">)</span>;</span></code></pre></div>
+<h5 data-number="3.1.3.7.2" id="binary-transform_reduce"><span class="header-section-number">3.1.3.7.2</span> Binary
 <code>transform_reduce</code><a href="#binary-transform_reduce" class="self-link"></a></h5>
 <p>Expressing binary <code>transform_reduce</code> using only
 <code>reduce</code> requires <code>zip_transform_view</code> or
@@ -833,28 +821,28 @@ two function arguments does what. They may also find it troublesome that
 <code>zip_view</code> and <code>zip_transform_view</code> are not
 pipeable: there is no <code>{v1, v2} | views::zip</code> syntax, for
 example.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> foo <span class="op">{}</span>;</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span>std<span class="op">::</span>tuple<span class="op">&lt;</span><span class="dt">int</span>, foo, std<span class="op">::</span>string<span class="op">&gt;&gt;</span> v1<span class="op">{</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span><span class="dv">5</span>, <span class="op">{}</span>, <span class="st">&quot;five&quot;</span><span class="op">}</span>, <span class="op">{</span><span class="dv">7</span>, <span class="op">{}</span>, <span class="st">&quot;seven&quot;</span><span class="op">}</span>, <span class="op">{</span><span class="dv">11</span>, <span class="op">{}</span>, <span class="st">&quot;eleven&quot;</span><span class="op">}}</span>;</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span>std<span class="op">::</span>pair<span class="op">&lt;</span>std<span class="op">::</span>string, <span class="dt">int</span><span class="op">&gt;&gt;</span> v2<span class="op">{</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span><span class="st">&quot;thirteen&quot;</span>, <span class="dv">13</span><span class="op">}</span>, <span class="op">{</span><span class="st">&quot;seventeen&quot;</span>, <span class="dv">17</span><span class="op">}</span>, <span class="op">{</span><span class="st">&quot;nineteen&quot;</span>, <span class="dv">19</span><span class="op">}}</span>;</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="dt">int</span> init <span class="op">=</span> <span class="dv">3</span>;</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> out<span class="op">(</span>std<span class="op">::</span>from_range, std<span class="op">::</span>views<span class="op">::</span>repeat<span class="op">(</span><span class="dv">0</span>, <span class="dv">3</span><span class="op">))</span>;</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">// reduce with zip_transform_view</span></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> result_bztv <span class="op">=</span> std<span class="op">::</span>ranges<span class="op">::</span>reduce<span class="op">(</span></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>views<span class="op">::</span>zip_transform<span class="op">(</span>std<span class="op">::</span>multiplies<span class="op">{}</span>,</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    std<span class="op">::</span>views<span class="op">::</span>transform<span class="op">(</span>v1, get_element<span class="op">&lt;</span><span class="dv">0</span><span class="op">&gt;{})</span>,</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    std<span class="op">::</span>views<span class="op">::</span>transform<span class="op">(</span>v2, get_element<span class="op">&lt;</span><span class="dv">1</span><span class="op">&gt;{}))</span>,</span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>  init, std<span class="op">::</span>plus<span class="op">{})</span>;</span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>result_bztv <span class="op">==</span> <span class="dv">396</span><span class="op">)</span>;</span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="co">// binary transform_reduce</span></span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> result_no_proj <span class="op">=</span> std<span class="op">::</span>ranges<span class="op">::</span>transform_reduce<span class="op">(</span></span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>views<span class="op">::</span>transform<span class="op">(</span>v1, get_element<span class="op">&lt;</span><span class="dv">0</span><span class="op">&gt;{})</span>,</span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>views<span class="op">::</span>transform<span class="op">(</span>v2, get_element<span class="op">&lt;</span><span class="dv">1</span><span class="op">&gt;{})</span>,</span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>  out<span class="op">.</span>begin<span class="op">()</span>, init, std<span class="op">::</span>plus<span class="op">{}</span>, std<span class="op">::</span>multiplies<span class="op">{})</span>;</span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>result_no_proj <span class="op">==</span> <span class="dv">396</span><span class="op">)</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> foo <span class="op">{}</span>;</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span>std<span class="op">::</span>tuple<span class="op">&lt;</span><span class="dt">int</span>, foo, std<span class="op">::</span>string<span class="op">&gt;&gt;</span> v1<span class="op">{</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span><span class="dv">5</span>, <span class="op">{}</span>, <span class="st">&quot;five&quot;</span><span class="op">}</span>, <span class="op">{</span><span class="dv">7</span>, <span class="op">{}</span>, <span class="st">&quot;seven&quot;</span><span class="op">}</span>, <span class="op">{</span><span class="dv">11</span>, <span class="op">{}</span>, <span class="st">&quot;eleven&quot;</span><span class="op">}}</span>;</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span>std<span class="op">::</span>pair<span class="op">&lt;</span>std<span class="op">::</span>string, <span class="dt">int</span><span class="op">&gt;&gt;</span> v2<span class="op">{</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span><span class="st">&quot;thirteen&quot;</span>, <span class="dv">13</span><span class="op">}</span>, <span class="op">{</span><span class="st">&quot;seventeen&quot;</span>, <span class="dv">17</span><span class="op">}</span>, <span class="op">{</span><span class="st">&quot;nineteen&quot;</span>, <span class="dv">19</span><span class="op">}}</span>;</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="dt">int</span> init <span class="op">=</span> <span class="dv">3</span>;</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> out<span class="op">(</span>std<span class="op">::</span>from_range, std<span class="op">::</span>views<span class="op">::</span>repeat<span class="op">(</span><span class="dv">0</span>, <span class="dv">3</span><span class="op">))</span>;</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co">// reduce with zip_transform_view</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> result_bztv <span class="op">=</span> std<span class="op">::</span>ranges<span class="op">::</span>reduce<span class="op">(</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>views<span class="op">::</span>zip_transform<span class="op">(</span>std<span class="op">::</span>multiplies<span class="op">{}</span>,</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    std<span class="op">::</span>views<span class="op">::</span>transform<span class="op">(</span>v1, get_element<span class="op">&lt;</span><span class="dv">0</span><span class="op">&gt;{})</span>,</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    std<span class="op">::</span>views<span class="op">::</span>transform<span class="op">(</span>v2, get_element<span class="op">&lt;</span><span class="dv">1</span><span class="op">&gt;{}))</span>,</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  init, std<span class="op">::</span>plus<span class="op">{})</span>;</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>result_bztv <span class="op">==</span> <span class="dv">396</span><span class="op">)</span>;</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="co">// binary transform_reduce</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> result_no_proj <span class="op">=</span> std<span class="op">::</span>ranges<span class="op">::</span>transform_reduce<span class="op">(</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>views<span class="op">::</span>transform<span class="op">(</span>v1, get_element<span class="op">&lt;</span><span class="dv">0</span><span class="op">&gt;{})</span>,</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>views<span class="op">::</span>transform<span class="op">(</span>v2, get_element<span class="op">&lt;</span><span class="dv">1</span><span class="op">&gt;{})</span>,</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>  out<span class="op">.</span>begin<span class="op">()</span>, init, std<span class="op">::</span>plus<span class="op">{}</span>, std<span class="op">::</span>multiplies<span class="op">{})</span>;</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>result_no_proj <span class="op">==</span> <span class="dv">396</span><span class="op">)</span>;</span></code></pre></div>
 <p>C++17 binary <code>transform_reduce</code> does not take a
 projection. Instead, it takes a binary transform function, that combines
 elements from the two input ranges into a single element. The algorithm
@@ -871,26 +859,26 @@ than any other algorithm in the C++ Standard Library. Without
 projections, users would need to resort to <code>transform_view</code>,
 but this more verbose syntax makes it more clear which functions do
 what.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> foo <span class="op">{}</span>;</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span>std<span class="op">::</span>tuple<span class="op">&lt;</span><span class="dt">int</span>, foo, std<span class="op">::</span>string<span class="op">&gt;&gt;</span> v1<span class="op">{</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span><span class="dv">5</span>, <span class="op">{}</span>, <span class="st">&quot;five&quot;</span><span class="op">}</span>, <span class="op">{</span><span class="dv">7</span>, <span class="op">{}</span>, <span class="st">&quot;seven&quot;</span><span class="op">}</span>, <span class="op">{</span><span class="dv">11</span>, <span class="op">{}</span>, <span class="st">&quot;eleven&quot;</span><span class="op">}}</span>;</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span>std<span class="op">::</span>pair<span class="op">&lt;</span>std<span class="op">::</span>string, <span class="dt">int</span><span class="op">&gt;&gt;</span> v2<span class="op">{</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span><span class="st">&quot;thirteen&quot;</span>, <span class="dv">13</span><span class="op">}</span>, <span class="op">{</span><span class="st">&quot;seventeen&quot;</span>, <span class="dv">17</span><span class="op">}</span>, <span class="op">{</span><span class="st">&quot;nineteen&quot;</span>, <span class="dv">19</span><span class="op">}}</span>;</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="dt">int</span> init <span class="op">=</span> <span class="dv">3</span>;</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> out<span class="op">(</span>std<span class="op">::</span>from_range, std<span class="op">::</span>views<span class="op">::</span>repeat<span class="op">(</span><span class="dv">0</span>, <span class="dv">3</span><span class="op">))</span>;</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">// With projections</span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> result_proj <span class="op">=</span> std<span class="op">::</span>ranges<span class="op">::</span>transform_reduce<span class="op">(</span>v1, v2, out<span class="op">.</span>begin<span class="op">()</span>, init,</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>plus<span class="op">{}</span>, std<span class="op">::</span>multiplies<span class="op">{}</span>, get_element<span class="op">&lt;</span><span class="dv">0</span><span class="op">&gt;{}</span>, get_element<span class="op">&lt;</span><span class="dv">1</span><span class="op">&gt;{})</span>;</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>result_proj <span class="op">==</span> <span class="dv">396</span><span class="op">)</span>;</span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">// Without projections</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> result_no_proj <span class="op">=</span> std<span class="op">::</span>ranges<span class="op">::</span>transform_reduce<span class="op">(</span></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>views<span class="op">::</span>transform<span class="op">(</span>v1, get_element<span class="op">&lt;</span><span class="dv">0</span><span class="op">&gt;{})</span>,</span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>views<span class="op">::</span>transform<span class="op">(</span>v2, get_element<span class="op">&lt;</span><span class="dv">1</span><span class="op">&gt;{})</span>,</span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>  out<span class="op">.</span>begin<span class="op">()</span>, init, std<span class="op">::</span>plus<span class="op">{}</span>, std<span class="op">::</span>multiplies<span class="op">{})</span>;</span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>result_no_proj <span class="op">==</span> <span class="dv">396</span><span class="op">)</span>;</span></code></pre></div>
-<h4 data-number="3.1.5.2" id="mixed-guidance-from-the-current-ranges-library"><span class="header-section-number">3.1.5.2</span> Mixed guidance from the
+<div class="sourceCode" id="cb8"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> foo <span class="op">{}</span>;</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span>std<span class="op">::</span>tuple<span class="op">&lt;</span><span class="dt">int</span>, foo, std<span class="op">::</span>string<span class="op">&gt;&gt;</span> v1<span class="op">{</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span><span class="dv">5</span>, <span class="op">{}</span>, <span class="st">&quot;five&quot;</span><span class="op">}</span>, <span class="op">{</span><span class="dv">7</span>, <span class="op">{}</span>, <span class="st">&quot;seven&quot;</span><span class="op">}</span>, <span class="op">{</span><span class="dv">11</span>, <span class="op">{}</span>, <span class="st">&quot;eleven&quot;</span><span class="op">}}</span>;</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span>std<span class="op">::</span>pair<span class="op">&lt;</span>std<span class="op">::</span>string, <span class="dt">int</span><span class="op">&gt;&gt;</span> v2<span class="op">{</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span><span class="st">&quot;thirteen&quot;</span>, <span class="dv">13</span><span class="op">}</span>, <span class="op">{</span><span class="st">&quot;seventeen&quot;</span>, <span class="dv">17</span><span class="op">}</span>, <span class="op">{</span><span class="st">&quot;nineteen&quot;</span>, <span class="dv">19</span><span class="op">}}</span>;</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="dt">int</span> init <span class="op">=</span> <span class="dv">3</span>;</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> out<span class="op">(</span>std<span class="op">::</span>from_range, std<span class="op">::</span>views<span class="op">::</span>repeat<span class="op">(</span><span class="dv">0</span>, <span class="dv">3</span><span class="op">))</span>;</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">// With projections</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> result_proj <span class="op">=</span> std<span class="op">::</span>ranges<span class="op">::</span>transform_reduce<span class="op">(</span>v1, v2, out<span class="op">.</span>begin<span class="op">()</span>, init,</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>plus<span class="op">{}</span>, std<span class="op">::</span>multiplies<span class="op">{}</span>, get_element<span class="op">&lt;</span><span class="dv">0</span><span class="op">&gt;{}</span>, get_element<span class="op">&lt;</span><span class="dv">1</span><span class="op">&gt;{})</span>;</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>result_proj <span class="op">==</span> <span class="dv">396</span><span class="op">)</span>;</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co">// Without projections</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> result_no_proj <span class="op">=</span> std<span class="op">::</span>ranges<span class="op">::</span>transform_reduce<span class="op">(</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>views<span class="op">::</span>transform<span class="op">(</span>v1, get_element<span class="op">&lt;</span><span class="dv">0</span><span class="op">&gt;{})</span>,</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>views<span class="op">::</span>transform<span class="op">(</span>v2, get_element<span class="op">&lt;</span><span class="dv">1</span><span class="op">&gt;{})</span>,</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>  out<span class="op">.</span>begin<span class="op">()</span>, init, std<span class="op">::</span>plus<span class="op">{}</span>, std<span class="op">::</span>multiplies<span class="op">{})</span>;</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="ot">assert</span><span class="op">(</span>result_no_proj <span class="op">==</span> <span class="dv">396</span><span class="op">)</span>;</span></code></pre></div>
+<h4 data-number="3.1.3.8" id="mixed-guidance-from-the-current-ranges-library"><span class="header-section-number">3.1.3.8</span> Mixed guidance from the
 current ranges library<a href="#mixed-guidance-from-the-current-ranges-library" class="self-link"></a></h4>
 <p>The current ranges library offers only mixed guidance for deciding
 whether <code>*reduce</code> algorithms should take projections.</p>
@@ -917,7 +905,7 @@ interface.</p>
 that would be less of a concern here. However, if we ever wanted a
 <code>ranges::reduce_first</code> algorithm, then the consistency
 argument would arise.</p>
-<h4 data-number="3.1.5.3" id="transform_view-not-always-trivially-copyable-even-when-function-object-is"><span class="header-section-number">3.1.5.3</span>
+<h4 data-number="3.1.3.9" id="transform_view-not-always-trivially-copyable-even-when-function-object-is"><span class="header-section-number">3.1.3.9</span>
 <code>*transform_view</code> not always trivially copyable even when
 function object is<a href="#transform_view-not-always-trivially-copyable-even-when-function-object-is" class="self-link"></a></h4>
 <p>Use of <code>transform_view</code> and
@@ -930,49 +918,49 @@ get copies of the range to different parallel execution units.</p>
 <p>Here is an example
 (<a href="https://godbolt.org/z/vYnzGd3js">Compiler Explorer
 link</a>).</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;ranges&gt;</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;type_traits&gt;</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;vector&gt;</span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co">// Function object type that acts just like f2 below.</span></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> F3 <span class="op">{</span></span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> <span class="kw">operator</span><span class="op">()</span> <span class="op">(</span><span class="dt">int</span> x<span class="op">)</span> <span class="kw">const</span> <span class="op">{</span></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> x <span class="op">+</span> y;</span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> y <span class="op">=</span> <span class="dv">1</span>;</span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>vector v<span class="op">{</span><span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span><span class="op">}</span>;</span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>  <span class="co">// operator= is defaulted; lambda type is trivially copyable</span></span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>  <span class="kw">auto</span> f1 <span class="op">=</span> <span class="op">[]</span> <span class="op">(</span><span class="kw">auto</span> x<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> x <span class="op">+</span> <span class="dv">1</span>;</span>
-<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span>
-<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>  <span class="kw">static_assert</span><span class="op">(</span>std<span class="op">::</span>is_trivially_copyable_v<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span>f1<span class="op">)&gt;)</span>;</span>
-<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Capture means that lambda&#39;s operator= is deleted,</span></span>
-<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>  <span class="co">// but lambda type is still trivially copyable</span></span>
-<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>  <span class="kw">auto</span> f2 <span class="op">=</span> <span class="op">[</span>y <span class="op">=</span> <span class="dv">1</span><span class="op">]</span> <span class="op">(</span><span class="kw">auto</span> x<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> x <span class="op">+</span> y;</span>
-<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span>
-<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>  <span class="kw">static_assert</span><span class="op">(</span>std<span class="op">::</span>is_trivially_copyable_v<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span>f2<span class="op">)&gt;)</span>;</span>
-<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>  <span class="co">// decltype(view1) is trivially copyable</span></span>
-<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>  <span class="kw">auto</span> view1 <span class="op">=</span> v <span class="op">|</span> std<span class="op">::</span>views<span class="op">::</span>transform<span class="op">(</span>f1<span class="op">)</span>;</span>
-<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>  <span class="kw">static_assert</span><span class="op">(</span>std<span class="op">::</span>is_trivially_copyable_v<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span>view1<span class="op">)&gt;)</span>;</span>
-<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>  <span class="co">// decltype(view2) is NOT trivially copyable, even though f2 is</span></span>
-<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>  <span class="kw">auto</span> view2 <span class="op">=</span> v <span class="op">|</span> std<span class="op">::</span>views<span class="op">::</span>transform<span class="op">(</span>f2<span class="op">)</span>;</span>
-<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>  <span class="kw">static_assert</span><span class="op">(!</span>std<span class="op">::</span>is_trivially_copyable_v<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span>view2<span class="op">)&gt;)</span>;</span>
-<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>  <span class="co">// view3 is trivally copyable, though it behaves just like view2.</span></span>
-<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>  F3 f3<span class="op">{}</span>;</span>
-<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>  <span class="kw">auto</span> view3 <span class="op">=</span> v <span class="op">|</span> std<span class="op">::</span>views<span class="op">::</span>transform<span class="op">(</span>f3<span class="op">)</span>;</span>
-<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>  <span class="kw">static_assert</span><span class="op">(</span>std<span class="op">::</span>is_trivially_copyable_v<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span>view3<span class="op">)&gt;)</span>;</span>
-<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="dv">0</span>;</span>
-<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;ranges&gt;</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;type_traits&gt;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;vector&gt;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">// Function object type that acts just like f2 below.</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> F3 <span class="op">{</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> <span class="kw">operator</span><span class="op">()</span> <span class="op">(</span><span class="dt">int</span> x<span class="op">)</span> <span class="kw">const</span> <span class="op">{</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> x <span class="op">+</span> y;</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> y <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>vector v<span class="op">{</span><span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span><span class="op">}</span>;</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>  <span class="co">// operator= is defaulted; lambda type is trivially copyable</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  <span class="kw">auto</span> f1 <span class="op">=</span> <span class="op">[]</span> <span class="op">(</span><span class="kw">auto</span> x<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> x <span class="op">+</span> <span class="dv">1</span>;</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>  <span class="kw">static_assert</span><span class="op">(</span>std<span class="op">::</span>is_trivially_copyable_v<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span>f1<span class="op">)&gt;)</span>;</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Capture means that lambda&#39;s operator= is deleted,</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>  <span class="co">// but lambda type is still trivially copyable</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>  <span class="kw">auto</span> f2 <span class="op">=</span> <span class="op">[</span>y <span class="op">=</span> <span class="dv">1</span><span class="op">]</span> <span class="op">(</span><span class="kw">auto</span> x<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> x <span class="op">+</span> y;</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>  <span class="kw">static_assert</span><span class="op">(</span>std<span class="op">::</span>is_trivially_copyable_v<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span>f2<span class="op">)&gt;)</span>;</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>  <span class="co">// decltype(view1) is trivially copyable</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>  <span class="kw">auto</span> view1 <span class="op">=</span> v <span class="op">|</span> std<span class="op">::</span>views<span class="op">::</span>transform<span class="op">(</span>f1<span class="op">)</span>;</span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>  <span class="kw">static_assert</span><span class="op">(</span>std<span class="op">::</span>is_trivially_copyable_v<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span>view1<span class="op">)&gt;)</span>;</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>  <span class="co">// decltype(view2) is NOT trivially copyable, even though f2 is</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>  <span class="kw">auto</span> view2 <span class="op">=</span> v <span class="op">|</span> std<span class="op">::</span>views<span class="op">::</span>transform<span class="op">(</span>f2<span class="op">)</span>;</span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>  <span class="kw">static_assert</span><span class="op">(!</span>std<span class="op">::</span>is_trivially_copyable_v<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span>view2<span class="op">)&gt;)</span>;</span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>  <span class="co">// view3 is trivally copyable, though it behaves just like view2.</span></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>  F3 f3<span class="op">{}</span>;</span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>  <span class="kw">auto</span> view3 <span class="op">=</span> v <span class="op">|</span> std<span class="op">::</span>views<span class="op">::</span>transform<span class="op">(</span>f3<span class="op">)</span>;</span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>  <span class="kw">static_assert</span><span class="op">(</span>std<span class="op">::</span>is_trivially_copyable_v<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span>view3<span class="op">)&gt;)</span>;</span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="dv">0</span>;</span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <p>Both lambdas <code>f1</code> and <code>f2</code> are trivially
 copyable, but <code>std::views::transform(f2)</code> is <em>not</em>
 trivally copyable. The wording for both <code>transform_view</code> and
@@ -1017,7 +1005,7 @@ third-party ranges implementation for their views. Parallel algorithm
 implementers generally prefer to minimize coupling of actual parallel
 algorithms with Standard Library features that don’t directly relate to
 parallel execution.</p>
-<h4 data-number="3.1.5.4" id="review"><span class="header-section-number">3.1.5.4</span> Review<a href="#review" class="self-link"></a></h4>
+<h4 data-number="3.1.3.10" id="review"><span class="header-section-number">3.1.3.10</span> Review<a href="#review" class="self-link"></a></h4>
 <p>Let’s review what we learned from the above discussion.</p>
 <ol type="1">
 <li><p>In general and particularly for <code>ranges::transform</code>,
@@ -1043,7 +1031,7 @@ projections. However, a version without projections would need
 <code>transform_view</code> in order to offer the same functionality.
 This potentially hinders performance.</p></li>
 </ol>
-<h4 data-number="3.1.5.5" id="conclusions"><span class="header-section-number">3.1.5.5</span> Conclusions<a href="#conclusions" class="self-link"></a></h4>
+<h4 data-number="3.1.3.11" id="conclusions"><span class="header-section-number">3.1.3.11</span> Conclusions<a href="#conclusions" class="self-link"></a></h4>
 <p>We propose</p>
 <ul>
 <li><p>providing both unary and binary
@@ -1080,16 +1068,16 @@ so we provide <code>ranges::transform_{in,ex}clusive_scan</code> as well
 as <code>ranges::{in,ex}clusive_scan</code>, and do not provide
 projections for any of them.</p></li>
 </ol>
-<h3 data-number="3.1.6" id="we-propose-convenience-wrappers-to-replace-some-algorithms"><span class="header-section-number">3.1.6</span> We propose convenience
+<h3 data-number="3.1.4" id="we-propose-convenience-wrappers-to-replace-some-algorithms"><span class="header-section-number">3.1.4</span> We propose convenience
 wrappers to replace some algorithms<a href="#we-propose-convenience-wrappers-to-replace-some-algorithms" class="self-link"></a></h3>
-<h4 data-number="3.1.6.1" id="accumulate"><span class="header-section-number">3.1.6.1</span> <code>accumulate</code><a href="#accumulate" class="self-link"></a></h4>
+<h4 data-number="3.1.4.1" id="accumulate"><span class="header-section-number">3.1.4.1</span> <code>accumulate</code><a href="#accumulate" class="self-link"></a></h4>
 <p>The <code>accumulate</code> algorithm performs operations
 sequentially. Users who want that left-to-right sequential behavior can
 call C++23’s <code>fold_left</code>. For users who are not concerned
 about the order of operations and who want <code>accumulate</code>’s
 default binary operation, we propose parallel and non-parallel
 convenience wrappers <code>ranges::sum</code>.</p>
-<h4 data-number="3.1.6.2" id="inner_product"><span class="header-section-number">3.1.6.2</span>
+<h4 data-number="3.1.4.2" id="inner_product"><span class="header-section-number">3.1.4.2</span>
 <code>inner_product</code><a href="#inner_product" class="self-link"></a></h4>
 <p>The <code>inner_product</code> algorithm performs operations
 sequentially. Users who want that left-to-right sequential behavior can
@@ -1105,12 +1093,12 @@ more general. We specifically mean not just any inner product, but the
 inner product that is the dot product. Calling them <code>dot</code> has
 the added benefit that they represent the same mathematical computation
 as <code>std::linalg::dot</code>.</p>
-<h3 data-number="3.1.7" id="existing-views-replace-some-other-algorithms"><span class="header-section-number">3.1.7</span> Existing views replace some
+<h3 data-number="3.1.5" id="existing-views-replace-some-other-algorithms"><span class="header-section-number">3.1.5</span> Existing views replace some
 other algorithms<a href="#existing-views-replace-some-other-algorithms" class="self-link"></a></h3>
 <p>We do not propose ranges versions of the following numeric
 algorithms, since they can be replaced with existing views and ranges
 algorithms.</p>
-<h4 data-number="3.1.7.1" id="iota"><span class="header-section-number">3.1.7.1</span> <code>iota</code><a href="#iota" class="self-link"></a></h4>
+<h4 data-number="3.1.5.1" id="iota"><span class="header-section-number">3.1.5.1</span> <code>iota</code><a href="#iota" class="self-link"></a></h4>
 <p>C++23 has <code>iota_view</code>, the view version of
 <code>iota</code>. One can replace the <code>iota</code> algorithm with
 <code>iota_view</code> and <code>ranges::copy</code>. In fact, one could
@@ -1122,7 +1110,7 @@ Standard specifies <code>iota_view</code> in a way that does not hinder
 it from being trivially copyable, as long as its input types are. The
 iterator type of <code>iota_view</code> is a random access iterator for
 reasonable lower bound types (e.g., integers).</p>
-<h4 data-number="3.1.7.2" id="adjacent_difference"><span class="header-section-number">3.1.7.2</span>
+<h4 data-number="3.1.5.2" id="adjacent_difference"><span class="header-section-number">3.1.5.2</span>
 <code>adjacent_difference</code><a href="#adjacent_difference" class="self-link"></a></h4>
 <p>The <code>adjacent_difference</code> algorithm can be replaced with a
 combination of <code>adjacent_transform_view</code> (which was adopted
@@ -1151,7 +1139,7 @@ necessarily single-dimensional. It could not be used straightforwardly
 for finite-difference methods for solving partial differential
 equations, for example. All this makes an
 <code>adjacent_transform</code> algorithm a lower-priority task.</p>
-<h3 data-number="3.1.8" id="we-dont-propose-the-lost-algorithm-noncommutative-parallel-reduce"><span class="header-section-number">3.1.8</span> We don’t propose “the lost
+<h3 data-number="3.1.6" id="we-dont-propose-the-lost-algorithm-noncommutative-parallel-reduce"><span class="header-section-number">3.1.6</span> We don’t propose “the lost
 algorithm” (noncommutative parallel reduce)<a href="#we-dont-propose-the-lost-algorithm-noncommutative-parallel-reduce" class="self-link"></a></h3>
 <p>The Standard lacks an analog of <code>reduce</code> that can assume
 associativity but not commutativity of binary operations. One author of
@@ -1208,7 +1196,7 @@ think the right way would be to propose a new algorithm with a distinct
 name. A reasonable choice of name would be <code>fold</code> (just
 <code>fold</code> by itself, not <code>fold_left</code> or
 <code>fold_right</code>).</p>
-<h3 data-number="3.1.9" id="we-dont-propose-partial_sum"><span class="header-section-number">3.1.9</span> We don’t propose
+<h3 data-number="3.1.7" id="we-dont-propose-partial_sum"><span class="header-section-number">3.1.7</span> We don’t propose
 <code>partial_sum</code><a href="#we-dont-propose-partial_sum" class="self-link"></a></h3>
 <p>The <code>partial_sum</code> algorithm performs operations
 sequentially. The existing ranges library does not have an equivalent
@@ -1227,7 +1215,7 @@ special case of an inclusive prefix plus-scan that
 whether this is an inclusive or exclusive scan. We think it’s not a very
 convenient convenience wrapper if users have to look this up every time
 they use it.</p>
-<h3 data-number="3.1.10" id="we-dont-propose-reduce_first"><span class="header-section-number">3.1.10</span> We don’t propose
+<h3 data-number="3.1.8" id="we-dont-propose-reduce_first"><span class="header-section-number">3.1.8</span> We don’t propose
 <code>reduce_first</code><a href="#we-dont-propose-reduce_first" class="self-link"></a></h3>
 <p>Section 5.1 of <a href="https://wg21.link/P2760R1">P2760R1</a> asks
 whether there should be a <code>reduce_first</code> algorithm, analogous
@@ -1244,7 +1232,7 @@ parallel generalization of <code>reduce_first</code> would actually be a
 different algorithm that can start with any element in the range. We do
 not propose that generalization here, but would not oppose such a
 proposal.</p>
-<h4 data-number="3.1.10.1" id="arguments-against-reduce_first"><span class="header-section-number">3.1.10.1</span> Arguments against
+<h4 data-number="3.1.8.1" id="arguments-against-reduce_first"><span class="header-section-number">3.1.8.1</span> Arguments against
 <code>reduce_first</code><a href="#arguments-against-reduce_first" class="self-link"></a></h4>
 <ol type="1">
 <li><p>P3179R8 already proposes parallel ranges overloads of
@@ -1269,7 +1257,7 @@ optimizations.</p></li>
 themselves, by extracting the first element from the sequence and using
 it as the initial value in <code>reduce</code>.</p></li>
 </ol>
-<h4 data-number="3.1.10.2" id="arguments-for-reduce_first"><span class="header-section-number">3.1.10.2</span> Arguments for
+<h4 data-number="3.1.8.2" id="arguments-for-reduce_first"><span class="header-section-number">3.1.8.2</span> Arguments for
 <code>reduce_first</code><a href="#arguments-for-reduce_first" class="self-link"></a></h4>
 <p>Users often want to combine multiple reductions into a single pass,
 where some of the reductions are min and/or max, while others have a
@@ -1280,7 +1268,7 @@ This happens often enough that MPI (the Message Passing Interface for
 distributed-memory parallel computing) has predefined reduction
 operations for minimum and its index (<code>MINLOC</code>) and maximum
 and its index (<code>MAXLOC</code>).</p>
-<h4 data-number="3.1.10.3" id="a-good-parallel-reduce_first-is-actually-a-different-algorithm"><span class="header-section-number">3.1.10.3</span> A good parallel
+<h4 data-number="3.1.8.3" id="a-good-parallel-reduce_first-is-actually-a-different-algorithm"><span class="header-section-number">3.1.8.3</span> A good parallel
 <code>reduce_first</code> is actually a different algorithm<a href="#a-good-parallel-reduce_first-is-actually-a-different-algorithm" class="self-link"></a></h4>
 <p>A reasonable parallel generalization of <code>reduce_first</code>
 would be a different algorithm, because it would want to preserve
@@ -1299,7 +1287,7 @@ are ordered, so it matters which element of the sequence starts the
 fold. The <code>reduce*</code> algorithms are unordered, so there’s no
 functional correctness reason to privilege the first element over any
 other.</p>
-<h3 data-number="3.1.11" id="we-dont-propose-reduce_with_iter"><span class="header-section-number">3.1.11</span> We don’t propose
+<h3 data-number="3.1.9" id="we-dont-propose-reduce_with_iter"><span class="header-section-number">3.1.9</span> We don’t propose
 <code>reduce_with_iter</code><a href="#we-dont-propose-reduce_with_iter" class="self-link"></a></h3>
 <p>A hypothetical <code>reduce_with_iter</code> algorithm would look
 like <code>fold_left_with_iter</code>, but would permit reordering of
@@ -1441,28 +1429,28 @@ value, and binary operation. Consider the following example, adapted
 from Section 3 of P2322R6
 (<a href="https://godbolt.org/z/3q71EMTPa">Compiler Explorer
 link</a>).</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;algorithm&gt;</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;cassert&gt;</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;iostream&gt;</span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;numeric&gt;</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;ranges&gt;</span></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;type_traits&gt;</span></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;vector&gt;</span></span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>vector<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> v <span class="op">=</span> <span class="op">{</span><span class="fl">0.25</span>, <span class="fl">0.75</span><span class="op">}</span>;</span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span></span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">auto</span> r <span class="op">=</span> std<span class="op">::</span>reduce<span class="op">(</span>v<span class="op">.</span>begin<span class="op">()</span>, v<span class="op">.</span>end<span class="op">()</span>, <span class="dv">1</span>, std<span class="op">::</span>plus<span class="op">())</span>;</span>
-<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">static_assert</span><span class="op">(</span>std<span class="op">::</span>is_same_v<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span>r<span class="op">)</span>, <span class="dt">int</span><span class="op">&gt;)</span>;</span>
-<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    <span class="ot">assert</span><span class="op">(</span>r <span class="op">==</span> <span class="dv">1</span><span class="op">)</span>;</span>
-<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span></span>
-<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">auto</span> r <span class="op">=</span> std<span class="op">::</span>ranges<span class="op">::</span>fold_left<span class="op">(</span>v, <span class="dv">1</span>, std<span class="op">::</span>plus<span class="op">())</span>;</span>
-<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">static_assert</span><span class="op">(</span>std<span class="op">::</span>is_same_v<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span>r<span class="op">)</span>, <span class="dt">double</span><span class="op">&gt;)</span>;</span>
-<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>    <span class="ot">assert</span><span class="op">(</span>r <span class="op">==</span> <span class="fl">2.0</span><span class="op">)</span>;</span>
-<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="dv">0</span>;</span>
-<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;algorithm&gt;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;cassert&gt;</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;iostream&gt;</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;numeric&gt;</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;ranges&gt;</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;type_traits&gt;</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;vector&gt;</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>vector<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> v <span class="op">=</span> <span class="op">{</span><span class="fl">0.25</span>, <span class="fl">0.75</span><span class="op">}</span>;</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">auto</span> r <span class="op">=</span> std<span class="op">::</span>reduce<span class="op">(</span>v<span class="op">.</span>begin<span class="op">()</span>, v<span class="op">.</span>end<span class="op">()</span>, <span class="dv">1</span>, std<span class="op">::</span>plus<span class="op">())</span>;</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">static_assert</span><span class="op">(</span>std<span class="op">::</span>is_same_v<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span>r<span class="op">)</span>, <span class="dt">int</span><span class="op">&gt;)</span>;</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="ot">assert</span><span class="op">(</span>r <span class="op">==</span> <span class="dv">1</span><span class="op">)</span>;</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">auto</span> r <span class="op">=</span> std<span class="op">::</span>ranges<span class="op">::</span>fold_left<span class="op">(</span>v, <span class="dv">1</span>, std<span class="op">::</span>plus<span class="op">())</span>;</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">static_assert</span><span class="op">(</span>std<span class="op">::</span>is_same_v<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span>r<span class="op">)</span>, <span class="dt">double</span><span class="op">&gt;)</span>;</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    <span class="ot">assert</span><span class="op">(</span>r <span class="op">==</span> <span class="fl">2.0</span><span class="op">)</span>;</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="dv">0</span>;</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <p>The <code>std::reduce</code> part of the example expresses a common
 user error. <code>ranges::fold_*</code> instead returns “the decayed
 result of invoking the binary operation with <code>T</code> (the initial
@@ -1630,7 +1618,7 @@ been applied to the Working Draft.</p>
 below with the integer literal encoding the appropriate year (YYYY) and
 month (MM).</p>
 </blockquote>
-<div class="sourceCode" id="cb12"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#define __cpp_lib_parallel_algorithm </span>YYYYMML<span class="pp"> </span><span class="co">// also in &lt;algorithm&gt;</span></span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#define __cpp_lib_parallel_algorithm </span>YYYYMML<span class="pp"> </span><span class="co">// also in &lt;algorithm&gt;</span></span></code></pre></div>
 <h2 data-number="5.2" id="change-numeric.ops.overview"><span class="header-section-number">5.2</span> Change [numeric.ops.overview]<a href="#change-numeric.ops.overview" class="self-link"></a></h2>
 <blockquote>
 <p>Change [numeric.ops.overview] (the <code>&lt;numeric&gt;</code>
@@ -1645,53 +1633,53 @@ exposition-only concepts<a href="#add-declaration-of-exposition-only-concepts" c
 [numeric.ops.overview] (the <code>&lt;numeric&gt;</code> header
 synopsis) as follows.</p>
 </blockquote>
-<div class="sourceCode" id="cb13"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>    template&lt;class F, class T, class I, class U&gt;</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>      concept <em>indirectly-binary-left-foldable-impl</em> =  // <em>exposition only</em></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>        movable&lt;T&gt; &amp;&amp; movable&lt;U&gt; &amp;&amp;</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>        convertible_to&lt;T, U&gt; &amp;&amp; invocable&lt;F&amp;, U, iter_reference_t&lt;I&gt;&gt; &amp;&amp;</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>        assignable_from&lt;U&amp;, invoke_result_t&lt;F&amp;, U, iter_reference_t&lt;I&gt;&gt;&gt;;</span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>    template&lt;class F, class T, class I, class U&gt;</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>      concept <em>indirectly-binary-left-foldable-impl</em> =  // <em>exposition only</em></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>        movable&lt;T&gt; &amp;&amp; movable&lt;U&gt; &amp;&amp;</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>        convertible_to&lt;T, U&gt; &amp;&amp; invocable&lt;F&amp;, U, iter_reference_t&lt;I&gt;&gt; &amp;&amp;</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>        assignable_from&lt;U&amp;, invoke_result_t&lt;F&amp;, U, iter_reference_t&lt;I&gt;&gt;&gt;;</span></code></pre></div>
 <div class="add" style="color: #00AA00">
 
-<div class="sourceCode" id="cb14"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>template&lt;class F, class T, class I, class U&gt;</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  concept <em>indirectly-binary-foldable-impl</em> =       // <em>exposition only</em></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    movable&lt;T&gt; &amp;&amp; movable&lt;U&gt; &amp;&amp;</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    convertible_to&lt;T, U&gt; &amp;&amp;</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    invocable&lt;F&amp;, U, iter_reference_t&lt;I&gt;&gt; &amp;&amp;</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    assignable_from&lt;U&amp;, invoke_result_t&lt;F&amp;, U, iter_reference_t&lt;I&gt;&gt;&gt; &amp;&amp;</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    invocable&lt;F&amp;, iter_reference_t&lt;I&gt;, U&gt; &amp;&amp;</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    assignable_from&lt;U&amp;, invoke_result_t&lt;F&amp;, iter_reference_t&lt;I&gt;, U&gt;&gt;;</span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>template&lt;class F, class T, class I, class U&gt;</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  concept <em>indirectly-binary-foldable-impl</em> =       // <em>exposition only</em></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    movable&lt;T&gt; &amp;&amp; movable&lt;U&gt; &amp;&amp;</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    convertible_to&lt;T, U&gt; &amp;&amp;</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    invocable&lt;F&amp;, U, iter_reference_t&lt;I&gt;&gt; &amp;&amp;</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    assignable_from&lt;U&amp;, invoke_result_t&lt;F&amp;, U, iter_reference_t&lt;I&gt;&gt;&gt; &amp;&amp;</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    invocable&lt;F&amp;, iter_reference_t&lt;I&gt;, U&gt; &amp;&amp;</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    assignable_from&lt;U&amp;, invoke_result_t&lt;F&amp;, iter_reference_t&lt;I&gt;, U&gt;&gt;;</span></code></pre></div>
 
 </div>
-<div class="sourceCode" id="cb15"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>    template&lt;class F, class T, class I&gt;</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>      concept <em>indirectly-binary-left-foldable</em> =      // <em>exposition only</em></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>        copy_constructible&lt;F&gt; &amp;&amp; indirectly_readable&lt;I&gt; &amp;&amp;</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>        invocable&lt;F&amp;, T, iter_reference_t&lt;I&gt;&gt; &amp;&amp;</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>        convertible_to&lt;invoke_result_t&lt;F&amp;, T, iter_reference_t&lt;I&gt;&gt;,</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>               decay_t&lt;invoke_result_t&lt;F&amp;, T, iter_reference_t&lt;I&gt;&gt;&gt;&gt; &amp;&amp;</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>        <em>indirectly-binary-left-foldable-impl</em>&lt;F, T, I,</span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>                        decay_t&lt;invoke_result_t&lt;F&amp;, T, iter_reference_t&lt;I&gt;&gt;&gt;&gt;;</span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    template&lt;class F, class T, class I&gt;</span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>      concept <em>indirectly-binary-right-foldable</em> =    // <em>exposition only</em></span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>        indirectly-binary-left-foldable&lt;<em>flipped</em>&lt;F&gt;, T, I&gt;;</span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>    template&lt;class F, class T, class I&gt;</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>      concept <em>indirectly-binary-left-foldable</em> =      // <em>exposition only</em></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>        copy_constructible&lt;F&gt; &amp;&amp; indirectly_readable&lt;I&gt; &amp;&amp;</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>        invocable&lt;F&amp;, T, iter_reference_t&lt;I&gt;&gt; &amp;&amp;</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>        convertible_to&lt;invoke_result_t&lt;F&amp;, T, iter_reference_t&lt;I&gt;&gt;,</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>               decay_t&lt;invoke_result_t&lt;F&amp;, T, iter_reference_t&lt;I&gt;&gt;&gt;&gt; &amp;&amp;</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>        <em>indirectly-binary-left-foldable-impl</em>&lt;F, T, I,</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>                        decay_t&lt;invoke_result_t&lt;F&amp;, T, iter_reference_t&lt;I&gt;&gt;&gt;&gt;;</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    template&lt;class F, class T, class I&gt;</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>      concept <em>indirectly-binary-right-foldable</em> =    // <em>exposition only</em></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>        indirectly-binary-left-foldable&lt;<em>flipped</em>&lt;F&gt;, T, I&gt;;</span></code></pre></div>
 <div class="add" style="color: #00AA00">
 
-<div class="sourceCode" id="cb16"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>template&lt;class F, class T, class I&gt;</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  concept <em>indirectly-binary-foldable</em> =           // <em>exposition only</em></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    copy_constructible&lt;F&gt; &amp;&amp; indirectly_readable&lt;I&gt; &amp;&amp;</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    invocable&lt;F&amp;, T, iter_reference_t&lt;I&gt;&gt; &amp;&amp;</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    convertible_to&lt;invoke_result_t&lt;F&amp;, T, iter_reference_t&lt;I&gt;&gt;,</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>      decay_t&lt;invoke_result_t&lt;F&amp;, T, iter_reference_t&lt;I&gt;&gt;&gt;&gt; &amp;&amp;</span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    invocable&lt;F&amp;, iter_reference_t&lt;I&gt;, T&gt; &amp;&amp;</span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    convertible_to&lt;invoke_result_t&lt;F&amp;, iter_reference_t&lt;I&gt;, T&gt;,</span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>      decay_t&lt;invoke_result_t&lt;F&amp;, iter_reference_t&lt;I&gt;, T&gt;&gt;&gt; &amp;&amp;</span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>    <em>indirectly-binary-foldable-impl</em>&lt;F, T, I,</span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>      decay_t&lt;invoke_result_t&lt;F&amp;, T, iter_reference_t&lt;I&gt;&gt;&gt;&gt;;</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>template&lt;class F, class T, class I&gt;</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  concept <em>indirectly-binary-foldable</em> =           // <em>exposition only</em></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    copy_constructible&lt;F&gt; &amp;&amp; indirectly_readable&lt;I&gt; &amp;&amp;</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    invocable&lt;F&amp;, T, iter_reference_t&lt;I&gt;&gt; &amp;&amp;</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    convertible_to&lt;invoke_result_t&lt;F&amp;, T, iter_reference_t&lt;I&gt;&gt;,</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>      decay_t&lt;invoke_result_t&lt;F&amp;, T, iter_reference_t&lt;I&gt;&gt;&gt;&gt; &amp;&amp;</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    invocable&lt;F&amp;, iter_reference_t&lt;I&gt;, T&gt; &amp;&amp;</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    convertible_to&lt;invoke_result_t&lt;F&amp;, iter_reference_t&lt;I&gt;, T&gt;,</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>      decay_t&lt;invoke_result_t&lt;F&amp;, iter_reference_t&lt;I&gt;, T&gt;&gt;&gt; &amp;&amp;</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    <em>indirectly-binary-foldable-impl</em>&lt;F, T, I,</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>      decay_t&lt;invoke_result_t&lt;F&amp;, T, iter_reference_t&lt;I&gt;&gt;&gt;&gt;;</span></code></pre></div>
 
 </div>
-<div class="sourceCode" id="cb17"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>    template&lt;input_iterator I, sentinel_for&lt;I&gt; S, class T = iter_value_t&lt;I&gt;,</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>             indirectly-binary-left-foldable&lt;T, I&gt; F&gt;</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>      constexpr auto fold_left(I first, S last, T init, F f);</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>    template&lt;input_iterator I, sentinel_for&lt;I&gt; S, class T = iter_value_t&lt;I&gt;,</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>             indirectly-binary-left-foldable&lt;T, I&gt; F&gt;</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>      constexpr auto fold_left(I first, S last, T init, F f);</span></code></pre></div>
 <h3 data-number="5.2.2" id="add-declarations-of-parallel-ranges-reduce-overloads"><span class="header-section-number">5.2.2</span> Add declarations of parallel
 ranges <code>reduce</code> overloads<a href="#add-declarations-of-parallel-ranges-reduce-overloads" class="self-link"></a></h3>
 <blockquote>
@@ -1703,119 +1691,119 @@ synopsis) as follows.</p>
 <p>TODO: Check that using <code>projected&lt;I, Proj&gt;</code> instead
 of <code>I</code> in <em><code>indirectly-binary-foldable</code></em> is
 the right way to handle projections.</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>  template&lt;class ExecutionPolicy, class ForwardIterator, class T, class BinaryOperation&gt;</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    T reduce(ExecutionPolicy&amp;&amp; exec, // <em>freestanding-deleted, see [algorithms.parallel.overloads]</em></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>             ForwardIterator first, ForwardIterator last, T init, BinaryOperation binary_op);</span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>  template&lt;class ExecutionPolicy, class ForwardIterator, class T, class BinaryOperation&gt;</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    T reduce(ExecutionPolicy&amp;&amp; exec, // <em>freestanding-deleted, see [algorithms.parallel.overloads]</em></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>             ForwardIterator first, ForwardIterator last, T init, BinaryOperation binary_op);</span></code></pre></div>
 <div class="add" style="color: #00AA00">
 
-<div class="sourceCode" id="cb19"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>  namespace ranges {</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  // Non-parallel overloads of reduce</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  template&lt;random_access_iterator I,</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>           sized_sentinel_for&lt;I&gt; S,</span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>           class T,</span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>           class Proj = identity,</span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>           <em>indirectly-binary-foldable</em>&lt;T, projected&lt;I, Proj&gt;&gt; F&gt;</span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>      constexpr auto reduce(I first, S last, T init, F binary_op,</span>
-<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>                            Proj proj = {}) -&gt; /* <em>see below</em> */;</span>
-<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>  template&lt;random_access_iterator I,</span>
-<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>           <em>sized-random-access-range</em> R,</span>
-<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>           class Proj = identity,</span>
-<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>           <em>indirectly-binary-foldable</em>&lt;T, projected&lt;ranges::iterator_t&lt;R&gt;, Proj&gt;&gt; F&gt;</span>
-<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>      constexpr auto reduce(R&amp;&amp; r, T init, F binary_op,</span>
-<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>                            Proj proj = {}) -&gt; /* <em>see below</em> */;</span>
-<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>  // Parallel overloads of reduce</span>
-<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>execution-policy</em> ExecutionPolicy,</span>
-<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>           random_access_iterator I,</span>
-<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>           sized_sentinel_for&lt;I&gt; S,</span>
-<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>           class T,</span>
-<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>           class Proj = identity,</span>
-<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>           <em>indirectly-binary-foldable</em>&lt;T, projected&lt;I, Proj&gt;&gt; F&gt;</span>
-<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a>      auto reduce(ExecutionPolicy&amp;&amp; exec, // <em>freestanding-deleted, see [algorithms.parallel.overloads]</em></span>
-<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a>                  I first, S last, T init, F binary_op,</span>
-<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a>                  Proj proj = {}) -&gt; /* <em>see below</em> */;</span>
-<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>execution-policy</em> ExecutionPolicy,</span>
-<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>           <em>sized-random-access-range</em> R,</span>
-<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a>           class T,</span>
-<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a>           class Proj = identity,</span>
-<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a>           <em>indirectly-binary-foldable</em>&lt;T, projected&lt;ranges::iterator_t&lt;R&gt;, Proj&gt;&gt; F&gt;</span>
-<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a>      auto reduce(ExecutionPolicy&amp;&amp; exec, // <em>freestanding-deleted, see [algorithms.parallel.overloads]</em></span>
-<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a>                  R&amp;&amp; r, T init, F binary_op,</span>
-<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a>                  Proj proj = {}) -&gt; /* <em>see below</em> */;</span>
-<span id="cb19-38"><a href="#cb19-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-39"><a href="#cb19-39" aria-hidden="true" tabindex="-1"></a>  // Non-parallel overloads of sum</span>
-<span id="cb19-40"><a href="#cb19-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-41"><a href="#cb19-41" aria-hidden="true" tabindex="-1"></a>  template&lt;random_access_iterator I,</span>
-<span id="cb19-42"><a href="#cb19-42" aria-hidden="true" tabindex="-1"></a>           sized_sentinel_for&lt;I&gt; S,</span>
-<span id="cb19-43"><a href="#cb19-43" aria-hidden="true" tabindex="-1"></a>           class Proj = identity&gt;</span>
-<span id="cb19-44"><a href="#cb19-44" aria-hidden="true" tabindex="-1"></a>    requires /* <em>see below</em> */</span>
-<span id="cb19-45"><a href="#cb19-45" aria-hidden="true" tabindex="-1"></a>      constexpr auto sum(I first, S last, Proj proj = {})</span>
-<span id="cb19-46"><a href="#cb19-46" aria-hidden="true" tabindex="-1"></a>        -&gt; /* <em>see below</em> */;</span>
-<span id="cb19-47"><a href="#cb19-47" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>sized-random-access-range</em> R&gt;</span>
-<span id="cb19-48"><a href="#cb19-48" aria-hidden="true" tabindex="-1"></a>    requires /* <em>see below</em> */</span>
-<span id="cb19-49"><a href="#cb19-49" aria-hidden="true" tabindex="-1"></a>      constexpr auto sum(R&amp;&amp; r, Proj proj = {})</span>
-<span id="cb19-50"><a href="#cb19-50" aria-hidden="true" tabindex="-1"></a>        -&gt; /* <em>see below</em> */;</span>
-<span id="cb19-51"><a href="#cb19-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-52"><a href="#cb19-52" aria-hidden="true" tabindex="-1"></a>  // Parallel overloads of sum</span>
-<span id="cb19-53"><a href="#cb19-53" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-54"><a href="#cb19-54" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>execution-policy</em> ExecutionPolicy,</span>
-<span id="cb19-55"><a href="#cb19-55" aria-hidden="true" tabindex="-1"></a>           random_access_iterator I,</span>
-<span id="cb19-56"><a href="#cb19-56" aria-hidden="true" tabindex="-1"></a>           sized_sentinel_for&lt;I&gt; S,</span>
-<span id="cb19-57"><a href="#cb19-57" aria-hidden="true" tabindex="-1"></a>           class Proj = identity&gt;</span>
-<span id="cb19-58"><a href="#cb19-58" aria-hidden="true" tabindex="-1"></a>    requires /* <em>see below</em> */</span>
-<span id="cb19-59"><a href="#cb19-59" aria-hidden="true" tabindex="-1"></a>      auto sum(ExecutionPolicy&amp;&amp; exec, // <em>freestanding-deleted, see [algorithms.parallel.overloads]</em></span>
-<span id="cb19-60"><a href="#cb19-60" aria-hidden="true" tabindex="-1"></a>               I first, S last, Proj proj = {})</span>
-<span id="cb19-61"><a href="#cb19-61" aria-hidden="true" tabindex="-1"></a>        -&gt; /* <em>see below</em> */;</span>
-<span id="cb19-62"><a href="#cb19-62" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>execution-policy</em> ExecutionPolicy,</span>
-<span id="cb19-63"><a href="#cb19-63" aria-hidden="true" tabindex="-1"></a>           <em>sized-random-access-range</em> R,</span>
-<span id="cb19-64"><a href="#cb19-64" aria-hidden="true" tabindex="-1"></a>           class T,</span>
-<span id="cb19-65"><a href="#cb19-65" aria-hidden="true" tabindex="-1"></a>           class Proj = identity&gt;</span>
-<span id="cb19-66"><a href="#cb19-66" aria-hidden="true" tabindex="-1"></a>    requires /* <em>see below</em> */</span>
-<span id="cb19-67"><a href="#cb19-67" aria-hidden="true" tabindex="-1"></a>      auto sum(ExecutionPolicy&amp;&amp; exec, // <em>freestanding-deleted, see [algorithms.parallel.overloads]</em></span>
-<span id="cb19-68"><a href="#cb19-68" aria-hidden="true" tabindex="-1"></a>               R&amp;&amp; r, Proj proj = {})</span>
-<span id="cb19-69"><a href="#cb19-69" aria-hidden="true" tabindex="-1"></a>        -&gt; /* <em>see below</em> */;</span>
-<span id="cb19-70"><a href="#cb19-70" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-71"><a href="#cb19-71" aria-hidden="true" tabindex="-1"></a>  // Non-parallel overloads of product</span>
-<span id="cb19-72"><a href="#cb19-72" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-73"><a href="#cb19-73" aria-hidden="true" tabindex="-1"></a>  template&lt;random_access_iterator I,</span>
-<span id="cb19-74"><a href="#cb19-74" aria-hidden="true" tabindex="-1"></a>           sized_sentinel_for&lt;I&gt; S,</span>
-<span id="cb19-75"><a href="#cb19-75" aria-hidden="true" tabindex="-1"></a>           class Proj = identity&gt;</span>
-<span id="cb19-76"><a href="#cb19-76" aria-hidden="true" tabindex="-1"></a>    requires /* <em>see below</em> */</span>
-<span id="cb19-77"><a href="#cb19-77" aria-hidden="true" tabindex="-1"></a>      constexpr auto product(I first, S last, Proj proj = {})</span>
-<span id="cb19-78"><a href="#cb19-78" aria-hidden="true" tabindex="-1"></a>        -&gt; /* <em>see below</em> */;</span>
-<span id="cb19-79"><a href="#cb19-79" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>sized-random-access-range</em> R&gt;</span>
-<span id="cb19-80"><a href="#cb19-80" aria-hidden="true" tabindex="-1"></a>    requires /* <em>see below</em> */</span>
-<span id="cb19-81"><a href="#cb19-81" aria-hidden="true" tabindex="-1"></a>      constexpr auto product(R&amp;&amp; r, Proj proj = {})</span>
-<span id="cb19-82"><a href="#cb19-82" aria-hidden="true" tabindex="-1"></a>        -&gt; /* <em>see below</em> */;</span>
-<span id="cb19-83"><a href="#cb19-83" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-84"><a href="#cb19-84" aria-hidden="true" tabindex="-1"></a>  // Parallel overloads of product</span>
-<span id="cb19-85"><a href="#cb19-85" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-86"><a href="#cb19-86" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>execution-policy</em> ExecutionPolicy,</span>
-<span id="cb19-87"><a href="#cb19-87" aria-hidden="true" tabindex="-1"></a>           random_access_iterator I,</span>
-<span id="cb19-88"><a href="#cb19-88" aria-hidden="true" tabindex="-1"></a>           sized_sentinel_for&lt;I&gt; S,</span>
-<span id="cb19-89"><a href="#cb19-89" aria-hidden="true" tabindex="-1"></a>           class Proj = identity&gt;</span>
-<span id="cb19-90"><a href="#cb19-90" aria-hidden="true" tabindex="-1"></a>    requires /* <em>see below</em> */</span>
-<span id="cb19-91"><a href="#cb19-91" aria-hidden="true" tabindex="-1"></a>      auto product(ExecutionPolicy&amp;&amp; exec, // <em>freestanding-deleted, see [algorithms.parallel.overloads]</em></span>
-<span id="cb19-92"><a href="#cb19-92" aria-hidden="true" tabindex="-1"></a>                   I first, S last, Proj proj = {})</span>
-<span id="cb19-93"><a href="#cb19-93" aria-hidden="true" tabindex="-1"></a>        -&gt; /* <em>see below</em> */;</span>
-<span id="cb19-94"><a href="#cb19-94" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>execution-policy</em> ExecutionPolicy,</span>
-<span id="cb19-95"><a href="#cb19-95" aria-hidden="true" tabindex="-1"></a>           <em>sized-random-access-range</em> R,</span>
-<span id="cb19-96"><a href="#cb19-96" aria-hidden="true" tabindex="-1"></a>           class Proj = identity&gt;</span>
-<span id="cb19-97"><a href="#cb19-97" aria-hidden="true" tabindex="-1"></a>    requires /* <em>see below</em> */</span>
-<span id="cb19-98"><a href="#cb19-98" aria-hidden="true" tabindex="-1"></a>      auto product(ExecutionPolicy&amp;&amp; exec, // <em>freestanding-deleted, see [algorithms.parallel.overloads]</em></span>
-<span id="cb19-99"><a href="#cb19-99" aria-hidden="true" tabindex="-1"></a>                   R&amp;&amp; r, Proj proj = {})</span>
-<span id="cb19-100"><a href="#cb19-100" aria-hidden="true" tabindex="-1"></a>        -&gt; /* <em>see below</em> */;</span>
-<span id="cb19-101"><a href="#cb19-101" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-102"><a href="#cb19-102" aria-hidden="true" tabindex="-1"></a>  } // namespace ranges</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>  namespace ranges {</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  // Non-parallel overloads of reduce</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  template&lt;random_access_iterator I,</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>           sized_sentinel_for&lt;I&gt; S,</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>           class T,</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>           class Proj = identity,</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>           <em>indirectly-binary-foldable</em>&lt;T, projected&lt;I, Proj&gt;&gt; F&gt;</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>      constexpr auto reduce(I first, S last, T init, F binary_op,</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>                            Proj proj = {}) -&gt; /* <em>see below</em> */;</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>  template&lt;random_access_iterator I,</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>           <em>sized-random-access-range</em> R,</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>           class Proj = identity,</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>           <em>indirectly-binary-foldable</em>&lt;T, projected&lt;ranges::iterator_t&lt;R&gt;, Proj&gt;&gt; F&gt;</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>      constexpr auto reduce(R&amp;&amp; r, T init, F binary_op,</span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>                            Proj proj = {}) -&gt; /* <em>see below</em> */;</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>  // Parallel overloads of reduce</span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>execution-policy</em> ExecutionPolicy,</span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>           random_access_iterator I,</span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>           sized_sentinel_for&lt;I&gt; S,</span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>           class T,</span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>           class Proj = identity,</span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>           <em>indirectly-binary-foldable</em>&lt;T, projected&lt;I, Proj&gt;&gt; F&gt;</span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>      auto reduce(ExecutionPolicy&amp;&amp; exec, // <em>freestanding-deleted, see [algorithms.parallel.overloads]</em></span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>                  I first, S last, T init, F binary_op,</span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>                  Proj proj = {}) -&gt; /* <em>see below</em> */;</span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>execution-policy</em> ExecutionPolicy,</span>
+<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a>           <em>sized-random-access-range</em> R,</span>
+<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a>           class T,</span>
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a>           class Proj = identity,</span>
+<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a>           <em>indirectly-binary-foldable</em>&lt;T, projected&lt;ranges::iterator_t&lt;R&gt;, Proj&gt;&gt; F&gt;</span>
+<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a>      auto reduce(ExecutionPolicy&amp;&amp; exec, // <em>freestanding-deleted, see [algorithms.parallel.overloads]</em></span>
+<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a>                  R&amp;&amp; r, T init, F binary_op,</span>
+<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a>                  Proj proj = {}) -&gt; /* <em>see below</em> */;</span>
+<span id="cb18-38"><a href="#cb18-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-39"><a href="#cb18-39" aria-hidden="true" tabindex="-1"></a>  // Non-parallel overloads of sum</span>
+<span id="cb18-40"><a href="#cb18-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-41"><a href="#cb18-41" aria-hidden="true" tabindex="-1"></a>  template&lt;random_access_iterator I,</span>
+<span id="cb18-42"><a href="#cb18-42" aria-hidden="true" tabindex="-1"></a>           sized_sentinel_for&lt;I&gt; S,</span>
+<span id="cb18-43"><a href="#cb18-43" aria-hidden="true" tabindex="-1"></a>           class Proj = identity&gt;</span>
+<span id="cb18-44"><a href="#cb18-44" aria-hidden="true" tabindex="-1"></a>    requires /* <em>see below</em> */</span>
+<span id="cb18-45"><a href="#cb18-45" aria-hidden="true" tabindex="-1"></a>      constexpr auto sum(I first, S last, Proj proj = {})</span>
+<span id="cb18-46"><a href="#cb18-46" aria-hidden="true" tabindex="-1"></a>        -&gt; /* <em>see below</em> */;</span>
+<span id="cb18-47"><a href="#cb18-47" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>sized-random-access-range</em> R&gt;</span>
+<span id="cb18-48"><a href="#cb18-48" aria-hidden="true" tabindex="-1"></a>    requires /* <em>see below</em> */</span>
+<span id="cb18-49"><a href="#cb18-49" aria-hidden="true" tabindex="-1"></a>      constexpr auto sum(R&amp;&amp; r, Proj proj = {})</span>
+<span id="cb18-50"><a href="#cb18-50" aria-hidden="true" tabindex="-1"></a>        -&gt; /* <em>see below</em> */;</span>
+<span id="cb18-51"><a href="#cb18-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-52"><a href="#cb18-52" aria-hidden="true" tabindex="-1"></a>  // Parallel overloads of sum</span>
+<span id="cb18-53"><a href="#cb18-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-54"><a href="#cb18-54" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>execution-policy</em> ExecutionPolicy,</span>
+<span id="cb18-55"><a href="#cb18-55" aria-hidden="true" tabindex="-1"></a>           random_access_iterator I,</span>
+<span id="cb18-56"><a href="#cb18-56" aria-hidden="true" tabindex="-1"></a>           sized_sentinel_for&lt;I&gt; S,</span>
+<span id="cb18-57"><a href="#cb18-57" aria-hidden="true" tabindex="-1"></a>           class Proj = identity&gt;</span>
+<span id="cb18-58"><a href="#cb18-58" aria-hidden="true" tabindex="-1"></a>    requires /* <em>see below</em> */</span>
+<span id="cb18-59"><a href="#cb18-59" aria-hidden="true" tabindex="-1"></a>      auto sum(ExecutionPolicy&amp;&amp; exec, // <em>freestanding-deleted, see [algorithms.parallel.overloads]</em></span>
+<span id="cb18-60"><a href="#cb18-60" aria-hidden="true" tabindex="-1"></a>               I first, S last, Proj proj = {})</span>
+<span id="cb18-61"><a href="#cb18-61" aria-hidden="true" tabindex="-1"></a>        -&gt; /* <em>see below</em> */;</span>
+<span id="cb18-62"><a href="#cb18-62" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>execution-policy</em> ExecutionPolicy,</span>
+<span id="cb18-63"><a href="#cb18-63" aria-hidden="true" tabindex="-1"></a>           <em>sized-random-access-range</em> R,</span>
+<span id="cb18-64"><a href="#cb18-64" aria-hidden="true" tabindex="-1"></a>           class T,</span>
+<span id="cb18-65"><a href="#cb18-65" aria-hidden="true" tabindex="-1"></a>           class Proj = identity&gt;</span>
+<span id="cb18-66"><a href="#cb18-66" aria-hidden="true" tabindex="-1"></a>    requires /* <em>see below</em> */</span>
+<span id="cb18-67"><a href="#cb18-67" aria-hidden="true" tabindex="-1"></a>      auto sum(ExecutionPolicy&amp;&amp; exec, // <em>freestanding-deleted, see [algorithms.parallel.overloads]</em></span>
+<span id="cb18-68"><a href="#cb18-68" aria-hidden="true" tabindex="-1"></a>               R&amp;&amp; r, Proj proj = {})</span>
+<span id="cb18-69"><a href="#cb18-69" aria-hidden="true" tabindex="-1"></a>        -&gt; /* <em>see below</em> */;</span>
+<span id="cb18-70"><a href="#cb18-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-71"><a href="#cb18-71" aria-hidden="true" tabindex="-1"></a>  // Non-parallel overloads of product</span>
+<span id="cb18-72"><a href="#cb18-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-73"><a href="#cb18-73" aria-hidden="true" tabindex="-1"></a>  template&lt;random_access_iterator I,</span>
+<span id="cb18-74"><a href="#cb18-74" aria-hidden="true" tabindex="-1"></a>           sized_sentinel_for&lt;I&gt; S,</span>
+<span id="cb18-75"><a href="#cb18-75" aria-hidden="true" tabindex="-1"></a>           class Proj = identity&gt;</span>
+<span id="cb18-76"><a href="#cb18-76" aria-hidden="true" tabindex="-1"></a>    requires /* <em>see below</em> */</span>
+<span id="cb18-77"><a href="#cb18-77" aria-hidden="true" tabindex="-1"></a>      constexpr auto product(I first, S last, Proj proj = {})</span>
+<span id="cb18-78"><a href="#cb18-78" aria-hidden="true" tabindex="-1"></a>        -&gt; /* <em>see below</em> */;</span>
+<span id="cb18-79"><a href="#cb18-79" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>sized-random-access-range</em> R&gt;</span>
+<span id="cb18-80"><a href="#cb18-80" aria-hidden="true" tabindex="-1"></a>    requires /* <em>see below</em> */</span>
+<span id="cb18-81"><a href="#cb18-81" aria-hidden="true" tabindex="-1"></a>      constexpr auto product(R&amp;&amp; r, Proj proj = {})</span>
+<span id="cb18-82"><a href="#cb18-82" aria-hidden="true" tabindex="-1"></a>        -&gt; /* <em>see below</em> */;</span>
+<span id="cb18-83"><a href="#cb18-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-84"><a href="#cb18-84" aria-hidden="true" tabindex="-1"></a>  // Parallel overloads of product</span>
+<span id="cb18-85"><a href="#cb18-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-86"><a href="#cb18-86" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>execution-policy</em> ExecutionPolicy,</span>
+<span id="cb18-87"><a href="#cb18-87" aria-hidden="true" tabindex="-1"></a>           random_access_iterator I,</span>
+<span id="cb18-88"><a href="#cb18-88" aria-hidden="true" tabindex="-1"></a>           sized_sentinel_for&lt;I&gt; S,</span>
+<span id="cb18-89"><a href="#cb18-89" aria-hidden="true" tabindex="-1"></a>           class Proj = identity&gt;</span>
+<span id="cb18-90"><a href="#cb18-90" aria-hidden="true" tabindex="-1"></a>    requires /* <em>see below</em> */</span>
+<span id="cb18-91"><a href="#cb18-91" aria-hidden="true" tabindex="-1"></a>      auto product(ExecutionPolicy&amp;&amp; exec, // <em>freestanding-deleted, see [algorithms.parallel.overloads]</em></span>
+<span id="cb18-92"><a href="#cb18-92" aria-hidden="true" tabindex="-1"></a>                   I first, S last, Proj proj = {})</span>
+<span id="cb18-93"><a href="#cb18-93" aria-hidden="true" tabindex="-1"></a>        -&gt; /* <em>see below</em> */;</span>
+<span id="cb18-94"><a href="#cb18-94" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>execution-policy</em> ExecutionPolicy,</span>
+<span id="cb18-95"><a href="#cb18-95" aria-hidden="true" tabindex="-1"></a>           <em>sized-random-access-range</em> R,</span>
+<span id="cb18-96"><a href="#cb18-96" aria-hidden="true" tabindex="-1"></a>           class Proj = identity&gt;</span>
+<span id="cb18-97"><a href="#cb18-97" aria-hidden="true" tabindex="-1"></a>    requires /* <em>see below</em> */</span>
+<span id="cb18-98"><a href="#cb18-98" aria-hidden="true" tabindex="-1"></a>      auto product(ExecutionPolicy&amp;&amp; exec, // <em>freestanding-deleted, see [algorithms.parallel.overloads]</em></span>
+<span id="cb18-99"><a href="#cb18-99" aria-hidden="true" tabindex="-1"></a>                   R&amp;&amp; r, Proj proj = {})</span>
+<span id="cb18-100"><a href="#cb18-100" aria-hidden="true" tabindex="-1"></a>        -&gt; /* <em>see below</em> */;</span>
+<span id="cb18-101"><a href="#cb18-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-102"><a href="#cb18-102" aria-hidden="true" tabindex="-1"></a>  } // namespace ranges</span></code></pre></div>
 
 </div>
-<div class="sourceCode" id="cb20"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>  // [inner.product], inner product</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  template&lt;class InputIterator1, class InputIterator2, class T&gt;</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    constexpr T inner_product(InputIterator1 first1, InputIterator1 last1,</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>                              InputIterator2 first2, T init);</span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>  // [inner.product], inner product</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  template&lt;class InputIterator1, class InputIterator2, class T&gt;</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    constexpr T inner_product(InputIterator1 first1, InputIterator1 last1,</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>                              InputIterator2 first2, T init);</span></code></pre></div>
 <h3 data-number="5.2.3" id="add-declarations-of-parallel-ranges-inclusive_scan"><span class="header-section-number">5.2.3</span> Add declarations of parallel
 ranges <code>inclusive_scan</code><a href="#add-declarations-of-parallel-ranges-inclusive_scan" class="self-link"></a></h3>
 <p>TODO</p>

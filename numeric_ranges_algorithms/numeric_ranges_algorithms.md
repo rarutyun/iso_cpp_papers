@@ -2,7 +2,7 @@
 ---
 title: Parallel and non-parallel numeric range algorithms
 document: DXXXXR0
-date: 2025-05-30
+date: 2025-06-02
 audience: SG1,SG9,LEWG
 author:
   - name: Ruslan Arutyunyan
@@ -163,49 +163,32 @@ Questions about transforms and projections suggest studying `ranges::transform` 
 
 2. If binary transform is equivalent to unary transform of a `zip_transform_view`, then why does binary `std::ranges::transform` exist?
 
-It can help to look at examples.  Here is a binary transform example without projections, that uses a single big lambda.  Users have to read the big lambda to see what it does.  So does the compiler, which can hinder optimization if it's not good
-at inlining. Contrast the code on the left (below) with use of projections.  Users can read out loud what this does.  It also separates the "selection" or "query" part of the transform from the "arithmetic" or "computation" part.
+##### Binary transform
+
+It can help to look at examples.  The code below shows the same binary transform computation done in two different ways: first, without projections, and second, with projections.  The code without projections using a single big lambda to express the binary operation.  Users have to read the big lambda to see what it does.  So does the compiler, which can hinder optimization if it's not good at inlining.  In contrast, the version with projections lets users read out loud what it does.  It also separates the "selection" or "query" part of the transform from the "arithmetic" or "computation" part.
 The power of the ranges abstraction is that users can factor computation on a range from the logic to iterate over that range.  It's natural to extend this separation to selection logic as well.
 
-
-::: cmptable
-
-> `transform` without and with projection
-
-### Without projections
 ```c++
 struct foo {};
 std::vector<std::tuple<int, foo, std::string>> v1{
   {5, {}, "five"}, {7, {}, "seven"}, {11, {}, "eleven"}};
 std::vector<std::pair<int, std::string>> v2{
   {13, "thirteen"}, {17, "seventeen"}, {19, "nineteen"}};
-std::vector<int> out(std::from_range, std::views::repeat(0, 3));
+std::vector<int> out(std::from_range, std::views::repeat(0, 3));;
+std::vector<int> expected{65, 119, 209};
 
 // Without projections: Big, opaque lambda
 std::ranges::transform(v1, v2, out.begin(),
   [] (auto x, auto y) { return get<0>(x) * get<0>(y); });
-
-std::vector<int> expected{65, 119, 209};
 assert(out == expected);
-```
-
-### With projections
-```c++
-struct foo {};
-std::vector<std::tuple<int, foo, std::string>> v1{
-  {5, {}, "five"}, {7, {}, "seven"}, {11, {}, "eleven"}};
-std::vector<std::pair<int, std::string>> v2{
-  {13, "thirteen"}, {17, "seventeen"}, {19, "nineteen"}};
-std::vector<int> out(std::from_range, std::views::repeat(0, 3));
 
 // With projections: More readable
 std::ranges::transform(v1, v2, out.begin(),
   std::multiplies{}, get_element<0>{}, get_element<0>{});
-
-std::vector<int> expected{65, 119, 209};
-assert(out == expected);
+assert(out2 == expected);
 ```
-:::
+
+##### Unary transform
 
 It's harder to avoid a lambda in the unary transform case.  Most of the named C++ Standard Library arithmetic function objects are binary.  Currying them into unary functions in C++ requires either making a lambda (which defeats the purpose somewhat) or using something like `std::bind` (which is verbose).  On the other hand, using a projection still has the benefit of separating the "selection" part of the transform from the "computation" part.
 
