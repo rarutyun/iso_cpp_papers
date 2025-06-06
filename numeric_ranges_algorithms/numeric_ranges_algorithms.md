@@ -24,9 +24,9 @@ toc: true
 
 # Abstract {- .unlisted}
 
-We propose `ranges` algorithm overloads (both parallel and nonparallel) for `<numeric>` header.
+We propose `ranges` algorithm overloads (both parallel and non-parallel) for the `<numeric>` header.
 
-# Authors
+# Authors {- .unlisted}
 
 * Ruslan Arutyunyan (Intel)
 
@@ -38,13 +38,9 @@ We propose `ranges` algorithm overloads (both parallel and nonparallel) for `<nu
 
 * Abhilash Majumder (NVIDIA)
 
-# Design
+# What we propose
 
-## What algorithms to include?
-
-### What we propose
-
-We propose `ranges` overloads (both parallel and nonparallel) of the following algorithms:
+We propose `ranges` overloads (both parallel and non-parallel) of the following algorithms:
 
 * `reduce`, unary `transform_reduce`, and binary `transform_reduce`;
 
@@ -58,11 +54,18 @@ We also propose adding parallel and non-parallel convenience wrappers:
 
 * `ranges::dot` for the special case of binary `transform_reduce` with transform `multiplies{}` and reduction `plus{}`.
 
-The following sections explain why we propose these algorithms and not others.  This relates to other aspects of the design besides algorithm selection, such as whether to include optional projection parameters.
+The following sections explain why we propose these algorithms and not others.  This relates to other aspects of the design
+besides algorithm selection, such as whether to include optional projection parameters.
+
+# Design
+
+## What algorithms to include?
 
 ### Current set of numeric algorithms
 
-[@P3179R8], "C++ Parallel Range Algorithms," is in the last stages of wording review as of the publication date. [@P3179R8] explicitly defers adding `ranges` versions of the numeric algorithms.  This proposal does that.  As such, we focus on the numeric algorithms, that is, the 11 algorithms in [numeric.ops]{- .sref}.
+[@P3179R8], "C++ Parallel Range Algorithms," is in the last stages of wording review as of the publication date.
+[@P3179R8] explicitly defers adding `ranges` versions of the numeric algorithms. This proposal does that.
+As such, we focus on the 11 algorithms in [numeric.ops]{- .sref}.
 
 * `iota`
 
@@ -120,7 +123,7 @@ ranges constructs can hinder parallelization on different kinds of hardware.
 #### Unary transforms, projections, and `transform_view` are functionally equivalent
 
 The above two questions are related, since a projection can have the same effect as a `transform_*` function.  This aligns with
-<a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4128.html#algorithms-should-take-invokable-projections">Section 13.2 of N4128</a>,
+[Section 13.2 of N4128](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4128.html#algorithms-should-take-invokable-projections),
 which explains why `ranges` algorithms take optional projections "everywhere it makes sense."
 
 > Wherever appropriate, algorithms should optionally take *`INVOKE`*-able *projections* that are applied to each element in
@@ -157,9 +160,7 @@ auto result_tv = std::ranges::reduce(
 assert(result_tv == 26);
 ```
 
-#### Scan algorithms work like unary `transform_reduce`
-
-Regarding scan algorithms, [@P2214R2] points out that `ranges::transform_inclusive_scan(r, o, f, g)` can be rewritten
+This applies to scan algorithms as well. [@P2214R2] points out that `ranges::transform_inclusive_scan(r, o, f, g)` can be rewritten
 as `ranges::inclusive_scan(r | views::transform(g), o, f)`.  The latter formulation saves users from needing to remember
 which of `f` and `g` is the transform (unary) operation, and which is the binary operation. Making the ranges version of
 the algorithm take an optional projection would be exactly equivalent to adding a `transform_*` version that does not take
@@ -168,7 +169,11 @@ as `ranges::transform_inclusive_scan(r, o, f, g)` with `g` as the transform oper
 
 #### Binary `transform_reduce` is functionally equivalent to `reduce` and `zip_transform_view`
 
-Expressing binary `transform_reduce` using only `reduce` requires `zip_transform_view` or something like it.
+The binary variant of `transform_reduce` is different. Unlike `reduce` and most other numeric algorithms, it takes two
+input sequences and applies a binary function to the pairs of elements from both sequences. Projections, being unary functions,
+cannot replace the binary transform function of the algorithm. `transform_view` is similarly of no help unless it is combined with
+`zip_view` and operates on tuples of elements. `zip_transform_view` is a convenient way to express this combination;
+applying `reduce` to `zip_transform_view` gives the necessary result (code examples are shown below).
 
 #### Study `ranges::transform` for design hints
 
@@ -182,12 +187,7 @@ more questions.
 ##### Binary transform
 
 It can help to look at examples. The code below shows the same binary transform computation done in two different ways:
-first, without projections, and second, with projections.  The code without projections using a single big lambda to express
-the binary operation. Users have to read the big lambda to see what it does. So does the compiler, which can hinder
-optimization if it's not good at inlining.  In contrast, the version with projections lets users read out loud what it does.
-It also separates the "selection" or "query" part of the transform from the "arithmetic" or "computation" part. The power of
-the ranges abstraction is that users can factor computation on a range from the logic to iterate over that range. It's
-natural to extend this separation to selection logic as well.
+without projections and with projections.
 
 ::: cmptable
 
@@ -225,6 +225,13 @@ std::ranges::transform(v1, v2, out.begin(),
 assert(out2 == expected);
 ```
 :::
+
+The code without projections using a single big lambda to express the binary operation. Users have to read the big lambda
+to see what it does. So does the compiler, which can hinder optimization if it's not good at inlining.
+In contrast, the version with projections lets users read out loud what it does.
+It also separates the "selection" or "query" part of the transform from the "arithmetic" or "computation" part. The power of
+the ranges abstraction is that users can factor computation on a range from the logic to iterate over that range. It's
+natural to extend this separation to selection logic as well.
 
 ##### Unary transform
 
@@ -288,7 +295,9 @@ auto result_xv = std::ranges::reduce(
 assert(result_xv == 26);
 ```
 
-On the other hand, `ranges` algorithms take projections whenever possible, and `std::ranges::transform` takes a projection.  Why can't `transform_reduce` take a projection?  For unary `transform_reduce`, this arguably makes the order of operations less clear.  The projection happens first, but most users would have to think about that.  A lambda or named function would improve readability.
+On the other hand, `ranges` algorithms take projections whenever possible, and `std::ranges::transform` takes a projection.
+Why can't `transform_reduce` take a projection?  For unary `transform_reduce`, this arguably makes the order of operations less clear.
+The projection happens first, but most users would have to think about that. A lambda or named function would improve readability.
 
 ```c++
 struct bar {
@@ -317,11 +326,11 @@ assert(result_no_proj == 52);
 
 ##### Binary `transform_reduce`
 
-Expressing binary `transform_reduce` using only `reduce` requires `zip_transform_view` or something like it.
-The `reduce`-only version is more verbose.  On the other hand, it's a toss-up which version is easier to understand.
-Users either need to learn what a "zip transform view" does, or they need to learn about `transform_reduce` and know which
-of the two function arguments does what.  They may also find it troublesome that `zip_view` and `zip_transform_view` are not
-pipeable: there is no `{v1, v2} | views::zip` syntax, for example.
+As we described above, expressing the functionality of binary `transform_reduce` using only `reduce` requires `zip_transform_view`
+or something like it, making the `reduce`-only version more verbose. Users may also find it troublesome that `zip_view` and `zip_transform_view`
+are not pipeable: there is no `{v1, v2} | views::zip` syntax, for example.
+On the other hand, it's a toss-up which version is easier to understand. Users either need to learn what a "zip transform view" does,
+or they need to learn about `transform_reduce` and know which of the two function arguments does what.  
 
 ```c++
 struct foo {};
@@ -347,15 +356,15 @@ auto result_no_proj = std::ranges::transform_reduce(
 assert(result_no_proj == 396);
 ```
 
-C++17 binary `transform_reduce` does not take a projection. Instead, it takes a binary transform function, that combines
-elements from the two input ranges into a single element. The algorithm then reduces these elements using the binary reduce
+C++17 binary `transform_reduce` does not take projections. Instead, it takes a binary transform function, that combines
+elements from the two input ranges into a single value. The algorithm then reduces these values using the binary reduce
 function and the initial value. It's perhaps misleading that this binary function is called a "transform"; it's really a
-kind of reduction on corresponding elements of the two input ranges.
+kind of "inner" reduction on corresponding elements of the two input ranges.
 
 One can imagine a ranges analog of C++17 binary `transform_reduce` that takes two projection functions, as in the example
 below. It's not too hard for a casual reader to tell that the last two arguments of `reduce` apply to each of the input
-sequences in turn, but that's still more consecutive function arguments than any other algorithm in the C++ Standard
-Library. Without projections, users would need to resort to `transform_view`, but this more verbose syntax makes it more
+sequences in turn, but that's still more consecutive function arguments than for any other algorithm in the C++ Standard
+Library. Without projections, users need to resort to `transform_view`, but this more verbose syntax makes it more
 clear which functions do what.
 
 ```c++
@@ -481,16 +490,16 @@ parallel execution.
 
 Let's review what we learned from the above discussion.
 
-1. In general and particularly for `ranges::transform`, projections improve readability and expose optimization potential,
+- In general and particularly for `ranges::transform`, projections improve readability and expose optimization potential,
 by separating the selection part of an algorithm from the computation part.
-1. None of the existing `fold_*` `ranges` algorithms (the closest things the Standard Library currently has to
+- None of the existing `fold_*` `ranges` algorithms (the closest things the Standard Library currently has to
 `ranges::reduce`) take projections.
-1. Ranges `reduce` with a projection and unary `transform_reduce` without a projection have the same functionality,
+- Ranges `reduce` with a projection and unary `transform_reduce` without a projection have the same functionality,
 without much usability or implementation difference.   Ditto for `{in,ex}clusive_scan` with a projection and
 `transform_{in,ex}clusive_scan` without.
-1. Expressing binary `transform_reduce` using only `reduce` requires `zip_transform_view` *always*, even if the two input
+- Expressing binary `transform_reduce` using only `reduce` requires `zip_transform_view` *always*, even if the two input
 ranges are contiguous ranges of `int`.  This hinders readability and potentially also performance.
-1. A ranges version of binary `transform_reduce` that takes projections is harder to use and read than a version without
+- A ranges version of binary `transform_reduce` that takes projections is harder to use and read than a version without
 projections. However, a version without projections would need `transform_view` in order to offer the same functionality.
 This potentially hinders performance.
 
@@ -548,8 +557,8 @@ an `iota_view`.  For example, the Standard specifies `iota_view` in a way that d
 copyable, as long as its input types are.  The iterator type of `iota_view` is a random access iterator for reasonable
 lower bound types (e.g., integers).
 
-However, `ranges::iota` algorithm was added since C++23 (later than `iota_view`). So, for the sake of completeness we might
-want to add it as well. It going to give a syntactic advantage only: if users already have `ranges::iota` in their code,
+However, `ranges::iota` algorithm was added since C++23, later than`iota_view`. For the sake of completeness we might want to add
+a parallel variation of it as well. It's only going to give a syntactic advantage: if users already have `ranges::iota` in their code,
 parallelizing it would be as simple as adding an execution policy (assuming the iterator/range categories are satisfied).
 
 We do not propose parallel `ranges::iota` in R0. We are seeking for SG9 (Ranges Study Group) feedback.
@@ -583,11 +592,11 @@ algorithm, but we would welcome a separate proposal to do so.
 
 The current numeric algorithms express a variety of permissions to reorder binary operations.
 
-1. `accumulate` and `partial_sum` both precisely specify the order of binary operations as sequential, from left to right.
+- `accumulate` and `partial_sum` both precisely specify the order of binary operations as sequential, from left to right.
 This works even if the binary operation is neither associative nor commutative.
-1. The various `*_scan` algorithms can reorder binary operations as if they are associative (they may replace `a + (b + c)`
+- The various `*_scan` algorithms can reorder binary operations as if they are associative (they may replace `a + (b + c)`
 with `(a + b) + c`), but not as if they are commutative (they may replace `a + b` with `b + a`).
-1. `reduce` can reorder binary operations as if they are both associative and commutative.
+- `reduce` can reorder binary operations as if they are both associative and commutative.
 
 What's missing here is a parallel analog of `reduce` with the assumptions of `*_scan`, that is, a reduction that can assume
 associativity but not commutativity of binary operations. Parallel reduction operations with these assumptions exist in
@@ -595,7 +604,7 @@ other programming models. For example, MPI (the Message Passing Interface for di
 a function `MPI_Create_op` for defining custom reduction operators from a user's function. `MPI_Create_op` has a parameter
 that specifies whether MPI may assume that the user's function is commutative.
 
-Users could get a parallel algorithm by calling `*_scan` with an extra output sequence, and using only the last element.
+Users could get that parallel algorithm by calling `*_scan` with an extra output sequence, and using only the last element.
 However, this requires extra storage.
 
 A concepts-based approach like [@P1813R0]'s could permit specializing `reduce` on whether the user asserts that the binary
@@ -614,7 +623,7 @@ a distinct name. A reasonable choice of name would be `fold` (just `fold` by its
 
 The `partial_sum` algorithm performs operations sequentially. The existing ranges library does not have an equivalent
 algorithm with this left-to-right sequential behavior, nor do we propose such an algorithm. For users who want this
-behavior, [@P2760R1] suggests a view instead of an algorithm. [@P3351R2], "`views::scan`," proposes this view. [@P3351R2]
+behavior, [@P2760R1] suggests a view instead of an algorithm. [@P3351R2], "`views::scan`," proposes this view; it
 is currently in SG9 (Ranges Study Group) review.
 
 Users of `partial_sum` who are not concerned about the order of operations can call `inclusive_scan` instead, which we
@@ -622,7 +631,7 @@ propose here. We considered adding a convenience wrapper for the same special ca
 `partial_sum` supports. However, names like `partial_sum` or `prefix_sum` would obscure whether this is an inclusive or
 exclusive scan. Also, we already have `std::partial_sum` that operates in order. Using the same name as a convenient wrapper
 on top of out-of-order `*_scan`, we propose in the paper, is misleading. We think it's not a very convenient convenience
-wrapper if users have to look this up every time they use it.
+wrapper if users have to look these aspects up every time they use it.
 
 If WG21 did want a convenience wrapper, one option would be to give this common use case a longer but more explicit name,
 like `inclusive_sum_scan`.
@@ -633,7 +642,7 @@ Section 5.1 of [@P2760R1] asks whether the Standard Library should have a `reduc
 `fold_left_first`, `reduce_first` would use the first element of the range as the initial value of the reduction operation.
 One application of `reduce_first` is to support binary operations that lack a natural identity element to serve as the
 initial value. An example would be `min` on a range of `int` values, where callers would have no way to tell if `INT_MAX`
-represents an actual value in the range, or a fake "identity" element (that callers get as a result because the range is
+represents an actual value in the range, or a fake "identity" element (that callers may get as a result when the range is
 empty).
 
 We do not propose `reduce_first` here. We first explain how `reduce_first` relates to the difference between a reduction's
@@ -742,7 +751,8 @@ mathematically the identity.
 1. Users could always implement `reduce_first` themselves, by extracting the first element from the sequence and using it
 as the initial value in `reduce`.
 1. Unlike `fold_left_first*` and `fold_right_last`, the `*reduce` algorithms are unordered.  As a result, there is no
-reason to privilege the first (or last) element of the range.  One could imagine an algorithm `reduce_any` that uses any element of the range as its initial value.
+reason to privilege the first (or last) element of the range.  One could imagine an algorithm `reduce_any` that uses any element
+of the range as its initial value.
 1. A parallel `reduce_first` would have potential performance issues.  Its computational loop would be less uniform. This
 could introduce branches and data misalignment.
 
@@ -786,8 +796,8 @@ We propose the following.
 The algorithms proposed by [@P3179R8] differ in the following ways.
 
 1. [@P3179R8] uses a range, not an iterator, as the output parameter (see Section 2.7).
-1. [@P3179R8] requires that the ranges be sized (see Section 2.8).
-1. [@P3179R8] requires random access ranges (see Section 2.6).
+2. [@P3179R8] requires that the ranges be sized (see Section 2.8).
+3. [@P3179R8] requires random access ranges (see Section 2.6).
 
 Of these differences, (1) and (2) could apply generally to all `ranges` algorithms, so we adopt them for this proposal.
 
@@ -801,7 +811,7 @@ range-as-output overloads to coexist, so we follow [@P3179R8] by not proposing i
 
 Regarding (2), we make the parallel algorithms proposed here take sized random access ranges, as [@P3179R8] does.
 For consistency, we also propose that the output ranges be sized. As a result, any parallel algorithms with an output range
-need to return both an iterator to one past the last element of the input, and an iterator to one past the last element of
+need to return both an iterator to one past the last element of the output, and an iterator to one past the last element of
 the input. This tells callers whether there was enough room in the output, and if not, where to start when processing the
 rest of the input. This includes all the `*{ex,in}clusive_scan` algorithms we propose.
 
@@ -899,12 +909,14 @@ types and the initial value are all floating-point types or specializations of `
 [linalg.algs.blas1.dot]{- .sref} 7.)  For ranges reduction algorithms, we expect a larger audience of users and thus prefer
 consistency with `fold_*`'s return type.
 
-## Constraining parallel ranges numeric algorithms
+## Constraining numeric ranges algorithms
 
-1. We use the same constraints as `fold_left` and `fold_right` to constrain the binary operator of `reduce` and `*_scan`.
-1. We imitate C++17 parallel algorithms and [linalg]{- .sref} ([@P1673R13]) by using *GENERALIZED_NONCOMMUTATIVE_SUM* and
+In summary,
+
+- We use the same constraints as `fold_left` and `fold_right` to constrain the binary operator of `reduce` and `*_scan`.
+- We imitate C++17 parallel algorithms and [linalg]{- .sref} ([@P1673R13]) by using *GENERALIZED_NONCOMMUTATIVE_SUM* and
 *GENERALIZED_SUM* to describe the behavior of `reduce` and `*_scan`.
-1. Otherwise, we follow the approach of [@P3179R8] ("C++ Parallel Range Algorithms").
+- Otherwise, we follow the approach of [@P3179R8] ("C++ Parallel Range Algorithms").
 
 [@P3179R8], which is in the last stages of wording review, defines parallel versions of many `ranges` algorithms in the C++
 Standard Library. (The "parallel version of an algorithm" is an overload of an algorithm whose first parameter is an
@@ -932,7 +944,7 @@ algorithms. This means that the algorithms will not be selected for overload res
 the required operations. It further means that algorithms could (at least in theory) dispatch based on properties like
 whether the element type's binary operation is commutative. The concepts include both syntactic and semantic constraints.
 
-WG21 has not expressed a consensus on [@P1813R0]'s approach. LEWGI reviewed [@P1813R0] at the Belfast meeting in November
+WG21 has not expressed a consensus on [@P1813R0]'s approach. LEWG reviewed [@P1813R0] at the Belfast meeting in November
 2019, but did not forward the proposal and wanted to see it again. Two other proposals express something more like WG21's
 consensus on constraining the numeric algorithms: [@P2214R2], "A Plan for C++23 Ranges,"
 [@P1673R13], "A free function linear algebra interface based on the BLAS," which defines mdspan-based analogs of the
@@ -977,7 +989,7 @@ position.) We express what `reduce` does using *GENERALIZED_SUM*.
 ## Enabling list-initialization for proposed algorithms
 
 Our proposal follows the same principles as described in [@P2248R8] paper. We want to enable the use case with constructing
-`init` from curvy braces.
+`init` from curly braces.
 
 ```c++
 #include <cassert>
@@ -998,7 +1010,7 @@ for the new set of algorithms because `fold_` family already has this feature.
 
 # Implementation
 
-The Intel oneAPI DPC++ library ([oneDPL](https://github.com/uxlfoundation/oneDPL)) has deployment experience. The
+The oneAPI DPC++ library ([oneDPL](https://github.com/uxlfoundation/oneDPL)) has deployment experience. The
 implementation is done as experimental with the following deviations from this proposal:
 
 - Algorithms do not have constraints
