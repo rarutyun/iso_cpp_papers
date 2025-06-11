@@ -95,7 +95,7 @@ other `ranges` algorithms.  We carefully read the two proposals [@P2214R2], "A P
 [@P2760R1], "A Plan for C++26 Ranges," in order to inform our algorithm selections.  In some cases that we will explain
 below, usability and performance concerns led us to disagree with their conclusions.
 
-### `transform_*` algorithms (and/or projections)
+### We propose to include all `*_reduce` and `*_scan` algorithms
 
 #### Summary
 
@@ -546,7 +546,7 @@ For users who are not concerned about the order of operations and who want the d
 but the inner product that is the dot product.  Calling them `dot` has the added benefit that they represent the same
 mathematical computation as `std::linalg::dot`.
 
-### Existing views replace some other algorithms
+### Other existing algorithms can be replaced with views
 
 #### `iota`
 
@@ -582,6 +582,23 @@ single-dimensional. It could not be used straightforwardly for finite-difference
 equations, for example. All this makes an `adjacent_transform` algorithm a lower-priority task.
 
 We do not propose `adjacent_transform` for the reasons described above.
+
+#### `partial_sum`
+
+The `partial_sum` algorithm performs operations sequentially. The existing ranges library does not have an equivalent
+algorithm with this left-to-right sequential behavior, nor do we propose such an algorithm. For users who want this
+behavior, [@P2760R1] suggests a view instead of an algorithm. [@P3351R2], "`views::scan`," proposes this view; it
+is currently in SG9 (Ranges Study Group) review.
+
+Users of `partial_sum` who are not concerned about the order of operations can call `inclusive_scan` instead, which we
+propose here. We considered adding a convenience wrapper for the same special case of an inclusive prefix plus-scan that
+`partial_sum` supports. However, names like `partial_sum` or `prefix_sum` would obscure whether this is an inclusive or
+exclusive scan. Also, we already have `std::partial_sum` that operates in order. Using the same name as a convenient wrapper
+on top of out-of-order `*_scan`, we propose in the paper, is misleading. We think it's not a very convenient convenience
+wrapper if users have to look these aspects up every time they use it.
+
+If WG21 did want a convenience wrapper, one option would be to give this common use case a longer but more explicit name,
+like `inclusive_sum_scan`.
 
 ### We don't propose "the lost algorithm" (noncommutative parallel reduce)
 
@@ -619,156 +636,6 @@ with a two-sided identity element.
 This proposal leaves the described algorithm out of scope. We think the right way would be to propose a new algorithm with
 a distinct name. A reasonable choice of name would be `fold` (just `fold` by itself, not `fold_left` or `fold_right`).
 
-### We don't propose `partial_sum`
-
-The `partial_sum` algorithm performs operations sequentially. The existing ranges library does not have an equivalent
-algorithm with this left-to-right sequential behavior, nor do we propose such an algorithm. For users who want this
-behavior, [@P2760R1] suggests a view instead of an algorithm. [@P3351R2], "`views::scan`," proposes this view; it
-is currently in SG9 (Ranges Study Group) review.
-
-Users of `partial_sum` who are not concerned about the order of operations can call `inclusive_scan` instead, which we
-propose here. We considered adding a convenience wrapper for the same special case of an inclusive prefix plus-scan that
-`partial_sum` supports. However, names like `partial_sum` or `prefix_sum` would obscure whether this is an inclusive or
-exclusive scan. Also, we already have `std::partial_sum` that operates in order. Using the same name as a convenient wrapper
-on top of out-of-order `*_scan`, we propose in the paper, is misleading. We think it's not a very convenient convenience
-wrapper if users have to look these aspects up every time they use it.
-
-If WG21 did want a convenience wrapper, one option would be to give this common use case a longer but more explicit name,
-like `inclusive_sum_scan`.
-
-### We don't propose `reduce_first`
-
-Section 5.1 of [@P2760R1] asks whether the Standard Library should have a `reduce_first` algorithm. Analogously to
-`fold_left_first`, `reduce_first` would use the first element of the range as the initial value of the reduction operation.
-One application of `reduce_first` is to support binary operations that lack a natural identity element to serve as the
-initial value. An example would be `min` on a range of `int` values, where callers would have no way to tell if `INT_MAX`
-represents an actual value in the range, or a fake "identity" element (that callers may get as a result when the range is
-empty).
-
-We do not propose `reduce_first` here. We first explain how `reduce_first` relates to the difference between a reduction's
-initial value and its identity element.  We then list designs of other parallel programming models, and outline arguments
-against and for `reduce_first`.
-
-#### Reduction's initial value vs. its identity
-
-It's important to distinguish between a reduction's initial value, and its identity element. C++17's `std::reduce` takes an
-optional initial value `T init` that is included in the terms of the reduction. This is not necessarily the same as the
-identity element for a reduction, which is a value that does not change the reduction's result, no matter how many times it
-is included in the sum. The following example illustrates.
-
-```c++
-std::vector<float> v{5.0f, 7.0f, 11.0f};
-
-// Default initial value is float{}, which is 0.0f.
-float result = std::reduce(v.begin(), v.end());
-assert(result == 23.0f);
-
-// Initial value happens to be the identity in this case.
-result = std::reduce(v.begin(), v.end(), 0.0f);
-assert(result == 23.0f);
-
-// Initial value is NOT the identity in this case.
-float result_plus_3 = std::reduce(v.begin(), v.end(), 3.0f);
-assert(result_plus_3 == 26.0f);
-
-// Including arbitrarily many copies of the identity element
-// does not change the reduction result.
-std::vector<float> v2{5.0f, 0.0f, 7.0f, 0.0f, 0.0f, 11.0f, 0.0f};
-result = std::reduce(v.begin(), v.end());
-assert(result == 23.0f);
-result = std::reduce(v.begin(), v.end(), 0.0f);
-assert(result == 23.0f);
-```
-
-Both the initial value and the identity have a purpose in parallelization. If an identity `id` for a binary operator `op`
-is known, then here is a natural way to parallelize `reduce(`$R$`, init, op)` over $P$ processors.
-
-1. Partition the range $R$ into $P$ distinct subranges $R_p$
-1. Compute a local result $L_p$ `= reduce(`$R_p$`, id, op)` (with `id` as the initial value) on each processor $p$
-1. Reduce over the range of $L_p$ local results with `init` as the initial value
-
-The initial value parameter of `reduce` also lets users express a "running reduction" where the whole range is not
-available all at once and users need to call `reduce` repeatedly.
-
-#### C++ types already have a natural default identity
-
-The `std::linalg` linear algebra library in the Working Draft for C++26 says, "A value-initialized object of linear algebra
-value type shall act as the additive identity" ([linalg.reqs.val]{- .sref} 3). That is, `T{}` is the natural default identity
-value for a custom reduction over `T`.
-
-This is C++, not C or Fortran 77. We have constructors! We can define types that wrap other types. If `U`'s default
-constructor doesn't have the desired behavior, we can wrap it in `T` and make `T`'s default constructor have the desired
-behavior.
-
-#### Parallelization needs `reduce_first` anyway
-
-What happens to a parallel implementation of C++17 `std::reduce` with a user-defined binary operation, where the Standard
-offers no way to know the operation's identity, if it exists? Each processor must be able to compute its subrange's local
-result by starting with the first element of the subrange. That is, each processor must do the equivalent of`reduce_first`.
-That results in the following parallelization approach.
-
-1. Partition the range $R$ into $P$ distinct subranges $R_p$
-1. Compute a local result $L_p$ `= reduce_first(`$R_p$`, op)` on each processor $p$
-1. Reduce over the range of $L_p$ local results with `init` as the initial value
-
-#### Other parallel programming models
-
-Other parallel programming models provide all combinations of design options. Some compute only `reduce_first`, some only
-`reduce`, and some compute both. Some have a way to specify only an identity element, some only an initial value, and some
-both.
-
-MPI (the Message Passing Interface for distributed-memory parallel communication) has reductions and lets users define
-custom binary operations. MPI's reductions compute the analog of `reduce_first`.  Users have no way to specify either an
-initial value or an identity for their custom operations.
-
-In the <a href="https://j3-fortran.org/doc/year/23/23-007r1.pdf">Draft Fortran 2023 Standard</a>, the `REDUCE` clause
-permits specification of an identity element.
-
-OpenMP lets users specify the identity value (via an _initializer-clause_ `initializer(`_initializer-expr_`)`), which is
-"used as the initializer for private copies of reduction list items" (see the relevant section of the
-<a href="https://www.openmp.org/spec-html/5.0/openmpsu107.html">OpenMP 5.0 specification</a>).
-
-Kokkos lets users define the identity value for custom reduction result types, by giving the reducer class an
-`init(value_type& value)` member function that sets `value` to the identity.  (Please see the
-<a href="https://kokkos.org/kokkos-core-wiki/ProgrammingGuide/Custom-Reductions-Custom-Reducers.html">section on custom
-reducers in the Kokkos Programming Guide</a>.)
-
-The `std::linalg` linear algebra library in the Working Draft for C++26 says, "A value-initialized object of linear algebra
-value type shall act as the additive identity" ([linalg.reqs.val]{- .sref} 3).
-
-In Python's NumPy library,
-<a href="https://numpy.org/doc/stable/reference/generated/numpy.ufunc.reduce.html">`numpy.ufunc.reduce`</a> takes optional
-initial values. If not provided and the binary operation (a "universal function" (ufunc), effectively an elementwise binary
-operation on a possibly multidimensional array) has an identity, then the initial values default to the identity. If the
-binary operation has no identity or the initial values are `None`, then this works like `reduce_first`.
-
-#### Arguments against `reduce_first`
-
-1. [@P3179R8] already proposes parallel ranges overloads of `min_element`, `max_element`, and `minmax_element`.  Minima and
-maxima are the main use cases that lack a natural identity element.
-1. In practice, most custom binary operations have some value that can work like an identity element, even if it's not
-mathematically the identity.
-1. Users could always implement `reduce_first` themselves, by extracting the first element from the sequence and using it
-as the initial value in `reduce`.
-1. Unlike `fold_left_first*` and `fold_right_last`, the `*reduce` algorithms are unordered.  As a result, there is no
-reason to privilege the first (or last) element of the range.  One could imagine an algorithm `reduce_any` that uses any element
-of the range as its initial value.
-1. A parallel `reduce_first` would have potential performance issues.  Its computational loop would be less uniform. This
-could introduce branches and data misalignment.
-
-#### Arguments for `reduce_first`
-
-1. Parallelization of C++17 `std::reduce` requires the equivalent of `reduce_first` anyway.
-1. Even though `min_element`, `max_element`, and `minmax_element` exist, users may still want to combine multiple
-reductions into a single pass, where some of the reductions are min and/or max, while others have a natural identity.
-As an example of (2), users may want the minimum of an array of integers (with no natural identity), along with the least
-index of the array element with the minimum value (whose natural identity is zero).  This happens often enough that MPI
-(the Message Passing Interface for distributed-memory parallel computing) has predefined reduction operations for minimum
-and its index (`MINLOC`) and maximum and its index (`MAXLOC`).  On the other hand, even `MINLOC` and `MAXLOC` have
-reasonable choices of fake "identity" elements that work in practice, e.g., for `MINLOC`, `INT_MAX` for the minimum value
-and `INT_MAX` for the least array index (where users are responsible for testing that the returned array index is in
-bounds).
-
 ### We don't propose `reduce_with_iter`
 
 A hypothetical `reduce_with_iter` algorithm would look like `fold_left_with_iter`, but would permit reordering of binary
@@ -782,6 +649,44 @@ this makes it easier to use, and improves consistency with other `ranges` algori
 `ranges::any_of`.  It is also consistent with [@P3179R8].  Furthermore, even if a `reduce_with_iter` algorithm were to
 exist, `reduce` should not be specified in terms of it. This is for performance reasons, as Section 4.4 of [@P2322R6]
 elaborates for `fold_left` and `fold_left_with_iter`.
+
+### We don't propose `reduce_first`
+
+Section 5.1 of [@P2760R1] asks whether the Standard Library should have a `reduce_first` algorithm. Analogously to
+`fold_left_first`, `reduce_first` would use the first element of the range as the initial value of the reduction operation.
+One application of `reduce_first` is to support binary operations that lack a natural identity element to serve as the
+initial value. An example would be `min` on a range of `int` values, where callers would have no way to tell if `INT_MAX`
+represents an actual value in the range, or a fake "identity" element (that callers may get as a result when the range is
+empty).
+
+We do not propose `reduce_first` here, only outline arguments against and for adding it.
+
+#### Arguments against `reduce_first`
+
+1. [@P3179R8] already proposes parallel ranges overloads of `min_element`, `max_element`, and `minmax_element`.  Minima and
+maxima are the main use cases that lack a natural identity element.
+1. Users could always implement `reduce_first` themselves, by extracting the first element from the sequence and using it
+as the initial value in `reduce`.
+1. In practice, most custom binary operations have some value that can work like a neutral initial value, even if it's not
+mathematically the identity.
+1. Unlike `fold_left_first*` and `fold_right_last`, the `*reduce` algorithms are unordered.  As a result, there is no
+reason to privilege the first (or last) element of the range.  One could imagine an algorithm `reduce_any` that uses any element
+of the range as its initial value.
+1. For parallel execution, `reduce_first` does not fully address lack of identity, and potentially creates a suboptimal execution flow.
+See [](#initial-value-vs-identity) for more detailed analysis.
+
+#### Arguments for `reduce_first`
+
+1. Some equivalent of `reduce_first` can be used as a building block for parallel reduction with unknown identity, if no other solution is proposed.
+1. Even though `min_element`, `max_element`, and `minmax_element` exist, users may still want to combine multiple
+reductions into a single pass, where some of the reductions are min and/or max, while others have a natural identity.
+As an example, users may want the minimum of an array of integers (with no natural identity), along with the least
+index of the array element with the minimum value (whose natural identity is zero).  This happens often enough that MPI
+(the Message Passing Interface for distributed-memory parallel computing) has predefined reduction operations for minimum
+and its index (`MINLOC`) and maximum and its index (`MAXLOC`).  On the other hand, even `MINLOC` and `MAXLOC` have
+reasonable choices of fake "identity" elements that work in practice, e.g., for `MINLOC`, `INT_MAX` for the minimum value
+and `INT_MAX` for the least array index (where users are responsible for testing that the returned array index is in
+bounds).
 
 ## Range categories and return types
 
@@ -833,6 +738,145 @@ proposal.
 
 [@P2902R1] proposes to add `constexpr` to the parallel algorithms. [@P3179R8] does not object to this; see Section 2.10.
 We continue the approach of [@P3179R8] in not opposing [@P2902R1]'s approach, but also not depending on it.
+
+## Reduction's initial value vs. its identity element {#initial-value-vs-identity}
+
+It's important to distinguish between a reduction's initial value, and its identity element. C++17's `std::reduce` takes an
+optional initial value `T init` that is included in the terms of the reduction. This is not necessarily the same as the
+identity element for a reduction, which is a value that does not change the reduction's result, no matter how many times it
+is included. The following example illustrates.
+
+```c++
+std::vector<float> v{5.0f, 7.0f, 11.0f};
+
+// Default initial value is float{}, which is 0.0f.
+// It is also the identity for std::plus<>, the default operation 
+float result = std::reduce(v.begin(), v.end());
+assert(result == 23.0f);
+
+// Initial value happens to be the identity in this case.
+result = std::reduce(v.begin(), v.end(), 0.0f);
+assert(result == 23.0f);
+
+// Initial value is NOT the identity in this case.
+float result_plus_3 = std::reduce(v.begin(), v.end(), 3.0f);
+assert(result_plus_3 == 26.0f);
+
+// Including arbitrarily many copies of the identity element
+// does not change the reduction result.
+std::vector<float> v2{5.0f, 0.0f, 7.0f, 0.0f, 0.0f, 11.0f, 0.0f};
+result = std::reduce(v.begin(), v.end());
+assert(result == 23.0f);
+result = std::reduce(v.begin(), v.end(), 0.0f);
+assert(result == 23.0f);
+```
+
+The identity element can serve as an initial value, but not vice versa. This is especially important for parallelism.
+
+#### Initial value matters most for sequential reduction
+
+From the serial execution perspective, it is easy to miss importance of the reduction identity. Let's consider typical code
+that sums elements of an indexed array.
+
+```c++
+float sum = 0.0f;
+for (size_t i = 0; i<array_size; ++i)
+    sum += a[i];
+```
+
+The identity element `0.0f` is used to initialize the *accumulator* where the array values then sum up. However, if an initial
+value for the reduction is provided, it replaces the identity in the code above. An implementation of `reduce` does not
+therefore need to know the identity of its operation when an initial value is provided.
+
+The initial value parameter of `reduce` also lets users express a "running reduction" where the whole range is not
+available all at once and users need to call `reduce` repeatedly.
+
+#### Identity element matters most for parallel reduction
+
+The situation is different for parallel execution, because there are more than one accumulator to initialize. Any parallel
+reduction somehow distributes the data over multiple threads of execution, and each one uses a local accumulator for its part
+of the job. The initial value can be used to initialize at most one of those; for others, something else is needed.
+
+If an identity `id` for a binary operator `op` is known, then here is a natural way to parallelize `reduce(`$R$`, init, op)`
+over $P$ processors using the serial version as a building block.
+
+1. Partition the range $R$ into $P$ distinct subsequences $S_p$.
+2. On each processor $p$ compute a local result $L_p$ `= reduce(`$S_p$`, id, op)` (with `id` as the initial value).
+3. Reduce over the local results $L_p$ with `init` as the initial value.
+
+It's not the only and not necessarily the best way though. For example, an implementation for the `unseq` policy probably
+will not call the serial algorithm. Yet it also needs to somehow initialize local accumulators for each SIMD lane.
+
+#### What to do when the identity element is unknown
+
+Then, what happens to a parallel implementation of C++17 `std::reduce` with a user-defined binary operation, where the Standard
+offers no way to know the operation's identity, if it exists? There are two other ways to initialize local accumulators:
+either with values from the respective subsequences or with the reduction of two such values.
+
+The type requirements of `std::reduce` seem to assume the second approach, as the type of the result is not required to be copy-constructible.
+
+```c++
+// using random access iterators for simplicity
+auto sum = std::move(op(first[0], first[1])));
+size_t sz = last - first;
+for (size_t i = 2; i < sz; ++i)
+    sum = std::move(op(sum, first[i]));
+```
+
+While technically doable, this approach is often suboptimal. In many use cases, the iteration space and the data storage are aligned
+(e.g. to `std::hardware_constructive_interference_size` or to the SIMD width) to allow for more efficient use of HW.
+The loop bound changes shown above break this alignment, affecting code efficiency.
+
+At a glance, a hypothetical `reduce_first` could be used in an alternative solution where it would be a serial building block
+in the step (2) above, instead of `reduce` with `id`. But as we noted, such an implementation is not always the best.
+
+#### Other parallel programming models
+
+Other parallel programming models provide all combinations of design options. Some compute only `reduce_first`, some only
+`reduce`, and some compute both. Some have a way to specify only an identity element, some only an initial value, and some
+both.
+
+MPI (the Message Passing Interface for distributed-memory parallel communication) has reductions and lets users define
+custom binary operations. MPI's reductions compute the analog of `reduce_first`.  Users have no way to specify either an
+initial value or an identity for their custom operations.
+
+In the [Draft Fortran 2023 Standard](https://j3-fortran.org/doc/year/23/23-007r1.pdf), the `REDUCE` clause
+permits specification of an identity element.
+
+OpenMP lets users specify the identity value (via an _initializer-clause_ `initializer(`_initializer-expr_`)`), which is
+"used as the initializer for private copies of reduction list items" (see the relevant section of the [OpenMP 5.0
+specification](https://www.openmp.org/spec-html/5.0/openmpsu107.html)).
+
+Kokkos lets users define the identity value for custom reduction result types, by giving the reducer class an
+`init(value_type& value)` member function that sets `value` to the identity (see the [section on custom reducers
+in the Kokkos Programming Guide](https://kokkos.org/kokkos-core-wiki/ProgrammingGuide/Custom-Reductions-Custom-Reducers.html)).
+
+oneTBB asks users to specify the identity value as an argument to `parallel_reduce` function template (see the [relevant
+oneTBB specification page](https://oneapi-spec.uxlfoundation.org/specifications/oneapi/latest/elements/onetbb/source/algorithms/functions/parallel_reduce_func)).
+
+SYCL lets users specify the identity value by specializing `sycl::known_identity` class template for a custom reduction operation
+(see the [relevant section of the SYCL specification](https://registry.khronos.org/SYCL/specs/sycl-2020/html/sycl-2020.html#sec:reduction)).
+
+The `std::linalg` linear algebra library in the Working Draft for C++26 says, "A value-initialized object of linear algebra
+value type shall act as the additive identity" ([linalg.reqs.val]{- .sref} 3).
+
+In Python's NumPy library, [`numpy.ufunc.reduce`](https://numpy.org/doc/stable/reference/generated/numpy.ufunc.reduce.html) takes optional
+initial values. If not provided and the binary operation (a "universal function" (ufunc), effectively an elementwise binary
+operation on a possibly multidimensional array) has an identity, then the initial values default to the identity. If the
+binary operation has no identity or the initial values are `None`, then this works like `reduce_first`.
+
+#### Conclusions
+
+Based on the above considerations, we conclude that there are good reasons to consider a mechanism for users to explicitly
+specify the identity element for parallel reduction. There are options of how that could be achieved, of which we list a few.
+
+- Add an optional extra parameter for the value of identity, defaulting to value initialization.
+- Change the meaning of the `init` parameter for parallel algorithms to represent identity instead of the initial value.
+- Provide a customization point similar to `sycl::known_identity` that also defaults to value initialization but can be
+  specialized for a given operation.
+- Similarly to `std::linalg`, require that for numeric parallel algorithms a value-initialized object shall act as the identity element.
+
+At this point, we do not propose any of these options. We would like to hear feedback from SG1 and SG9 on exploring this further.
 
 ## `ranges::reduce` design
 
