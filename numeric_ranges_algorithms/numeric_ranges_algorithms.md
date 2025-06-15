@@ -793,7 +793,8 @@ available all at once and users need to call `reduce` repeatedly.
 
 #### Identity element matters most for parallel reduction
 
-The situation is different for parallel execution, because there is more than one accumulator to initialize. Any parallel
+The situation is different for parallel execution, because there are more than one accumulators to initialize. Any parallel
+
 reduction somehow distributes the data over multiple threads of execution, and each one uses a local accumulator for its part
 of the job. The initial value can be used to initialize at most one of those; for others, something else is needed.
 
