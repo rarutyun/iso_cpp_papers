@@ -578,8 +578,8 @@ time-dependent differential equations, each of which is an adjacent difference p
 want to express that as a one-pass algorithm, they might need to combine more than two input ranges, possibly using a
 combination of `transform_view`s and `adjacent_transform_view`s.  This ultimately would be hard to express as a single
 "`ranges::adjacent_transform`" algorithm invocation. Furthermore, `ranges::adjacent_transform` is necessarily
-single-dimensional. It could not be used in a straightforward manner for finite-difference methods for solving partial differential
-equations, for example. All this makes an `adjacent_transform` algorithm a lower-priority task.
+single-dimensional. For example, it cannot be used straightforwardly in finite-difference methods for solving partial 
+differential equations. All this makes an `adjacent_transform` algorithm a lower-priority task.
 
 We do not propose `adjacent_transform` for the reasons described above.
 
