@@ -573,12 +573,12 @@ being not trivially copyable even for some cases where `F` is trivially copyable
 `std::minus` function object.
 
 In our experience, adjacent differences or their generalization are often used in combination with other ranges. For
-example, finite-difference methods (such as Runge-Kutta schemes) for solving time-dependent differential equations may need
-to add together multiple ranges, each of which is an adjacent difference possibly composed with other functions. If users
+example, finite-difference methods (such as Runge-Kutta schemes)  may need to add together multiple ranges for solving 
+time-dependent differential equations, each of which is an adjacent difference possibly composed with other functions. If users
 want to express that as a one-pass algorithm, they might need to combine more than two input ranges, possibly using a
 combination of `transform_view`s and `adjacent_transform_view`s.  This ultimately would be hard to express as a single
 "`ranges::adjacent_transform`" algorithm invocation. Furthermore, `ranges::adjacent_transform` is necessarily
-single-dimensional. It could not be used straightforwardly for finite-difference methods for solving partial differential
+single-dimensional. It could not be used in a straightforward manner for finite-difference methods for solving partial differential
 equations, for example. All this makes an `adjacent_transform` algorithm a lower-priority task.
 
 We do not propose `adjacent_transform` for the reasons described above.
@@ -667,10 +667,10 @@ We do not propose `reduce_first` here, only outline arguments against and for ad
 maxima are the main use cases that lack a natural identity element.
 1. Users could always implement `reduce_first` themselves, by extracting the first element from the sequence and using it
 as the initial value in `reduce`.
-1. In practice, most custom binary operations have some value that can work like a neutral initial value, even if it's not
+1. In practice, most custom binary operations have some value that can work, like a neutral initial value, even if it's not
 mathematically the identity.
 1. Unlike `fold_left_first*` and `fold_right_last`, the `*reduce` algorithms are unordered.  As a result, there is no
-reason to privilege the first (or last) element of the range.  One could imagine an algorithm `reduce_any` that uses any element
+reason to priviledge the first (or last) element of the range.  One could imagine an algorithm, `reduce_any`, that uses any element
 of the range as its initial value.
 1. For parallel execution, `reduce_first` does not fully address lack of identity, and potentially creates a suboptimal execution flow.
 See [](#initial-value-vs-identity) for more detailed analysis.
@@ -685,7 +685,7 @@ index of the array element with the minimum value (whose natural identity is zer
 (the Message Passing Interface for distributed-memory parallel computing) has predefined reduction operations for minimum
 and its index (`MINLOC`) and maximum and its index (`MAXLOC`).  On the other hand, even `MINLOC` and `MAXLOC` have
 reasonable choices of fake "identity" elements that work in practice, e.g., for `MINLOC`, `INT_MAX` for the minimum value
-and `INT_MAX` for the least array index (where users are responsible for testing that the returned array index is in
+and also `INT_MAX` for the least array index (where users are responsible for testing that the returned array index is in
 bounds).
 
 ## Range categories and return types
@@ -717,7 +717,7 @@ range-as-output overloads to coexist, so we follow [@P3179R8] by not proposing i
 Regarding (2), we make the parallel algorithms proposed here take sized random access ranges, as [@P3179R8] does.
 For consistency, we also propose that the output ranges be sized. As a result, any parallel algorithms with an output range
 need to return both an iterator to one past the last element of the output, and an iterator to one past the last element of
-the input. This tells callers whether there was enough room in the output, and if not, where to start when processing the
+the input. This tells callers whether there was enough room in the output, and if not, where to start while processing the
 rest of the input. This includes all the `*{ex,in}clusive_scan` algorithms we propose.
 
 Difference (3) relates to [@P3179R8] only proposing parallel algorithms. It would make sense for us to relax this
@@ -793,7 +793,7 @@ available all at once and users need to call `reduce` repeatedly.
 
 #### Identity element matters most for parallel reduction
 
-The situation is different for parallel execution, because there are more than one accumulator to initialize. Any parallel
+The situation is different for parallel execution, because there is more than one accumulator to initialize. Any parallel
 reduction somehow distributes the data over multiple threads of execution, and each one uses a local accumulator for its part
 of the job. The initial value can be used to initialize at most one of those; for others, something else is needed.
 
@@ -1026,9 +1026,9 @@ lets us imitate the approach of [@P3179R8] in adding ranges overloads.
 
 Our approach combines the syntactic constraints used for the `fold_*` family of algorithms, with the semantic approach of
 [@P1673R13] and the C++17 parallel numeric algorithms. For example, we constrain `reduce`'s binary operation with both
-_`indirectly-binary-left-foldable`_ and _`indirectly-binary-right-foldable`_. (This expresses that if the binary operation
+_`indirectly-binary-left-foldable`_ and _`indirectly-binary-right-foldable`_ (This expresses that if the binary operation
 is called with an argument of the initial value's type `T`, then that argument can be in either the first or second
-position.) We express what `reduce` does using *GENERALIZED_SUM*.
+position.). We express what `reduce` does using *GENERALIZED_SUM*.
 
 ## Enabling list-initialization for proposed algorithms
 
