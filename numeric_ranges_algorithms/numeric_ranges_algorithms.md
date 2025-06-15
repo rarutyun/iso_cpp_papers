@@ -670,7 +670,7 @@ as the initial value in `reduce`.
 1. In practice, most custom binary operations have some value that can work, like a neutral initial value, even if it's not
 mathematically the identity.
 1. Unlike `fold_left_first*` and `fold_right_last`, the `*reduce` algorithms are unordered.  As a result, there is no
-reason to priviledge the first (or last) element of the range.  One could imagine an algorithm, `reduce_any`, that uses any element
+reason to privilege the first (or last) element of the range.  One could imagine an algorithm, `reduce_any`, that uses any element
 of the range as its initial value.
 1. For parallel execution, `reduce_first` does not fully address lack of identity, and potentially creates a suboptimal execution flow.
 See [](#initial-value-vs-identity) for more detailed analysis.
