@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2025-06-02" />
+  <meta name="dcterms.date" content="2025-06-18" />
   <title>Reconsider parallel `ranges::rotate_copy` and
 `ranges::reverse_copy`</title>
   <style>
@@ -426,14 +426,14 @@ and <code class="sourceCode cpp">ranges<span class="op">::</span>reverse_copy</c
   <tr>
     <td>Document #:</td>
     <td>
-      P3709R1
+      P3709R2
       [<a href="https://wg21.link/P3709">Latest</a>]
       [<a href="https://wg21.link/P3709/status">Status</a>]
     </td>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2025-06-02</td>
+    <td>2025-06-18</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -465,24 +465,34 @@ design<span></span></a></li>
 <li><a href="#reverse_copy_design" id="toc-reverse_copy_design"><span class="toc-section-number">3</span>
 <code class="sourceCode cpp">reverse_copy</code> recommended
 design<span></span></a></li>
-<li><a href="#alternative_design" id="toc-alternative_design"><span class="toc-section-number">4</span> Alternative
+<li><a href="#return_type_naming" id="toc-return_type_naming"><span class="toc-section-number">4</span> Return types naming
+consideration<span></span></a></li>
+<li><a href="#alternative_design" id="toc-alternative_design"><span class="toc-section-number">5</span> Alternative
 design<span></span></a></li>
-<li><a href="#wording" id="toc-wording"><span class="toc-section-number">5</span> Wording<span></span></a>
+<li><a href="#wording" id="toc-wording"><span class="toc-section-number">6</span> Wording<span></span></a>
 <ul>
-<li><a href="#modify_alg_syn" id="toc-modify_alg_syn"><span class="toc-section-number">5.1</span> Modify
+<li><a href="#modify_alg_syn" id="toc-modify_alg_syn"><span class="toc-section-number">6.1</span> Modify
 <span><span>[algorithm.syn]</span></span><span></span></a></li>
-<li><a href="#modify_reverse" id="toc-modify_reverse"><span class="toc-section-number">5.2</span> Modify
+<li><a href="#modify_reverse" id="toc-modify_reverse"><span class="toc-section-number">6.2</span> Modify
 <span><span>[alg.reverse]</span></span><span></span></a></li>
-<li><a href="#modify_rotate" id="toc-modify_rotate"><span class="toc-section-number">5.3</span> Modify
+<li><a href="#modify_rotate" id="toc-modify_rotate"><span class="toc-section-number">6.3</span> Modify
 <span><span>[alg.rotate]</span></span><span></span></a></li>
 </ul></li>
-<li><a href="#revision_history" id="toc-revision_history"><span class="toc-section-number">6</span> Revision history<span></span></a>
+<li><a href="#revision_history" id="toc-revision_history"><span class="toc-section-number">7</span> Revision history<span></span></a>
 <ul>
-<li><a href="#r0_r1" id="toc-r0_r1"><span class="toc-section-number">6.1</span> R0 =&gt; R1<span></span></a></li>
+<li><a href="#r1_r2" id="toc-r1_r2"><span class="toc-section-number">7.1</span> R1 =&gt; R2<span></span></a></li>
+<li><a href="#r0_r1" id="toc-r0_r1"><span class="toc-section-number">7.2</span> R0 =&gt; R1<span></span></a></li>
 </ul></li>
-<li><a href="#acknowledgments" id="toc-acknowledgments"><span class="toc-section-number">7</span>
+<li><a href="#polls" id="toc-polls"><span class="toc-section-number">8</span> Polls<span></span></a>
+<ul>
+<li><a href="#sg9_sofia_2025" id="toc-sg9_sofia_2025"><span class="toc-section-number">8.1</span> SG9, Sofia,
+2025<span></span></a></li>
+<li><a href="#lewg_sofia_2025" id="toc-lewg_sofia_2025"><span class="toc-section-number">8.2</span> LEWG, Sofia,
+2025<span></span></a></li>
+</ul></li>
+<li><a href="#acknowledgments" id="toc-acknowledgments"><span class="toc-section-number">9</span>
 Acknowledgements<span></span></a></li>
-<li><a href="#bibliography" id="toc-bibliography"><span class="toc-section-number">8</span> References<span></span></a></li>
+<li><a href="#bibliography" id="toc-bibliography"><span class="toc-section-number">10</span> References<span></span></a></li>
 </ul>
 </div>
 <h1 class="unnumbered unlisted" id="abstract">Abstract<a href="#abstract" class="self-link"></a></h1>
@@ -1018,7 +1028,73 @@ are:</p>
 <span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span>
 <span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a><span class="kw">inline</span> <span class="kw">constexpr</span> reverse_copy_fn reverse_copy<span class="op">{}</span>;</span></code></pre></div>
-<h1 data-number="4" id="alternative_design"><span class="header-section-number">4</span> Alternative design<a href="#alternative_design" class="self-link"></a></h1>
+<h1 data-number="4" id="return_type_naming"><span class="header-section-number">4</span> Return types naming
+consideration<a href="#return_type_naming" class="self-link"></a></h1>
+<p>The current design for
+<code class="sourceCode cpp">rotate_copy</code> returns the stop points
+for two subranges - <code class="sourceCode cpp"><span class="op">[</span>middle, last<span class="op">)</span></code>
+and <code class="sourceCode cpp"><span class="op">[</span>first, middle<span class="op">)</span></code>
+- in the input. It means that:</p>
+<ul>
+<li>for the empty output it returns <code class="sourceCode cpp"><span class="op">{</span>middle, first, out<span class="op">}</span></code></li>
+<li>for the output that is sufficient to take some elements from <code class="sourceCode cpp"><span class="op">[</span>middle, last<span class="op">)</span></code>
+it returns <code class="sourceCode cpp"><span class="op">{</span><em>stop_point</em>, first, out<span class="op">}</span></code></li>
+<li>for the output that is sufficient to take all elements from <code class="sourceCode cpp"><span class="op">[</span>middle, last<span class="op">)</span></code>
+it returns <code class="sourceCode cpp"><span class="op">{</span>last, first, out<span class="op">}</span></code></li>
+<li>for the output that is sufficient to take all elements from <code class="sourceCode cpp"><span class="op">[</span>middle, last<span class="op">)</span></code>
+and some elements from <code class="sourceCode cpp"><span class="op">[</span>first, middle<span class="op">)</span></code>
+it returns <code class="sourceCode cpp"><span class="op">{</span>last, <em>stop_point</em>, out<span class="op">}</span></code></li>
+<li>for the output that is sufficient to take all elements from <code class="sourceCode cpp"><span class="op">[</span>middle, last<span class="op">)</span></code>
+and all elements from <code class="sourceCode cpp"><span class="op">[</span>first, middle<span class="op">)</span></code>
+it returns <code class="sourceCode cpp"><span class="op">{</span>last, middle, out<span class="op">}</span></code></li>
+</ul>
+<p>There is a specific reason why the design is like that. The users can
+easily figure out what elements were not copied from the input without
+extra checks. In the current design with the names
+<code class="sourceCode cpp">in1</code> and
+<code class="sourceCode cpp">in2</code> those uncopied elements are
+<code class="sourceCode cpp"><span class="op">[</span>in1, last<span class="op">)</span></code>
+and <code class="sourceCode cpp"><span class="op">[</span>in2, middle<span class="op">)</span></code>.</p>
+<p>Аor <code class="sourceCode cpp">rotate_copy</code> the alternative
+names to <code class="sourceCode cpp">in1</code> and
+<code class="sourceCode cpp">in2</code> could be:</p>
+<ul>
+<li><code class="sourceCode cpp">stop1</code> and
+<code class="sourceCode cpp">stop2</code></li>
+<li><code class="sourceCode cpp">stop_right</code> and
+<code class="sourceCode cpp">stop_left</code></li>
+<li><code class="sourceCode cpp">stage1</code> and
+<code class="sourceCode cpp">stage2</code></li>
+<li>maybe something else along those lines</li>
+</ul>
+<p>Those names make sense for the current design but are they anyhow
+better than <code class="sourceCode cpp">in1</code> and
+<code class="sourceCode cpp">in2</code>? In our opinion - not really.
+Furthermore, to use them we need to introduce a new type to C++ standard
+library, which does not give any more clarity from our perspective.</p>
+<p>To conclude, we don’t see a good alternative, compared to what is
+already proposed in the paper, in terms of public data member names of
+<code class="sourceCode cpp">rotate_copy</code> return type.</p>
+<p>For <code class="sourceCode cpp">reverse_copy</code> the reasonably
+good alternatives for <code class="sourceCode cpp">in1</code> and
+<code class="sourceCode cpp">in2</code> could be:</p>
+<ul>
+<li><code class="sourceCode cpp">last</code> and
+<code class="sourceCode cpp">stop</code></li>
+<li><code class="sourceCode cpp">in</code> and
+<code class="sourceCode cpp">stop</code></li>
+<li><code class="sourceCode cpp">last</code> and
+<code class="sourceCode cpp">in</code></li>
+</ul>
+<p>Then the question is do we really want to introduce a new type to the
+C++ standard library for the sake of one algorithm only? Our
+recommendation is that we should not do it.</p>
+<p>To summarize, we believe that
+<code class="sourceCode cpp">in_in_out_result</code> is good enough type
+to be used that implies <code class="sourceCode cpp">in1</code> and
+<code class="sourceCode cpp">in2</code> names for public data
+members.</p>
+<h1 data-number="5" id="alternative_design"><span class="header-section-number">5</span> Alternative design<a href="#alternative_design" class="self-link"></a></h1>
 <p>There are the following alternatives to the proposed design:</p>
 <ul>
 <li>Keep the <span class="citation" data-cites="P3179R9"><a href="https://isocpp.org/files/papers/P3179R9.html" role="doc-biblioref">[P3179R9]</a></span> status quo. The concerns are:
@@ -1052,9 +1128,9 @@ have a consensus, authors’ preference is to remove parallel
 <code class="sourceCode cpp">reverse_copy</code> and
 <code class="sourceCode cpp">rotate_copy</code> from <span class="citation" data-cites="P3179R9"><a href="https://isocpp.org/files/papers/P3179R9.html" role="doc-biblioref">[P3179R9]</a></span> and add them later, possibly
 together with the serial “range-as-the-output” algorithms.</p>
-<h1 data-number="5" id="wording"><span class="header-section-number">5</span> Wording<a href="#wording" class="self-link"></a></h1>
+<h1 data-number="6" id="wording"><span class="header-section-number">6</span> Wording<a href="#wording" class="self-link"></a></h1>
 <p>The diff shown below is against <span class="citation" data-cites="P3179R9"><a href="https://isocpp.org/files/papers/P3179R9.html" role="doc-biblioref">[P3179R9]</a></span>.</p>
-<h2 data-number="5.1" id="modify_alg_syn"><span class="header-section-number">5.1</span> Modify <span><a href="https://wg21.link/algorithm.syn">[algorithm.syn]</a></span><a href="#modify_alg_syn" class="self-link"></a></h2>
+<h2 data-number="6.1" id="modify_alg_syn"><span class="header-section-number">6.1</span> Modify <span><a href="https://wg21.link/algorithm.syn">[algorithm.syn]</a></span><a href="#modify_alg_syn" class="self-link"></a></h2>
 <div>
 <div class="sourceCode" id="cb12"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>namespace ranges {</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  template&lt;class I, class O&gt;</span>
@@ -1112,7 +1188,7 @@ together with the serial “range-as-the-output” algorithms.</p>
 <span id="cb12-54"><a href="#cb12-54" aria-hidden="true" tabindex="-1"></a>      ranges::rotate_copy(Ep&amp;&amp; exec, R&amp;&amp; r, iterator_t&lt;R&gt; middle, OutR&amp;&amp; result_r);    <em>// freestanding-deleted</em></span>
 <span id="cb12-55"><a href="#cb12-55" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 </div>
-<h2 data-number="5.2" id="modify_reverse"><span class="header-section-number">5.2</span> Modify <span><a href="https://wg21.link/alg.reverse">[alg.reverse]</a></span><a href="#modify_reverse" class="self-link"></a></h2>
+<h2 data-number="6.2" id="modify_reverse"><span class="header-section-number">6.2</span> Modify <span><a href="https://wg21.link/alg.reverse">[alg.reverse]</a></span><a href="#modify_reverse" class="self-link"></a></h2>
 <div class="sourceCode" id="cb13"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>bidirectional_iterator I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S, weakly_incrementable O<span class="op">&gt;</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> indirectly_copyable<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> ranges<span class="op">::</span>reverse_copy_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
@@ -1186,7 +1262,7 @@ note</em> ]</span></span></del></span></p>
 <p><span class="marginalizedparent"><a class="marginalized">x</a></span>
 <em>Complexity</em>: Exactly
 <em><code class="sourceCode cpp">N</code></em> assignments.</p>
-<h2 data-number="5.3" id="modify_rotate"><span class="header-section-number">5.3</span> Modify <span><a href="https://wg21.link/alg.rotate">[alg.rotate]</a></span><a href="#modify_rotate" class="self-link"></a></h2>
+<h2 data-number="6.3" id="modify_rotate"><span class="header-section-number">6.3</span> Modify <span><a href="https://wg21.link/alg.rotate">[alg.rotate]</a></span><a href="#modify_rotate" class="self-link"></a></h2>
 <div class="sourceCode" id="cb15"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>forward_iterator I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S, weakly_incrementable O<span class="op">&gt;</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> indirectly_copyable<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">constexpr</span> ranges<span class="op">::</span>rotate_copy_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
@@ -1278,19 +1354,290 @@ note</em> ]</span></span></del></span></p>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  ranges<span class="op">::</span>rotate_copy_<span class="add" style="color: #006e28"><ins>truncated_</ins></span>result<span class="op">&lt;</span>borrowed_iterator_t<span class="op">&lt;</span>R<span class="op">&gt;</span>, borrowed_iterator_t<span class="op">&lt;</span>OutR<span class="op">&gt;&gt;</span></span>
 <span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    ranges<span class="op">::</span>rotate_copy<span class="op">(</span>Ep<span class="op">&amp;&amp;</span> exec, R<span class="op">&amp;&amp;</span> r, iterator_t<span class="op">&lt;</span>R<span class="op">&gt;</span> middle, OutR<span class="op">&amp;&amp;</span> result_r<span class="op">)</span>;</span></code></pre></div>
 <p><em>Effects</em>: Equivalent to: <code class="sourceCode cpp"><span class="cf">return</span> ranges<span class="op">::</span>rotate_copy<span class="op">(</span>std<span class="op">::</span>forward<span class="op">&lt;</span>Ep<span class="op">&gt;(</span>exec<span class="op">)</span>, ranges<span class="op">::</span>begin<span class="op">(</span>r<span class="op">)</span>, middle, ranges<span class="op">::</span>end<span class="op">(</span>r<span class="op">)</span>, ranges<span class="op">::</span>begin<span class="op">(</span>result_r<span class="op">)</span>, ranges<span class="op">::</span>end<span class="op">(</span>result_r<span class="op">))</span>;</code></p>
-<h1 data-number="6" id="revision_history"><span class="header-section-number">6</span> Revision history<a href="#revision_history" class="self-link"></a></h1>
-<h2 data-number="6.1" id="r0_r1"><span class="header-section-number">6.1</span> R0 =&gt; R1<a href="#r0_r1" class="self-link"></a></h2>
+<h1 data-number="7" id="revision_history"><span class="header-section-number">7</span> Revision history<a href="#revision_history" class="self-link"></a></h1>
+<h2 data-number="7.1" id="r1_r2"><span class="header-section-number">7.1</span> R1 =&gt; R2<a href="#r1_r2" class="self-link"></a></h2>
+<ul>
+<li>Add naming considerations for public data member of
+<code class="sourceCode cpp">reverse_copy</code> and
+<code class="sourceCode cpp">rotate_copy</code> return types.</li>
+</ul>
+<h2 data-number="7.2" id="r0_r1"><span class="header-section-number">7.2</span> R0 =&gt; R1<a href="#r0_r1" class="self-link"></a></h2>
 <ul>
 <li>Editorial changes and fixes</li>
 <li>Add the formal wording</li>
 </ul>
-<h1 data-number="7" id="acknowledgments"><span class="header-section-number">7</span> Acknowledgements<a href="#acknowledgments" class="self-link"></a></h1>
+<h1 data-number="8" id="polls"><span class="header-section-number">8</span> Polls<a href="#polls" class="self-link"></a></h1>
+<h2 data-number="8.1" id="sg9_sofia_2025"><span class="header-section-number">8.1</span> SG9, Sofia, 2025<a href="#sg9_sofia_2025" class="self-link"></a></h2>
+<p>POLL: We want to change the return type of the parallel <code class="sourceCode cpp">std<span class="op">::</span>ranges<span class="op">::</span>rotate_copy</code>
+to return both “stop” and “end”, instead of just “stop” (unlike the
+serial one where it is “end”).</p>
+<table>
+<thead>
+<tr class="header">
+<th><div style="text-align:center">
+<strong>SF</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>F</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>N</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>A</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>SA</strong>
+</div></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>5</td>
+<td>3</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<p>POLL: We want to change the return type of the parallel <code class="sourceCode cpp">std<span class="op">::</span>ranges<span class="op">::</span>reverse_copy</code>
+to return both “stop” and “end”, instead of just “stop” (unlike the
+serial one where it is “end”).</p>
+<table>
+<thead>
+<tr class="header">
+<th><div style="text-align:center">
+<strong>SF</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>F</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>N</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>A</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>SA</strong>
+</div></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>4</td>
+<td>4</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<p>POLL: We want to use <code class="sourceCode cpp">std<span class="op">::</span>in_in_out_result</code>
+as the return type of <code class="sourceCode cpp">std<span class="op">::</span>ranges<span class="op">::</span>rotate_copy</code>
+and <code class="sourceCode cpp">std<span class="op">::</span>ranges<span class="op">::</span>reverse_copy</code>
+(as proposed in the paper).</p>
+<table>
+<thead>
+<tr class="header">
+<th><div style="text-align:center">
+<strong>SF</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>F</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>N</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>A</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>SA</strong>
+</div></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>2</td>
+<td>4</td>
+<td>2</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p>POLL: We want to use a new return type with members e.g. <code class="sourceCode cpp"><span class="op">{</span>in_end, in_stop, out<span class="op">}</span></code>
+(names TBD) instead of <code class="sourceCode cpp">std<span class="op">::</span>in_in_out_result</code></p>
+<table>
+<thead>
+<tr class="header">
+<th><div style="text-align:center">
+<strong>SF</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>F</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>N</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>A</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>SA</strong>
+</div></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>3</td>
+<td>5</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<p>POLL: Remove the parallel execution overloads of <code class="sourceCode cpp">std<span class="op">::</span>ranges<span class="op">::</span>rotate_copy</code>
+and <code class="sourceCode cpp">std<span class="op">::</span>ranges<span class="op">::</span>reverse_copy</code>
+from P3179R9 scheduled for C++26.</p>
+<table>
+<thead>
+<tr class="header">
+<th><div style="text-align:center">
+<strong>SF</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>F</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>N</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>A</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>SA</strong>
+</div></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>3</td>
+<td>2</td>
+<td>1</td>
+<td>3</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<p>POLL: Forward P3709R1, with the return type change guidance from
+above to LEWG for inclusion in C++26.</p>
+<table>
+<thead>
+<tr class="header">
+<th><div style="text-align:center">
+<strong>SF</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>F</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>N</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>A</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>SA</strong>
+</div></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2</td>
+<td>6</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<h2 data-number="8.2" id="lewg_sofia_2025"><span class="header-section-number">8.2</span> LEWG, Sofia, 2025<a href="#lewg_sofia_2025" class="self-link"></a></h2>
+<p>POLL: We want to change the return type of “rotate_copy” and
+“reverse_copy” to something similar to in_in_out</p>
+<table>
+<thead>
+<tr class="header">
+<th><div style="text-align:center">
+<strong>SF</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>F</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>N</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>A</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>SA</strong>
+</div></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>3</td>
+<td>7</td>
+<td>2</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<p>POLL: In P3709R1 rotate_copy and reverse_copy should have a dedicated
+return type instead of re-using
+<code class="sourceCode cpp">in_in_out_result</code></p>
+<table>
+<thead>
+<tr class="header">
+<th><div style="text-align:center">
+<strong>SF</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>F</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>N</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>A</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>SA</strong>
+</div></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>7</td>
+<td>5</td>
+<td>2</td>
+<td>2</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<h1 data-number="9" id="acknowledgments"><span class="header-section-number">9</span> Acknowledgements<a href="#acknowledgments" class="self-link"></a></h1>
 <ul>
 <li>Thanks to Jonathan Mueller for a fruitful discussion on
 <code class="sourceCode cpp">reverse_copy</code> and
 <code class="sourceCode cpp">rotate_copy</code> return type.</li>
 </ul>
-<h1 data-number="8" id="bibliography"><span class="header-section-number">8</span> References<a href="#bibliography" class="self-link"></a></h1>
+<h1 data-number="10" id="bibliography"><span class="header-section-number">10</span> References<a href="#bibliography" class="self-link"></a></h1>
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="1" role="doc-bibliography">
 <div id="ref-P1061R10" class="csl-entry" role="doc-biblioentry">
 [P1061R10] Barry Revzin, Jonathan Wakely. 2024-11-24. Structured
