@@ -4,12 +4,16 @@
 The paper proposes adding parallel algorithms that work together with the C++ Ranges library.
 
 At the F2F meeting in February 2025, LEWG forwarded P3179R6 to LWG for C++26.
+At a telecon on 2025-05-23, LWG polled P3179R9 to put into C++26: 11-0-0 Unanimous consent.
+The proposal was then approved by the C++ committee to be added to the C++ standard working draft for C++26.
 
 [Source code](P3179/P3179.md) (for mpark/wg21)
 
 ### Revisions
 
-- R7 - in progress: https://github.com/rarutyun/iso_cpp_papers/pull/19
+- R9: https://isocpp.org/files/papers/P3179R9.html
+- R8: https://wg21.link/p3179r8
+- R7: https://wg21.link/p3179r7
 - R6: https://wg21.link/p3179r6
 - R5: https://wg21.link/p3179r5
 - R4: https://wg21.link/p3179r4
