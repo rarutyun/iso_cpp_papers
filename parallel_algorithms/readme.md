@@ -39,7 +39,7 @@ The proposed design was approved by SG9 and merged into P3179.
 
 The paper proposes changing the return value type for parallel `ranges::rotate_copy` and `ranges::reverse_copy` in P3179.
 
-The proposal was approved by the C++ committee to be added (on top of P3179) to the C++ standard working draft.
+The proposal was approved by the C++ committee to be added (on top of P3179) to the C++ standard working draft for C++26.
 
 [Source code](P3709/P3709.md) (for mpark/wg21)
 
