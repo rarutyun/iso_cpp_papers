@@ -5,7 +5,7 @@ The paper proposes adding parallel algorithms that work together with the C++ Ra
 
 At the F2F meeting in February 2025, LEWG forwarded P3179R6 to LWG for C++26.
 At a telecon on 2025-05-23, LWG polled P3179R9 to put into C++26: 11-0-0 Unanimous consent.
-The proposal was then approved by the C++ committee to be added to the C++ standard working draft.
+The proposal was then approved by the C++ committee to be added to the C++ standard working draft for C++26.
 
 [Source code](P3179/P3179.md) (for mpark/wg21)
 
