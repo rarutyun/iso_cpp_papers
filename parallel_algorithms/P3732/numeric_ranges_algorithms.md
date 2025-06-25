@@ -988,7 +988,7 @@ algorithms. This means that the algorithms will not be selected for overload res
 the required operations. It further means that algorithms could (at least in theory) dispatch based on properties like
 whether the element type's binary operation is commutative. The concepts include both syntactic and semantic constraints.
 
-WG21 has not expressed a consensus on [@P1813R0]'s approach. LEWG reviewed [@P1813R0] at the Belfast meeting in November
+WG21 has not expressed a consensus on [@P1813R0]'s approach. LEWGI reviewed [@P1813R0] at the Belfast meeting in November
 2019, but did not forward the proposal and wanted to see it again. Two other proposals express something more like WG21's
 consensus on constraining the numeric algorithms: [@P2214R2], "A Plan for C++23 Ranges,"
 [@P1673R13], "A free function linear algebra interface based on the BLAS," which defines mdspan-based analogs of the
