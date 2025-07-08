@@ -38,6 +38,24 @@ We propose `ranges` algorithm overloads (both parallel and non-parallel) for the
 
 * Abhilash Majumder (NVIDIA)
 
+# Revision history
+
+## R0 to be submitted 2025-07-15
+
+R0 is the original draft prepared before the June 2025 Sofia WG21 meeting.  SG1 reviewed this draft during the Sofia meeting with the following feedback.
+
+- SG1 agrees (via poll 4/5/1/0/0) that users should have a way to specify an identity value.  SG1 asks whether there is any need to specify this as a compile-time value, or whether a run-time-only interface would suffice.  One concern is the potential cost of broadcasting an identity value at run time to all threads, versus initializing each thread's accumulator to a value known at compile time.
+
+- SG1 has no objection to adding `transform_*` variants of algorithms.
+
+- SG1 asks us to add `reduce_into` and `transform_reduce_into` (via poll 4/4/0/0/0), that is, versions of `reduce` and `transform_reduce` that write the reduction result to an output range of one element.  (We asked SG1 to take this poll because LEWG rejected an analogous design for std::linalg reduction-like algorithms such as dot product and norms.)
+
+- SG1 members would like separate proposals on fixing _`movable-box`_ trivial copyability, and fixing performance issues with views in general.
+
+## R1 in preparation
+
+- Revise non-wording sections
+
 # What we propose
 
 We propose `ranges` overloads (both parallel and non-parallel) of the following algorithms:
