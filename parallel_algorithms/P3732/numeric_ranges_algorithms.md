@@ -1,8 +1,8 @@
 
 ---
 title: Numeric range algorithms
-document: P3732R0
-date: 2025-06-14
+document: P3732R1
+date: 2025-07-15
 audience: SG1,SG9
 author:
   - name: Ruslan Arutyunyan
@@ -171,7 +171,9 @@ as `ranges::transform_inclusive_scan(r, o, f, g)` with `g` as the transform oper
 
 The binary variant of `transform_reduce` is different. Unlike `reduce` and most other numeric algorithms, it takes two
 input sequences and applies a binary function to the pairs of elements from both sequences. Projections, being unary functions,
-cannot replace the binary transform function of the algorithm. `transform_view` is similarly of no help unless it is combined with
+cannot replace the binary transform function of the algorithm.
+Likewise, `transform_view` by itself cannot replace
+the binary transform function unless it is combined with
 `zip_view` and operates on tuples of elements. `zip_transform_view` is a convenient way to express this combination;
 applying `reduce` to `zip_transform_view` gives the necessary result (code examples are shown below).
 
@@ -226,7 +228,7 @@ assert(out2 == expected);
 ```
 :::
 
-The code without projections using a single big lambda to express the binary operation. Users have to read the big lambda
+The code without projections uses a single big lambda to express the binary operation. Users have to read the big lambda
 to see what it does. So does the compiler, which can hinder optimization if it's not good at inlining.
 In contrast, the version with projections lets users read out loud what it does.
 It also separates the "selection" or "query" part of the transform from the "arithmetic" or "computation" part. The power of
@@ -235,11 +237,13 @@ natural to extend this separation to selection logic as well.
 
 ##### Unary transform
 
-It's harder to avoid a lambda, as the function that does an operation, in the unary `transform` case.  Most of the named
-C++ Standard Library arithmetic function objects are binary.  Currying them into unary functions in C++ requires either
-making a lambda (which defeats the purpose somewhat) or using something like `std::bind_front` (which is verbose).  On the
-other hand, using a projection still has the benefit of separating the "selection" part of the transform from the
-"computation" part.
+In the unary `transform` case, it's harder to avoid using a lambda.
+Most of the named C++ Standard Library arithmetic function objects are binary.
+Currying them into unary functions in C++ requires either
+making a lambda (which defeats the purpose somewhat) or
+using something like `std::bind_front` (which is verbose).
+On the other hand, using a projection still has the benefit of
+separating the "selection" part of the transform from the "computation" part.
 
 ```c++
 struct foo {};
@@ -326,10 +330,13 @@ assert(result_no_proj == 52);
 
 ##### Binary `transform_reduce`
 
-As we described above, expressing the functionality of binary `transform_reduce` using only `reduce` requires `zip_transform_view`
-or something like it, making the `reduce`-only version more verbose. Users may also find it troublesome that `zip_view` and `zip_transform_view`
+As we explained above, expressing the functionality of binary `transform_reduce`
+using only `reduce` requires `zip_transform_view` or something like it.
+This makes the `reduce`-only version more verbose.
+Users may also find it troublesome that `zip_view` and `zip_transform_view`
 are not pipeable: there is no `{v1, v2} | views::zip` syntax, for example.
-On the other hand, it's a toss-up which version is easier to understand. Users either need to learn what a "zip transform view" does,
+On the other hand, it's a toss-up which version is easier to understand.
+Users either need to learn what `zip_transform_view` does,
 or they need to learn about `transform_reduce` and know which of the two function arguments does what.  
 
 ```c++
@@ -361,11 +368,12 @@ elements from the two input ranges into a single value. The algorithm then reduc
 function and the initial value. It's perhaps misleading that this binary function is called a "transform"; it's really a
 kind of "inner" reduction on corresponding elements of the two input ranges.
 
-One can imagine a ranges analog of C++17 binary `transform_reduce` that takes two projection functions, as in the example
-below. It's not too hard for a casual reader to tell that the last two arguments of `reduce` apply to each of the input
-sequences in turn, but that's still more consecutive function arguments than for any other algorithm in the C++ Standard
-Library. Without projections, users need to resort to `transform_view`, but this more verbose syntax makes it more
-clear which functions do what.
+One can imagine a ranges analog of C++17 binary `transform_reduce`
+that takes two projection functions, as in the example below.
+The result has four consecutive function arguments in a row,
+which is more than for any other algorithm in the Standard Library.
+Without projections, users need to resort to `transform_view`,
+but this more verbose syntax makes it more clear which functions do what.
 
 ```c++
 struct foo {};
@@ -375,12 +383,12 @@ std::vector<std::pair<std::string, int>> v2{
   {"thirteen", 13}, {"seventeen", 17}, {"nineteen", 19}};
 constexpr int init = 3;
 
-// With projections
+// With projections: 4 functions in a row
 auto result_proj = std::ranges::transform_reduce(v1, v2, init,
   std::plus{}, std::multiplies{}, get_element<0>{}, get_element<1>{});
 assert(result_proj == 396);
 
-// Without projections
+// Without projections: more clear where get_element<k> happens
 auto result_no_proj = std::ranges::transform_reduce(
   std::views::transform(v1, get_element<0>{}),
   std::views::transform(v2, get_element<1>{}),
@@ -490,7 +498,8 @@ parallel execution.
 
 Let's review what we learned from the above discussion.
 
-- In general and particularly for `ranges::transform`, projections improve readability and expose optimization potential,
+- Projections improve readability of `ranges::transform`.
+- Projections expose optimization potential,
 by separating the selection part of an algorithm from the computation part.
 - None of the existing `fold_*` `ranges` algorithms (the closest things the Standard Library currently has to
 `ranges::reduce`) take projections.
@@ -585,27 +594,34 @@ We do not propose `adjacent_transform` for the reasons described above.
 
 #### `partial_sum`
 
-The `partial_sum` algorithm performs operations sequentially. The existing ranges library does not have an equivalent
-algorithm with this left-to-right sequential behavior, nor do we propose such an algorithm. For users who want this
-behavior, [@P2760R1] suggests a view instead of an algorithm. [@P3351R2], "`views::scan`," proposes this view; it
-is currently in SG9 (Ranges Study Group) review.
+The `partial_sum` algorithm combines elements sequentially, from left to right.
+The Standard Library already has `fold_left*` algorithms with this behavior.
+[@P3351R2], "`views::scan`," proposes a view with the same left-to-right behavior;
+it is currently in SG9 (Ranges Study Group) review.
 
-Users of `partial_sum` who are not concerned about the order of operations can call `inclusive_scan` instead, which we
-propose here. We considered adding a convenience wrapper for the same special case of an inclusive prefix plus-scan that
-`partial_sum` supports. However, names like `partial_sum` or `prefix_sum` would obscure whether this is an inclusive or
-exclusive scan. Also, we already have `std::partial_sum` that operates in order. Using the same name as a convenient wrapper
-on top of out-of-order `*_scan`, we propose in the paper, is misleading. We think it's not a very convenient convenience
-wrapper if users have to look these aspects up every time they use it.
+Users of `partial_sum` who are not concerned about the order of operations
+can call the `inclusive_scan` algorithm (proposed here) instead.
+We considered adding a convenience wrapper for the same special case
+of an inclusive prefix plus-scan that `partial_sum` supports.
+However, names like `partial_sum` or `prefix_sum` would obscure
+whether this is an inclusive or exclusive scan.
+Also, the existing `partial_sum` algorithm operates left-to-right.
+A new algorithm with the same name and almost the same interface,
+but with a different order of operations, could be misleading.
+We think it's not a very convenient convenience wrapper
+if users have to look up its behavior every time they use it.
 
-If WG21 did want a convenience wrapper, one option would be to give this common use case a longer but more explicit name,
+If WG21 did want a convenience wrapper, one option would be
+to give this common use case a longer but more explicit name,
 like `inclusive_sum_scan`.
 
 ### We don't propose "the lost algorithm" (noncommutative parallel reduce)
 
 The Standard lacks an analog of `reduce` that can assume associativity but not commutativity of binary operations.
-One author of this proposal refers to this as "the lost algorithm" (in e.g.,
-[Episode 25 of "ASDP: The Podcast"](https://adspthepodcast.com/2021/05/14/Episode-25.html)). We do not propose this
-algorithm, but we would welcome a separate proposal to do so.
+One author of this proposal refers to this as "the lost algorithm."
+(Please refer to
+[Episode 25 of "ASDP: The Podcast"](https://adspthepodcast.com/2021/05/14/Episode-25.html).)
+We do not propose this algorithm, but we would welcome a separate proposal to do so.
 
 The current numeric algorithms express a variety of permissions to reorder binary operations.
 
@@ -636,13 +652,15 @@ with a two-sided identity element.
 This proposal leaves the described algorithm out of scope. We think the right way would be to propose a new algorithm with
 a distinct name. A reasonable choice of name would be `fold` (just `fold` by itself, not `fold_left` or `fold_right`).
 
-### We don't propose `reduce_with_iter`
+### We don't propose `reduce_with_iter` {#no-reduce-with-iter}
 
 A hypothetical `reduce_with_iter` algorithm would look like `fold_left_with_iter`, but would permit reordering of binary
 operations. It would return both an iterator to one past the last input element, and the computed value. The only reason
 for a reduction to return an iterator would be if the input range is single-pass.  However, users who have a single-pass
 input range really should be using one of the `fold*` algorithms instead of `reduce*`.  As a result, we do not propose the
 analogous `reduce_with_iter` here.
+
+Note that the previous paragraph effectively argues for `*reduce` to require at least forward ranges.
 
 Just like `fold_left`, the `reduce` algorithm should return just the computed value.  Section 4.4 of [@P2322R6] argues that
 this makes it easier to use, and improves consistency with other `ranges` algorithms like `ranges::count` and
@@ -659,7 +677,7 @@ initial value. An example would be `min` on a range of `int` values, where calle
 represents an actual value in the range, or a fake "identity" element (that callers may get as a result when the range is
 empty).
 
-We do not propose `reduce_first` here, only outline arguments against and for adding it.
+We do not propose `reduce_first` here; we just outline arguments against and for adding it.
 
 #### Arguments against `reduce_first`
 
@@ -680,8 +698,12 @@ See [](#initial-value-vs-identity) for more detailed analysis.
 1. Some equivalent of `reduce_first` can be used as a building block for parallel reduction with unknown identity, if no other solution is proposed.
 1. Even though `min_element`, `max_element`, and `minmax_element` exist, users may still want to combine multiple
 reductions into a single pass, where some of the reductions are min and/or max, while others have a natural identity.
-As an example, users may want the minimum of an array of integers (with no natural identity), along with the least
-index of the array element with the minimum value (whose natural identity is zero).  This happens often enough that MPI
+
+As an example of combining multiple reductions into a single pass,
+users may want the minimum of an array of integers (with no natural identity),
+along with the least index of the array element with the minimum value
+(whose natural identity is zero).
+This happens often enough that MPI
 (the Message Passing Interface for distributed-memory parallel computing) has predefined reduction operations for minimum
 and its index (`MINLOC`) and maximum and its index (`MAXLOC`).  On the other hand, even `MINLOC` and `MAXLOC` have
 reasonable choices of fake "identity" elements that work in practice, e.g., for `MINLOC`, `INT_MAX` for the minimum value
@@ -731,8 +753,7 @@ The various reduction and scan algorithms we propose can combine the elements of
 we make the non-parallel algorithms take (multipass) forward ranges, even though this is not consistent with the existing
 non-parallel `<numeric>` algorithms. If users have single-pass iterators, they should just call one of the `fold_*`
 algorithms, or use the `views::scan` proposed elsewhere. This has the benefit of letting us specify `ranges::reduce`
-to return just the value. We don't propose a separate algorithm `reduce_with_iter`, as we explain elsewhere in this
-proposal.
+to return just the value. We don't propose a separate algorithm `reduce_with_iter`, as we explain [in the relevant section](#no-reduce-with-iter).
 
 ## Constexpr parallel algorithms?
 
@@ -773,29 +794,36 @@ assert(result == 23.0f);
 
 The identity element can serve as an initial value, but not vice versa. This is especially important for parallelism.
 
-#### Initial value matters most for sequential reduction
+### Initial value matters most for sequential reduction
 
-From the serial execution perspective, it is easy to miss importance of the reduction identity. Let's consider typical code
+From the serial execution perspective, it is easy to miss the importance of the reduction identity. Let's consider typical code
 that sums elements of an indexed array.
 
 ```c++
 float sum = 0.0f;
-for (size_t i = 0; i<array_size; ++i)
-    sum += a[i];
+for (size_t i = 0; i < array_size; ++i) {
+  sum += a[i];
+}
 ```
 
-The identity element `0.0f` is used to initialize the *accumulator* where the array values then sum up. However, if an initial
-value for the reduction is provided, it replaces the identity in the code above. An implementation of `reduce` does not
-therefore need to know the identity of its operation when an initial value is provided.
+The identity element `0.0f` is used to initialize the *accumulator*
+into which the array's values are summed.
+If an initial value for the reduction is provided, it replaces the identity in the code above.
+A serial implementation of `reduce` therefore does not need to know
+its binary operation's identity when an initial value is provided.
 
-The initial value parameter of `reduce` also lets users express a "running reduction" where the whole range is not
-available all at once and users need to call `reduce` repeatedly.
+The initial value parameter of `reduce` also lets users express a "running reduction"
+where the whole range is not available all at once
+and users need to call `reduce` repeatedly.
 
-#### Identity element matters most for parallel reduction
+### Identity element matters most for parallel reduction
 
-The situation is different for parallel execution, because there are more than one accumulator to initialize. Any parallel
-reduction somehow distributes the data over multiple threads of execution, and each one uses a local accumulator for its part
-of the job. The initial value can be used to initialize at most one of those; for others, something else is needed.
+The situation is different for parallel execution,
+because more than one accumulator must be initialized.
+Any parallel reduction somehow distributes the data over multiple threads of execution,
+where each thread uses a local accumulator for its part of the job.
+The initial value can be used to initialize at most one of those accumulators;
+for the others, something else is needed.
 
 If an identity `id` for a binary operator `op` is known, then here is a natural way to parallelize `reduce(`$R$`, init, op)`
 over $P$ processors using the serial version as a building block.
@@ -804,33 +832,44 @@ over $P$ processors using the serial version as a building block.
 2. On each processor $p$ compute a local result $L_p$ `= reduce(`$S_p$`, id, op)` (with `id` as the initial value).
 3. Reduce over the local results $L_p$ with `init` as the initial value.
 
-It's not the only and not necessarily the best way though. For example, an implementation for the `unseq` policy probably
-will not call the serial algorithm. Yet it also needs to somehow initialize local accumulators for each SIMD lane.
+It's not the only and not necessarily the best way though.
+For example, a SIMD-based implementation for the `unseq` policy
+likely would not call the serial algorithm,
+yet it would need to initialize a local accumulator for each SIMD lane.
 
-#### What to do when the identity element is unknown
+### What to do when the identity element is unknown
 
-Then, what happens to a parallel implementation of C++17 `std::reduce` with a user-defined binary operation, where the Standard
-offers no way to know the operation's identity, if it exists? There are two other ways to initialize local accumulators:
-either with values from the respective subsequences or with the reduction of two such values.
+What happens to a parallel implementation of C++17 `std::reduce`
+with a user-defined binary operation?
+The Standard offers no way to know the operation's identity, if it exists at all.
+There are two other ways to initialize each local accumulator.
 
-The type requirements of `std::reduce` seem to assume the second approach, as the type of the result is not required to be copy-constructible.
+1. With some value from that subsequence, such as the first one.
+2. With the result of applying the binary operation to two values from the subsequence.
+
+The type requirements of `std::reduce` seem to assume the second approach,
+as the type of the result is not required to be copy-constructible.
 
 ```c++
 // using random access iterators for simplicity
 auto sum = std::move(op(first[0], first[1])));
 size_t sz = last - first;
-for (size_t i = 2; i < sz; ++i)
-    sum = std::move(op(sum, first[i]));
+for (size_t i = 2; i < sz; ++i) {
+  sum = std::move(op(sum, first[i]));
+}
 ```
 
-While technically doable, this approach is often suboptimal. In many use cases, the iteration space and the data storage are aligned
-(e.g. to `std::hardware_constructive_interference_size` or to the SIMD width) to allow for more efficient use of HW.
+While technically doable, this approach is often suboptimal.
+In many use cases, the iteration space and the data storage are aligned
+(e.g., to `std::hardware_constructive_interference_size` or to the SIMD width)
+to allow for more efficient hardware use.
 The loop bound changes shown above break this alignment, affecting code efficiency.
 
-At a glance, a hypothetical `reduce_first` could be used in an alternative solution where it would be a serial building block
-in the step (2) above, instead of `reduce` with `id`. But as we noted, such an implementation is not always the best.
+An alternative solution could use a hypothetical `reduce_first` algorithm
+as a serial building block of parallel `reduce`.
+As we noted above, though, that solution may also have performance issues.
 
-#### Other parallel programming models
+### Other parallel programming models
 
 Other parallel programming models provide all combinations of design options. Some compute only `reduce_first`, some only
 `reduce`, and some compute both. Some have a way to specify only an identity element, some only an initial value, and some
@@ -865,7 +904,7 @@ initial values. If not provided and the binary operation (a "universal function"
 operation on a possibly multidimensional array) has an identity, then the initial values default to the identity. If the
 binary operation has no identity or the initial values are `None`, then this works like `reduce_first`.
 
-#### Conclusions
+### Conclusions
 
 Based on the above considerations, we conclude that there are good reasons to consider a mechanism for users to explicitly
 specify the identity element for parallel reduction. There are options of how that could be achieved, of which we list a few.
@@ -1032,8 +1071,10 @@ position.) We express what `reduce` does using *GENERALIZED_SUM*.
 
 ## Enabling list-initialization for proposed algorithms
 
-Our proposal follows the same principles as described in [@P2248R8] paper. We want to enable the use case with constructing
-`init` from curly braces.
+Our proposal follows the same principles as described in [@P2248R8],
+"Enabling list-initialization for algorithms."
+We want to enable the use case where users construct a nondefault initial value
+using curly braces without naming the type.
 
 ```c++
 #include <cassert>
@@ -1048,8 +1089,11 @@ int main() {
 }
 ```
 
-Thus, we need to add a default template argument to `T init` in the proposed signatures. While [@P2248R8] does not propose
-a default template parameter for `init` in `<numeric>` header, we want to address this design question from the beginning
+Supporting this use case requires that we add
+a default template argument to `T init` in the proposed signatures.
+While [@P2248R8] does not propose a default template parameter
+for `init` in the `<numeric>` header,
+we want to address this design question from the beginning
 for the new set of algorithms because `fold_` family already has this feature.
 
 # Implementation
@@ -1060,7 +1104,7 @@ implementation is done as experimental with the following deviations from this p
 - Algorithms do not have constraints
 - `reduce` has more overloads (without init and without binary predicate)
 - `*_scan` return type is not `in_out_result`
-- Convenience wrappers, proposed in the paper are not implemented. The implementation is expected to be trivial, though.
+- The convenience wrappers proposed in this paper are not implemented. Their implementation is expected to be trivial, though.
 
 # Wording
 
