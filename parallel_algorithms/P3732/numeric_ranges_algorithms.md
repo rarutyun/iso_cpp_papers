@@ -66,14 +66,18 @@ We propose `ranges` overloads (both parallel and non-parallel) of the following 
 
 * `exclusive_scan` and `transform_exclusive_scan`.
 
+These correspond to existing algorithms with the same names in the `<numeric>` header.
+Therefore, we called them "numeric range(s) algorithms."
+
 We also propose adding parallel and non-parallel convenience wrappers:
 
 * `ranges::sum` and `ranges::product` for special cases of `reduce` with addition and multiplication, respectively; and
 
 * `ranges::dot` for the special case of binary `transform_reduce` with transform `multiplies{}` and reduction `plus{}`.
 
-The following sections explain why we propose these algorithms and not others.  This relates to other aspects of the design
-besides algorithm selection, such as whether to include optional projection parameters.
+The following sections explain why we propose these algorithms and not others.
+This relates to other aspects of the design besides algorithm selection,
+such as whether to include optional projection parameters.
 
 # Design
 
