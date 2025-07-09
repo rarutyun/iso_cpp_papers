@@ -56,6 +56,10 @@ R0 is the original draft prepared before the June 2025 Sofia WG21 meeting.  SG1 
 
 - Revise non-wording sections
 
+    - Explain `reduce_into` and `transform_reduce_into`
+
+    - Show different designs for specifying identity value
+
 # What we propose
 
 We propose `ranges` overloads (both parallel and non-parallel) of the following algorithms:
