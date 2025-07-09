@@ -1059,30 +1059,32 @@ to make a different design choice for numeric range algorithms.
 
 1. Avoid confusion with C++17 `std::reduce` initial value
 
-2. Let users specify a different binary operation and identity value for the same reduction result type
+    - Strongly counterindicates designs that just pass in the identity as `T id`.
+        Doing that would easily confuse users who want to switch
+        from C++17 numeric algorithms to the new ranges versions.
 
-3. Let users use the identity value to specify a reduction result type
+2. Let users specify a different binary operation and identity for the same reduction result type
+
+    - Counterindicates a purely compile-time traits system.
+        For an example of such a system, please see the
+        ["Reduction Variables"](https://github.khronos.org/SYCL_Reference/iface/reduction-variables.html)
+        section of the SYCL Reference.
+
+3. Let users specify an identity even if their binary operation is a lambda
+
+    - Counterindicates a purely compile-time traits system
+
+4. Let users use the identity value to specify a reduction result type
     that differs from `range_value_t<R>`,
-    just as they can use the initial value's type to do that with C++17 `reduce`.
+    just as they can use the initial value's type to do that with C++17 `reduce`
 
-4. Provide default identity value if possible
+5. Provide default identity value if possible
 
     - Conform to fold expression default identity if possible
 
     - Algorithms must know both `range_value_t<R>` and the binary operation in order to deduce a default identity value
 
-5. Make it work for binary operations that are lambdas
-
 6. Let users specify a nondefault identity value "in line" with invoking the algorithm, without needing to specializing a class
-
-#### Design 0: Just pass in the identity value
-
-This would work just like the C++17 `*reduce` and `*_scan` algorithms,
-except that instead of `T init` being the initial value,
-it would be an identity value.
-
-We do not favor this approach, because it would easily confuse users
-who want to switch from C++17 numeric algorithms to their new ranges versions.
 
 #### Design 1: `reduce_identity<T>{value}`
 
@@ -1096,10 +1098,11 @@ struct reduce_identity {
 };
 ```
 
-The default identity value would be `T{}`, because the default needs to be *something*.
+The default identity value would be `T{}`, because the default needs to be _something_.
 Users would have two ways to provide a nondefault value.
 
-1. `reduce_identity{nondefault_value}`
+1. Construct `reduce_identity` with a default value using aggregate initialization:
+    `reduce_identity{nondefault_value}`
 
 2. Specialize `reduce_identity<T>` so `declval<reduce_identity<T>>().value` is the value
 
@@ -1149,11 +1152,12 @@ Disadvantages:
 
 - A specialization of `reduce_identity<T>` would take effect for all binary operations on `T`
 
-### Design 2: `reduce_operation{binary_op, value}`
+#### Design 2: `reduce_operation{binary_op, value}`
 
 The `reduce_operation` struct would encapsulate the binary operation
 and its identity value into a single argument.
 This would make it easier for an implementation to deduce a default identity value.
+The default identity would match the identity for the corresponding binary fold.
 Users' specializations would only affect that (operation, value type) pair.
 It's a named struct, so algorithms could overload on it without ambiguity.
 
@@ -1223,16 +1227,14 @@ struct reduce_operation<T, std::multiplies<U>> {
 // ... more specializations for Standard binary function objects ...
 ```
 
-Some design issues:
+This is a more complicated design than the `reduce_identity<T>` struct shown above.
+However, it offers a straightforward path to providing a reasonable default
+for commonly used binary operations.
 
-1. Users could not override default identity values for known binary operators
-    and reduction result types.  (Is this a feature, not a bug?)
-
-2. `BinaryOp` must be copy-constructible or move-constructible.
-
-    - That's fine for parallel algorithms, but not strictly necessary for non-parallel algorithms.
-
-    - On the other hand, if you want non-copyable `BinaryOp`, maybe you should use `fold_*` instead.
+This design does impose the requirement that `BinaryOp`
+must be copy-constructible or move-constructible.
+That's fine for parallel algorithms, but not strictly necessary for non-parallel algorithms.
+On the other hand, if you want non-copyable `BinaryOp`, maybe you should use `fold_*` instead.
 
 ### If users can define an identity value, do they need an initial value?
 
@@ -1343,9 +1345,18 @@ std::ranges::exclusive_scan(in, out,
 
 ### Conclusions
 
-There are good reasons for users to be able to specify an identity value for parallel reductions.
-Different designs could achieve that goal, some of which we discuss above.
-We would like to hear feedback from SG9 on their preferred design.
+It's important for both performance and functionality
+that users be able to specify an identity value for parallel reductions.
+Designs for this should avoid confusion when switching from
+C++17 parallel numeric algorithms to the new ranges versions.
+We would like feedback from SG9 and LEWG on their preferred design.
+
+Our proposed `*reduce` algorithms do not need an initial value parameter.
+For our proposed `*_scan` algorithms, an initial value could improve performance
+in some cases by avoiding an additional pass over all the output elements.
+The `*exclusive_scan` algorithms need an initial value
+because it defines the first element of the output range.
+The initial value could default to the identity, if it exists and is known.
 
 ## `ranges::reduce` design
 
