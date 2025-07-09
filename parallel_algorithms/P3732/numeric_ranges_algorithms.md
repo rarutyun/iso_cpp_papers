@@ -617,9 +617,12 @@ We do not propose `adjacent_transform` for the reasons described above.
 #### `partial_sum`
 
 The `partial_sum` algorithm combines elements sequentially, from left to right.
-The Standard Library already has `fold_left*` algorithms with this behavior.
-[@P3351R2], "`views::scan`," proposes a view with the same left-to-right behavior;
-it is currently in SG9 (Ranges Study Group) review.
+It behaves like an order-constrained version of `inclusive_scan`.
+
+Our proposal focuses on algorithms that permit reordering binary operations.
+For users who want an order-constrained partial sum,
+[@P3351R2], "`views::scan`," proposes a view with the same left-to-right behavior.
+This paper is currently in SG9 (Ranges Study Group) review.
 
 Users of `partial_sum` who are not concerned about the order of operations
 can call the `inclusive_scan` algorithm (proposed here) instead.
