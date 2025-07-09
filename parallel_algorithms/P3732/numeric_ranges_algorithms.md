@@ -557,6 +557,55 @@ reduction algorithms to have projections.
 `ranges::transform_{in,ex}clusive_scan` as well as `ranges::{in,ex}clusive_scan`, and do not provide projections for any of
 them.
 
+### `reduce_into` and `transform_reduce_into`
+
+We propose new algorithms `reduce_into` and `transform_reduce_into`.
+These work like `reduce` and `transform_reduce`,
+except that instead of returning the reduction result by value,
+they write it to the first element of an output range.
+
+The `reduce_into` algorithm has
+[precedent in the Thrust library](https://nvidia.github.io/cccl/thrust/api_docs/algorithms/reductions.html).
+Its performance advantange is that the algorithm can write its result
+directly to special memory associated with parallel execution,
+such as accelerator memory or a NUMA (Non-Uniform Memory Access) domain
+where the algorithm's threads run.
+
+#### Output should be a single iterator
+
+P3179 (parallel ranges algorithms) always specifies output ranges
+as sized ranges, instead of as a single iterator.
+However, in the case of `*reduce_into`,
+the output range always has exactly one element.
+Thus, there would be no safety improvement in requiring a sized range.
+Users would end up needing to go through a possibly error-prone
+syntax ritual to turn their one output iterator into a sized range.
+The use cases below illustrate this.
+
+```c++
+std::vector<float> input_range{3.0f, 5.0f, 7.0f};
+float out_value{};
+unique_ptr<float[], my_deleter> out{my_alloc(sizeof(float)), deleter};
+
+// Input sized range, output iterator
+ranges::reduce_into(input_range, /* ... */ &out_value);
+ranges::reduce_into(input_range, /* ... */ out.get());
+assert(out_value == out[0]);
+
+// Input sized range, output sized range (size 1)
+ranges::reduce_into(input_range, /* ... */ span<float, 1>{out_value});
+ranges::reduce_into(input_range, /* ... */ span<float, 1>{out.get()});
+assert(out_value == out[0]);
+```
+
+#### Output iterator could be single pass
+
+The output range needs to be copyable for parallelization reasons,
+so its iterator can't be merely an `output_iterator`.
+However, it could be a single-pass range,
+because the algorithm only needs to write one element at most once.
+The Standard does not currently have an iterator category to express this distinction.
+
 ### We propose convenience wrappers to replace some algorithms
 
 #### `accumulate`
