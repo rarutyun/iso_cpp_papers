@@ -796,18 +796,25 @@ as we explain [in the relevant section](#no-reduce-with-iter).
 [@P2902R1] proposes to add `constexpr` to the parallel algorithms. [@P3179R8] does not object to this; see Section 2.10.
 We continue the approach of [@P3179R8] in not opposing [@P2902R1]'s approach, but also not depending on it.
 
-## Reduction's initial value vs. its identity element {#initial-value-vs-identity}
+## Specifying a reduction's identity element {#initial-value-vs-identity}
 
-It's important to distinguish between a reduction's initial value, and its identity element. C++17's `std::reduce` takes an
-optional initial value `T init` that is included in the terms of the reduction. This is not necessarily the same as the
-identity element for a reduction, which is a value that does not change the reduction's result, no matter how many times it
-is included. The following example illustrates.
+### Initial value not necessarily the same as identity value
+
+It's important to distinguish between a reduction's initial value, and its identity value.
+C++17's parallel `*reduce` algorithms take an optional *initial value* `T init`.
+This defaults to `T{}`, and is included in the terms of the reduction.
+The initial value is not necessarily the same as an *identity value* for a reduction,
+which is a value that does not change the reduction's result,
+no matter how many times it is included as a term.
+We say "an" identity value because it need not be unique.
+The identity value can serve as an initial value, but not vice versa.
+The following example illustrates.
 
 ```c++
 std::vector<float> v{5.0f, 7.0f, 11.0f};
 
 // Default initial value is float{}, which is 0.0f.
-// It is also the identity for std::plus<>, the default operation 
+// It is also the identity for std::plus<>, the default operation.
 float result = std::reduce(v.begin(), v.end());
 assert(result == 23.0f);
 
@@ -828,12 +835,10 @@ result = std::reduce(v.begin(), v.end(), 0.0f);
 assert(result == 23.0f);
 ```
 
-The identity element can serve as an initial value, but not vice versa. This is especially important for parallelism.
-
 ### Initial value matters most for sequential reduction
 
-From the serial execution perspective, it is easy to miss the importance of the reduction identity. Let's consider typical code
-that sums elements of an indexed array.
+Users who never use parallel reductions may miss the importance of the reduction identity.
+Let's consider typical code that sums elements of an indexed array.
 
 ```c++
 float sum = 0.0f;
@@ -940,18 +945,354 @@ initial values. If not provided and the binary operation (a "universal function"
 operation on a possibly multidimensional array) has an identity, then the initial values default to the identity. If the
 binary operation has no identity or the initial values are `None`, then this works like `reduce_first`.
 
+### Default identity value?
+
+#### Use cases for default identity value
+
+```c++
+// Should this even work?
+// Deduce binary op: std::plus{}
+// Deduce identity: range_value_t<R>{}
+auto result1 = std::ranges::reduce(exec_policy, range);
+
+// Deduce identity: range_value_t<R>{}
+auto result2 = std::ranges::reduce(exec_policy, range, std::plus{});
+
+// If range_value_t<R> is arithmetic or std::complex,
+// deduce identity: range_value_t<R>(1)
+auto result3 = std::ranges::reduce(exec_policy, range, std::multiplies{});
+
+// Should this even work?
+// The "identity" is really -Inf if range_value_t<R> has that,
+// but this is one of those cases where users might not like that behavior.
+auto result4 = std::ranges::reduce(exec_policy, range, std::ranges::min);
+```
+
+#### Do not force `T{}` to be an identity value
+
+The identity value of a binary operator that returns `T`
+need not necessarily be `T{}` (a value-constructed `T`)
+for all operators and types.
+
+- For `std::multiplies{}` it's `T(1)`
+
+- For "addition" in the max-plus ("tropical") algebra it's `-Inf`
+
+We don't want to force users to wrap reduction result types
+so that `T{}` defines the identity (if it exists) for `operator+(T, T)`.
+
+- What if the operator has no identity value?
+
+- What if `T` differs from the input range's value type?
+
+- What if users want to use the same value type for different binary operators, such as `double` for `plus`, `multiplies`, and `ranges::max`?
+
+- If we make users write a nondefaulted default constructor for `T`, they are more likely to make `T` not trivially constructible, and thus hinder optimizations.
+
+Note that this differs from std::linalg:
+"A value-initialized object of linear algebra value type shall act as the additive identity"
+([linalg.reqs.val] 3).  However:
+
+- std::linalg does not take user-defined binary operators; it always uses `operator+` for reductions
+
+- std::linalg needs "zero" for reasons other than reductions, e.g., its support for user-defined complex number types (_`imag-if-needed`_)
+
+For these reasons, we think it's reasonable
+to make a different design choice for numeric range algorithms.
+
+### Interface sketches for specifying identity
+
+#### Design goals
+
+1. Avoid confusion with C++17 `std::reduce` initial value
+
+2. Let users specify a different binary operation and identity value for the same reduction result type
+
+3. Let users use the identity value to specify a reduction result type
+    that differs from `range_value_t<R>`,
+    just as they can use the initial value's type to do that with C++17 `reduce`.
+
+4. Provide default identity value if possible
+
+    - Conform to fold expression default identity if possible
+
+    - Algorithms must know both `range_value_t<R>` and the binary operation in order to deduce a default identity value
+
+5. Make it work for binary operations that are lambdas
+
+6. Let users specify a nondefault identity value "in line" with invoking the algorithm, without needing to specializing a class
+
+#### Design 0: Just pass in the identity value
+
+This would work just like the C++17 `*reduce` and `*_scan` algorithms,
+except that instead of `T init` being the initial value,
+it would be an identity value.
+
+We do not favor this approach, because it would easily confuse users
+who want to switch from C++17 numeric algorithms to their new ranges versions.
+
+#### Design 1: `reduce_identity<T>{value}`
+
+Users would pass in their identity value
+by wrapping it in a named struct `reduce_identity`.
+
+```c++
+template<semiregular T>
+struct reduce_identity {
+  T value{};
+};
+```
+
+The default identity value would be `T{}`, because the default needs to be *something*.
+Users would have two ways to provide a nondefault value.
+
+1. `reduce_identity{nondefault_value}`
+
+2. Specialize `reduce_identity<T>` so `declval<reduce_identity<T>>().value` is the value
+
+For example, users could inherit their specialization from `constant_wrapper`.
+
+```c++
+namespace impl {
+  inline constexpr my_number some_value = /* value goes here */;
+}
+template<class T>
+struct reduce_identity<my_number> : 
+  constant_wrapper<impl::some_value>
+{};
+```
+
+Here are some use cases.
+
+```c++
+// User explicitly opts into "most negative integer"
+// as the identity for min.  This should not be the default,
+// as the C++ Standard Library has no way to know
+// whether this represents a valid input value.
+constexpr auto lowest = std::numeric_limits<int>::lowest();
+auto result5 = std::ranges::reduce(exec_policy, range,
+  std::ranges::min, reduce_identity{lowest});
+
+// range_value_t<R> is float, but identity value is double
+// (even though it's otherwise the default value, zero).
+// std::plus<void> should use operator()(double, double) -> double
+auto result6 = std::ranges::reduce(exec_policy, range,
+  std::plus{}, reduce_identity{0.0});
+```
+
+Advantages of this approach:
+
+- Users would see in plain text the purpose of this function argument
+
+- Algorithms could overload on it without risk of ambiguity
+
+- The struct is an aggregate, which would maximize potential for optimizations
+
+- It would not impose requirements on the user's binary function
+
+Disadvantages:
+
+- The algorithm could not use this to deduce a default identity value from a binary operation
+
+- A specialization of `reduce_identity<T>` would take effect for all binary operations on `T`
+
+### Design 2: `reduce_operation{binary_op, value}`
+
+The `reduce_operation` struct would encapsulate the binary operation
+and its identity value into a single argument.
+This would make it easier for an implementation to deduce a default identity value.
+Users' specializations would only affect that (operation, value type) pair.
+It's a named struct, so algorithms could overload on it without ambiguity.
+
+Here are some use cases.
+
+```c++
+auto result7 = std::ranges::reduce(exec_policy, range,
+  reduce_operation{custom_binary_op, custom_value});
+
+constexpr auto minus_Inf = -std::numeric_limits<float>::infinity();
+auto result5 = std::ranges::reduce(exec_policy, range,
+  reduce_operation{std::ranges::min, minus_Inf};
+
+// range_value_t<R> is float
+auto result6 = std::ranges::reduce(exec_policy, range,
+  reduce_operation{std::plus{}, /* double */ 0.0};
+
+// Deduce identity: range_value_t<R>{}
+auto result2 = std::ranges::reduce(exec_policy, range, std::plus{});
+```
+
+Here is an implementation sketch.
+
+```c++
+// Keep this an aggregate if possible.
+// We can constrain BinaryOp on being invocable with T, T,
+// but we don't know range_value_t<R> at this point,
+// so we don't know yet if the algorithm is well-formed with BinaryOp.
+template<class BinaryOp, class T = invoke_result<BinaryOp, T, T>>
+  requires semiregular<T> && invocable<BinaryOp, T, T>
+struct reduce_operation {
+  BinaryOp op;
+  T value{};
+};
+
+// std::plus with arithmetic types -> T{}.
+//
+// We can't specialize for all T, because users might have
+// defined std::plus<T> such that T{} is not the identity.
+template<class U, class T>
+  requires(
+    (is_arithmetic_v<T>) &&
+    (is_void_v<U> || (is_arithmetic_v<U> && is_convertible_v<U, T>))
+  )
+struct reduce_operation<std::plus<U>, T> {
+  static constexpr std::plus<U> op{};
+  static constexpr T value = T{};
+};
+
+// (std::plus or std::multiplies) with std::complex takes more effort,
+// since e.g., std::complex<double> + float is not well-formed.
+
+// std::multiplies with arithmetic types -> T(1).
+//
+// We can't specialize for all T, because users might have
+// defined std::multiplies<T> such that T(1) is not the identity.
+template<class T, class U>
+  requires(
+    (is_arithmetic_v<T>) &&
+    (is_void_v<U> || (is_arithmetic_v<U> && is_convertible_v<U, T>))
+  )
+struct reduce_operation<T, std::multiplies<U>> {
+  static constexpr std::multiplies<U> op{};
+  static constexpr T value = T(1);
+};
+
+// ... more specializations for Standard binary function objects ...
+```
+
+Some design issues:
+
+1. Users could not override default identity values for known binary operators
+    and reduction result types.  (Is this a feature, not a bug?)
+
+2. `BinaryOp` must be copy-constructible or move-constructible.
+
+    - That's fine for parallel algorithms, but not strictly necessary for non-parallel algorithms.
+
+    - On the other hand, if you want non-copyable `BinaryOp`, maybe you should use `fold_*` instead.
+
+### If users can define an identity value, do they need an initial value?
+
+#### `*reduce` algorithms should not take both
+
+- Providing both would confuse users and would specify the result type redundantly.
+
+- There is no performance benefit for providing an initial value, if an identity value is known.
+
+```c++
+std::vector<int> v{5, 11, 7};
+const int max_identity = std::numeric_limits<int>::lowest();
+
+// identity as initial value
+int result1 = ranges::reduce(v, max_identity, ranges::max{});
+assert(result1 == 11);
+
+// identity as, well, identity
+int result2 = ranges::reduce(v,
+  reduce_operation{ranges::max{}, max_identity});
+assert(result2 == 11);
+
+std::vector<int> empty_vec;
+int result3 = ranges::reduce(empty_vec,
+  reduce_operation{ranges::max{}, max_identity});
+assert(result3 == max_identity);
+```
+
+#### `*_scan` algorithms would benefit from an initial value
+
+- Initial value affects every element of output
+
+- Without it, would need extra `transform` pass over output
+
+- For exclusive scan, can't use `transform_exclusive_scan` to work around non-identity initial value
+
+```c++
+std::vector<int> in{5, 7, 11, 13, 17};
+std::vector<int> out(size_t(5));
+const int init = 3;
+auto binary_op = plus{};
+
+// out: 8, 15, 26, 39, 56
+ranges::inclusive_scan(in, out, binary_op, init);
+
+// out: 3, 8, 15, 26, 39
+// Yes, init and binary_op have reversed order.
+ranges::exclusive_scan(in, out, init, binary_op);
+
+// out: 8, 15, 26, 39, 56
+auto unary_op = [op = binary_op] (auto x) { return op(x, 3); };
+ranges::transform_inclusive_scan(int, out, binary_op, unary_op);
+
+// out: 0, 8, 15, 26, 39
+ranges::transform_exclusive_scan(in, out, binary_op, unary_op);
+```
+
+#### Avoid mixing up identity and initial value
+
+C++17 `*reduce` and `*_scan` take initial value `T init`, undecorated.
+
+If new algorithms take `T identity`, then users could be confused when switching from C++17 to new algorithms.
+ 
+"Decorating" identity by wrapping it in a struct prevents confusion.  It also lets algorithms provide both initial value and identity.
+
+```c++
+std::vector<int> in{-8, 6, -4, 2, 0, 10, -12};
+std::vector<int> out(size_t(7));
+const int init = 7;
+auto binary_op = std::ranges::max{};
+
+// inclusive_scan doesn't need an initial value.
+
+// out: -8, 6, 6, 6, 6, 10, 10
+std::ranges::inclusive_scan(in, out, binary_op);
+
+// out: 7, 7, 7, 7, 7, 10, 10
+std::ranges::inclusive_scan(in, out, binary_op, init);
+
+// Suppose the user knows that they
+// will never see values smaller than -9.
+const int identity_value = -10;
+
+// out: 7, 7, 7, 7, 7, 10, 10
+std::ranges::inclusive_scan(in, out,
+  reduce_operation{binary_op, identity_value},
+  init);
+
+// exclusive scan needs an initial value.
+// Identity is a reasonable default initial value,
+// if you have it.
+//
+// C++17 *exclusive_scan puts init left of binary_op,
+// while inclusive_scan puts init right of binary_op.
+// We find this weird so we don't do it.
+
+// out: 7, 7, 7, 7, 7, 7, 10
+std::ranges::exclusive_scan(in, out, binary_op, init);
+
+// out: -10, -8, 6, 6, 6, 6, 10
+std::ranges::exclusive_scan(in, out,
+  reduce_operation{binary_op, identity_value});
+
+// out: 7, 7, 7, 7, 7, 7, 7, 10
+std::ranges::exclusive_scan(in, out,
+  reduce_operation{binary_op, identity_value}, init);
+```
+
 ### Conclusions
 
-Based on the above considerations, we conclude that there are good reasons to consider a mechanism for users to explicitly
-specify the identity element for parallel reduction. There are options of how that could be achieved, of which we list a few.
-
-- Add an optional extra parameter for the value of identity, defaulting to value initialization.
-- Change the meaning of the `init` parameter for parallel algorithms to represent identity instead of the initial value.
-- Provide a customization point similar to `sycl::known_identity` that also defaults to value initialization but can be
-  specialized for a given operation.
-- Similarly to `std::linalg`, require that for numeric parallel algorithms a value-initialized object shall act as the identity element.
-
-At this point, we do not propose any of these options. We would like to hear feedback from SG1 and SG9 on exploring this further.
+There are good reasons for users to be able to specify an identity value for parallel reductions.
+Different designs could achieve that goal, some of which we discuss above.
+We would like to hear feedback from SG9 on their preferred design.
 
 ## `ranges::reduce` design
 
