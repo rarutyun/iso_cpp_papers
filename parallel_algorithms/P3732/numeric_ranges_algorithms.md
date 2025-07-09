@@ -1348,12 +1348,12 @@ We would like to hear feedback from SG9 on their preferred design.
 In this section, we focus on `ranges::reduce`'s design.  The discussion here applies generally to the other algorithms we
 propose.
 
-### No default parameters
+### No default binary operation or initial value
 
 Section 5.1 of [@P2760R1] states:
 
-> One thing is clear: `ranges::reduce` should *not* take a default binary operation *nor* a default initial [value]
-> parameter. The user needs to supply both.
+> One thing is clear: `ranges::reduce` should *not* take a default binary operation
+> *nor* a default initial [value] parameter. The user needs to supply both.
 
 This motivates the following convenience wrappers:
 
@@ -1361,8 +1361,9 @@ This motivates the following convenience wrappers:
 - `ranges::product(r)` for `ranges::reduce` with `init = range_value_t<R>(1))` and `multiplies{}` as the reduce operation;
   and
 - `ranges::dot(x, y)` for binary `ranges::transform_reduce` with `init = T()` where
-  `T = decltype(declval<range_value_t<X>>() * declval<range_value_t<Y>>())`, `multiplies{}` as the transform operation,
-  and `plus{}` as the reduce operation.
+  `T = decltype(declval<range_value_t<X>>() * declval<range_value_t<Y>>())`,
+  `multiplies{}` is the transform operation,
+  and `plus{}` is the reduce operation.
 
 One argument *for* a default initial value in `std::reduce` is that `int` literals like `0` or `1` do not behave in the
 expected way with a sequence of `float` or `double`.  For `ranges::reduce`, however, making its return value type imitate
