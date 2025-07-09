@@ -774,11 +774,22 @@ requirement for the non-parallel algorithms we propose. This leaves us with two 
 
 * (multipass) forward ranges.
 
-The various reduction and scan algorithms we propose can combine the elements of the range in any order. For this reason,
-we make the non-parallel algorithms take (multipass) forward ranges, even though this is not consistent with the existing
-non-parallel `<numeric>` algorithms. If users have single-pass iterators, they should just call one of the `fold_*`
-algorithms, or use the `views::scan` proposed elsewhere. This has the benefit of letting us specify `ranges::reduce`
-to return just the value. We don't propose a separate algorithm `reduce_with_iter`, as we explain [in the relevant section](#no-reduce-with-iter).
+We believe there is no value in `*reduce` and `*_scan` taking single-pass input ranges,
+because these algorithms can combine the elements of their input range(s) in any order.
+Suppose that an algorithm had that freedom to rearrange operations,
+yet was constrained to read the input ranges exactly once, in left-to-right order.
+The only way such an algorithm could exploit that freedom
+would be for it to copy the input ranges into temporary storage.
+Users who want that could just copy the input ranges into contiguous storage themselves.
+
+For this reason, we make the non-parallel algorithms take (multipass) forward ranges,
+even though this is not consistent with the existing non-parallel `<numeric>` algorithms.
+If users have single-pass iterators, they should just call one of the `fold_*` algorithms,
+or use the `views::scan` proposed in [@P3351R2].
+This has the benefit of letting us specify `ranges::reduce` to return just the value.
+We don't propose a separate `reduce_with_iter` algorithm
+to return both the value and the one-past-the-input iterator,
+as we explain [in the relevant section](#no-reduce-with-iter).
 
 ## Constexpr parallel algorithms?
 
