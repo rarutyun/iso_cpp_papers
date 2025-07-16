@@ -89,8 +89,8 @@ such as whether to include optional projection parameters.
 
 ### Current set of numeric algorithms
 
-[@P3179R8], "C++ Parallel Range Algorithms," is in the last stages of wording review as of the publication date.
-[@P3179R8] explicitly defers adding `ranges` versions of the numeric algorithms. This proposal does that.
+[@P3179R9], "C++ Parallel Range Algorithms," is in the last stages of wording review as of the publication date.
+[@P3179R9] explicitly defers adding `ranges` versions of the numeric algorithms. This proposal does that.
 As such, we focus on the 11 algorithms in [numeric.ops]{- .sref}.
 
 * `iota`
@@ -885,7 +885,7 @@ Note that the previous paragraph effectively argues for `*reduce` to require at 
 
 Just like `fold_left`, the `reduce` algorithm should return just the computed value.  Section 4.4 of [@P2322R6] argues that
 this makes it easier to use, and improves consistency with other `ranges` algorithms like `ranges::count` and
-`ranges::any_of`.  It is also consistent with [@P3179R8].  Furthermore, even if a `reduce_with_iter` algorithm were to
+`ranges::any_of`.  It is also consistent with [@P3179R9].  Furthermore, even if a `reduce_with_iter` algorithm were to
 exist, `reduce` should not be specified in terms of it. This is for performance reasons, as Section 4.4 of [@P2322R6]
 elaborates for `fold_left` and `fold_left_with_iter`.
 
@@ -902,7 +902,7 @@ We do not propose `reduce_first` here; we just outline arguments against and for
 
 #### Arguments against `reduce_first`
 
-1. [@P3179R8] already proposes parallel ranges overloads of `min_element`, `max_element`, and `minmax_element`.  Minima and
+1. [@P3179R9] already proposes parallel ranges overloads of `min_element`, `max_element`, and `minmax_element`.  Minima and
 maxima are the main use cases that lack a natural identity element.
 1. Users could always implement `reduce_first` themselves, by extracting the first element from the sequence and using it
 as the initial value in `reduce`.
@@ -940,12 +940,12 @@ We propose the following.
 - Our scans' return type is an alias of `in_out_result`.
 - Our reductions just return the reduction value, not `in_value_result` with an input iterator.
 
-[@P3179R8] does not aim for perfect consistency with the range categories accepted by existing `ranges` algorithms.
-The algorithms proposed by [@P3179R8] differ in the following ways.
+[@P3179R9] does not aim for perfect consistency with the range categories accepted by existing `ranges` algorithms.
+The algorithms proposed by [@P3179R9] differ in the following ways.
 
-1. [@P3179R8] uses a range, not an iterator, as the output parameter (see Section 2.7).
-2. [@P3179R8] requires that the ranges be sized (see Section 2.8).
-3. [@P3179R8] requires random access ranges (see Section 2.6).
+1. [@P3179R9] uses a range, not an iterator, as the output parameter (see Section 2.7).
+2. [@P3179R9] requires that the ranges be sized (see Section 2.8).
+3. [@P3179R9] requires random access ranges (see Section 2.6).
 
 Of these differences, (1) and (2) could apply generally to all `ranges` algorithms, so we adopt them for this proposal.
 
@@ -955,15 +955,15 @@ Standard. For arguments in favor of non-parallel algorithms taking a range as ou
 about non-parallel algorithms too.) Taking a range as output would prevent use of existing output-only iterators that do
 not have a separate sized sentinel type, like `std::back_insert_iterator`.  However, all the algorithms we propose require
 at least forward iterators (see below). [@P3490R0] shows that it is possible for both iterator-as-output and
-range-as-output overloads to coexist, so we follow [@P3179R8] by not proposing iterator-as-output algorithms here.
+range-as-output overloads to coexist, so we follow [@P3179R9] by not proposing iterator-as-output algorithms here.
 
-Regarding (2), we make the parallel algorithms proposed here take sized random access ranges, as [@P3179R8] does.
+Regarding (2), we make the parallel algorithms proposed here take sized random access ranges, as [@P3179R9] does.
 For consistency, we also propose that the output ranges be sized. As a result, any parallel algorithms with an output range
 need to return both an iterator to one past the last element of the output, and an iterator to one past the last element of
 the input. This tells callers whether there was enough room in the output, and if not, where to start when processing the
 rest of the input. This includes all the `*{ex,in}clusive_scan` algorithms we propose.
 
-Difference (3) relates to [@P3179R8] only proposing parallel algorithms. It would make sense for us to relax this
+Difference (3) relates to [@P3179R9] only proposing parallel algorithms. It would make sense for us to relax this
 requirement for the non-parallel algorithms we propose. This leaves us with two possibilities:
 
 * (single-pass) input and output ranges, the most general; or
@@ -989,8 +989,8 @@ as we explain [in the relevant section](#no-reduce-with-iter).
 
 ## Constexpr parallel algorithms?
 
-[@P2902R1] proposes to add `constexpr` to the parallel algorithms. [@P3179R8] does not object to this; see Section 2.10.
-We continue the approach of [@P3179R8] in not opposing [@P2902R1]'s approach, but also not depending on it.
+[@P2902R1] proposes to add `constexpr` to the parallel algorithms. [@P3179R9] does not object to this; see Section 2.10.
+We continue the approach of [@P3179R9] in not opposing [@P2902R1]'s approach, but also not depending on it.
 
 ## Specifying a reduction's identity element {#initial-value-vs-identity}
 
@@ -1584,11 +1584,11 @@ In summary,
 - We use the same constraints as `fold_left` and `fold_right` to constrain the binary operator of `reduce` and `*_scan`.
 - We imitate C++17 parallel algorithms and [linalg]{- .sref} ([@P1673R13]) by using *GENERALIZED_NONCOMMUTATIVE_SUM* and
 *GENERALIZED_SUM* to describe the behavior of `reduce` and `*_scan`.
-- Otherwise, we follow the approach of [@P3179R8] ("C++ Parallel Range Algorithms").
+- Otherwise, we follow the approach of [@P3179R9] ("C++ Parallel Range Algorithms").
 
-[@P3179R8], which is in the last stages of wording review, defines parallel versions of many `ranges` algorithms in the C++
+[@P3179R9], which is in the last stages of wording review, defines parallel versions of many `ranges` algorithms in the C++
 Standard Library. (The "parallel version of an algorithm" is an overload of an algorithm whose first parameter is an
-execution policy.) That proposal restricts itself to adding parallel versions of existing `ranges` algorithms. [@P3179R8]
+execution policy.) That proposal restricts itself to adding parallel versions of existing `ranges` algorithms. [@P3179R9]
 explicitly defers adding overloads to the numeric algorithms in [numeric.ops]{- .sref}, because these do not yet have
 ranges versions.  Our proposal fills that gap.
 
@@ -1646,7 +1646,7 @@ define the returned result(s) in terms of *GENERALIZED_SUM*. Those algorithms do
 precision of intermediate terms in the sum (so they need to define those terms). In our case, the Standard already uses
 *GENERALIZED_SUM* and *GENERALIZED_NONCOMMUTATIVE_SUM* to define iterator-based C++17 algorithms like `reduce`,
 `inclusive_scan`, and `exclusive_scan`.  We can just adapt this wording to talk about ranges instead of iterators. This
-lets us imitate the approach of [@P3179R8] in adding ranges overloads.
+lets us imitate the approach of [@P3179R9] in adding ranges overloads.
 
 Our approach combines the syntactic constraints used for the `fold_*` family of algorithms, with the semantic approach of
 [@P1673R13] and the C++17 parallel numeric algorithms. For example, we constrain `reduce`'s binary operation with both
@@ -1695,7 +1695,7 @@ implementation is done as experimental with the following deviations from this p
 
 > Text in blockquotes is not proposed wording, but rather instructions for generating proposed wording.
 
-> Assume that [@P3179R8] has been applied to the Working Draft.
+> Assume that [@P3179R9] has been applied to the Working Draft.
 
 ## Update feature test macro
 
