@@ -2,7 +2,7 @@
 ---
 title: Numeric range algorithms
 document: P3732R1
-date: 2025-07-15
+date: 2025-09-08
 audience: SG1,SG9
 author:
   - name: Ruslan Arutyunyan
@@ -60,6 +60,9 @@ R0 is the original draft prepared before the June 2025 Sofia WG21 meeting.  SG1 
 
     - Show different designs for specifying identity value
 
+- Add `sum_into`, `product_into`, and `dot_into`
+    (special cases of `reduce_into` or `transform_reduce_into`)
+
 # What we propose
 
 We propose `ranges` overloads (both parallel and non-parallel) of the following algorithms:
@@ -73,11 +76,17 @@ We propose `ranges` overloads (both parallel and non-parallel) of the following 
 These correspond to existing algorithms with the same names in the `<numeric>` header.
 Therefore, we called them "numeric range(s) algorithms."
 
-We also propose adding parallel and non-parallel convenience wrappers:
+We also propose adding "`_into`" versions of `reduce` and `transform_reduce`,
+that write the reduction result into a size-one range.
 
-* `ranges::sum` and `ranges::product` for special cases of `reduce` with addition and multiplication, respectively; and
+Finally, we propose parallel and non-parallel convenience wrappers:
 
-* `ranges::dot` for the special case of binary `transform_reduce` with transform `multiplies{}` and reduction `plus{}`.
+* `ranges::sum` and `ranges::product` for special cases of `reduce` with addition and multiplication, respectively;
+
+* `ranges::dot` for the special case of binary `transform_reduce` with transform `multiplies{}` and reduction `plus{}`; and
+
+* `ranges::sum_into`, `ranges::product_into`, and `ranges::dot_into`
+    (the "`_into`" versions of `sum`, `product`, and `dot`).
 
 The following sections explain why we propose these algorithms and not others.
 This relates to other aspects of the design besides algorithm selection,
@@ -89,7 +98,7 @@ such as whether to include optional projection parameters.
 
 ### Current set of numeric algorithms
 
-[@P3179R9], "C++ Parallel Range Algorithms," is in the last stages of wording review as of the publication date.
+[@P3179R9], "C++ Parallel Range Algorithms," was voted into the Working Draft for C++26 during the June 2025 Sofia meeting.
 [@P3179R9] explicitly defers adding `ranges` versions of the numeric algorithms. This proposal does that.
 As such, we focus on the 11 algorithms in [numeric.ops]{- .sref}.
 
@@ -578,8 +587,16 @@ where the algorithm's threads run.
 
 #### Do we need non-parallel versions of these algorithms?
 
-The entire motivation for these algorithms is parallel execution.
-The only reason to include non-parallel versions is for consistency.
+C++17 offers both parallel and non-parallel
+`reduce`, `transform_reduce`, `inclusive_scan`, and `exclusive_scan`.
+The main benefit of the non-parallel versions
+is that they permit reordering terms in the reduction or sum.
+For example, an implementation of `reduce(x.begin(), x.end(), std::plus{})`
+for a forward range of `float` is permitted to
+copy the range into contiguous storage and
+perform a parallel- and SIMD-accelerated reduction there.
+We want our non-parallel `ranges` numeric algorithms
+to have the same implementation freedom.
 
 #### Should output be an iterator or a range?
 
@@ -744,6 +761,18 @@ but implementations generally are allowed to copy results anyway.
 Users who worry about the cost of copying a reduction result
 and who do not want parallel execution can use `fold_*` instead.
 
+#### Also add `sum_into`, `product_into`, and `dot_into`
+
+We provide convenience wrappers `ranges::sum` and `ranges::product`
+for special cases of `reduce` with addition resp. multiplication, and
+`ranges::dot` for the special case of binary `transform_reduce`
+with transform `multiplies{}` and reduction `plus{}`.
+As a result, we also need to provide `_into` versions:
+`sum_into`, `product_into`, and `dot_into`.
+Otherwise, users who want reductions for these special cases
+would have to write them by hand and call
+`reduce_into` or `transform_reduce_into`.
+
 #### Conclusions
 
 1. Include both parallel and non-parallel versions
@@ -752,6 +781,9 @@ and who do not want parallel execution can use `fold_*` instead.
 2. Represent the output as a nonempty sized range.
 
 3. Output should be at least a forward range.
+
+4. Include both parallel and non-parallel versions
+    of `sum_into`, `product_into`, and `dot_into`.
 
 ### We propose convenience wrappers to replace some algorithms
 
@@ -989,8 +1021,8 @@ as we explain [in the relevant section](#no-reduce-with-iter).
 
 ## Constexpr parallel algorithms?
 
-[@P2902R1] proposes to add `constexpr` to the parallel algorithms. [@P3179R9] does not object to this; see Section 2.10.
-We continue the approach of [@P3179R9] in not opposing [@P2902R1]'s approach, but also not depending on it.
+[@P2902R2] proposes to add `constexpr` to the parallel algorithms. [@P3179R9] does not object to this; see Section 2.10.
+We continue the approach of [@P3179R9] in not opposing [@P2902R2]'s approach, but also not depending on it.
 
 ## Specifying a reduction's identity element {#initial-value-vs-identity}
 
@@ -1586,7 +1618,7 @@ In summary,
 *GENERALIZED_SUM* to describe the behavior of `reduce` and `*_scan`.
 - Otherwise, we follow the approach of [@P3179R9] ("C++ Parallel Range Algorithms").
 
-[@P3179R9], which is in the last stages of wording review, defines parallel versions of many `ranges` algorithms in the C++
+[@P3179R9], which has been voted into the Working Draft for C++26, defines parallel versions of many `ranges` algorithms in the C++
 Standard Library. (The "parallel version of an algorithm" is an overload of an algorithm whose first parameter is an
 execution policy.) That proposal restricts itself to adding parallel versions of existing `ranges` algorithms. [@P3179R9]
 explicitly defers adding overloads to the numeric algorithms in [numeric.ops]{- .sref}, because these do not yet have
@@ -1694,8 +1726,6 @@ implementation is done as experimental with the following deviations from this p
 # Wording
 
 > Text in blockquotes is not proposed wording, but rather instructions for generating proposed wording.
-
-> Assume that [@P3179R9] has been applied to the Working Draft.
 
 ## Update feature test macro
 
