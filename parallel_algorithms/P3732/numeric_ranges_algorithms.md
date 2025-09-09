@@ -2,7 +2,7 @@
 ---
 title: Numeric range algorithms
 document: P3732R1
-date: 2025-09-08
+date: 2025-09-09
 audience: SG1,SG9
 author:
   - name: Ruslan Arutyunyan
@@ -570,13 +570,19 @@ reduction algorithms to have projections.
 `ranges::transform_{in,ex}clusive_scan` as well as `ranges::{in,ex}clusive_scan`, and do not provide projections for any of
 them.
 
-### `reduce_into` and `transform_reduce_into`
+### Add `reduce_into` and `transform_reduce_into`
 
-We propose new algorithms `reduce_into` and `transform_reduce_into`.
+We propose new parallel and non-parallel algorithms
+`reduce_into` and `transform_reduce_into`.
 These work like `reduce` and `transform_reduce`,
 except that instead of returning the reduction result by value,
 they write it to the first element of an output range.
 We include both unary and binary versions of `transform_reduce_into`.
+We also provide convenience wrappers 
+`sum_into`, `product_into`, and `dot_into`
+that are the "`_into`" analogues of `sum`, `product`, and `dot`.
+
+#### Justification
 
 The `reduce_into` algorithm has
 [precedent in the Thrust library](https://nvidia.github.io/cccl/thrust/api_docs/algorithms/reductions.html).
@@ -585,7 +591,7 @@ directly to special memory associated with parallel execution,
 such as accelerator memory or a NUMA (Non-Uniform Memory Access) domain
 where the algorithm's threads run.
 
-#### Do we need non-parallel versions of these algorithms?
+#### Provide both parallel and non-parallel versions of these algorithms
 
 C++17 offers both parallel and non-parallel
 `reduce`, `transform_reduce`, `inclusive_scan`, and `exclusive_scan`.
@@ -598,7 +604,7 @@ perform a parallel- and SIMD-accelerated reduction there.
 We want our non-parallel `ranges` numeric algorithms
 to have the same implementation freedom.
 
-#### Should output be an iterator or a range?
+#### Output should be a nonempty sized forward range, not an iterator
 
 P3179 (parallel ranges algorithms) always specifies output ranges
 as sized ranges, instead of as a single iterator.
@@ -606,29 +612,66 @@ However, in the case of `*reduce_into`,
 the output range only needs to have one element.
 Thus, the interface could represent the output range
 either as a single iterator to that element,
-or as a nonempty sized range.
+or as a nonempty range.
+We propose representing the output as a nonempty sized forward range.
 
-The advantage of the output being a nonempty sized range
-is that the algorithms can have a hardened precondition
-that the output range is nonempty.
-Alternately, the `*reduce_into` algorithms could simply do nothing
-if the output range is empty,
-just like the parallel ranges algorithms adopted from [@P3179R9] into C++26.
+There are two parts to this.
 
-One disadvantage of the output being a nonempty sized range
-is that it would restrict the range category
-to be a forward (multipass) range.
-The `ranges::size` customization point object would be ill-formed otherwise.
-This is for good reason: if evaluating the size of a single-pass range
-requires traversing the range to find an iterator difference,
-then the range would no longer be valid for output.
-The algorithm only needs to write to the output range exactly once,
-so a single-pass range should suffice.
-On the other hand, implementations may want to update the output
-"in place" multiple times, instead of creating a temporary result
-and assigning it once to the output range.
+1. *Nonempty* and *sized*:
+    we define this as `sized_range` with nonzero `ranges::size(r)`
 
-The intended use case for `*reduce_into`
+2. *Forward range*: in the sense of `forward_range`
+
+We propose making the output a nonempty range instead of just an iterator
+because this lets the `*reduce_into` algorithms simply do nothing
+if the output range is empty.  This would make their behavior
+consistent with [@P3179R9]'s parallel ranges algorithms
+that were adopted into the Working Draft for C++26.
+
+Unlike other algorithms in [@P3179R9],
+the `*reduce_into` algorithms don't need to know
+the size of the output range;
+they just need to know that it has at least one element.
+Ranges provides three different ways to say that a range `r`
+has at least one element.
+
+a. The range is a `sized_range`
+    (meaning that `ranges::size(r)` has constant complexity)
+    and `ranges::size(r)` is nonzero;
+
+b. `ranges::empty(r)` is `false`; or,
+
+c. iterator comparison: `ranges::begin(r) != ranges::end(r)`.
+
+We choose Option (a) because
+
+i. it's consistent with [@P3179R9]'s output ranges;
+
+ii. the Standard currently has no concept to express
+    algorithmic complexity constraints on `ranges::empty(r)`
+    ([range.prim.empty]), while `ranges::size(r)` on a `sized_range`
+    always has constant complexity; and
+
+iii. `sized_range` permits evaluation of `ranges::size(r)`
+    before `ranges::begin(r)` without invalidating the range,
+    even if the range is not a `forward_range`.
+    This would enable future proposals that generalize the output
+    to be a `sized_range` that is not a `forward_range`.
+
+We propose making the output a `forward_range`
+because the intention of these algorithms
+is that once they return, users read from the output range.
+If the algorithm itself invalidates the range by writing to it,
+then users can't use the output range to get back the result.
+This requirement applies to both the parallel and the non-parallel algorithms.
+Specifically for the parallel algorithms, the output range must be copyable.
+The Standard does not currently have an iterator category
+to express "single-pass but copyable."
+This, again, would limit the iterator category to be at least forward.
+
+#### Use case comparing range and iterator interface options
+
+The motivating use case for `*reduce_into`
 is that both input and output live in special memory
 associated with parallel execution.
 Users of accelerators may want to avoid
@@ -636,9 +679,12 @@ implicitly reallocating data structures like `std::vector`,
 and instead make all allocations explicit, like this.
 
 ```c++
+// Allocate num_bytes bytes of special memory
 extern void* accelerator_malloc(size_t num_bytes);
+// Free an allocation created by accelerator_malloc
 extern void accelerator_free(void* ptr);
 
+// unique_ptr deleter for special memory
 template<class T>
 struct accelerator_deleter {
   void operator() (T* ptr) const {
@@ -646,6 +692,7 @@ struct accelerator_deleter {
   }
 };
 
+// Dynamic allocation of special memory for an array
 template<class T, size_t Extent = std::dynamic_extent>
 class accelerator_array {
 public:
@@ -654,7 +701,7 @@ public:
     alloc_((float*) accelerator_malloc(num_elements * sizeof(T)), {})
   {}
 
-  std::span<T, Extent> data() const {
+  std::span<T, Extent> get_span() const {
     if constexpr (Extent == std::dynamic_extent) {
       return {alloc_.get(), num_elements_}
     }
@@ -668,6 +715,7 @@ private:
   std::unique_ptr<T[], accelerator_deleter<T>> alloc_;
 };
 
+// Dynamic allocation of special memory for a single value
 template<class T>
 class accelerator_value {
 public:
@@ -687,29 +735,11 @@ private:
 extern void user_fill_span(std::span<float> x);
 ```
 
-If `reduce_into` takes an iterator for the output,
-users would use it like this.
-(We assume provisionally that the algorithm can fill in defaults
-for the binary operation, identity value, and initial value.)
-
-```c++
-// Create input range, reduce over input into output,
-// and return output allocation.
-accelerator_value<float>
-user_fill_and_reduce(size_t num_elements) {
-  accelerator_array<float> input(num_elements);
-  user_fill_span(input.data());
-  accelerator_value<float> output;
-  std::ranges::reduce_into(std::execution::par,
-    input.data(), output.get());
-  return std::move(output);
-}
-```
-
 If `reduce_into` takes a range for the output,
 users would use it like this.
-The only difference is that users would need to
-represent the output as a size-1 array.
+Note that the output value needs to be a range.
+We do that here by making it a size-1 `span`,
+but there are other options.
 
 ```c++
 // Create input range, reduce over input into output,
@@ -717,10 +747,31 @@ represent the output as a size-1 array.
 accelerator_array<float, 1>
 user_fill_and_reduce(size_t num_elements) {
   accelerator_array<float> input(num_elements);
-  user_fill_span(input.data());
-  accelerator_array<float, 1> output;
+  user_fill_span(input.get_span());
+  accelerator_value<float> output;
   std::ranges::reduce_into(std::execution::par,
-    input.data(), output.data());
+    input.get_span(),
+    std::span<float, 1>(output.get())
+    /*, other arguments */);
+  return std::move(output);
+}
+```
+
+If `reduce_into` takes an iterator for the output,
+users would use it like this.
+
+```c++
+// Create input range, reduce over input into output,
+// and return output allocation.
+accelerator_value<float>
+user_fill_and_reduce(size_t num_elements) {
+  accelerator_array<float> input(num_elements);
+  user_fill_span(input.get_span());
+  accelerator_value<float> output;
+  std::ranges::reduce_into(std::execution::par,
+    input.get_span(),
+    output.get() // pointer is an iterator
+    /*, other arguments */);
   return std::move(output);
 }
 ```
@@ -734,34 +785,15 @@ Thus, users probably won't be writing code like this.
 
 ```c++
 std::vector<float> input_range{3.0f, 5.0f, 7.0f};
-float out_value{};
+float output_value{};
 ranges::reduce_into(std::execution::par,
-  input_range, span<float, 1>{&out_value});
+  input_range,
+  span<float, 1>{&output_value}
+  /*, other arguments */);
 assert(out_value == out[0]);
 ```
 
-#### What should the output iterator category be?
-
-As we explain above, if we represent the output as a range
-and require it to be a sized range,
-then the iterator category must be at least forward.
-
-For the parallel algorithms, the output range must be copyable.
-The Standard does not currently have an iterator category
-to express "single-pass but copyable."
-This, again, would limit the iterator category to be at least forward.
-
-The main motivation for `*reduce_into` is parallel execution.
-If we do include non-parallel versions of these algorithms,
-the only way we could relax the output iterator category
-is to represent the output as a single iterator instead of a sized range.
-In that case, we could use a single-pass iterator.
-That would prevent "in-place" implementations,
-but implementations generally are allowed to copy results anyway.
-Users who worry about the cost of copying a reduction result
-and who do not want parallel execution can use `fold_*` instead.
-
-#### Also add `sum_into`, `product_into`, and `dot_into`
+#### Add `sum_into`, `product_into`, and `dot_into`
 
 We provide convenience wrappers `ranges::sum` and `ranges::product`
 for special cases of `reduce` with addition resp. multiplication, and
@@ -778,11 +810,9 @@ would have to write them by hand and call
 1. Include both parallel and non-parallel versions
     of `reduce_into` and `transform_reduce_into`.
 
-2. Represent the output as a nonempty sized range.
+2. Represent the output as a nonempty `sized_range` + `forward_range`.
 
-3. Output should be at least a forward range.
-
-4. Include both parallel and non-parallel versions
+3. Include both parallel and non-parallel versions
     of `sum_into`, `product_into`, and `dot_into`.
 
 ### We propose convenience wrappers to replace some algorithms
@@ -967,7 +997,9 @@ bounds).
 
 We propose the following.
 
-- Our parallel algorithms take sized random access ranges.
+- Our parallel algorithms take sized random access ranges
+    (except for output ranges of "`_into`" algorithms,
+    which are sized forward ranges; see above).
 - Our non-parallel algorithms take sized forward ranges.
 - Our scans' return type is an alias of `in_out_result`.
 - Our reductions just return the reduction value, not `in_value_result` with an input iterator.
