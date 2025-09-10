@@ -1768,6 +1768,36 @@ implementation is done as experimental with the following deviations from this p
 #define __cpp_lib_parallel_algorithm YYYYMML // also in <algorithm>
 ```
 
+## Add _`sized-forward-range`_ to [range.refinements]
+
+[7]{.pnum} The `constant_range` concept specifies the requirements of a `range` type whose elements are not modifiable.
+
+```
+template<class T>
+  concept constant_range =
+    input_range<T> && @_constant-iterator_@<iterator_t<T>>;
+```
+
+::: add
+[8]{.pnum} The exposition-only concept _`sized-forward-range`_ specifies the requirements of a `range` type that is sized and whose iterators model `forward_iterator`.
+
+```
+template<class T>
+  concept @_sized-random-access-range_@ =           // @_exposition only_@
+    random_access_range<R> && sized_range<R>;
+```
+:::
+
+[9]{.pnum} The exposition-only concept _`sized-random-access-range`_ specifies the requirements of a `range` type that is sized and allows random access to its elements.
+
+```
+template<class T>
+  concept @_sized-random-access-range_@ =           // @_exposition only_@
+    random_access_range<R> && sized_range<R>;
+```
+
+[*Note 1*: [This concept]{.rm}[The concepts _`sized-forward-range`_ and _`sized-random-access-range`_]{.add} constrain[s]{.rm} some parallel algorithm overloads; see [algorithms] [and [numeric]]{.add}. -- *end note*]
+
 ## Change [numeric.ops.overview]{- .sref}
 
 > Change [numeric.ops.overview]{- .sref} (the `<numeric>` header synopsis) as follows.
@@ -1776,68 +1806,54 @@ implementation is done as experimental with the following deviations from this p
 
 > Add declarations of exposition-only concepts _`indirectly-binary-foldable-impl`_ and _`indirectly-binary-foldable`_ to
 > [numeric.ops.overview]{- .sref} (the `<numeric>` header synopsis) as follows.
+>
+> Note that the exposition-only concepts _`indirectly-binary-left-foldable`_
+> and _`indirectly-binary-right-foldable`_ live in the `<algorithm>` header.
 
 ```
-template<class F, class T, class I, class U>
-  concept @_indirectly-binary-left-foldable-impl_@ =  // @_exposition only_@
-    movable<T> && movable<U> &&
-    convertible_to<T, U> && invocable<F&, U, iter_reference_t<I>> &&
-    assignable_from<U&, invoke_result_t<F&, U, iter_reference_t<I>>>;
+// mostly freestanding
+namespace std {
 ```
-
 ::: add
-```cpp
-template<class F, class T, class I, class U>
-  concept @_indirectly-binary-foldable-impl_@ =       // @_exposition only_@
-    movable<T> && movable<U> &&
-    convertible_to<T, U> &&
-    invocable<F&, U, iter_reference_t<I>> &&
-    assignable_from<U&, invoke_result_t<F&, U, iter_reference_t<I>>> &&
-    invocable<F&, iter_reference_t<I>, U> &&
-    assignable_from<U&, invoke_result_t<F&, iter_reference_t<I>, U>>;
 ```
-:::
+namespace ranges {
 
-```
-template<class F, class T, class I>
-  concept @_indirectly-binary-left-foldable_@ =      // @_exposition only_@
-    copy_constructible<F> && indirectly_readable<I> &&
-    invocable<F&, T, iter_reference_t<I>> &&
-    convertible_to<invoke_result_t<F&, T, iter_reference_t<I>>,
-            decay_t<invoke_result_t<F&, T, iter_reference_t<I>>>> &&
-    @_indirectly-binary-left-foldable-impl_@<F, T, I,
-                    decay_t<invoke_result_t<F&, T, iter_reference_t<I>>>>;
-
-template<class F, class T, class I>
-  concept @_indirectly-binary-right-foldable_@ =    // @_exposition only_@
-    indirectly-binary-left-foldable<@_flipped_@<F>, T, I>;
-```
-
-::: add
-```cpp
-template<class F, class T, class I>
-  concept @_indirectly-binary-foldable_@ =           // @_exposition only_@
-    copy_constructible<F> && indirectly_readable<I> &&
-    invocable<F&, T, iter_reference_t<I>> &&
-    convertible_to<invoke_result_t<F&, T, iter_reference_t<I>>,
-      decay_t<invoke_result_t<F&, T, iter_reference_t<I>>>> &&
-    invocable<F&, iter_reference_t<I>, T> &&
-    convertible_to<invoke_result_t<F&, iter_reference_t<I>, T>,
-      decay_t<invoke_result_t<F&, iter_reference_t<I>, T>>> &&
-    @_indirectly-binary-foldable-impl_@<F, T, I,
-      decay_t<invoke_result_t<F&, T, iter_reference_t<I>>>>;
+  template<class F, class T, class I, class U>
+    concept @_indirectly-binary-foldable-impl_@ =       // @_exposition only_@
+      movable<T> && movable<U> &&
+      convertible_to<T, U> &&
+      invocable<F&, U, iter_reference_t<I>> &&
+      assignable_from<U&, invoke_result_t<F&, U, iter_reference_t<I>>> &&
+      invocable<F&, iter_reference_t<I>, U> &&
+      assignable_from<U&, invoke_result_t<F&, iter_reference_t<I>, U>>;
+  template<class F, class T, class I>
+    concept @_indirectly-binary-foldable_@ =           // @_exposition only_@
+      copy_constructible<F> && indirectly_readable<I> &&
+      invocable<F&, T, iter_reference_t<I>> &&
+      convertible_to<invoke_result_t<F&, T, iter_reference_t<I>>,
+        decay_t<invoke_result_t<F&, T, iter_reference_t<I>>>> &&
+      invocable<F&, iter_reference_t<I>, T> &&
+      convertible_to<invoke_result_t<F&, iter_reference_t<I>, T>,
+        decay_t<invoke_result_t<F&, iter_reference_t<I>, T>>> &&
+      @_indirectly-binary-foldable-impl_@<F, T, I,
+        decay_t<invoke_result_t<F&, T, iter_reference_t<I>>>>;
+  }
 ```
 :::
 ```
-template<input_iterator I, sentinel_for<I> S, class T = iter_value_t<I>,
-          indirectly-binary-left-foldable<T, I> F>
-  constexpr auto fold_left(I first, S last, T init, F f);
+  // [accumulate], accumulate
+  template<class InputIterator, class T>
+    constexpr T accumulate(InputIterator first, InputIterator last, T init);
+  template<class InputIterator, class T, class BinaryOperation>
+    constexpr T accumulate(InputIterator first, InputIterator last, T init,
+                           BinaryOperation binary_op);
 ```
 
-### Add declarations of ranges `reduce` overloads
+### Add declarations of `reduce`, `sum`, `product`, and their `*_into` variants
 
-> Add declarations of ranges overloads of `reduce`, `sum`, and `product` algorithms to [numeric.ops.overview]{- .sref}
-> (the `<numeric>` header synopsis) as follows.
+> Add declarations of ranges overloads of
+> `reduce`, `reduce_into`, `sum`, `sum_into`, `product`, and `product_into` algorithms
+> to [numeric.ops.overview]{- .sref} (the `<numeric>` header synopsis) as follows.
 
 ```
 template<class ExecutionPolicy, class ForwardIterator, class T, class BinaryOperation>
@@ -1850,15 +1866,15 @@ template<class ExecutionPolicy, class ForwardIterator, class T, class BinaryOper
 
   // Non-parallel overloads of reduce
 
-  template<random_access_iterator I,
+  template<forward_iterator I,
            sized_sentinel_for<I> S,
            class T = iter_value_t<I>,
            @_indirectly-binary-foldable_@<T, I> F>
-      constexpr auto reduce(I first, S last, T init, F binary_op) -> /* @_see below_@ */;
-  template<@_sized-random-access-range_@ R,
-           class T = range_value_t<I>,
-           @_indirectly-binary-foldable_@<T, ranges::iterator_t<R>> F>
-      constexpr auto reduce(R&& r, T init, F binary_op) -> /* @_see below_@ */;
+    constexpr auto reduce(I first, S last, T init, F binary_op) -> /* @_see below_@ */;
+  template<@_sized-forward-range_@ R,
+           class T = range_value_t<R>,
+           @_indirectly-binary-foldable_@<T, iterator_t<R>> F>
+    constexpr auto reduce(R&& r, T init, F binary_op) -> /* @_see below_@ */;
 
   // Parallel overloads of reduce
 
@@ -1867,22 +1883,70 @@ template<class ExecutionPolicy, class ForwardIterator, class T, class BinaryOper
            sized_sentinel_for<I> S,
            class T = iter_value_t<I>,
            @_indirectly-binary-foldable_@<T, I> F>
-      auto reduce(Ep&& exec, // @_freestanding-deleted, see [algorithms.parallel.overloads]_@
-                  I first, S last, T init, F binary_op) -> /* @_see below_@ */;
+    auto reduce(Ep&& exec, // @_freestanding-deleted, see [algorithms.parallel.overloads]_@
+                I first, S last, T init, F binary_op) -> /* @_see below_@ */;
   template<@_execution-policy_@ Ep,
            @_sized-random-access-range_@ R,
-           class T = range_value_t<I>,
-           @_indirectly-binary-foldable_@<T, ranges::iterator_t<R>> F>
-      auto reduce(Ep&& exec, // @_freestanding-deleted, see [algorithms.parallel.overloads]_@
-                  R&& r, T init, F binary_op) -> /* @_see below_@ */;
+           class T = range_value_t<R>,
+           @_indirectly-binary-foldable_@<T, iterator_t<R>> F>
+    auto reduce(Ep&& exec, // @_freestanding-deleted, see [algorithms.parallel.overloads]_@
+                R&& r, T init, F binary_op) -> /* @_see below_@ */;
+
+  // Non-parallel overloads of reduce_into
+
+  template<forward_iterator I,
+           sized_sentinel_for<I> IS,
+           forward_iterator O,
+           sized_sentinel_for<O> OS,
+           class T = iter_value_t<I>,
+           @_indirectly-binary-foldable_@<T, I> F>
+    constexpr auto reduce_into(
+      I in_first, IS in_last,
+      O out_first, OS out_last,
+      T init,
+      F binary_op) -> /* @_see below_@ */;
+  template<@_sized-forward-range_@ IR,
+           @_sized-forward-range_@ OR,
+           class T = range_value_t<IR>,
+           @_indirectly-binary-foldable_@<T, iterator_t<IR>> F>
+    constexpr auto reduce_into(
+      IR&& in_range,
+      OR&& out_range,
+      T init,
+      F binary_op) -> /* @_see below_@ */;
+
+  // Parallel overloads of reduce_into
+
+  template<@_execution-policy_@ Ep,
+           random_access_iterator I,
+           sized_sentinel_for<I> S,
+           forward_iterator O,
+           sized_sentinel_for<O> OS,
+           class T = iter_value_t<I>,
+           @_indirectly-binary-foldable_@<T, I> F>
+    auto reduce_into(Ep&& exec, // @_freestanding-deleted, see [algorithms.parallel.overloads]_@
+      I in_first, S in_last,
+      O out_first, OS out_last,
+      T init,
+      F binary_op) -> /* @_see below_@ */;
+  template<@_execution-policy_@ Ep,
+           @_sized-random-access-range_@ IR,
+           @_sized-forward-range_@ OR,
+           class T = range_value_t<IR>,
+           @_indirectly-binary-foldable_@<T, iterator_t<IR>> F>
+    auto reduce_into(Ep&& exec, // @_freestanding-deleted, see [algorithms.parallel.overloads]_@
+      IR&& in_range,
+      OR&& out_range,
+      T init,
+      F binary_op) -> /* @_see below_@ */;
 
   // Non-parallel overloads of sum
 
-  template<random_access_iterator I,
+  template<forward_iterator I,
            sized_sentinel_for<I> S>
     requires /* @_see below_@ */
       constexpr auto sum(I first, S last) -> /* @_see below_@ */;
-  template<@_sized-random-access-range_@ R>
+  template<@_sized-forward-range_@ R>
     requires /* @_see below_@ */
       constexpr auto sum(R&& r) -> /* @_see below_@ */;
 
@@ -1900,13 +1964,46 @@ template<class ExecutionPolicy, class ForwardIterator, class T, class BinaryOper
       auto sum(Ep&& exec, // @_freestanding-deleted, see [algorithms.parallel.overloads]_@
                R&& r) -> /* @_see below_@ */;
 
+  // Non-parallel overloads of sum_into
+
+  template<forward_iterator I,
+           sized_sentinel_for<I> IS,
+           forward_iterator O,
+           sized_sentinel_for<O> OS>
+    requires /* @_see below_@ */
+      constexpr auto sum_into(I in_first, S in_last,
+        O out_first, OS out_last) -> /* @_see below_@ */;
+  template<@_sized-forward-range_@ IR,
+           @_sized-forward-range_@ OR>
+    requires /* @_see below_@ */
+      constexpr auto sum_into(IR&& input, OR&& output) -> /* @_see below_@ */;
+
+  // Parallel overloads of sum_into
+
+  template<@_execution-policy_@ Ep,
+           random_access_iterator I,
+           sized_sentinel_for<I> IS,
+           forward_iterator O,
+           sized_sentinel_for<O> OS>
+    requires /* @_see below_@ */
+      auto sum_into(Ep&& exec, // @_freestanding-deleted, see [algorithms.parallel.overloads]_@
+        I in_first, IS in_last,
+        O out_first, OS out_last) -> /* @_see below_@ */;
+  template<@_execution-policy_@ Ep,
+           @_sized-random-access-range_@ IR,
+           @_sized-forward-range_@ OR>
+    requires /* @_see below_@ */
+      auto sum_into(Ep&& exec, // @_freestanding-deleted, see [algorithms.parallel.overloads]_@
+        OR&& out,
+        IR&& in) -> /* @_see below_@ */;
+
   // Non-parallel overloads of product
 
-  template<random_access_iterator I,
+  template<forward_iterator I,
            sized_sentinel_for<I> S>
     requires /* @_see below_@ */
       constexpr auto product(I first, S last) -> /* @_see below_@ */;
-  template<@_sized-random-access-range_@ R>
+  template<@_sized-forward-range_@ R>
     requires /* @_see below_@ */
       constexpr auto product(R&& r) -> /* @_see below_@ */;
 
@@ -1924,6 +2021,42 @@ template<class ExecutionPolicy, class ForwardIterator, class T, class BinaryOper
       auto product(Ep&& exec, // @_freestanding-deleted, see [algorithms.parallel.overloads]_@
                    R&& r) -> /* @_see below_@ */;
 
+  // Non-parallel overloads of product_into
+
+  template<forward_iterator I,
+           sized_sentinel_for<I> IS,
+           forward_iterator O,
+           sized_sentinel_for<O> OS>
+    requires /* @_see below_@ */
+      constexpr auto product_into(
+        I in_first, IS in_last,
+        O out_first, OS out_last) -> /* @_see below_@ */;
+  template<@_sized-forward-range_@ IR,
+           @_sized-forward-range_@>
+    requires /* @_see below_@ */
+      constexpr auto product_into(
+        IR&& in,
+        OR& out) -> /* @_see below_@ */;
+
+  // Parallel overloads of product_into
+
+  template<@_execution-policy_@ Ep,
+           random_access_iterator I,
+           sized_sentinel_for<I> IS,
+           forward_iterator O,
+           sized_sentinel_for<O> OS>
+    requires /* @_see below_@ */
+      auto product_into(Ep&& exec, // @_freestanding-deleted, see [algorithms.parallel.overloads]_@
+        I in_first, IS in_last,
+        O out_first, OS out_last) -> /* @_see below_@ */;
+  template<@_execution-policy_@ Ep,
+           @_sized-random-access-range_@ IR,
+           @_sized-forward-range_@ OR>
+    requires /* @_see below_@ */
+      auto product_into(Ep&& exec, // @_freestanding-deleted, see [algorithms.parallel.overloads]_@
+        IR&& in,
+        OR&& out) -> /* @_see below_@ */;
+
   } // namespace ranges
 ```
 :::
@@ -1934,13 +2067,146 @@ template<class InputIterator1, class InputIterator2, class T>
                             InputIterator2 first2, T init);
 ```
 
-### Add declarations of ranges `inclusive_scan`
+### Add declarations of ranges `transform_reduce`, `dot`, and `dot_into`
 
-TODO
+```
+  template<class ExecutionPolicy, class ForwardIterator, class T,
+           class BinaryOperation, class UnaryOperation>
+    T transform_reduce(ExecutionPolicy&& exec, // @_freestanding-deleted, see [algorithms.parallel.overloads]_@
+                       ForwardIterator first, ForwardIterator last, T init,
+                       BinaryOperation binary_op, UnaryOperation unary_op);
+```
+::: add
+```
+  namespace ranges {
+
+  // Non-parallel overloads of unary transform_reduce
+
+  // TODO
+
+  // Parallel overloads of unary transform_reduce
+
+  // TODO
+
+  // Non-parallel overloads of unary transform_reduce_into
+
+  // TODO
+
+  // Parallel overloads of unary transform_reduce_into
+
+  // TODO
+
+  // Non-parallel overloads of binary transform_reduce
+
+  // TODO
+
+  // Parallel overloads of binary transform_reduce
+
+  // TODO
+
+  // Non-parallel overloads of binary transform_reduce_into
+
+  // TODO
+
+  // Parallel overloads of binary transform_reduce_into
+
+  // TODO
+
+  // Non-parallel overloads of dot
+
+  // TODO
+
+  // Parallel overloads of dot
+
+  // TODO
+
+  // Non-parallel overloads of dot_into
+
+  // TODO
+
+  // Parallel overloads of dot_into
+
+  // TODO
+
+  }
+```
+:::
+```
+  // [partial.sum], partial sum
+  template<class InputIterator, class OutputIterator>
+    constexpr OutputIterator
+      partial_sum(InputIterator first, InputIterator last,
+                  OutputIterator result);
+```
 
 ### Add declarations of ranges `exclusive_scan`
 
-TODO
+```
+  template<class ExecutionPolicy, class ForwardIterator1, class ForwardIterator2, class T,
+           class BinaryOperation>
+    ForwardIterator2
+      exclusive_scan(ExecutionPolicy&& exec,                    // @_freestanding-deleted, see [algorithms.parallel.overloads]_@
+                     ForwardIterator1 first, ForwardIterator1 last,
+                     ForwardIterator2 result, T init, BinaryOperation binary_op);
+```
+::: add
+```
+  namespace ranges {
+    // Non-parallel overloads of exclusive_scan
+    
+    // TODO
+
+    // Parallel overloads of exclusive_scan
+
+    // TODO
+  }
+```
+:::
+```
+  // [inclusive.scan], inclusive scan
+  template<class InputIterator, class OutputIterator>
+    constexpr OutputIterator
+      inclusive_scan(InputIterator first, InputIterator last,
+                     OutputIterator result);
+```
+
+### Add declarations of ranges `inclusive_scan`
+
+```
+  template<class ExecutionPolicy, class ForwardIterator1, class ForwardIterator2,
+           class BinaryOperation, class T>
+    ForwardIterator2
+      inclusive_scan(ExecutionPolicy&& exec,                    // @_freestanding-deleted, see [algorithms.parallel.overloads]_@
+                     ForwardIterator1 first, ForwardIterator1 last,
+                     ForwardIterator2 result, BinaryOperation binary_op, T init);
+```
+::: add
+```
+  namespace ranges {
+    // Non-parallel overloads of inclusive_scan
+    
+    // TODO
+
+    // Parallel overloads of inclusive_scan
+
+    // TODO
+  }
+```
+:::
+```
+
+  // [transform.exclusive.scan], transform exclusive scan
+  template<class InputIterator, class OutputIterator, class T,
+           class BinaryOperation, class UnaryOperation>
+    constexpr OutputIterator
+      transform_exclusive_scan(InputIterator first, InputIterator last,
+                               OutputIterator result, T init,
+                               BinaryOperation binary_op, UnaryOperation unary_op);
+```
+
+### TODO What about `transform_exclusive_scan`?
+
+### TODO What about `transform_inclusive_scan`?
 
 ### Add wording for algorithms
 
