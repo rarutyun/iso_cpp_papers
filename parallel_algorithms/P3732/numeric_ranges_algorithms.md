@@ -1679,7 +1679,7 @@ whether the element type's binary operation is commutative. The concepts include
 WG21 has not expressed a consensus on [@P1813R0]'s approach. LEWGI reviewed [@P1813R0] at the Belfast meeting in November
 2019, but did not forward the proposal and wanted to see it again. Two other proposals express something more like WG21's
 consensus on constraining the numeric algorithms: [@P2214R2], "A Plan for C++23 Ranges,"
-[@P1673R13], "A free function linear algebra interface based on the BLAS," which defines mdspan-based analogs of the
+[@P1673R13], "A free function linear algebra interface based on the BLAS," which defines `mdspan`-based analogs of the
 numeric algorithms. Section 5.1.1 of [@P2214R2] points out that [@P1813R0]'s approach would overconstrain `fold`;
 [@P2214R2] instead suggests just constraining the operation to be binary invocable. This was ultimately the approach taken
 by the Standard through the exposition-only concepts _`indirectly-binary-left-foldable`_ and
@@ -1713,8 +1713,8 @@ precision of intermediate terms in the sum (so they need to define those terms).
 lets us imitate the approach of [@P3179R9] in adding ranges overloads.
 
 Our approach combines the syntactic constraints used for the `fold_*` family of algorithms, with the semantic approach of
-[@P1673R13] and the C++17 parallel numeric algorithms. For example, we constrain `reduce`'s binary operation with both
-_`indirectly-binary-left-foldable`_ and _`indirectly-binary-right-foldable`_. (This expresses that if the binary operation
+[@P1673R13] and the C++17 parallel numeric algorithms. For example, we constrain `reduce`'s binary operation with
+_`indirectly-binary-foldable`_, which is like saying that it must be both _`indirectly-binary-left-foldable`_ and _`indirectly-binary-right-foldable`_. (This expresses that if the binary operation
 is called with an argument of the initial value's type `T`, then that argument can be in either the first or second
 position.) We express what `reduce` does using *GENERALIZED_SUM*.
 
