@@ -1262,6 +1262,10 @@ to make a different design choice for numeric range algorithms.
 
 ### Interface sketches for specifying identity
 
+#### TODO integrate new prototype
+
+[New prototype -- 3 ways to specify identity, plus `no_identity_t`](https://godbolt.org/z/bde1nYh5z)
+
 #### Design goals
 
 1. Avoid confusion with C++17 `std::reduce` initial value
