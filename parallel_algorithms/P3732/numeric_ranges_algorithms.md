@@ -1460,6 +1460,8 @@ like `std::plus` or `std::multiplies` with arithmetic types.
 
 ### Interface sketches for specifying identity
 
+TODO Rewrite this section to reflect 2025/09/10 discussion
+
 #### Design goals
 
 1. Avoid confusion with C++17 `std::reduce` initial value
