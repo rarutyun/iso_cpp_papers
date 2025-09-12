@@ -1491,6 +1491,10 @@ TODO Rewrite this section to reflect 2025/09/10 discussion
 
 [New prototype -- 3 ways to specify identity, plus `no_identity_t`](https://godbolt.org/z/bde1nYh5z)
 
+TODO Update prototype to reflect "wrapper binary operation" idea -- 
+it needs to be a valid binary operation even though it holds an identity,
+just like we require that mdspan `layout_transpose` be a valid layout.
+
 #### Design 1: `reduce_identity<T>{value}`
 
 Users would pass in their identity value
