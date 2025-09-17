@@ -1233,7 +1233,7 @@ assert(result == 23.0f);
 
 Not every binary operator has an identity.
 For instance, integers have no identity for the maximum operation.
-(Floating-point numbers have `-Inf`.)
+(For floating-point numbers, `-Inf` serves as an identity for maximum.)
 Adoption of `ranges::max_element` in [@P3179R9] mitigates this,
 but only partially.  This is because users commonly compose
 multiple binary operations into a single reduction.
@@ -1278,10 +1278,8 @@ max_and_sum_result inf_and_one_norm(Range&& r) {
 
 The binary operator `max_and_sum` has no identity,
 because integers have no identity for the maximum operation.
-(Floating-point numbers have `-Inf`.)
-
-In the above example, if the range is nonempty and the first element is `x_0`,
-`max_and_sum_result{x_0, 0}` works like an identity for this range,
+However, if a range is nonempty and its first element is `x_0`,
+`max_and_sum_result{x_0, 0}` works like an identity for the range,
 even though it is not an identity for the binary operator `max_and_sum`.
 We call this value a *pseudoidentity* of the binary operator and range.
 It's an interesting mathematical question whether
@@ -1316,8 +1314,8 @@ so that `T{}` defines the identity (if it exists) for `operator+(T, T)`.
     they are more likely to make `T` not trivially constructible,
     and thus hinder optimizations.
 
-Note that this differs from std::linalg:
-"A value-initialized object of linear algebra value type
+Note that this differs from std::linalg's algorithms, where
+"[a] value-initialized object of linear algebra value type
 shall act as the additive identity" ([linalg.reqs.val] 3).
 However, std::linalg does not take user-defined binary operators;
 it always uses `operator+` for reductions.
@@ -1332,14 +1330,19 @@ Users who never use parallel reductions may miss the importance of the reduction
 Let's consider typical code that sums elements of an indexed array.
 
 ```c++
-float sum = 0.0f;
-for (size_t i = 0; i < array_size; ++i) {
-  sum += a[i];
+float sum(std::span<float> a) {
+  float s = 0.0f;
+  for (size_t i = 0; i < a.size(); ++i) {
+    s += a[i];
+  }
+  return s;
 }
 ```
 
 The identity element `0.0f` is used to initialize the *accumulator*
 into which the array's values are summed.
+It defines both the type of the accumulator (`float`, in this case),
+and its initial value.
 If an initial value for the reduction is provided, it replaces the identity in the code above.
 A serial implementation of `reduce` therefore does not need to know
 its binary operation's identity when an initial value is provided.
@@ -1439,8 +1442,8 @@ Kokkos lets users define the identity value for custom reduction result types, b
 `init(value_type& value)` member function that sets `value` to the identity (see the [section on custom reducers
 in the Kokkos Programming Guide](https://kokkos.org/kokkos-core-wiki/ProgrammingGuide/Custom-Reductions-Custom-Reducers.html)).
 
-oneTBB asks users to specify the identity value as an argument to `parallel_reduce` function template (see the [relevant
-oneTBB specification page](https://oneapi-spec.uxlfoundation.org/specifications/oneapi/latest/elements/onetbb/source/algorithms/functions/parallel_reduce_func)).
+The oneTBB specification asks users to specify the identity value as an argument to `parallel_reduce` function template
+(see the [relevant oneTBB specification page](https://oneapi-spec.uxlfoundation.org/specifications/oneapi/latest/elements/onetbb/source/algorithms/functions/parallel_reduce_func)).
 
 SYCL lets users specify the identity value by specializing `sycl::known_identity` class template for a custom reduction operation
 (see the [relevant section of the SYCL specification](https://registry.khronos.org/SYCL/specs/sycl-2020/html/sycl-2020.html#sec:reduction)).
@@ -1458,62 +1461,328 @@ binary operation has no identity or the initial values are `None`, then this wor
 Implementations may use a default identity value for known cases,
 like `std::plus` or `std::multiplies` with arithmetic types.
 
-### Interface sketches for specifying identity
-
-TODO Rewrite this section to reflect 2025/09/10 discussion
+### Interface for specifying identity
 
 #### Design goals
 
-1. Avoid confusion with C++17 `std::reduce` initial value
+1. Identity is an optional optimization
 
-    - Strongly counterindicates designs that just pass in the identity as `T id`.
-        Doing that would easily confuse users who want to switch
-        from C++17 numeric algorithms to the new ranges versions.
+2. Avoid confusion with C++17 algorithms' initial value
 
-2. Let users specify a different binary operation and identity for the same reduction result type
+3. Let users specify a different binary operation and identity
+    for the same reduction result type
 
-    - Counterindicates a purely compile-time traits system.
-        For an example of such a system, please see the
-        ["Reduction Variables"](https://github.khronos.org/SYCL_Reference/iface/reduction-variables.html)
-        section of the SYCL Reference.
+4. Let users specify an identity even if their binary operation is a lambda
 
-3. Let users specify an identity even if their binary operation is a lambda
+5. Let users specify a nondefault identity value "in line"
+    with invoking the algorithm, without needing to specialize a class
 
-    - Counterindicates a purely compile-time traits system
+Items 1 and 2 suggest that the identity should not be
+a separate parameter `T id` of the algorithms.
+That would overly emphasize an optimization hint,
+and it could result in confusion between C++17 numeric algorithms
+and our new ranges numeric algorithms.
 
-4. Let users use the identity value to specify a reduction result type
-    that differs from `range_value_t<R>`,
-    just as they can use the initial value's type to do that with C++17 `reduce`
+Items 3, 4, and 5 strongly suggest that we should not
+rely solely on a compile-time trait for getting the identity value.
+Users need a way to provide the identity value at run time.
+(For an example of a compile-time trait system, please see the
+["Reduction Variables"](https://github.khronos.org/SYCL_Reference/iface/reduction-variables.html)
+section of the SYCL Reference.  SYCL requires users to specify
+the identity as a `static constexpr` member of a specialization
+of `known_identity` for their binary operator type.)
 
-5. Let users specify a nondefault identity value "in line" with invoking the algorithm, without needing to specialize a class
+#### Design outline
 
-#### TODO integrate new prototype
+[Here is a prototype](https://godbolt.org/z/hYq16PTob)
+that shows three different designs, including this one.
 
-[New prototype -- 3 ways to specify identity, plus `no_identity_t`](https://godbolt.org/z/bde1nYh5z)
+1. Algorithms use a trait and a customization point to look
+    for an optional identity in the binary operator itself.
 
-TODO Update prototype to reflect "wrapper binary operation" idea -- 
-it needs to be a valid binary operation even though it holds an identity,
-just like we require that mdspan `layout_transpose` be a valid layout.
+    a. If `has_identity_value<BinaryOperator>` is `true`,
+        the algorithm can use
+        `identity_value<range_value_t<InRange>>(BinaryOperator)`
+        to get the operator's identity.
 
-#### Design 1: `reduce_identity<T>{value}`
+    b. `identity_value` has an explicit template parameter
+        so that it can change its behavior based on the
+        input range's value type.  For example,
+        `binary_operation<Op, void>` (see below) returns a
+        value-initialized value of the input range's value type.
 
-Users would pass in their identity value
-by wrapping it in a named struct `reduce_identity`.
+2. We provide a binary operator wrapper `binary_operation`
+    that lets users
+
+    a. specify the identity value,
+    b. say that the algorithm should assume
+        that the identity does not exist, or
+    c. let the algorithm pick a reasonable default.
+
+3. Users can also define their own binary operation types
+    and customizations of `identity_value`.
+
+The `binary_operation` wrapper is also a binary operation,
+just like std::linalg's `layout_transpose` is a valid mdspan layout.
+
+##### `no_identity_t`: Express that an identity doesn't exist
 
 ```c++
-template<semiregular T>
-struct reduce_identity {
-  T value{};
+struct no_identity_t {};
+inline constexpr no_identity_t no_identity{};
+```
+
+The `no_identity` tag expresses that an identity value doesn't exist
+or isn't known for the given binary operator.
+Min and max on integers both have this problem
+(as integers lack representations of positive and negative infinity).
+
+Having this lets us implement `ranges::min_element` and
+`ranges::max_element` using `ranges::reduce`.
+
+##### `binary_operation`: Binary operation wrapper that can hold identity too
+
+The `binary_operation` struct holds both the binary operation,
+and an identity value, if the user provides one.
+Users can construct it in three different ways.
+
+1. Via CTAD, by providing a binary operator and identity value
+
+```c++
+binary_operation bop{
+  [] (auto x, auto y) { return x + y; },
+  0.0
 };
 ```
 
-The default identity value would be `T{}`, because the default needs to be _something_.
-Users would have two ways to provide a nondefault value.
+2. By specifying the template arguments and using `void`
+    as the identity type, which tells algorithms to use
+    a value-initialized `ranges_value_t<R>` as the identity
 
-1. Construct `reduce_identity` with a default value using aggregate initialization:
-    `reduce_identity{nondefault_value}`
+```c++
+binary_operation<std::plus<void>, void> bop_void{};
+```
 
-2. Specialize `reduce_identity<T>` so `declval<reduce_identity<T>>().value` is the value
+3. By specifying the binary operation and the `no_identity`
+    tag value, to indicate that the user wants the algorithm
+    to assume that the binary operation has no known identity
+
+```c++
+binary_operation bop_no_id{my_op, no_identity};
+```
+
+A key feature of `binary_operation` is that it is a working binary operation.
+That is, it has a call operator and it forwards calls to the user's binary operation.
+This is because the identity is an optional optimization.
+Algorithms *could* just call `binary_operation`'s call operator
+and ignore the identity value, and they would get a correct answer.
+
+Here is a sketch of the implementation of `binary_operation`.
+We start with a base class `binary_operation_base`
+that implements call operator forwarding.
+It prefers the user's const call operator if it exists;
+this makes use of `binary_operation` in parallel algorithms easier.
+
+```c++
+template<class BinaryOp>
+struct binary_operation_base {
+  template<class Arg0, class Arg1>
+  constexpr auto operator() (Arg0&& arg0, Arg1&& arg1) const 
+    requires std::invocable<
+      std::add_const_t<BinaryOp>,
+      decltype(std::forward<Arg0>(arg0)),
+      decltype(std::forward<Arg1>(arg1))>
+  {
+    return std::as_const(op)(
+      std::forward<Arg0>(arg0),
+      std::forward<Arg1>(arg1));
+  }
+
+  template<class Arg0, class Arg1>
+  constexpr auto operator() (Arg0&& arg0, Arg1&& arg1) 
+    requires (! std::invocable<
+      std::add_const_t<BinaryOp>,
+      decltype(std::forward<Arg0>(arg0)),
+      decltype(std::forward<Arg1>(arg1))>)
+  {
+    return op(
+      std::forward<Arg0>(arg0),
+      std::forward<Arg1>(arg1));
+  }
+
+  [[no_unique_address]] BinaryOp op;
+};
+```
+
+The `binary_operation` struct has two template parameters:
+the type of the binary operator, and the type of the identity.
+`Identity` can be, say, `constant_wrapper` of the value,
+not the actual value.  This works because the accumulator
+type is deduced from the operator result.
+
+```c++
+template<class BinaryOp, class Identity>
+struct binary_operation :
+  public binary_operation_base<BinaryOp>
+{
+  [[no_unique_address]] Identity id;
+};
+```
+
+We value-initialize the identity by default, if its type supports that.
+`Identity=no_identity_t` means that the binary operator
+does not have an identity, or the user does not know
+an identity value.  It still gets "stored" in the struct
+so that the struct can remain an aggregate.  Otherwise,
+it would need a one-parameter constructor for that case.
+
+```c++
+template<class BinaryOp, class Identity>
+requires requires { Identity{}; }
+struct binary_operation<BinaryOp, Identity> :
+  public binary_operation_base<BinaryOp>
+{
+  [[no_unique_address]] Identity id{};
+};
+```
+
+As with `std::plus<void>`, `Identity=void` means
+"the algorithm needs to deduce the identity type and value."
+
+```c++
+template<class BinaryOp>
+struct binary_operation<BinaryOp, void> :
+  public binary_operation_base<BinaryOp>
+{
+  [[no_unique_address]] BinaryOp op;
+};
+```
+
+We define deduction guides so that algorithms
+by default do not assume the existence of an identity.
+
+```c++
+template<class BinaryOp, class Identity>
+binary_operation(BinaryOp, Identity) ->
+  binary_operation<BinaryOp, Identity>;
+
+template<class BinaryOp>
+binary_operation(BinaryOp) ->
+  binary_operation<BinaryOp, no_identity_t>;
+```
+
+Finally, we specialize `has_identity_value` and overload `identity_value`.
+`Identity=void` means that `binary_operation` itself does not specify
+the identity type or value; rather, the algorithm must supply the type,
+and `identity_value` returns a value-initialized object of that type.
+This is why `identity_value` has a required `InputRangeValueType` template parameter.
+
+```c++
+template<class BinaryOp, class Identity>
+constexpr bool has_identity_value<
+  binary_operation<BinaryOp, Identity>> = true;
+
+template<class BinaryOp>
+constexpr bool has_identity_value<
+  binary_operation<BinaryOp, no_identity_t>> = false;
+
+template<std::default_initializable InputRangeValueType,
+         class BinaryOp>
+constexpr auto
+identity_value(const binary_operation<BinaryOp, void>&) {
+  return InputRangeValueType{};
+}
+
+template<class InputRangeValueType,
+         class BinaryOp, class Identity>
+  requires(! std::is_same_v<Identity, no_identity_t>)
+constexpr auto
+identity_value(const binary_operation<BinaryOp, Identity>& bop) {
+  return bop.id;
+}
+```
+
+##### Algorithm overloads
+
+The above infrastructure means that algorithms only need
+a `BinaryOp` template parameter and `binary_op` function parameter
+for the binary operator.  Ability to use an identity value
+if available does not increase the number of overloads.
+The definitions of algorithms can use
+`if constexpr(has_identity_value<BinaryOp>)`
+to dispatch at compile time between code
+that uses the identity value and code that does not.
+
+### Other designs
+
+#### Separate wrapped identity parameter: `op_identity<T>{value}`
+
+In this design, users supply an identity value by wrapping it
+in a named struct `op_identity` and passing it in as a separate
+optional argument that immediately follows the binary operator
+to which it applies.
+
+```c++
+template<class Identity=void>
+struct op_identity;
+
+template<class Identity>
+struct op_identity {
+  [[no_unique_address]] Identity id;
+};
+
+template<std::default_initializable Identity>
+struct op_identity<Identity> {
+  [[no_unique_address]] Identity id{};
+};
+
+template<>
+struct op_identity<void> {};
+
+template<>
+struct op_identity<no_identity_t> {};
+```
+
+The `Identity` template parameter can be `constant_wrapper`
+of the value, not the actual value.
+This works because the accumulator type is deduced from the operator result.
+The default template argument permits using `op_identity{}`
+as an argument of `exclusive_scan`.
+As with `binary_operation<BinaryOp, void>` above,
+`Identity=void` tells the algorithm to deduce the identity value
+as a value-initialized object of the input range's value type.
+
+It should be rare that users need to spell out
+`op_identity<no_identity_t>`.  Nevertheless, we include
+an abbreviation `no_op_identity` to avoid duplicate typing.
+
+```c++
+inline constexpr op_identity<no_identity_t> no_op_identity{};
+```
+
+We define a customization point `identity_value` analogously
+to the way we defined it with the `binary_operation` design above.
+
+```c++
+template<class InputRangeValueType, class Identity>
+  requires(! std::is_same_v<Identity, no_identity_t>)
+constexpr auto identity_value(op_identity<Identity> op_id) {
+  return op_id.id;
+}
+
+template<std::default_initializable InputRangeValueType>
+constexpr auto identity_value(op_identity<void>) {
+  return InputRangeValueType{};
+}
+```
+
+Users would have two ways to provide a nondefault identity value.
+
+1. Construct `op_identity` with a default value using
+    aggregate initialization: `op_identity{nondefault_value}`
+
+2. Specialize `op_identity<T>` so
+    `declval<op_identity<T>>().value` is the value
 
 For example, users could inherit their specialization from `constant_wrapper`.
 
@@ -1522,7 +1791,7 @@ namespace impl {
   inline constexpr my_number some_value = /* value goes here */;
 }
 template<class T>
-struct reduce_identity<my_number> : 
+struct op_identity<my_number> : 
   constant_wrapper<impl::some_value>
 {};
 ```
@@ -1559,91 +1828,7 @@ Disadvantages:
 
 - The algorithm could not use this to deduce a default identity value from a binary operation
 
-- A specialization of `reduce_identity<T>` would take effect for all binary operations on `T`
-
-#### Design 2: `reduce_operation{binary_op, value}`
-
-The `reduce_operation` struct would encapsulate the binary operation
-and its identity value into a single argument.
-This would make it easier for an implementation to deduce a default identity value.
-The default identity would match the identity for the corresponding binary fold.
-Users' specializations would only affect that (operation, value type) pair.
-It's a named struct, so algorithms could overload on it without ambiguity.
-
-Here are some use cases.
-
-```c++
-auto result7 = std::ranges::reduce(exec_policy, range,
-  reduce_operation{custom_binary_op, custom_value});
-
-constexpr auto minus_Inf = -std::numeric_limits<float>::infinity();
-auto result5 = std::ranges::reduce(exec_policy, range,
-  reduce_operation{std::ranges::min, minus_Inf};
-
-// range_value_t<R> is float
-auto result6 = std::ranges::reduce(exec_policy, range,
-  reduce_operation{std::plus{}, /* double */ 0.0};
-
-// Deduce identity: range_value_t<R>{}
-auto result2 = std::ranges::reduce(exec_policy, range, std::plus{});
-```
-
-Here is an implementation sketch.
-
-```c++
-// Keep this an aggregate if possible.
-// We can constrain BinaryOp on being invocable with T, T,
-// but we don't know range_value_t<R> at this point,
-// so we don't know yet if the algorithm is well-formed with BinaryOp.
-template<class BinaryOp, class T = invoke_result<BinaryOp, T, T>>
-  requires semiregular<T> && invocable<BinaryOp, T, T>
-struct reduce_operation {
-  BinaryOp op;
-  T value{};
-};
-
-// std::plus with arithmetic types -> T{}.
-//
-// We can't specialize for all T, because users might have
-// defined std::plus<T> such that T{} is not the identity.
-template<class U, class T>
-  requires(
-    (is_arithmetic_v<T>) &&
-    (is_void_v<U> || (is_arithmetic_v<U> && is_convertible_v<U, T>))
-  )
-struct reduce_operation<std::plus<U>, T> {
-  static constexpr std::plus<U> op{};
-  static constexpr T value = T{};
-};
-
-// (std::plus or std::multiplies) with std::complex takes more effort,
-// since e.g., std::complex<double> + float is not well-formed.
-
-// std::multiplies with arithmetic types -> T(1).
-//
-// We can't specialize for all T, because users might have
-// defined std::multiplies<T> such that T(1) is not the identity.
-template<class T, class U>
-  requires(
-    (is_arithmetic_v<T>) &&
-    (is_void_v<U> || (is_arithmetic_v<U> && is_convertible_v<U, T>))
-  )
-struct reduce_operation<T, std::multiplies<U>> {
-  static constexpr std::multiplies<U> op{};
-  static constexpr T value = T(1);
-};
-
-// ... more specializations for Standard binary function objects ...
-```
-
-This is a more complicated design than the `reduce_identity<T>` struct shown above.
-However, it offers a straightforward path to providing a reasonable default
-for commonly used binary operations.
-
-This design does impose the requirement that `BinaryOp`
-must be copy-constructible or move-constructible.
-That's fine for parallel algorithms, but not strictly necessary for non-parallel algorithms.
-On the other hand, if you want non-copyable `BinaryOp`, maybe you should use `fold_*` instead.
+- A specialization of `op_identity<T>` would take effect for all binary operations on `T`
 
 ### If users can define an identity value, do they need an initial value?
 
