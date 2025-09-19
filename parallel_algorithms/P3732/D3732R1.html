@@ -489,8 +489,8 @@ reductions and scans</a>
 <li><a href="#summary-1" id="toc-summary-1"><span class="toc-section-number">3.4.1</span> Summary</a></li>
 <li><a href="#initial-value-of-a-reduction-or-scan" id="toc-initial-value-of-a-reduction-or-scan"><span class="toc-section-number">3.4.2</span> Initial value of a reduction or
 scan</a></li>
-<li><a href="#identity-value-of-a-reduction-or-scans-binary-operator" id="toc-identity-value-of-a-reduction-or-scans-binary-operator"><span class="toc-section-number">3.4.3</span> Identity value of a reduction or
-scan’s binary operator</a></li>
+<li><a href="#identity-value-of-a-reductions-or-scans-binary-operator" id="toc-identity-value-of-a-reductions-or-scans-binary-operator"><span class="toc-section-number">3.4.3</span> Identity value of a reduction’s
+or scan’s binary operator</a></li>
 <li><a href="#identity-may-not-exist-or-may-be-unknown" id="toc-identity-may-not-exist-or-may-be-unknown"><span class="toc-section-number">3.4.4</span> Identity may not exist or may be
 unknown</a></li>
 <li><a href="#initial-value-matters-most-for-sequential-reduction" id="toc-initial-value-matters-most-for-sequential-reduction"><span class="toc-section-number">3.4.5</span> Initial value matters most for
@@ -1814,8 +1814,8 @@ repeatedly.</p></li>
 because the first element of the output range is just the initial value.
 For the other algorithms, the initial value is optional and defaults to
 <code>T{}</code>, a value-initialized <code>T</code> value.</p>
-<h3 data-number="3.4.3" id="identity-value-of-a-reduction-or-scans-binary-operator"><span class="header-section-number">3.4.3</span> Identity value of a reduction
-or scan’s binary operator<a href="#identity-value-of-a-reduction-or-scans-binary-operator" class="self-link"></a></h3>
+<h3 data-number="3.4.3" id="identity-value-of-a-reductions-or-scans-binary-operator"><span class="header-section-number">3.4.3</span> Identity value of a
+reduction’s or scan’s binary operator<a href="#identity-value-of-a-reductions-or-scans-binary-operator" class="self-link"></a></h3>
 <p>The initial value of a reduction or scan is not necessarily the same
 as an identity value of the reduction’s or scan’s binary operator. An
 <em>identity value</em> <code>id</code> of a binary operator
@@ -1824,9 +1824,11 @@ as an identity value of the reduction’s or scan’s binary operator. An
 <code>x</code> of <code>bop</code>. Including an identity value an
 arbitrary number of times in a reduction does not change the reduction’s
 result.</p>
-<p>We say “an” identity value because it need not be unique. The
-identity value can serve as an initial value, but not vice versa. The
-following example illustrates.</p>
+<p>We say “an” identity value because it need not be unique. For
+example, if the binary operator is integer addition modulo 7, every
+multiple of 7 is an identity.</p>
+<p>The identity value can serve as an initial value, but not vice versa.
+The following example illustrates.</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>vector<span class="op">&lt;</span><span class="dt">float</span><span class="op">&gt;</span> v<span class="op">{</span><span class="fl">5.0</span><span class="bu">f</span>, <span class="fl">7.0</span><span class="bu">f</span>, <span class="fl">11.0</span><span class="bu">f</span><span class="op">}</span>;</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co">// Default initial value is float{}, which is 0.0f.</span></span>
@@ -1906,7 +1908,7 @@ parallel algorithm, for performance reasons.</p>
 <h4 data-number="3.4.4.1" id="do-not-assume-that-t-value-initialized-t-is-an-identity"><span class="header-section-number">3.4.4.1</span> Do not assume that
 <code>T{}</code> (value-initialized <code>T</code>) is an identity<a href="#do-not-assume-that-t-value-initialized-t-is-an-identity" class="self-link"></a></h4>
 <p>The identity value of a binary operator that returns <code>T</code>
-need not necessarily be <code>T{}</code> (a value-constructed
+need not necessarily be <code>T{}</code> (a value-initialized
 <code>T</code>) for all operators and types.</p>
 <ul>
 <li><p>For <code>std::multiplies{}</code> it’s

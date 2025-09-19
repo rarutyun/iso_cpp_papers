@@ -1189,7 +1189,7 @@ of the output range is just the initial value.
 For the other algorithms, the initial value is optional
 and defaults to `T{}`, a value-initialized `T` value.
 
-### Identity value of a reduction or scan's binary operator
+### Identity value of a reduction's or scan's binary operator
 
 The initial value of a reduction or scan
 is not necessarily the same as an identity value
@@ -1201,6 +1201,9 @@ Including an identity value an arbitrary number of times
 in a reduction does not change the reduction's result.
 
 We say "an" identity value because it need not be unique.
+For example, if the binary operator is integer addition modulo 7,
+every multiple of 7 is an identity.
+
 The identity value can serve as an initial value, but not vice versa.
 The following example illustrates.
 
@@ -1292,7 +1295,7 @@ outside of a parallel algorithm, for performance reasons.
 #### Do not assume that `T{}` (value-initialized `T`) is an identity
 
 The identity value of a binary operator that returns `T`
-need not necessarily be `T{}` (a value-constructed `T`)
+need not necessarily be `T{}` (a value-initialized `T`)
 for all operators and types.
 
 - For `std::multiplies{}` it's `T(1)`.
