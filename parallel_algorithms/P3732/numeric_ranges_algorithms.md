@@ -56,12 +56,10 @@ R0 is the original draft prepared before the June 2025 Sofia WG21 meeting.  SG1 
 
 - Revise non-wording sections
 
-    - Explain `reduce_into` and `transform_reduce_into`
+    - Explain `reduce_into` and `transform_reduce_into`, as well as
+      `sum_into`, `product_into`, and `dot_into` as special cases
 
-    - Show different designs for specifying identity value
-
-- Add `sum_into`, `product_into`, and `dot_into`
-    (special cases of `reduce_into` or `transform_reduce_into`)
+    - Show different designs for specifying an identity value
 
 # What we propose
 
@@ -555,11 +553,11 @@ Let's review what we learned from the above discussion.
 - Projections expose optimization potential,
     by separating the selection part of an algorithm from the computation part.
 
-- None of the existing `fold_*` `ranges` algorithms
+- None of the existing `ranges::fold_*` algorithms
     (the closest things the Standard Library currently has to
     `ranges::reduce`) take projections.
 
-- Ranges `reduce` with a projection and unary `transform_reduce`
+- `reduce` with a projection and unary `transform_reduce`
     without a projection have the same functionality,
     without much usability or implementation difference.
     Ditto for `{in,ex}clusive_scan` with a projection and
@@ -599,7 +597,27 @@ reduction algorithms to have projections.
 `ranges::transform_{in,ex}clusive_scan` as well as `ranges::{in,ex}clusive_scan`, and do not provide projections for any of
 them.
 
-### Add `reduce_into` and `transform_reduce_into`
+### We propose convenience wrappers to replace some algorithms
+
+#### `accumulate`
+
+The `accumulate` algorithm performs operations sequentially. Users who want that left-to-right sequential behavior can call
+C++23's `fold_left`.  For users who are not concerned about the order of operations and who want `accumulate`'s default
+binary operation, we propose parallel and non-parallel convenience wrappers `ranges::sum`.
+
+#### `inner_product`
+
+The `inner_product` algorithm performs operations sequentially. Users who want that left-to-right sequential behavior can
+call `fold_left`. Note that [@P2214R2] argues specifically against adding a ranges analog of `inner_product`, because it is
+less fundamental than other algorithms.
+
+For users who are not concerned about the order of operations and who want the default binary operations used by
+`inner_product`, we propose parallel and non-parallel convenience wrappers `ranges::dot`.  We call them `dot` and not
+`inner_product` because inner products are mathematically more general. We specifically mean not just any inner product,
+but the inner product that is the dot product.  Calling them `dot` has the added benefit that they represent the same
+mathematical computation as `std::linalg::dot`.
+
+### We propose to add `reduce_into` and `transform_reduce_into`
 
 We propose new parallel and non-parallel algorithms
 `reduce_into` and `transform_reduce_into`.
@@ -635,7 +653,7 @@ to have the same implementation freedom.
 
 #### Output should be a nonempty sized forward range, not an iterator
 
-P3179 (parallel ranges algorithms) always specifies output ranges
+[@P3179R9] (parallel ranges algorithms) always specifies output ranges
 as sized ranges, instead of as a single iterator.
 However, in the case of `*reduce_into`,
 the output range only needs to have one element.
@@ -843,26 +861,6 @@ would have to write them by hand and call
 
 3. Include both parallel and non-parallel versions
     of `sum_into`, `product_into`, and `dot_into`.
-
-### We propose convenience wrappers to replace some algorithms
-
-#### `accumulate`
-
-The `accumulate` algorithm performs operations sequentially. Users who want that left-to-right sequential behavior can call
-C++23's `fold_left`.  For users who are not concerned about the order of operations and who want `accumulate`'s default
-binary operation, we propose parallel and non-parallel convenience wrappers `ranges::sum`.
-
-#### `inner_product`
-
-The `inner_product` algorithm performs operations sequentially. Users who want that left-to-right sequential behavior can
-call `fold_left`. Note that [@P2214R2] argues specifically against adding a ranges analog of `inner_product`, because it is
-less fundamental than other algorithms.
-
-For users who are not concerned about the order of operations and who want the default binary operations used by
-`inner_product`, we propose parallel and non-parallel convenience wrappers `ranges::dot`.  We call them `dot` and not
-`inner_product` because inner products are mathematically more general. We specifically mean not just any inner product,
-but the inner product that is the dot product.  Calling them `dot` has the added benefit that they represent the same
-mathematical computation as `std::linalg::dot`.
 
 ### Other existing algorithms can be replaced with views
 
@@ -1107,10 +1105,10 @@ Thus, we propose that the *identity be optional*.
 
 All C++17 reductions and scans have an initial value parameter.
 It's optional for all algorithms except `exclusive_scan` and
-`transform_exclusive_scan`, as they require it in order to make
-mathematical sense.  It has performance benefits for `inclusive_scan`
-and `transform_inclusive_scan`.  Thus, we propose that
-the ranges versions of scans take *both an initial value*
+`transform_exclusive_scan`, as they require an initial value in order to make
+mathematical sense.  For `inclusive_scan` and `transform_inclusive_scan`
+the parameter gives performance benefits if an initial value is needed.
+Thus, we propose that the ranges versions of scans take *both an initial value*
 (optional for inclusive scans, required for exclusive scans)
 *and an identity* (always optional).
 
