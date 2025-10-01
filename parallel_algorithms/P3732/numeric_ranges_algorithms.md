@@ -64,6 +64,8 @@ SG1 reviewed R0 during the Sofia meeting with the following feedback:
 
 ## R1
 
+- Add `sum_into`, `product_into`, and `dot_into` algorithms
+
 - Revise non-wording sections
 
     - Explain `reduce_into` and `transform_reduce_into`, as well as
