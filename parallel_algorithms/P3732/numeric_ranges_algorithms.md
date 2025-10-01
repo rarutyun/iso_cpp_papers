@@ -2,7 +2,7 @@
 ---
 title: Numeric range algorithms
 document: P3732R1
-date: 2025-09-09
+date: today
 audience: SG1,SG9
 author:
   - name: Ruslan Arutyunyan
@@ -40,19 +40,29 @@ We propose `ranges` algorithm overloads (both parallel and non-parallel) for the
 
 # Revision history
 
-## R0 to be submitted 2025-07-15
+## R0
 
-R0 is the original draft prepared before the June 2025 Sofia WG21 meeting.  SG1 reviewed this draft during the Sofia meeting with the following feedback.
+SG1 reviewed R0 during the Sofia meeting with the following feedback:
 
-- SG1 agrees (via poll 4/5/1/0/0) that users should have a way to specify an identity value.  SG1 asks whether there is any need to specify this as a compile-time value, or whether a run-time-only interface would suffice.  One concern is the potential cost of broadcasting an identity value at run time to all threads, versus initializing each thread's accumulator to a value known at compile time.
+- SG1 agrees that users should have a way to specify an identity value.  SG1 asks whether there is any need to specify this
+  as a compile-time value, or whether a run-time-only interface would suffice. One concern is the potential cost of
+  broadcasting an identity value at run time to all threads, versus initializing each thread's accumulator to a value known
+  at compile time.
+
+ SF | F | N | A | SA
+---|---|---|---|---
+ 4 | 5 | 1 | 0 | 0
 
 - SG1 has no objection to adding `transform_*` variants of algorithms.
+- SG1 asks us to add `reduce_into` and `transform_reduce_into`, that is, versions of `reduce` and `transform_reduce` that write the reduction result to an output range of one element.  (We asked SG1 to take this poll because LEWG rejected an analogous design for `std::linalg` reduction-like algorithms such as dot product and norms.)
 
-- SG1 asks us to add `reduce_into` and `transform_reduce_into` (via poll 4/4/0/0/0), that is, versions of `reduce` and `transform_reduce` that write the reduction result to an output range of one element.  (We asked SG1 to take this poll because LEWG rejected an analogous design for std::linalg reduction-like algorithms such as dot product and norms.)
+ SF | F | N | A | SA
+---|---|---|---|---
+ 4 | 4 | 0 | 0 | 0
 
 - SG1 members would like separate proposals on fixing _`movable-box`_ trivial copyability, and fixing performance issues with views in general.
 
-## R1 in preparation
+## R1
 
 - Revise non-wording sections
 
@@ -113,7 +123,7 @@ of the following algorithms.
 
 ### Current set of numeric algorithms
 
-[@P3179R9], "C++ Parallel Range Algorithms," was voted into the Working Draft for C++26 during the June 2025 Sofia meeting.
+[@P3179R9], "C++ Parallel Range Algorithms," is accepted to C++ working draft for C++26.
 [@P3179R9] explicitly defers adding `ranges` versions of the numeric algorithms. This proposal does that.
 As such, we focus on the 11 algorithms in [numeric.ops]{- .sref}.
 
@@ -145,7 +155,7 @@ other `ranges` algorithms.  We carefully read the two proposals [@P2214R2], "A P
 [@P2760R1], "A Plan for C++26 Ranges," in order to inform our algorithm selections.  In some cases that we will explain
 below, usability and performance concerns led us to disagree with their conclusions.
 
-### We propose to include all `*_reduce` and `*_scan` algorithms
+### `*_reduce` and `*_scan` algorithms
 
 #### Summary
 
@@ -522,7 +532,7 @@ Both lambdas `f1` and `f2` are trivially copyable, but `std::views::transform(f2
 The wording for both `transform_view` and `zip_transform_view` expresses the input function object of type `F` as stored in
 an exposition-only _`movable-box<F>`_ member. `f2` has a capture that gives it a `=delete`d copy assignment operator.
 Nevertheless, `f2` is still trivially copyable, because each of its default copy and move operations is either trivial or
-deleted, and its destructor is nontrivial and deleted.
+deleted, and its destructor is trivial and not deleted.
 
 The problem is _`movable-box`_.  As [range.move.wrap]{- .sref} 1.3 explains, since `copyable<decltype(f2)>` is not modeled,
 _`movable-box`_`<decltype(f2)>` provides a nontrivial, not deleted copy assignment operator.  This makes
@@ -597,7 +607,7 @@ reduction algorithms to have projections.
 `ranges::transform_{in,ex}clusive_scan` as well as `ranges::{in,ex}clusive_scan`, and do not provide projections for any of
 them.
 
-### We propose convenience wrappers to replace some algorithms
+### Convenience wrappers to replace some algorithms
 
 #### `accumulate`
 
@@ -617,7 +627,7 @@ For users who are not concerned about the order of operations and who want the d
 but the inner product that is the dot product.  Calling them `dot` has the added benefit that they represent the same
 mathematical computation as `std::linalg::dot`.
 
-### We propose to add `reduce_into` and `transform_reduce_into`
+### `reduce_into` and `transform_reduce_into`
 
 We propose new parallel and non-parallel algorithms
 `reduce_into` and `transform_reduce_into`.
@@ -625,7 +635,7 @@ These work like `reduce` and `transform_reduce`,
 except that instead of returning the reduction result by value,
 they write it to the first element of an output range.
 We include both unary and binary versions of `transform_reduce_into`.
-We also provide convenience wrappers 
+We also provide convenience wrappers
 `sum_into`, `product_into`, and `dot_into`
 that are the "`_into`" analogues of `sum`, `product`, and `dot`.
 
@@ -692,14 +702,14 @@ c. iterator comparison: `ranges::begin(r) != ranges::end(r)`.
 
 We choose Option (a) because
 
-i. it's consistent with [@P3179R9]'s output ranges;
+- it's consistent with [@P3179R9]'s output ranges;
 
-ii. the Standard currently has no concept to express
+- the Standard currently has no concept to express
     algorithmic complexity constraints on `ranges::empty(r)`
     ([range.prim.empty]), while `ranges::size(r)` on a `sized_range`
     always has constant complexity; and
 
-iii. `sized_range` permits evaluation of `ranges::size(r)`
+- `sized_range` permits evaluation of `ranges::size(r)`
     before `ranges::begin(r)` without invalidating the range,
     even if the range is not a `forward_range`.
     This would enable future proposals that generalize the output
@@ -873,11 +883,11 @@ an `iota_view`.  For example, the Standard specifies `iota_view` in a way that d
 copyable, as long as its input types are.  The iterator type of `iota_view` is a random access iterator for reasonable
 lower bound types (e.g., integers).
 
-However, `ranges::iota` algorithm was added since C++23, later than`iota_view`. For the sake of completeness we might want to add
+However, `ranges::iota` algorithm was added since C++23, later than `iota_view`. For the sake of completeness we might want to add
 a parallel variation of it as well. It's only going to give a syntactic advantage: if users already have `ranges::iota` in their code,
 parallelizing it would be as simple as adding an execution policy (assuming the iterator/range categories are satisfied).
 
-We do not propose parallel `ranges::iota` in R0. We are seeking for SG9 (Ranges Study Group) feedback.
+We do not propose parallel `ranges::iota` in both R0 and R1 for now. We are seeking for SG9 (Ranges Study Group) feedback.
 
 #### `adjacent_difference`
 
@@ -1031,12 +1041,11 @@ We propose the following.
 - Our non-parallel algorithms take sized forward ranges.
 
 - Our scans' return type is an alias of `in_out_result`.
+- Our reductions just return the reduction value, not `in_value_result` with an input iterator.
+- Our `reduction_into` family return type is an alias of `in_out_result`.
 
-- Our reductions just return the reduction value,
-    not `in_value_result` with an input iterator.
-
-[@P3179R9] does not aim for perfect consistency with the range categories accepted by existing `ranges` algorithms.
-The algorithms proposed by [@P3179R9] differ in the following ways.
+[@P3179R9] does not aim for perfect consistency with the range categories accepted by existing serial `ranges` algorithms.
+The algorithms proposed by [@P3179R9] differ from serial range algorithms in the following ways.
 
 1. [@P3179R9] uses a range, not an iterator, as the output parameter (see Section 2.7).
 2. [@P3179R9] requires that the ranges be sized (see Section 2.8).
@@ -1044,8 +1053,7 @@ The algorithms proposed by [@P3179R9] differ in the following ways.
 
 Of these differences, (1) and (2) could apply generally to all `ranges` algorithms, so we adopt them for this proposal.
 
-Regarding (1), this would make our proposal the first to add non-parallel range-as-output `ranges` algorithms to the
-Standard. For arguments in favor of non-parallel algorithms taking a range as output, please refer to
+Regarding (1), for arguments in favor of non-parallel algorithms taking a range as output, please refer to
 [@P3490R0], "Justification for ranges as the output of parallel range algorithms." (Despite the title, it has things to say
 about non-parallel algorithms too.) Taking a range as output would prevent use of existing output-only iterators that do
 not have a separate sized sentinel type, like `std::back_insert_iterator`.  However, all the algorithms we propose require
@@ -2171,7 +2179,7 @@ template<class T>
 
 ```
 template<class T>
-  concept @_sized-random-access-range_@ =           // @_exposition only_@
+  concept @_sized-forward-range_@ =           // @_exposition only_@
     random_access_range<R> && sized_range<R>;
 ```
 :::
