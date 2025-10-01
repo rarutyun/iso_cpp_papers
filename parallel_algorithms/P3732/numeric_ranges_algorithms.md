@@ -988,47 +988,58 @@ this makes it easier to use, and improves consistency with other `ranges` algori
 exist, `reduce` should not be specified in terms of it. This is for performance reasons, as Section 4.4 of [@P2322R6]
 elaborates for `fold_left` and `fold_left_with_iter`.
 
-### We don't propose `reduce_first`
+### We do not propose `reduce_first` and we do not think it is needed
 
-Section 5.1 of [@P2760R1] asks whether the Standard Library should have a `reduce_first` algorithm. Analogously to
-`fold_left_first`, `reduce_first` would use the first element of the range as the initial value of the reduction operation.
-One application of `reduce_first` is to support binary operations that lack a natural identity element to serve as the
-initial value. An example would be `min` on a range of `int` values, where callers would have no way to tell if `INT_MAX`
-represents an actual value in the range, or a fake "identity" element (that callers may get as a result when the range is
-empty).
+Section 5.1 of [@P2760R1] asks whether the Standard Library should have a "`reduce_first`" algorithm.
+Analogously to `fold_left_first`, `reduce_first` would use the first element
+of the range as the initial value of the reduction operation.
+Users might want this algorithm because
 
-We do not propose `reduce_first` here; we just outline arguments against and for adding it.
+1. there is no reasonable default initial value that does not depend on the range's elements, *and*
 
-#### Arguments against `reduce_first`
+2. there is an extra run-time cost for users to read the first element of the range themselves.
 
-1. [@P3179R9] already proposes parallel ranges overloads of `min_element`, `max_element`, and `minmax_element`.  Minima and
-maxima are the main use cases that lack a natural identity element.
-1. Users could always implement `reduce_first` themselves, by extracting the first element from the sequence and using it
-as the initial value in `reduce`.
-1. In practice, most custom binary operations have some value that can work like a neutral initial value, even if it's not
-mathematically the identity.
-1. Unlike `fold_left_first*` and `fold_right_last`, the `*reduce` algorithms are unordered.  As a result, there is no
-reason to privilege the first (or last) element of the range.  One could imagine an algorithm `reduce_any` that uses any element
-of the range as its initial value.
-1. For parallel execution, `reduce_first` does not fully address lack of identity, and potentially creates a suboptimal execution flow.
-See [](#initial-value-vs-identity) for more detailed analysis.
+We think these requirements together are too esoteric to justify adding a separate algorithm.
+Furthermore, mitigations exist to work around both requirements.
 
-#### Arguments for `reduce_first`
+Requirement (1) means that the identity for the binary operation does not exist,
+the user does not know it, or the user has not supplied it to the algorithm.
+If an identity exists and the algorithm knows it,
+it would be the most reasonable default initial value,
+because including it in the range of values to reduce would not change the result.
+Section [](#identity-unknown) explains that
 
-1. Some equivalent of `reduce_first` can be used as a building block for parallel reduction with unknown identity, if no other solution is proposed.
-1. Even though `min_element`, `max_element`, and `minmax_element` exist, users may still want to combine multiple
-reductions into a single pass, where some of the reductions are min and/or max, while others have a natural identity.
+* a default-initialized value `T{}` might not be an identity for a given binary operation,
 
-As an example of combining multiple reductions into a single pass,
-users may want the minimum of an array of integers (with no natural identity),
-along with the least index of the array element with the minimum value
-(whose natural identity is zero).
-This happens often enough that MPI
-(the Message Passing Interface for distributed-memory parallel computing) has predefined reduction operations for minimum
-and its index (`MINLOC`) and maximum and its index (`MAXLOC`).  On the other hand, even `MINLOC` and `MAXLOC` have
-reasonable choices of fake "identity" elements that work in practice, e.g., for `MINLOC`, `INT_MAX` for the minimum value
-and `INT_MAX` for the least array index (where users are responsible for testing that the returned array index is in
-bounds).
+* some binary operations do not have an identity at all, and
+
+* we do not want to require users to specify an identity even if it exists.
+
+The mitigation for lack of a default initial value
+is for users to load the first (or some other) element
+of the range as a nondefault initial value.
+The element doesn't have to be the first because,
+Unlike `fold_left_first*` and `fold_right_last`,
+the `*reduce` algorithms are unordered.
+The only reason to privilege the first (or last) element is that
+excluding any other element would not preserve the range's contiguity.
+
+Requirement (2) means that loading the first (or some other) element
+in the user's code would be slower than the algorithm doing it.
+For example, for an implementation that executes parallel algorithms
+using an accelerator such as a GPU,
+the user's range may live in the accelerator's special memory.
+Standard C++ requires that this memory be accessible in user's code
+outside of parallel algorithms, but doesn't require that doing so be fast.
+
+One mitigation for this concern is to use as the nondefault initial value
+a proxy reference to the first element, instead of the first element itself.
+The proxy reference would defer the load until the algorithm actually uses the value.
+C++17 `std::reduce` cannot do this because the initial value type *is* the return type.
+Proxy reference types are not copyable and are certainly not `semiregular`,
+so they do not make good return types for reductions.
+Our `reduce` algorithms can use a proxy reference as the initial value
+because they deduce the return type as the result of the binary operator.
 
 ## Range categories and return types
 
@@ -1238,7 +1249,7 @@ result = std::reduce(v.begin(), v.end(), 0.0f);
 assert(result == 23.0f);
 ```
 
-### Identity may not exist or may be unknown
+### Identity may not exist or may be unknown {#identity-unknown}
 
 Not every binary operator has an identity.
 For instance, integers have no identity for the maximum operation.
