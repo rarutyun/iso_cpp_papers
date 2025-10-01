@@ -112,7 +112,8 @@ of the following algorithms.
     but *not* with projection parameters
 
 2. `reduce_into` and `transform_reduce_into`, that write
-    the reduction result into a nonempty sized forward range
+    the reduction result into a sized forward range
+    (if the range has nonzero size)
 
 3. `sum` and `product` for special cases of `reduce`
     with addition resp. multiplication, and `dot`
@@ -661,7 +662,7 @@ perform a parallel- and SIMD-accelerated reduction there.
 We want our non-parallel `ranges` numeric algorithms
 to have the same implementation freedom.
 
-#### Output should be a nonempty sized forward range, not an iterator
+#### Output should be a sized forward range, not an iterator
 
 [@P3179R9] (parallel ranges algorithms) always specifies output ranges
 as sized ranges, instead of as a single iterator.
@@ -669,19 +670,20 @@ However, in the case of `*reduce_into`,
 the output range only needs to have one element.
 Thus, the interface could represent the output range
 either as a single iterator to that element,
-or as a nonempty range.
-We propose representing the output as a nonempty sized forward range.
+or as a sized range.
+We propose representing the output as a sized forward range.
 
 There are two parts to this.
 
-1. *Nonempty* and *sized*:
-    we define this as `sized_range` with nonzero `ranges::size(r)`
+1. *Sized*: we define this as `sized_range`,
+    and say that the algorithm only writes to it
+    if it has nonzero `ranges::size(r)`
 
 2. *Forward range*: in the sense of `forward_range`
 
-We propose making the output a nonempty range instead of just an iterator
+We propose making the output a sized range instead of just an iterator
 because this lets the `*reduce_into` algorithms simply do nothing
-if the output range is empty.  This would make their behavior
+if the output range has zero size.  This would make their behavior
 consistent with [@P3179R9]'s parallel ranges algorithms
 that were adopted into the Working Draft for C++26.
 
@@ -700,7 +702,7 @@ b. `ranges::empty(r)` is `false`; or,
 
 c. iterator comparison: `ranges::begin(r) != ranges::end(r)`.
 
-We choose Option (a) because
+We choose Option (a), `sized_range`, because
 
 - it's consistent with [@P3179R9]'s output ranges;
 
@@ -867,7 +869,7 @@ would have to write them by hand and call
 1. Include both parallel and non-parallel versions
     of `reduce_into` and `transform_reduce_into`.
 
-2. Represent the output as a nonempty `sized_range` + `forward_range`.
+2. Represent the output as a `sized_range` + `forward_range`.
 
 3. Include both parallel and non-parallel versions
     of `sum_into`, `product_into`, and `dot_into`.
