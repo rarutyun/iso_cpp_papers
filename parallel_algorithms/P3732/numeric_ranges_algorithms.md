@@ -1124,33 +1124,29 @@ binary operator has an identity,
 and figuring out a pseudoidentity may be difficult or impossible.
 Thus, we propose that the *identity be optional*.
 
-All C++17 reductions and scans have an initial value parameter.
-It's optional for all algorithms except `exclusive_scan` and
-`transform_exclusive_scan`, as they require an initial value in order to make
-mathematical sense.  For `inclusive_scan` and `transform_inclusive_scan`
-the parameter gives performance benefits if an initial value is needed.
-Thus, we propose that the ranges versions of scans take *both an initial value*
-(optional for inclusive scans, required for exclusive scans)
-*and an identity* (always optional).
+All C++17 reductions and scans have overloads with an initial value parameter.
+We propose retaining this feature in our ranges reductions and scans.
+Exclusive scan requires an initial value in order to make mathematical sense,
+so our ranges `exclusive_scan` and `transform_exclusive_scan`
+require the initial value parameter.  For all other reductions and scans,
+we propose making the initial value optional, as it is in the C++17 algorithms.
+For `inclusive_scan` and `transform_inclusive_scan`,
+the initial value parameter has performance benefits.
 
-For reductions, if an identity is not available,
-then users need a way to provide an initial value
-in order to control the return type,
-which is also the type used for intermediate computations.
-Also, given that the identity is an optimization hint
-rather than something needed for functionality,
-reductions should behave in the same way
-(assuming that the binary operator is associative and commutative)
-whether or not an identity is available.
-This implies that *users should be allowed to provide*
-*both an initial value and an identity*.
-In order to avoid ambiguity in determining the return type,
-we propose that if ranges `reduce` and `transform_reduce`
-get both an initial value and an identity, then
+The return type of reductions comes from the result of calling
+the binary operator on the initial value and an element of the range.
+The identity is optional and is solely an optimization hint.
+Thus, the identity does not influence our reductions' return type.
+We only require that
 
-* either the identity and the initial value type are the same,
+* calling the binary operator with the identity (if provided)
+    and the initial value (in either order) is well formed,
 
-* or the identity and the range value type are the same.
+* calling the binary operator with the identity (if provided)
+    and an element of the range (in either order) is well formed, and
+
+* the result of any of these binary operator invocations
+    is assignable to the return type.
 
 Given that we permit both reductions and scans
 to accept both an initial value and an identity,
