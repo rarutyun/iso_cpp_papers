@@ -741,7 +741,7 @@ and instead make all allocations explicit, like this.
 
 ```c++
 // Allocate num_bytes bytes of special memory
-extern void* accelerator_malloc(size_t num_bytes);
+extern void* accelerator_malloc(std::size_t num_bytes);
 // Free an allocation created by accelerator_malloc
 extern void accelerator_free(void* ptr);
 
@@ -754,10 +754,10 @@ struct accelerator_deleter {
 };
 
 // Dynamic allocation of special memory for an array
-template<class T, size_t Extent = std::dynamic_extent>
+template<class T, std::size_t Extent = std::dynamic_extent>
 class accelerator_array {
 public:
-  accelerator_array(size_t num_elements) :
+  accelerator_array(std::size_t num_elements) :
     num_elements_(num_elements),
     alloc_((float*) accelerator_malloc(num_elements * sizeof(T)), {})
   {}
@@ -772,7 +772,7 @@ public:
   }
 
 private:
-  [[no_unique_address]] std::extents<size_t, Extent> num_elements_;
+  [[no_unique_address]] std::extents<std::size_t, Extent> num_elements_;
   std::unique_ptr<T[], accelerator_deleter<T>> alloc_;
 };
 
@@ -806,7 +806,7 @@ but there are other options.
 // Create input range, reduce over input into output,
 // and return output allocation.
 accelerator_array<float, 1>
-user_fill_and_reduce(size_t num_elements) {
+user_fill_and_reduce(std::size_t num_elements) {
   accelerator_array<float> input(num_elements);
   user_fill_span(input.get_span());
   accelerator_value<float> output;
@@ -825,7 +825,7 @@ users would use it like this.
 // Create input range, reduce over input into output,
 // and return output allocation.
 accelerator_value<float>
-user_fill_and_reduce(size_t num_elements) {
+user_fill_and_reduce(std::size_t num_elements) {
   accelerator_array<float> input(num_elements);
   user_fill_span(input.get_span());
   accelerator_value<float> output;
@@ -1119,7 +1119,7 @@ We propose adding a way for users to *specify an identity value*
 for reductions and scans.  This would give parallel implementations
 a value to use for initializing each execution agent's accumulator.
 
-Parallel reductions and scans don't *need* an identity.
+Parallel reductions and scans don't have to *require* an identity.
 Their C++17 versions work fine without it.
 Not every (mathematically associative and commutative)
 binary operator has an identity,
@@ -1175,7 +1175,7 @@ Users may want to specify a *compile-time identity value*,
 that is, a value that is guaranteed to be known at compile time
 because it results from a `static constexpr` member function
 of the parameter's type.  Examples include the conversion operator
-of `constant_wrapper` and `integral_constant`.  
+of `constant_wrapper` and `integral_constant`.
 The above interface works with this no differently
 than with a "run-time identity value,"
 because we deduce the return type like `fold_first` does,
@@ -1264,33 +1264,33 @@ of a range of integers is an example.
 
 ```c++
 struct max_and_sum_result {
-  int64_t max = 0;
-  int64_t sum = 0;
+  std::int64_t max = 0;
+  std::int64_t sum = 0;
 };
 
 struct max_and_sum {
   max_and_sum_result
-  operator() (max_and_sum_result u, max_and_sum_result v) {
+  operator() (max_and_sum_result u, max_and_sum_result v) const {
     return {std::max(u.max, v.max), u.sum + v.sum};
   }
 
   max_and_sum_result
-  operator() (max_and_sum_result u, int32_t y) {
+  operator() (max_and_sum_result u, std::int32_t y) const {
     return (*this)(u, max_and_sum_result{y, y});
   }
 
   max_and_sum_result
-  operator() (int32_t x, max_and_sum_result v) {
+  operator() (std::int32_t x, max_and_sum_result v) const {
     return (*this)(max_and_sum_result{x, x}, v);
   }
 
-  max_and_sum_result operator() (int32_t x, int32_t y) {
+  max_and_sum_result operator() (std::int32_t x, std::int32_t y) const {
     return (*this)(max_and_sum_result{x, x},
                    max_and_sum_result{y, y});
   }
 };
 
-template<forward_range Range>
+template<ranges::forward_range Range>
 max_and_sum_result inf_and_one_norm(Range&& r) {
   return ranges::reduce(in, max_and_sum{});
 }
@@ -1334,12 +1334,12 @@ so that `T{}` defines the identity (if it exists) for `operator+(T, T)`.
     they are more likely to make `T` not trivially constructible,
     and thus hinder optimizations.
 
-Note that this differs from std::linalg's algorithms, where
+Note that this differs from `std::linalg`'s algorithms, where
 "[a] value-initialized object of linear algebra value type
 shall act as the additive identity" ([linalg.reqs.val] 3).
-However, std::linalg does not take user-defined binary operators;
+However, `std::linalg` does not take user-defined binary operators;
 it always uses `operator+` for reductions.
-Also, std::linalg needs "zero" for reasons other than reductions,
+Also, `std::linalg` needs "zero" for reasons other than reductions,
 e.g., for supporting user-defined complex number types (_`imag-if-needed`_).
 For these reasons, we think it's reasonable to make a different
 design choice for numeric range algorithms than for `std::linalg`.
@@ -1352,7 +1352,7 @@ Let's consider typical code that sums elements of an indexed array.
 ```c++
 float sum(std::span<float> a) {
   float s = 0.0f;
-  for (size_t i = 0; i < a.size(); ++i) {
+  for (std::size_t i = 0; i < a.size(); ++i) {
     s += a[i];
   }
   return s;
@@ -1413,8 +1413,8 @@ as the type of the result is not required to be copy-constructible.
 ```c++
 // using random access iterators for simplicity
 auto sum = std::move(op(first[0], first[1])));
-size_t sz = last - first;
-for (size_t i = 2; i < sz; ++i) {
+std::size_t sz = last - first;
+for (std::size_t i = 2; i < sz; ++i) {
   sum = std::move(op(sum, first[i]));
 }
 ```
@@ -1485,17 +1485,18 @@ like `std::plus` or `std::multiplies` with arithmetic types.
 
 #### Design goals
 
-1. Identity is an optional optimization
+1. Make identity is an optional optimization
 
 2. Avoid confusion with C++17 algorithms' initial value
 
-3. Let users specify a different binary operation and identity
-    for the same reduction result type
+3. Let users specify a different identity for a given binary operation
+   and the reduction result type
 
 4. Let users specify an identity even if their binary operation is a lambda
 
 5. Let users specify a nondefault identity value "in line"
-    with invoking the algorithm, without needing to specialize a class
+    with invoking the algorithm, without doing something extra
+    (e.g., specializing a class, a trait, etc.)
 
 Items 1 and 2 suggest that the identity should not be
 a separate parameter `T id` of the algorithms.
@@ -1543,7 +1544,7 @@ that shows three different designs, including this one.
     and customizations of `identity_value`.
 
 The `binary_operation` wrapper is also a binary operation,
-just like std::linalg's `layout_transpose` is a valid mdspan layout.
+just like `std::linalg`'s `layout_transpose` is a valid `mdspan` layout.
 
 ##### `no_identity_t`: Express that an identity doesn't exist
 
@@ -1887,9 +1888,9 @@ assert(result3 == max_identity);
 
 ```c++
 std::vector<int> in{5, 7, 11, 13, 17};
-std::vector<int> out(size_t(5));
-const int init = 3;
-auto binary_op = plus{};
+std::vector<int> out(std::size_t(5));
+constexpr int init = 3;
+auto binary_op = std::plus{};
 
 // out: 8, 15, 26, 39, 56
 ranges::inclusive_scan(in, out, binary_op, init);
@@ -1916,11 +1917,11 @@ If new algorithms take `T identity`, then users could be confused when switching
 
 ```c++
 std::vector<int> in{-8, 6, -4, 2, 0, 10, -12};
-std::vector<int> out(size_t(7));
-const int init = 7;
+std::vector<int> out(std::size_t(7));
+constexpr int init = 7;
 auto binary_op = std::ranges::max{};
 
-// inclusive_scan doesn't need an initial value.
+// for inclusive_scan an initial value can be omitted.
 
 // out: -8, 6, 6, 6, 6, 10, 10
 std::ranges::inclusive_scan(in, out, binary_op);
@@ -1937,7 +1938,7 @@ std::ranges::inclusive_scan(in, out,
   reduce_operation{binary_op, identity_value},
   init);
 
-// exclusive scan needs an initial value.
+// exclusive scan requires an initial value.
 // Identity is a reasonable default initial value,
 // if you have it.
 //
@@ -2154,15 +2155,18 @@ for the new set of algorithms because `fold_` family already has this feature.
 
 # Implementation
 
-The oneAPI DPC++ library ([oneDPL](https://github.com/uxlfoundation/oneDPL)) has deployment experience. The
+The oneAPI DPC++ library ([oneDPL](https://github.com/uxlfoundation/oneDPL)) has a partial deployment experience. The
 implementation is done as experimental with the following deviations from this proposal:
 
 - Algorithms do not have constraints
+- Design for optional identity is not implemented1
 - `reduce` has more overloads (without init and without binary predicate)
 - `*_scan` return type is not `in_out_result`
 - The convenience wrappers proposed in this paper are not implemented. Their implementation is expected to be trivial, though.
 
 # Wording
+
+Note: the whole section is WORK IN PROGRESS.
 
 > Text in blockquotes is not proposed wording, but rather instructions for generating proposed wording.
 
@@ -2191,7 +2195,7 @@ template<class T>
 ```
 template<class T>
   concept @_sized-forward-range_@ =           // @_exposition only_@
-    random_access_range<R> && sized_range<R>;
+    forward_range<R> && sized_range<R>;
 ```
 :::
 
