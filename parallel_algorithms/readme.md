@@ -4,7 +4,9 @@
 The paper proposes adding parallel algorithms that work together with the C++ Ranges library.
 
 At the F2F meeting in February 2025, LEWG forwarded P3179R6 to LWG for C++26.
+
 At a telecon on 2025-05-23, LWG polled P3179R9 to put into C++26: 11-0-0 Unanimous consent.
+
 The proposal was then approved by the C++ committee to be added to the C++ standard working draft for C++26.
 
 [Source code](P3179/P3179.md) (for mpark/wg21)
@@ -46,3 +48,13 @@ The proposal was approved by the C++ committee to be added (on top of P3179) to 
 - R2: https://isocpp.org/files/papers/P3709R2.html
 - R1: https://isocpp.org/files/papers/P3709R1.html
 - R0: https://wg21.link/p3709r0
+
+## P3732
+**Numeric range algorithms**
+
+The paper proposes `std::ranges` algorithm overloads (both parallel and non-parallel) for the `<numeric>` header.
+
+[Source code](P3732/numeric_ranges_algorithms.md) (for mpark/wg21)
+
+- R1: https://isocpp.org/files/papers/P3732R1.html
+- R0: https://wg21.link/p3732r0
