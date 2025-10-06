@@ -72,7 +72,7 @@ SG1 reviewed R0 during the Sofia meeting with the following feedback:
       `sum_into`, `product_into`, and `dot_into` as special cases
 
     - Show different designs for specifying an identity value
-    
+
     - Conclude that `reduce_first` is not needed
 
 # What we propose
@@ -384,7 +384,7 @@ Users may also find it troublesome that `zip_view` and `zip_transform_view`
 are not pipeable: there is no `{v1, v2} | views::zip` syntax, for example.
 On the other hand, it's a toss-up which version is easier to understand.
 Users either need to learn what `zip_transform_view` does,
-or they need to learn about `transform_reduce` and know which of the two function arguments does what.  
+or they need to learn about `transform_reduce` and know which of the two function arguments does what.
 
 ```c++
 struct foo {};
@@ -630,7 +630,7 @@ that are the "`_into`" analogues of `sum`, `product`, and `dot`.
 
 The `reduce_into` algorithm has
 [precedent in the Thrust library](https://nvidia.github.io/cccl/thrust/api_docs/algorithms/reductions.html).
-Its performance advantange is that the algorithm can write its result
+Its performance advantage is that the algorithm can write its result
 directly to special memory associated with parallel execution,
 such as accelerator memory or a NUMA (Non-Uniform Memory Access) domain
 where the algorithm's threads run.
@@ -950,7 +950,7 @@ However, this requires extra storage.
 A concepts-based approach like [@P1813R0]'s could permit specializing `reduce` on whether the user asserts that the binary
 operation is commutative. [@P1813R0] does not attempt to do this; it merely specializes `reduce` on whether the associative
 and commutative operation has a two-sided identity element.  Furthermore, [@P1813R0] does not offer a way for users to assert
-that an operation is associative or commutative, because the `magma` (nonassociative) and `semigroup` (associative)
+that an operation is associative or commutative, because the `magma` (non-associative) and `semigroup` (associative)
 concepts do not differ syntactically.  One could imagine a refinement of this design that includes a trait for users to
 specialize on the type of their binary operation, say `is_commutative<BinaryOp>`.  This would be analogous to the
 `two_sided_identity` trait in [@P1813R0] that lets users declare that their set forms a monoid, a refinement of `semigroup`
@@ -1452,7 +1452,7 @@ The `std::linalg` linear algebra library in the Working Draft for C++26 says, "A
 value type shall act as the additive identity" ([linalg.reqs.val]{- .sref} 3).
 
 In Python's NumPy library, [`numpy.ufunc.reduce`](https://numpy.org/doc/stable/reference/generated/numpy.ufunc.reduce.html) takes optional
-initial values. If not provided and the binary operation (a "universal function" (ufunc), effectively an elementwise binary
+initial values. If not provided and the binary operation (a "universal function" (ufunc), effectively an element-wise binary
 operation on a possibly multidimensional array) has an identity, then the initial values default to the identity. If the
 binary operation has no identity or the initial values are `None`, then this works like `reduce_first`.
 
@@ -1588,7 +1588,7 @@ this makes use of `binary_operation` in parallel algorithms easier.
 template<class BinaryOp>
 struct binary_operation_base {
   template<class Arg0, class Arg1>
-  constexpr auto operator() (Arg0&& arg0, Arg1&& arg1) const 
+  constexpr auto operator() (Arg0&& arg0, Arg1&& arg1) const
     requires std::invocable<
       std::add_const_t<BinaryOp>,
       decltype(std::forward<Arg0>(arg0)),
@@ -1600,7 +1600,7 @@ struct binary_operation_base {
   }
 
   template<class Arg0, class Arg1>
-  constexpr auto operator() (Arg0&& arg0, Arg1&& arg1) 
+  constexpr auto operator() (Arg0&& arg0, Arg1&& arg1)
     requires (! std::invocable<
       std::add_const_t<BinaryOp>,
       decltype(std::forward<Arg0>(arg0)),
@@ -1792,7 +1792,7 @@ namespace impl {
   inline constexpr my_number some_value = /* value goes here */;
 }
 template<class T>
-struct op_identity<my_number> : 
+struct op_identity<my_number> :
   constant_wrapper<impl::some_value>
 {};
 ```
@@ -1892,7 +1892,7 @@ ranges::transform_exclusive_scan(in, out, binary_op, unary_op);
 C++17 `*reduce` and `*_scan` take initial value `T init`, undecorated.
 
 If new algorithms take `T identity`, then users could be confused when switching from C++17 to new algorithms.
- 
+
 "Decorating" identity by wrapping it in a struct prevents confusion.  It also lets algorithms provide both initial value and identity.
 
 ```c++
@@ -2544,7 +2544,7 @@ template<class InputIterator1, class InputIterator2, class T>
 ```
   namespace ranges {
     // Non-parallel overloads of exclusive_scan
-    
+
     // TODO
 
     // Parallel overloads of exclusive_scan
@@ -2575,7 +2575,7 @@ template<class InputIterator1, class InputIterator2, class T>
 ```
   namespace ranges {
     // Non-parallel overloads of inclusive_scan
-    
+
     // TODO
 
     // Parallel overloads of inclusive_scan
