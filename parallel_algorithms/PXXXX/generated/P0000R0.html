@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2025-10-22" />
+  <meta name="dcterms.date" content="2025-10-23" />
   <title>Add description for parallel `&lt;memory&gt;`
 algorithms</title>
   <style>
@@ -438,7 +438,7 @@ algorithms</h1>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2025-10-22</td>
+    <td>2025-10-23</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -548,7 +548,7 @@ algorithms (not only parallel).</p>
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="va">+                                       I first, S last);</span></span>
 <span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;<em>execution-policy</em> Ep, <em>nothrow-sized-random-access-range</em> R&gt;</span></span>
 <span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="va">+   requires default_initializable&lt;range_value_t&lt;R&gt;&gt;</span></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="va">+     borrowed_iterator_t&lt;R&gt; uninitialized_default_construct(Ep&amp;&amp; exec</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="va">+     borrowed_iterator_t&lt;R&gt; uninitialized_default_construct(Ep&amp;&amp; exec,</span></span>
 <span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="va">+                                                            R&amp;&amp; r);</span></span>
 <span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 </div>
@@ -628,7 +628,7 @@ algorithms (not only parallel).</p>
 <span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="va">+                                     I first, S last);</span></span>
 <span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;<em>execution-policy</em> Ep, <em>nothrow-sized-random-access-range</em> R&gt;</span></span>
 <span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="va">+   requires default_initializable&lt;range_value_t&lt;R&gt;&gt;</span></span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="va">+     borrowed_iterator_t&lt;R&gt; uninitialized_value_construct(Ep&amp;&amp; exec</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="va">+     borrowed_iterator_t&lt;R&gt; uninitialized_value_construct(Ep&amp;&amp; exec,</span></span>
 <span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="va">+                                                          R&amp;&amp; r);</span></span>
 <span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 </div>
@@ -786,7 +786,7 @@ does not overlap with <code class="sourceCode cpp">ifirst</code> + [0,
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>         <em>nothrow-sized-sentinel-for</em>&lt;O&gt; S&gt;</span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  requires constructible_from&lt;iter_value_t&lt;O&gt;, iter_reference_t&lt;I&gt;&gt;</span>
 <span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    uninitialized_copy_n_result&lt;I, O&gt;</span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>      uninitialized_copy_n(Ep&amp;&amp; exec, I ifirst, iter_difference_t&lt;I&gt; n</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>      uninitialized_copy_n(Ep&amp;&amp; exec, I ifirst, iter_difference_t&lt;I&gt; n,</span>
 <span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>                           O ofirst, S olast);</span></code></pre></div>
 <p><span class="marginalizedparent"><a class="marginalized">x</a></span>
 <em>Preconditions</em>: [<code class="sourceCode default">ofirst</code>,
@@ -797,7 +797,7 @@ does not overlap with <code class="sourceCode cpp">ifirst</code> + [0,
 <em>Effects</em>: Equivalent to:</p>
 <div class="sourceCode" id="cb30"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>  auto t = uninitialized_copy(std::forward&lt;Ep&gt;(exec), counted_iterator(std::move(ifirst), n),</span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>                              default_sentinel, ofirst, olast);</span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  return {in.base(), t.out};</span></code></pre></div>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  return {t.in.base(), t.out};</span></code></pre></div>
 
 </div>
 <h2 data-number="2.4" id="modify-uninitialized.move"><span class="header-section-number">2.4</span> Modify <span><a href="https://wg21.link/uninitialized.move">[uninitialized.move]</a></span><a href="#modify-uninitialized.move" class="self-link"></a></h2>
