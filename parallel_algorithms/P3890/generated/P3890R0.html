@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2025-10-23" />
+  <meta name="dcterms.date" content="2025-11-07" />
   <title>Add description for parallel `&lt;memory&gt;`
 algorithms</title>
   <style>
@@ -438,7 +438,7 @@ algorithms</h1>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2025-10-23</td>
+    <td>2025-11-07</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -465,17 +465,19 @@ algorithms</h1>
 <li><a href="#motivation" id="toc-motivation"><span class="toc-section-number">1</span> Motivation<span></span></a></li>
 <li><a href="#formal_wording" id="toc-formal_wording"><span class="toc-section-number">2</span> Formal wording<span></span></a>
 <ul>
-<li><a href="#modify-uninitialized.construct.default" id="toc-modify-uninitialized.construct.default"><span class="toc-section-number">2.1</span> Modify
+<li><a href="#modify-specialized.algorithms.general" id="toc-modify-specialized.algorithms.general"><span class="toc-section-number">2.1</span> Modify
+<span><span>[specialized.algorithms.general]</span></span><span></span></a></li>
+<li><a href="#modify-uninitialized.construct.default" id="toc-modify-uninitialized.construct.default"><span class="toc-section-number">2.2</span> Modify
 <span><span>[uninitialized.construct.default]</span></span><span></span></a></li>
-<li><a href="#modify-uninitialized.construct.value" id="toc-modify-uninitialized.construct.value"><span class="toc-section-number">2.2</span> Modify
+<li><a href="#modify-uninitialized.construct.value" id="toc-modify-uninitialized.construct.value"><span class="toc-section-number">2.3</span> Modify
 <span><span>[uninitialized.construct.value]</span></span><span></span></a></li>
-<li><a href="#modify-uninitialized.copy" id="toc-modify-uninitialized.copy"><span class="toc-section-number">2.3</span> Modify
+<li><a href="#modify-uninitialized.copy" id="toc-modify-uninitialized.copy"><span class="toc-section-number">2.4</span> Modify
 <span><span>[uninitialized.copy]</span></span><span></span></a></li>
-<li><a href="#modify-uninitialized.move" id="toc-modify-uninitialized.move"><span class="toc-section-number">2.4</span> Modify
+<li><a href="#modify-uninitialized.move" id="toc-modify-uninitialized.move"><span class="toc-section-number">2.5</span> Modify
 <span><span>[uninitialized.move]</span></span><span></span></a></li>
-<li><a href="#modify-uninitialized.fill" id="toc-modify-uninitialized.fill"><span class="toc-section-number">2.5</span> Modify
+<li><a href="#modify-uninitialized.fill" id="toc-modify-uninitialized.fill"><span class="toc-section-number">2.6</span> Modify
 <span><span>[uninitialized.fill]</span></span><span></span></a></li>
-<li><a href="#modify-specialized.destroy" id="toc-modify-specialized.destroy"><span class="toc-section-number">2.6</span> Modify
+<li><a href="#modify-specialized.destroy" id="toc-modify-specialized.destroy"><span class="toc-section-number">2.7</span> Modify
 <span><span>[specialized.destroy]</span></span><span></span></a></li>
 </ul></li>
 <li><a href="#bibliography" id="toc-bibliography"><span class="toc-section-number">3</span> References<span></span></a></li>
@@ -517,175 +519,206 @@ which is a dedicated place for algorithmic description of <code class="sourceCod
 algorithms (not only parallel).</p>
 <p>This proposal aims to fix that.</p>
 <h1 data-number="2" id="formal_wording"><span class="header-section-number">2</span> Formal wording<a href="#formal_wording" class="self-link"></a></h1>
-<h2 data-number="2.1" id="modify-uninitialized.construct.default"><span class="header-section-number">2.1</span> Modify <span><a href="https://wg21.link/uninitialized.construct.default">[uninitialized.construct.default]</a></span><a href="#modify-uninitialized.construct.default" class="self-link"></a></h2>
+<h2 data-number="2.1" id="modify-specialized.algorithms.general"><span class="header-section-number">2.1</span> Modify <span><a href="https://wg21.link/specialized.algorithms.general">[specialized.algorithms.general]</a></span><a href="#modify-specialized.algorithms.general" class="self-link"></a></h2>
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span><span class="note"><span>[ <em>Note:</em> </span>When new objects are created
+by the algorithms specified in <span><a href="https://wg21.link/specialized.algorithms">[specialized.algorithms]</a></span>,
+the lifetime ends for any existing objects (including
+potentially-overlapping subobjects <span><a href="https://wg21.link/intro.object">[intro.object]</a></span>) in
+storage that is reused <span><a href="https://wg21.link/basic.life">[basic.life]</a></span>.<span> —
+<em>end note</em> ]</span></span></p>
+<p><span class="marginalizedparent"><a class="marginalized">4</a></span>
+Some algorithms specified in <span><a href="https://wg21.link/specialized.algorithms">[specialized.algorithms]</a></span>
+make use of the following exposition-only function templates:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> <span class="dt">void</span><span class="op">*</span> voidify<span class="op">(</span>T<span class="op">&amp;</span> obj<span class="op">)</span> <span class="kw">noexcept</span> <span class="op">{</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> addressof<span class="op">(</span>obj<span class="op">)</span>;</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> I<span class="op">&gt;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">decltype</span><span class="op">(</span><span class="kw">auto</span><span class="op">)</span> <em>deref-move</em><span class="op">(</span>I<span class="op">&amp;</span> it<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">constexpr</span> <span class="op">(</span>is_lvalue_reference_v<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(*</span>it<span class="op">)&gt;)</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> std<span class="op">::</span>move<span class="op">(*</span>it<span class="op">)</span>;</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> <span class="op">*</span>it;</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span></code></pre></div>
+<p><span class="marginalizedparent"><a class="marginalized">5</a></span>
+<span class="add" style="color: #006e28"><ins>For the parallel algorithm
+overloads in subclause <span><a href="https://wg21.link/specialized.algorithms">[specialized.algorithms]</a></span>,
+each iteration of the loop with a
+<span><code class="sourceCode default">new</code></span> expression or
+invocation of
+<span><code class="sourceCode default">destroy</code></span>” in the
+specification of the function template (if any) is considered to be an
+invocation of an element access function (<span><a href="https://wg21.link/algorithms.parallel.exec">[algorithms.parallel.exec]</a></span>).</ins></span></p>
+<h2 data-number="2.2" id="modify-uninitialized.construct.default"><span class="header-section-number">2.2</span> Modify <span><a href="https://wg21.link/uninitialized.construct.default">[uninitialized.construct.default]</a></span><a href="#modify-uninitialized.construct.default" class="self-link"></a></h2>
 <div>
-<div class="sourceCode" id="cb1"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>template&lt;class NoThrowForwardIterator&gt;</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  constexpr void uninitialized_default_construct(NoThrowForwardIterator first,</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>                                                 NoThrowForwardIterator last);</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class ExecutionPolicy, class NoThrowForwardIterator&gt;</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="va">+   void uninitialized_default_construct(ExecutionPolicy&amp;&amp; exec,</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="va">+                                        NoThrowForwardIterator first,</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="va">+                                        NoThrowForwardIterator last);</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>template&lt;class NoThrowForwardIterator&gt;</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  constexpr void uninitialized_default_construct(NoThrowForwardIterator first,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>                                                 NoThrowForwardIterator last);</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class ExecutionPolicy, class NoThrowForwardIterator&gt;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="va">+   void uninitialized_default_construct(ExecutionPolicy&amp;&amp; exec,</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="va">+                                        NoThrowForwardIterator first,</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="va">+                                        NoThrowForwardIterator last);</span></span></code></pre></div>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
 <em>Effects</em>: Equivalent to:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; first <span class="op">!=</span> last; <span class="op">++</span>first<span class="op">)</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">::</span><span class="kw">new</span> <span class="op">(</span>voidify<span class="op">(*</span>first<span class="op">))</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>      <span class="kw">typename</span> iterator_traits<span class="op">&lt;</span>NoThrowForwardIterator<span class="op">&gt;::</span>value_type;</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; first <span class="op">!=</span> last; <span class="op">++</span>first<span class="op">)</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">::</span><span class="kw">new</span> <span class="op">(</span>voidify<span class="op">(*</span>first<span class="op">))</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>      <span class="kw">typename</span> iterator_traits<span class="op">&lt;</span>NoThrowForwardIterator<span class="op">&gt;::</span>value_type;</span></code></pre></div>
 <div>
-<div class="sourceCode" id="cb3"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>namespace ranges {</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>nothrow-forward-iterator</em> I, <em>nothrow-sentinel-for</em>&lt;I&gt; S&gt;</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    requires default_initializable&lt;iter_value_t&lt;I&gt;&gt;</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    constexpr I uninitialized_default_construct(I first, S last);</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>nothrow-forward-range</em> R&gt;</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    requires default_initializable&lt;range_value_t&lt;R&gt;&gt;</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    constexpr borrowed_iterator_t&lt;R&gt; uninitialized_default_construct(R&amp;&amp; r);</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;<em>execution-policy</em> Ep, <em>nothrow-random-access-iterator</em> I,</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="va">+          <em>nothrow-sized-sentinel-for</em>&lt;I&gt; S&gt;</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="va">+   requires default_initializable&lt;iter_value_t&lt;I&gt;&gt;</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="va">+     I uninitialized_default_construct(Ep&amp;&amp; exec,</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="va">+                                       I first, S last);</span></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;<em>execution-policy</em> Ep, <em>nothrow-sized-random-access-range</em> R&gt;</span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="va">+   requires default_initializable&lt;range_value_t&lt;R&gt;&gt;</span></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="va">+     borrowed_iterator_t&lt;R&gt; uninitialized_default_construct(Ep&amp;&amp; exec,</span></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="va">+                                                            R&amp;&amp; r);</span></span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>namespace ranges {</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>nothrow-forward-iterator</em> I, <em>nothrow-sentinel-for</em>&lt;I&gt; S&gt;</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    requires default_initializable&lt;iter_value_t&lt;I&gt;&gt;</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    constexpr I uninitialized_default_construct(I first, S last);</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>nothrow-forward-range</em> R&gt;</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    requires default_initializable&lt;range_value_t&lt;R&gt;&gt;</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    constexpr borrowed_iterator_t&lt;R&gt; uninitialized_default_construct(R&amp;&amp; r);</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;<em>execution-policy</em> Ep, <em>nothrow-random-access-iterator</em> I,</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="va">+          <em>nothrow-sized-sentinel-for</em>&lt;I&gt; S&gt;</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="va">+   requires default_initializable&lt;iter_value_t&lt;I&gt;&gt;</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="va">+     I uninitialized_default_construct(Ep&amp;&amp; exec,</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="va">+                                       I first, S last);</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;<em>execution-policy</em> Ep, <em>nothrow-sized-random-access-range</em> R&gt;</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="va">+   requires default_initializable&lt;range_value_t&lt;R&gt;&gt;</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="va">+     borrowed_iterator_t&lt;R&gt; uninitialized_default_construct(Ep&amp;&amp; exec,</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="va">+                                                            R&amp;&amp; r);</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">2</a></span>
 <em>Effects</em>: Equivalent to:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; first <span class="op">!=</span> last; <span class="op">++</span>first<span class="op">)</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">::</span><span class="kw">new</span> <span class="op">(</span>voidify<span class="op">(*</span>first<span class="op">))</span> remove_reference_t<span class="op">&lt;</span>iter_reference_t<span class="op">&lt;</span>I<span class="op">&gt;&gt;</span>;</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> first;</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; first <span class="op">!=</span> last; <span class="op">++</span>first<span class="op">)</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">::</span><span class="kw">new</span> <span class="op">(</span>voidify<span class="op">(*</span>first<span class="op">))</span> remove_reference_t<span class="op">&lt;</span>iter_reference_t<span class="op">&lt;</span>I<span class="op">&gt;&gt;</span>;</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> first;</span></code></pre></div>
 <div>
-<div class="sourceCode" id="cb5"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>template&lt;class NoThrowForwardIterator, class Size&gt;</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  constexpr NoThrowForwardIterator</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    uninitialized_default_construct_n(NoThrowForwardIterator first, Size n);</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class ExecutionPolicy, class NoThrowForwardIterator, class Size&gt;</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="va">+   NoThrowForwardIterator</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="va">+     uninitialized_default_construct_n(ExecutionPolicy&amp;&amp; exec,</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="va">+                                       NoThrowForwardIterator first,</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="va">+                                       Size n);</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>template&lt;class NoThrowForwardIterator, class Size&gt;</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  constexpr NoThrowForwardIterator</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    uninitialized_default_construct_n(NoThrowForwardIterator first, Size n);</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class ExecutionPolicy, class NoThrowForwardIterator, class Size&gt;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="va">+   NoThrowForwardIterator</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="va">+     uninitialized_default_construct_n(ExecutionPolicy&amp;&amp; exec,</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="va">+                                       NoThrowForwardIterator first,</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="va">+                                       Size n);</span></span></code></pre></div>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">3</a></span>
 <em>Effects</em>: Equivalent to:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; n <span class="op">&gt;</span> <span class="dv">0</span>; <span class="op">(</span><span class="dt">void</span><span class="op">)++</span>first, <span class="op">--</span>n<span class="op">)</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">::</span><span class="kw">new</span> <span class="op">(</span>voidify<span class="op">(*</span>first<span class="op">))</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>      <span class="kw">typename</span> iterator_traits<span class="op">&lt;</span>NoThrowForwardIterator<span class="op">&gt;::</span>value_type;</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> first;</span></code></pre></div>
-<div class="sourceCode" id="cb7"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ranges <span class="op">{</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-forward-iterator</em> I<span class="op">&gt;</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> default_initializable<span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>I<span class="op">&gt;&gt;</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">constexpr</span> I uninitialized_default_construct_n<span class="op">(</span>I first, iter_difference_t<span class="op">&lt;</span>I<span class="op">&gt;</span> n<span class="op">)</span>;</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; n <span class="op">&gt;</span> <span class="dv">0</span>; <span class="op">(</span><span class="dt">void</span><span class="op">)++</span>first, <span class="op">--</span>n<span class="op">)</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">::</span><span class="kw">new</span> <span class="op">(</span>voidify<span class="op">(*</span>first<span class="op">))</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>      <span class="kw">typename</span> iterator_traits<span class="op">&lt;</span>NoThrowForwardIterator<span class="op">&gt;::</span>value_type;</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> first;</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ranges <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-forward-iterator</em> I<span class="op">&gt;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> default_initializable<span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>I<span class="op">&gt;&gt;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">constexpr</span> I uninitialized_default_construct_n<span class="op">(</span>I first, iter_difference_t<span class="op">&lt;</span>I<span class="op">&gt;</span> n<span class="op">)</span>;</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <p><span class="marginalizedparent"><a class="marginalized">4</a></span>
 <em>Effects</em>: Equivalent to:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> uninitialized_default_construct<span class="op">(</span>counted_iterator<span class="op">(</span>first, n<span class="op">)</span>,</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>                                         default_sentinel<span class="op">).</span>base<span class="op">()</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> uninitialized_default_construct<span class="op">(</span>counted_iterator<span class="op">(</span>first, n<span class="op">)</span>,</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>                                         default_sentinel<span class="op">).</span>base<span class="op">()</span>;</span></code></pre></div>
 <div class="add" style="color: #006e28">
 
-<div class="sourceCode" id="cb9"><pre class="sourceCode default default"><code class="sourceCode default"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>namespace ranges {</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>execution-policy</em> Ep, <em>nothrow-random-access-iterator</em> I&gt;</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    requires default_initializable&lt;iter_value_t&lt;I&gt;&gt;</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>      I uninitialized_default_construct_n(Ep&amp;&amp; exec, I first,</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>                                          iter_difference_t&lt;I&gt; n);</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode default default"><code class="sourceCode default"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>namespace ranges {</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>execution-policy</em> Ep, <em>nothrow-random-access-iterator</em> I&gt;</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    requires default_initializable&lt;iter_value_t&lt;I&gt;&gt;</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>      I uninitialized_default_construct_n(Ep&amp;&amp; exec, I first,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>                                          iter_difference_t&lt;I&gt; n);</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 <p><span class="marginalizedparent"><a class="marginalized">5</a></span>
 <em>Effects</em>: Equivalent to:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>  return uninitialized_default_construct(std::forward&lt;Ep&gt;(exec), counted_iterator(first, n),</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>                                         default_sentinel).base();</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>  return uninitialized_default_construct(std::forward&lt;Ep&gt;(exec), counted_iterator(first, n),</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>                                         default_sentinel).base();</span></code></pre></div>
 
 </div>
-<h2 data-number="2.2" id="modify-uninitialized.construct.value"><span class="header-section-number">2.2</span> Modify <span><a href="https://wg21.link/uninitialized.construct.value">[uninitialized.construct.value]</a></span><a href="#modify-uninitialized.construct.value" class="self-link"></a></h2>
+<h2 data-number="2.3" id="modify-uninitialized.construct.value"><span class="header-section-number">2.3</span> Modify <span><a href="https://wg21.link/uninitialized.construct.value">[uninitialized.construct.value]</a></span><a href="#modify-uninitialized.construct.value" class="self-link"></a></h2>
 <div>
-<div class="sourceCode" id="cb11"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>template&lt;class NoThrowForwardIterator&gt;</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  constexpr void uninitialized_value_construct(NoThrowForwardIterator first,</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>                                               NoThrowForwardIterator last);</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class ExecutionPolicy, class NoThrowForwardIterator&gt;</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="va">+   void uninitialized_value_construct(ExecutionPolicy&amp;&amp; exec,</span></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="va">+                                      NoThrowForwardIterator first,</span></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="va">+                                      NoThrowForwardIterator last)</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>template&lt;class NoThrowForwardIterator&gt;</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  constexpr void uninitialized_value_construct(NoThrowForwardIterator first,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                                               NoThrowForwardIterator last);</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class ExecutionPolicy, class NoThrowForwardIterator&gt;</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="va">+   void uninitialized_value_construct(ExecutionPolicy&amp;&amp; exec,</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="va">+                                      NoThrowForwardIterator first,</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="va">+                                      NoThrowForwardIterator last)</span></span></code></pre></div>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
 <em>Effects</em>: Equivalent to:</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; first <span class="op">!=</span> last; <span class="op">++</span>first<span class="op">)</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">::</span><span class="kw">new</span> <span class="op">(</span>voidify<span class="op">(*</span>first<span class="op">))</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>      <span class="kw">typename</span> iterator_traits<span class="op">&lt;</span>NoThrowForwardIterator<span class="op">&gt;::</span>value_type<span class="op">()</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; first <span class="op">!=</span> last; <span class="op">++</span>first<span class="op">)</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">::</span><span class="kw">new</span> <span class="op">(</span>voidify<span class="op">(*</span>first<span class="op">))</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>      <span class="kw">typename</span> iterator_traits<span class="op">&lt;</span>NoThrowForwardIterator<span class="op">&gt;::</span>value_type<span class="op">()</span>;</span></code></pre></div>
 <div>
-<div class="sourceCode" id="cb13"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>namespace ranges {</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>nothrow-forward-iterator</em> I, <em>nothrow-sentinel-for</em>&lt;I&gt; S&gt;</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    requires default_initializable&lt;iter_value_t&lt;I&gt;&gt;</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    constexpr I uninitialized_value_construct(I first, S last);</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>nothrow-forward-range</em> R&gt;</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    requires default_initializable&lt;range_value_t&lt;R&gt;&gt;</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    constexpr borrowed_iterator_t&lt;R&gt; uninitialized_value_construct(R&amp;&amp; r);</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;<em>execution-policy</em> Ep, <em>nothrow-random-access-iterator</em> I,</span></span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="va">+          <em>nothrow-sized-sentinel-for&lt;</em>I&gt; S&gt;</span></span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="va">+   requires default_initializable&lt;iter_value_t&lt;I&gt;&gt;</span></span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="va">+     I uninitialized_value_construct(Ep&amp;&amp; exec,</span></span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="va">+                                     I first, S last);</span></span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;<em>execution-policy</em> Ep, <em>nothrow-sized-random-access-range</em> R&gt;</span></span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="va">+   requires default_initializable&lt;range_value_t&lt;R&gt;&gt;</span></span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="va">+     borrowed_iterator_t&lt;R&gt; uninitialized_value_construct(Ep&amp;&amp; exec,</span></span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="va">+                                                          R&amp;&amp; r);</span></span>
-<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>namespace ranges {</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>nothrow-forward-iterator</em> I, <em>nothrow-sentinel-for</em>&lt;I&gt; S&gt;</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    requires default_initializable&lt;iter_value_t&lt;I&gt;&gt;</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    constexpr I uninitialized_value_construct(I first, S last);</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>nothrow-forward-range</em> R&gt;</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    requires default_initializable&lt;range_value_t&lt;R&gt;&gt;</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    constexpr borrowed_iterator_t&lt;R&gt; uninitialized_value_construct(R&amp;&amp; r);</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;<em>execution-policy</em> Ep, <em>nothrow-random-access-iterator</em> I,</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="va">+          <em>nothrow-sized-sentinel-for&lt;</em>I&gt; S&gt;</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="va">+   requires default_initializable&lt;iter_value_t&lt;I&gt;&gt;</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="va">+     I uninitialized_value_construct(Ep&amp;&amp; exec,</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="va">+                                     I first, S last);</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;<em>execution-policy</em> Ep, <em>nothrow-sized-random-access-range</em> R&gt;</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="va">+   requires default_initializable&lt;range_value_t&lt;R&gt;&gt;</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="va">+     borrowed_iterator_t&lt;R&gt; uninitialized_value_construct(Ep&amp;&amp; exec,</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a><span class="va">+                                                          R&amp;&amp; r);</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">2</a></span>
 <em>Effects</em>: Equivalent to:</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; first <span class="op">!=</span> last; <span class="op">++</span>first<span class="op">)</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">::</span><span class="kw">new</span> <span class="op">(</span>voidify<span class="op">(*</span>first<span class="op">))</span> remove_reference_t<span class="op">&lt;</span>iter_reference_t<span class="op">&lt;</span>I<span class="op">&gt;&gt;()</span>;</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> first;</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; first <span class="op">!=</span> last; <span class="op">++</span>first<span class="op">)</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">::</span><span class="kw">new</span> <span class="op">(</span>voidify<span class="op">(*</span>first<span class="op">))</span> remove_reference_t<span class="op">&lt;</span>iter_reference_t<span class="op">&lt;</span>I<span class="op">&gt;&gt;()</span>;</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> first;</span></code></pre></div>
 <div>
-<div class="sourceCode" id="cb15"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>template&lt;class NoThrowForwardIterator, class Size&gt;</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  constexpr NoThrowForwardIterator</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    uninitialized_value_construct_n(NoThrowForwardIterator first, Size n);</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class ExecutionPolicy, class NoThrowForwardIterator, class Size&gt;</span></span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="va">+   NoThrowForwardIterator</span></span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="va">+     uninitialized_value_construct_n(ExecutionPolicy&amp;&amp; exec,</span></span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="va">+                                     NoThrowForwardIterator first,</span></span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="va">+                                     Size n);</span></span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>template&lt;class NoThrowForwardIterator, class Size&gt;</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  constexpr NoThrowForwardIterator</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    uninitialized_value_construct_n(NoThrowForwardIterator first, Size n);</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class ExecutionPolicy, class NoThrowForwardIterator, class Size&gt;</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="va">+   NoThrowForwardIterator</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="va">+     uninitialized_value_construct_n(ExecutionPolicy&amp;&amp; exec,</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="va">+                                     NoThrowForwardIterator first,</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="va">+                                     Size n);</span></span></code></pre></div>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">3</a></span>
 <em>Effects</em>: Equivalent to:</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; n <span class="op">&gt;</span> <span class="dv">0</span>; <span class="op">(</span><span class="dt">void</span><span class="op">)++</span>first, <span class="op">--</span>n<span class="op">)</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">::</span><span class="kw">new</span> <span class="op">(</span>voidify<span class="op">(*</span>first<span class="op">))</span></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>      <span class="kw">typename</span> iterator_traits<span class="op">&lt;</span>NoThrowForwardIterator<span class="op">&gt;::</span>value_type<span class="op">()</span>;</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> first;</span></code></pre></div>
-<div class="sourceCode" id="cb17"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ranges <span class="op">{</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-forward-iterator</em> I<span class="op">&gt;</span></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> default_initializable<span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>I<span class="op">&gt;&gt;</span></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">constexpr</span> I uninitialized_value_construct_n<span class="op">(</span>I first, iter_difference_t<span class="op">&lt;</span>I<span class="op">&gt;</span> n<span class="op">)</span>;</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; n <span class="op">&gt;</span> <span class="dv">0</span>; <span class="op">(</span><span class="dt">void</span><span class="op">)++</span>first, <span class="op">--</span>n<span class="op">)</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">::</span><span class="kw">new</span> <span class="op">(</span>voidify<span class="op">(*</span>first<span class="op">))</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>      <span class="kw">typename</span> iterator_traits<span class="op">&lt;</span>NoThrowForwardIterator<span class="op">&gt;::</span>value_type<span class="op">()</span>;</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> first;</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ranges <span class="op">{</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-forward-iterator</em> I<span class="op">&gt;</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> default_initializable<span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>I<span class="op">&gt;&gt;</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">constexpr</span> I uninitialized_value_construct_n<span class="op">(</span>I first, iter_difference_t<span class="op">&lt;</span>I<span class="op">&gt;</span> n<span class="op">)</span>;</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <p><span class="marginalizedparent"><a class="marginalized">4</a></span>
 <em>Effects</em>: Equivalent to:</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> uninitialized_value_construct<span class="op">(</span>counted_iterator<span class="op">(</span>first, n<span class="op">)</span>,</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>                                       default_sentinel<span class="op">).</span>base<span class="op">()</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> uninitialized_value_construct<span class="op">(</span>counted_iterator<span class="op">(</span>first, n<span class="op">)</span>,</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>                                       default_sentinel<span class="op">).</span>base<span class="op">()</span>;</span></code></pre></div>
 <div class="add" style="color: #006e28">
 
-<div class="sourceCode" id="cb19"><pre class="sourceCode default default"><code class="sourceCode default"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>namespace ranges {</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, <em>nothrow-random-access-iterator</em> I&gt;</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  requires default_initializable&lt;iter_value_t&lt;I&gt;&gt;</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    I uninitialized_value_construct_n(Ep&amp;&amp; exec, I first,</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>                                      iter_difference_t&lt;I&gt; n);</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode default default"><code class="sourceCode default"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>namespace ranges {</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, <em>nothrow-random-access-iterator</em> I&gt;</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  requires default_initializable&lt;iter_value_t&lt;I&gt;&gt;</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    I uninitialized_value_construct_n(Ep&amp;&amp; exec, I first,</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>                                      iter_difference_t&lt;I&gt; n);</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 <p><span class="marginalizedparent"><a class="marginalized">5</a></span>
 <em>Effects</em>: Equivalent to:</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>  return uninitialized_value_construct(std::forward&lt;Ep&gt;(exec), counted_iterator(first, n),</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>                                       default_sentinel).base();</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>  return uninitialized_value_construct(std::forward&lt;Ep&gt;(exec), counted_iterator(first, n),</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>                                       default_sentinel).base();</span></code></pre></div>
 
 </div>
-<h2 data-number="2.3" id="modify-uninitialized.copy"><span class="header-section-number">2.3</span> Modify <span><a href="https://wg21.link/uninitialized.copy">[uninitialized.copy]</a></span><a href="#modify-uninitialized.copy" class="self-link"></a></h2>
+<h2 data-number="2.4" id="modify-uninitialized.copy"><span class="header-section-number">2.4</span> Modify <span><a href="https://wg21.link/uninitialized.copy">[uninitialized.copy]</a></span><a href="#modify-uninitialized.copy" class="self-link"></a></h2>
 <div>
-<div class="sourceCode" id="cb21"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>template&lt;class InputIterator, class NoThrowForwardIterator&gt;</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  constexpr NoThrowForwardIterator uninitialized_copy(InputIterator first, InputIterator last,</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>                                                      NoThrowForwardIterator result);</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class ExecutionPolicy, class ForwardIterator, class NoThrowForwardIterator&gt;</span></span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="va">+   NoThrowForwardIterator uninitialized_copy(ExecutionPolicy&amp;&amp; exec,</span></span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="va">+                                             ForwardIterator first,</span></span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="va">+                                             ForwardIterator last,</span></span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="va">+                                             NoThrowForwardIterator result);</span></span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>template&lt;class InputIterator, class NoThrowForwardIterator&gt;</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  constexpr NoThrowForwardIterator uninitialized_copy(InputIterator first, InputIterator last,</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>                                                      NoThrowForwardIterator result);</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class ExecutionPolicy, class ForwardIterator, class NoThrowForwardIterator&gt;</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="va">+   NoThrowForwardIterator uninitialized_copy(ExecutionPolicy&amp;&amp; exec,</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="va">+                                             ForwardIterator first,</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="va">+                                             ForwardIterator last,</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="va">+                                             NoThrowForwardIterator result);</span></span></code></pre></div>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
 <em>Preconditions</em>: <code class="sourceCode cpp">result</code> + [0,
@@ -694,36 +727,36 @@ does not overlap with [<code class="sourceCode cpp">first</code>,
 <code class="sourceCode cpp">last</code>).</p>
 <p><span class="marginalizedparent"><a class="marginalized">2</a></span>
 <em>Effects</em>: Equivalent to:</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; first <span class="op">!=</span> last; <span class="op">++</span>result, <span class="op">(</span><span class="dt">void</span><span class="op">)++</span>first<span class="op">)</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">::</span><span class="kw">new</span> <span class="op">(</span>voidify<span class="op">(*</span>result<span class="op">))</span></span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>      <span class="kw">typename</span> iterator_traits<span class="op">&lt;</span>NoThrowForwardIterator<span class="op">&gt;::</span>value_type<span class="op">(*</span>first<span class="op">)</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; first <span class="op">!=</span> last; <span class="op">++</span>result, <span class="op">(</span><span class="dt">void</span><span class="op">)++</span>first<span class="op">)</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">::</span><span class="kw">new</span> <span class="op">(</span>voidify<span class="op">(*</span>result<span class="op">))</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>      <span class="kw">typename</span> iterator_traits<span class="op">&lt;</span>NoThrowForwardIterator<span class="op">&gt;::</span>value_type<span class="op">(*</span>first<span class="op">)</span>;</span></code></pre></div>
 <p><span class="marginalizedparent"><a class="marginalized">3</a></span>
 <em>Returns</em>: <code class="sourceCode cpp">result</code>.</p>
 <div>
-<div class="sourceCode" id="cb23"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>namespace ranges {</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  template&lt;input_iterator I, sentinel_for&lt;I&gt; S1,</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>           <em>nothrow-forward-iterator</em> O, <em>nothrow-sentinel-for&lt;O</em>&gt; S2&gt;</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    requires constructible_from&lt;iter_value_t&lt;O&gt;, iter_reference_t&lt;I&gt;&gt;</span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    constexpr uninitialized_copy_result&lt;I, O&gt;</span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>      uninitialized_copy(I ifirst, S1 ilast, O ofirst, S2 olast);</span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  template&lt;input_range IR, <em>nothrow-forward-range</em> OR&gt;</span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    requires constructible_from&lt;range_value_t&lt;OR&gt;, range_reference_t&lt;IR&gt;&gt;</span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    constexpr uninitialized_copy_result&lt;borrowed_iterator_t&lt;IR&gt;, borrowed_iterator_t&lt;OR&gt;&gt;</span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>      uninitialized_copy(IR&amp;&amp; in_range, OR&amp;&amp; out_range);</span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, random_access_iterator I, sized_sentinel_for&lt;I&gt; S1,</span></span>
-<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a><span class="va">+           <em>nothrow-random-access-iterator</em> O, <em>nothrow-sized-sentinel-for</em>&lt;O&gt; S2&gt;</span></span>
-<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires constructible_from&lt;iter_value_t&lt;O&gt;, iter_reference_t&lt;I&gt;&gt;</span></span>
-<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a><span class="va">+      uninitialized_copy_result&lt;I, O&gt;</span></span>
-<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a><span class="va">+        uninitialized_copy(Ep&amp;&amp; exec, I ifirst, S1 ilast,</span></span>
-<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a><span class="va">+                           O ofirst, S2 olast);</span></span>
-<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, <em>sized-random-access-range</em> IR,</span></span>
-<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a><span class="va">+           <em>nothrow-sized-random-access-range</em> OR&gt;</span></span>
-<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires constructible_from&lt;range_value_t&lt;OR&gt;, range_reference_t&lt;IR&gt;&gt;</span></span>
-<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a><span class="va">+      uninitialized_copy_result&lt;borrowed_iterator_t&lt;IR&gt;, borrowed_iterator_t&lt;OR&gt;&gt;</span></span>
-<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a><span class="va">+        uninitialized_copy(Ep&amp;&amp; exec, IR&amp;&amp; in_range,</span></span>
-<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a><span class="va">+                           OR&amp;&amp; out_range);</span></span>
-<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>namespace ranges {</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  template&lt;input_iterator I, sentinel_for&lt;I&gt; S1,</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>           <em>nothrow-forward-iterator</em> O, <em>nothrow-sentinel-for&lt;O</em>&gt; S2&gt;</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    requires constructible_from&lt;iter_value_t&lt;O&gt;, iter_reference_t&lt;I&gt;&gt;</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    constexpr uninitialized_copy_result&lt;I, O&gt;</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>      uninitialized_copy(I ifirst, S1 ilast, O ofirst, S2 olast);</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  template&lt;input_range IR, <em>nothrow-forward-range</em> OR&gt;</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    requires constructible_from&lt;range_value_t&lt;OR&gt;, range_reference_t&lt;IR&gt;&gt;</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    constexpr uninitialized_copy_result&lt;borrowed_iterator_t&lt;IR&gt;, borrowed_iterator_t&lt;OR&gt;&gt;</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>      uninitialized_copy(IR&amp;&amp; in_range, OR&amp;&amp; out_range);</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, random_access_iterator I, sized_sentinel_for&lt;I&gt; S1,</span></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a><span class="va">+           <em>nothrow-random-access-iterator</em> O, <em>nothrow-sized-sentinel-for</em>&lt;O&gt; S2&gt;</span></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires constructible_from&lt;iter_value_t&lt;O&gt;, iter_reference_t&lt;I&gt;&gt;</span></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a><span class="va">+      uninitialized_copy_result&lt;I, O&gt;</span></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a><span class="va">+        uninitialized_copy(Ep&amp;&amp; exec, I ifirst, S1 ilast,</span></span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a><span class="va">+                           O ofirst, S2 olast);</span></span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, <em>sized-random-access-range</em> IR,</span></span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a><span class="va">+           <em>nothrow-sized-random-access-range</em> OR&gt;</span></span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires constructible_from&lt;range_value_t&lt;OR&gt;, range_reference_t&lt;IR&gt;&gt;</span></span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a><span class="va">+      uninitialized_copy_result&lt;borrowed_iterator_t&lt;IR&gt;, borrowed_iterator_t&lt;OR&gt;&gt;</span></span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a><span class="va">+        uninitialized_copy(Ep&amp;&amp; exec, IR&amp;&amp; in_range,</span></span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a><span class="va">+                           OR&amp;&amp; out_range);</span></span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">4</a></span>
 <em>Preconditions</em>: [<code class="sourceCode cpp">ofirst</code>,
@@ -732,26 +765,19 @@ does not overlap with [<code class="sourceCode cpp">first</code>,
 <code class="sourceCode cpp">ilast</code>).</p>
 <p><span class="marginalizedparent"><a class="marginalized">5</a></span>
 <em>Effects</em>: Equivalent to:</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; ifirst <span class="op">!=</span> ilast <span class="op">&amp;&amp;</span> ofirst <span class="op">!=</span> olast; <span class="op">++</span>ofirst, <span class="op">(</span><span class="dt">void</span><span class="op">)++</span>ifirst<span class="op">)</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">::</span><span class="kw">new</span> <span class="op">(</span>voidify<span class="op">(*</span>ofirst<span class="op">))</span> remove_reference_t<span class="op">&lt;</span>iter_reference_t<span class="op">&lt;</span>O<span class="op">&gt;&gt;(*</span>ifirst<span class="op">)</span>;</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="op">{</span>std<span class="op">::</span>move<span class="op">(</span>ifirst<span class="op">)</span>, ofirst<span class="op">}</span>;</span></code></pre></div>
 <div>
-<div class="sourceCode" id="cb24"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>  for (; ifirst != ilast &amp;&amp; ofirst != olast; ++ofirst, (void)++ifirst)</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    ::new (voidify(*ofirst)) remove_reference_t&lt;iter_reference_t&lt;O&gt;&gt;(*ifirst);</span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="st">-  return {std::move(ifirst), ofirst};</span></span></code></pre></div>
-</div>
-<div class="add" style="color: #006e28">
-<p><span class="marginalizedparent"><a class="marginalized">x</a></span>
-<em>Returns</em>:
-<code class="sourceCode default">{ifirst, ofirst}</code>.</p>
-</div>
-<div>
-<div class="sourceCode" id="cb25"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>template&lt;class InputIterator, class Size, class NoThrowForwardIterator&gt;</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  constexpr NoThrowForwardIterator uninitialized_copy_n(InputIterator first, Size n,</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>                                                        NoThrowForwardIterator result);</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class ExecutionPolicy, class ForwardIterator, class Size,</span></span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="va">+          class NoThrowForwardIterator&gt;</span></span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="va">+   NoThrowForwardIterator uninitialized_copy_n(ExecutionPolicy&amp;&amp; exec,</span></span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="va">+                                               ForwardIterator first,</span></span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a><span class="va">+                                               Size n,</span></span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a><span class="va">+                                               NoThrowForwardIterator result);</span></span></code></pre></div>
+<div class="sourceCode" id="cb26"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>template&lt;class InputIterator, class Size, class NoThrowForwardIterator&gt;</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  constexpr NoThrowForwardIterator uninitialized_copy_n(InputIterator first, Size n,</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>                                                        NoThrowForwardIterator result);</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class ExecutionPolicy, class ForwardIterator, class Size,</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="va">+          class NoThrowForwardIterator&gt;</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="va">+   NoThrowForwardIterator uninitialized_copy_n(ExecutionPolicy&amp;&amp; exec,</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="va">+                                               ForwardIterator first,</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="va">+                                               Size n,</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="va">+                                               NoThrowForwardIterator result);</span></span></code></pre></div>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">6</a></span>
 <em>Preconditions</em>: <code class="sourceCode cpp">result</code> + [0,
@@ -760,34 +786,34 @@ does not overlap with [<code class="sourceCode cpp">first</code>,
 <code class="sourceCode cpp">n</code>).</p>
 <p><span class="marginalizedparent"><a class="marginalized">7</a></span><em>Effects</em>:
 Equivalent to:</p>
-<div class="sourceCode" id="cb26"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; n <span class="op">&gt;</span> <span class="dv">0</span>; <span class="op">++</span>result, <span class="op">(</span><span class="dt">void</span><span class="op">)++</span>first, <span class="op">--</span>n<span class="op">)</span></span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">::</span><span class="kw">new</span> <span class="op">(</span>voidify<span class="op">(*</span>result<span class="op">))</span></span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>      <span class="kw">typename</span> iterator_traits<span class="op">&lt;</span>NoThrowForwardIterator<span class="op">&gt;::</span>value_type<span class="op">(*</span>first<span class="op">)</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; n <span class="op">&gt;</span> <span class="dv">0</span>; <span class="op">++</span>result, <span class="op">(</span><span class="dt">void</span><span class="op">)++</span>first, <span class="op">--</span>n<span class="op">)</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">::</span><span class="kw">new</span> <span class="op">(</span>voidify<span class="op">(*</span>result<span class="op">))</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>      <span class="kw">typename</span> iterator_traits<span class="op">&lt;</span>NoThrowForwardIterator<span class="op">&gt;::</span>value_type<span class="op">(*</span>first<span class="op">)</span>;</span></code></pre></div>
 <p><span class="marginalizedparent"><a class="marginalized">8</a></span><em>Returns</em>:
 <code class="sourceCode cpp">result</code>.</p>
-<div class="sourceCode" id="cb27"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ranges <span class="op">{</span></span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span>input_iterator I, <em>nothrow-forward-iterator</em> O, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>O<span class="op">&gt;</span> S<span class="op">&gt;</span></span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> constructible_from<span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>O<span class="op">&gt;</span>, iter_reference_t<span class="op">&lt;</span>I<span class="op">&gt;&gt;</span></span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">constexpr</span> uninitialized_copy_n_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>      uninitialized_copy_n<span class="op">(</span>I ifirst, iter_difference_t<span class="op">&lt;</span>I<span class="op">&gt;</span> n, O ofirst, S olast<span class="op">)</span>;</span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb28"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ranges <span class="op">{</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span>input_iterator I, <em>nothrow-forward-iterator</em> O, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>O<span class="op">&gt;</span> S<span class="op">&gt;</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> constructible_from<span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>O<span class="op">&gt;</span>, iter_reference_t<span class="op">&lt;</span>I<span class="op">&gt;&gt;</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">constexpr</span> uninitialized_copy_n_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>      uninitialized_copy_n<span class="op">(</span>I ifirst, iter_difference_t<span class="op">&lt;</span>I<span class="op">&gt;</span> n, O ofirst, S olast<span class="op">)</span>;</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <p><span class="marginalizedparent"><a class="marginalized">9</a></span>
 <em>Preconditions</em>: <code class="sourceCode cpp"><span class="op">[</span>ofirst, olast<span class="op">)</span></code>
 does not overlap with <code class="sourceCode cpp">ifirst</code> + [0,
 <code class="sourceCode cpp">n</code>).</p>
 <p><span class="marginalizedparent"><a class="marginalized">10</a></span>
 <em>Effects</em>: Equivalent to:</p>
-<div class="sourceCode" id="cb28"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>  <span class="kw">auto</span> t <span class="op">=</span> uninitialized_copy<span class="op">(</span>counted_iterator<span class="op">(</span>std<span class="op">::</span>move<span class="op">(</span>ifirst<span class="op">)</span>, n<span class="op">)</span>,</span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>                              default_sentinel, ofirst, olast<span class="op">)</span>;</span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="op">{</span>std<span class="op">::</span>move<span class="op">(</span>t<span class="op">.</span>in<span class="op">).</span>base<span class="op">()</span>, t<span class="op">.</span>out<span class="op">}</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>  <span class="kw">auto</span> t <span class="op">=</span> uninitialized_copy<span class="op">(</span>counted_iterator<span class="op">(</span>std<span class="op">::</span>move<span class="op">(</span>ifirst<span class="op">)</span>, n<span class="op">)</span>,</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>                              default_sentinel, ofirst, olast<span class="op">)</span>;</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="op">{</span>std<span class="op">::</span>move<span class="op">(</span>t<span class="op">.</span>in<span class="op">).</span>base<span class="op">()</span>, t<span class="op">.</span>out<span class="op">}</span>;</span></code></pre></div>
 <div class="add" style="color: #006e28">
 
-<div class="sourceCode" id="cb29"><pre class="sourceCode default default"><code class="sourceCode default"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, random_access_iterator I, <em>nothrow-random-access-iterator</em> O,</span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>         <em>nothrow-sized-sentinel-for</em>&lt;O&gt; S&gt;</span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  requires constructible_from&lt;iter_value_t&lt;O&gt;, iter_reference_t&lt;I&gt;&gt;</span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    uninitialized_copy_n_result&lt;I, O&gt;</span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>      uninitialized_copy_n(Ep&amp;&amp; exec, I ifirst, iter_difference_t&lt;I&gt; n,</span>
-<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>                           O ofirst, S olast);</span></code></pre></div>
+<div class="sourceCode" id="cb30"><pre class="sourceCode default default"><code class="sourceCode default"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, random_access_iterator I, <em>nothrow-random-access-iterator</em> O,</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>         <em>nothrow-sized-sentinel-for</em>&lt;O&gt; S&gt;</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  requires constructible_from&lt;iter_value_t&lt;O&gt;, iter_reference_t&lt;I&gt;&gt;</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    uninitialized_copy_n_result&lt;I, O&gt;</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>      uninitialized_copy_n(Ep&amp;&amp; exec, I ifirst, iter_difference_t&lt;I&gt; n,</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>                           O ofirst, S olast);</span></code></pre></div>
 <p><span class="marginalizedparent"><a class="marginalized">x</a></span>
 <em>Preconditions</em>: [<code class="sourceCode default">ofirst</code>,
 <code class="sourceCode default">olast</code>) does not overlap with
@@ -795,21 +821,21 @@ does not overlap with <code class="sourceCode cpp">ifirst</code> + [0,
 <code class="sourceCode default">n</code>).</p>
 <p><span class="marginalizedparent"><a class="marginalized">x</a></span>
 <em>Effects</em>: Equivalent to:</p>
-<div class="sourceCode" id="cb30"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>  auto t = uninitialized_copy(std::forward&lt;Ep&gt;(exec), counted_iterator(std::move(ifirst), n),</span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>                              default_sentinel, ofirst, olast);</span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  return {t.in.base(), t.out};</span></code></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>  auto t = uninitialized_copy(std::forward&lt;Ep&gt;(exec), counted_iterator(std::move(ifirst), n),</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>                              default_sentinel, ofirst, olast);</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  return {t.in.base(), t.out};</span></code></pre></div>
 
 </div>
-<h2 data-number="2.4" id="modify-uninitialized.move"><span class="header-section-number">2.4</span> Modify <span><a href="https://wg21.link/uninitialized.move">[uninitialized.move]</a></span><a href="#modify-uninitialized.move" class="self-link"></a></h2>
+<h2 data-number="2.5" id="modify-uninitialized.move"><span class="header-section-number">2.5</span> Modify <span><a href="https://wg21.link/uninitialized.move">[uninitialized.move]</a></span><a href="#modify-uninitialized.move" class="self-link"></a></h2>
 <div>
-<div class="sourceCode" id="cb31"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>template&lt;class InputIterator, class NoThrowForwardIterator&gt;</span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  constexpr NoThrowForwardIterator uninitialized_move(InputIterator first, InputIterator last,</span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>                                                      NoThrowForwardIterator result);</span>
-<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class ExecutionPolicy, class ForwardIterator, class NoThrowForwardIterator&gt;</span></span>
-<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a><span class="va">+   NoThrowForwardIterator uninitialized_move(ExecutionPolicy&amp;&amp; exec,</span></span>
-<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a><span class="va">+                                             ForwardIterator first,</span></span>
-<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a><span class="va">+                                             ForwardIterator last,</span></span>
-<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a><span class="va">+                                             NoThrowForwardIterator result);</span></span></code></pre></div>
+<div class="sourceCode" id="cb32"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>template&lt;class InputIterator, class NoThrowForwardIterator&gt;</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  constexpr NoThrowForwardIterator uninitialized_move(InputIterator first, InputIterator last,</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>                                                      NoThrowForwardIterator result);</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class ExecutionPolicy, class ForwardIterator, class NoThrowForwardIterator&gt;</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="va">+   NoThrowForwardIterator uninitialized_move(ExecutionPolicy&amp;&amp; exec,</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a><span class="va">+                                             ForwardIterator first,</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a><span class="va">+                                             ForwardIterator last,</span></span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a><span class="va">+                                             NoThrowForwardIterator result);</span></span></code></pre></div>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
 <em>Preconditions</em>: <code class="sourceCode cpp">result</code> + [0,
@@ -818,35 +844,35 @@ does not overlap with [<code class="sourceCode cpp">first</code>,
 <code class="sourceCode cpp">last</code>).</p>
 <p><span class="marginalizedparent"><a class="marginalized">2</a></span>
 <em>Effects</em>: Equivalent to:</p>
-<div class="sourceCode" id="cb32"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; first <span class="op">!=</span> last; <span class="op">(</span><span class="dt">void</span><span class="op">)++</span>result, <span class="op">++</span>first<span class="op">)</span></span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">::</span><span class="kw">new</span> <span class="op">(</span>voidify<span class="op">(*</span>result<span class="op">))</span></span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>      <span class="kw">typename</span> iterator_traits<span class="op">&lt;</span>NoThrowForwardIterator<span class="op">&gt;::</span>value_type<span class="op">(</span><em>deref-move</em><span class="op">(</span>first<span class="op">))</span>;</span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> result;</span></code></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; first <span class="op">!=</span> last; <span class="op">(</span><span class="dt">void</span><span class="op">)++</span>result, <span class="op">++</span>first<span class="op">)</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">::</span><span class="kw">new</span> <span class="op">(</span>voidify<span class="op">(*</span>result<span class="op">))</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>      <span class="kw">typename</span> iterator_traits<span class="op">&lt;</span>NoThrowForwardIterator<span class="op">&gt;::</span>value_type<span class="op">(</span><em>deref-move</em><span class="op">(</span>first<span class="op">))</span>;</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> result;</span></code></pre></div>
 <div>
-<div class="sourceCode" id="cb33"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>namespace ranges {</span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  template&lt;input_iterator I, sentinel_for&lt;I&gt; S1,</span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>           <em>nothrow-forward-iterator</em> O, <em>nothrow-sentinel-for</em>&lt;O&gt; S2&gt;</span>
-<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    requires constructible_from&lt;iter_value_t&lt;O&gt;, iter_rvalue_reference_t&lt;I&gt;&gt;</span>
-<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>    constexpr uninitialized_move_result&lt;I, O&gt;</span>
-<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>      uninitialized_move(I ifirst, S1 ilast, O ofirst, S2 olast);</span>
-<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>  template&lt;input_range IR, <em>nothrow-forward-range</em> OR&gt;</span>
-<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>    requires constructible_from&lt;range_value_t&lt;OR&gt;, range_rvalue_reference_t&lt;IR&gt;&gt;</span>
-<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>    constexpr uninitialized_move_result&lt;borrowed_iterator_t&lt;IR&gt;, borrowed_iterator_t&lt;OR&gt;&gt;</span>
-<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>      uninitialized_move(IR&amp;&amp; in_range, OR&amp;&amp; out_range);</span>
-<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, random_access_iterator I, sized_sentinel_for&lt;I&gt; S1,</span></span>
-<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a><span class="va">+          <em>nothrow-random-access-iterator</em> O, <em>nothrow-sized-sentinel-for</em>&lt;O&gt; S2&gt;</span></span>
-<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires constructible_from&lt;iter_value_t&lt;O&gt;, iter_rvalue_reference_t&lt;I&gt;&gt;</span></span>
-<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a><span class="va">+      uninitialized_move_result&lt;I, O&gt;</span></span>
-<span id="cb33-16"><a href="#cb33-16" aria-hidden="true" tabindex="-1"></a><span class="va">+        uninitialized_move(Ep&amp;&amp; exec, I ifirst, S1 ilast,</span></span>
-<span id="cb33-17"><a href="#cb33-17" aria-hidden="true" tabindex="-1"></a><span class="va">+                           O ofirst, S2 olast);</span></span>
-<span id="cb33-18"><a href="#cb33-18" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, <em>sized-random-access-range</em> IR, <em>nothrow-sized-random-access-range</em> OR&gt;</span></span>
-<span id="cb33-19"><a href="#cb33-19" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires constructible_from&lt;range_value_t&lt;OR&gt;, range_rvalue_reference_t&lt;IR&gt;&gt;</span></span>
-<span id="cb33-20"><a href="#cb33-20" aria-hidden="true" tabindex="-1"></a><span class="va">+      uninitialized_move_result&lt;borrowed_iterator_t&lt;IR&gt;, borrowed_iterator_t&lt;OR&gt;&gt;</span></span>
-<span id="cb33-21"><a href="#cb33-21" aria-hidden="true" tabindex="-1"></a><span class="va">+        uninitialized_move(Ep&amp;&amp; exec, IR&amp;&amp; in_range,</span></span>
-<span id="cb33-22"><a href="#cb33-22" aria-hidden="true" tabindex="-1"></a><span class="va">+                           OR&amp;&amp; out_range);</span></span>
-<span id="cb33-23"><a href="#cb33-23" aria-hidden="true" tabindex="-1"></a><span class="va">+</span></span>
-<span id="cb33-24"><a href="#cb33-24" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb34"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>namespace ranges {</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  template&lt;input_iterator I, sentinel_for&lt;I&gt; S1,</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>           <em>nothrow-forward-iterator</em> O, <em>nothrow-sentinel-for</em>&lt;O&gt; S2&gt;</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    requires constructible_from&lt;iter_value_t&lt;O&gt;, iter_rvalue_reference_t&lt;I&gt;&gt;</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    constexpr uninitialized_move_result&lt;I, O&gt;</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>      uninitialized_move(I ifirst, S1 ilast, O ofirst, S2 olast);</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>  template&lt;input_range IR, <em>nothrow-forward-range</em> OR&gt;</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>    requires constructible_from&lt;range_value_t&lt;OR&gt;, range_rvalue_reference_t&lt;IR&gt;&gt;</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>    constexpr uninitialized_move_result&lt;borrowed_iterator_t&lt;IR&gt;, borrowed_iterator_t&lt;OR&gt;&gt;</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>      uninitialized_move(IR&amp;&amp; in_range, OR&amp;&amp; out_range);</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, random_access_iterator I, sized_sentinel_for&lt;I&gt; S1,</span></span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a><span class="va">+          <em>nothrow-random-access-iterator</em> O, <em>nothrow-sized-sentinel-for</em>&lt;O&gt; S2&gt;</span></span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires constructible_from&lt;iter_value_t&lt;O&gt;, iter_rvalue_reference_t&lt;I&gt;&gt;</span></span>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a><span class="va">+      uninitialized_move_result&lt;I, O&gt;</span></span>
+<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a><span class="va">+        uninitialized_move(Ep&amp;&amp; exec, I ifirst, S1 ilast,</span></span>
+<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a><span class="va">+                           O ofirst, S2 olast);</span></span>
+<span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, <em>sized-random-access-range</em> IR, <em>nothrow-sized-random-access-range</em> OR&gt;</span></span>
+<span id="cb34-19"><a href="#cb34-19" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires constructible_from&lt;range_value_t&lt;OR&gt;, range_rvalue_reference_t&lt;IR&gt;&gt;</span></span>
+<span id="cb34-20"><a href="#cb34-20" aria-hidden="true" tabindex="-1"></a><span class="va">+      uninitialized_move_result&lt;borrowed_iterator_t&lt;IR&gt;, borrowed_iterator_t&lt;OR&gt;&gt;</span></span>
+<span id="cb34-21"><a href="#cb34-21" aria-hidden="true" tabindex="-1"></a><span class="va">+        uninitialized_move(Ep&amp;&amp; exec, IR&amp;&amp; in_range,</span></span>
+<span id="cb34-22"><a href="#cb34-22" aria-hidden="true" tabindex="-1"></a><span class="va">+                           OR&amp;&amp; out_range);</span></span>
+<span id="cb34-23"><a href="#cb34-23" aria-hidden="true" tabindex="-1"></a><span class="va">+</span></span>
+<span id="cb34-24"><a href="#cb34-24" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">3</a></span>
 <em>Preconditions</em>: [<code class="sourceCode cpp">ofirst</code>,
@@ -855,15 +881,10 @@ does not overlap with [<code class="sourceCode cpp">first</code>,
 <code class="sourceCode cpp">ilast</code>).</p>
 <p><span class="marginalizedparent"><a class="marginalized">4</a></span>
 <em>Effects</em>: Equivalent to:</p>
-<div>
-<div class="sourceCode" id="cb34"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>  for (; ifirst != ilast &amp;&amp; ofirst != olast; ++ofirst, (void)++ifirst)</span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>    ::new (voidify(*ofirst))</span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>      remove_reference_t&lt;iter_reference_t&lt;O&gt;&gt;(ranges::iter_move(ifirst));</span>
-<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="st">-  return {std::move(ifirst), ofirst};</span></span></code></pre></div>
-</div>
-<p><span class="marginalizedparent"><a class="marginalized">x</a></span>
-<span class="add" style="color: #006e28"><ins><em>Returns</em>:
-<span><code class="sourceCode default">{ifirst, ofirst}</code></span>.</ins></span></p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; ifirst <span class="op">!=</span> ilast <span class="op">&amp;&amp;</span> ofirst <span class="op">!=</span> olast; <span class="op">++</span>ofirst, <span class="op">(</span><span class="dt">void</span><span class="op">)++</span>ifirst<span class="op">)</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">::</span><span class="kw">new</span> <span class="op">(</span>voidify<span class="op">(*</span>ofirst<span class="op">))</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>      remove_reference_t<span class="op">&lt;</span>iter_reference_t<span class="op">&lt;</span>O<span class="op">&gt;&gt;(</span>ranges<span class="op">::</span>iter_move<span class="op">(</span>ifirst<span class="op">))</span>;</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="op">{</span>std<span class="op">::</span>move<span class="op">(</span>ifirst<span class="op">)</span>, ofirst<span class="op">}</span>;</span></code></pre></div>
 <p><span class="marginalizedparent"><a class="marginalized">5</a></span>
 <span class="note"><span>[ <em>Note:</em> </span>If an exception is
 thrown, some objects in the range
@@ -871,15 +892,15 @@ thrown, some objects in the range
 <code class="sourceCode cpp">ilast</code>) are left in a valid, but
 unspecified state.<span> — <em>end note</em> ]</span></span></p>
 <div>
-<div class="sourceCode" id="cb35"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>template&lt;class InputIterator, class Size, class NoThrowForwardIterator&gt;</span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  constexpr pair&lt;InputIterator, NoThrowForwardIterator&gt;</span>
-<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>    uninitialized_move_n(InputIterator first, Size n, NoThrowForwardIterator result);</span>
-<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class ExecutionPolicy, class ForwardIterator, class Size,</span></span>
-<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="va">+          class NoThrowForwardIterator&gt;</span></span>
-<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a><span class="va">+   pair&lt;ForwardIterator, NoThrowForwardIterator&gt;</span></span>
-<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a><span class="va">+     uninitialized_move_n(ExecutionPolicy&amp;&amp; exec,</span></span>
-<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a><span class="va">+                          ForwardIterator first, Size n,</span></span>
-<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a><span class="va">+                          NoThrowForwardIterator result);</span></span></code></pre></div>
+<div class="sourceCode" id="cb36"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>template&lt;class InputIterator, class Size, class NoThrowForwardIterator&gt;</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  constexpr pair&lt;InputIterator, NoThrowForwardIterator&gt;</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>    uninitialized_move_n(InputIterator first, Size n, NoThrowForwardIterator result);</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class ExecutionPolicy, class ForwardIterator, class Size,</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a><span class="va">+          class NoThrowForwardIterator&gt;</span></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a><span class="va">+   pair&lt;ForwardIterator, NoThrowForwardIterator&gt;</span></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a><span class="va">+     uninitialized_move_n(ExecutionPolicy&amp;&amp; exec,</span></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a><span class="va">+                          ForwardIterator first, Size n,</span></span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a><span class="va">+                          NoThrowForwardIterator result);</span></span></code></pre></div>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">6</a></span>
 <em>Preconditions</em>: <code class="sourceCode cpp">result</code> + [0,
@@ -888,16 +909,16 @@ unspecified state.<span> — <em>end note</em> ]</span></span></p>
 <code class="sourceCode cpp">n</code>).</p>
 <p><span class="marginalizedparent"><a class="marginalized">7</a></span>
 <em>Effects</em>: Equivalent to:</p>
-<div class="sourceCode" id="cb36"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; n <span class="op">&gt;</span> <span class="dv">0</span>; <span class="op">++</span>result, <span class="op">(</span><span class="dt">void</span><span class="op">)++</span>first, <span class="op">--</span>n<span class="op">)</span></span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">::</span><span class="kw">new</span> <span class="op">(</span>voidify<span class="op">(*</span>result<span class="op">))</span></span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>      <span class="kw">typename</span> iterator_traits<span class="op">&lt;</span>NoThrowForwardIterator<span class="op">&gt;::</span>value_type<span class="op">(</span><em>deref-move</em><span class="op">(</span>first<span class="op">))</span>;</span>
-<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="op">{</span>first, result<span class="op">}</span>;</span></code></pre></div>
-<div class="sourceCode" id="cb37"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ranges <span class="op">{</span></span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span>input_iterator I, <em>nothrow-forward-iterator</em> O, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>O<span class="op">&gt;</span> S<span class="op">&gt;</span></span>
-<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> constructible_from<span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>O<span class="op">&gt;</span>, iter_rvalue_reference_t<span class="op">&lt;</span>I<span class="op">&gt;&gt;</span></span>
-<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">constexpr</span> uninitialized_move_n_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
-<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>      uninitialized_move_n<span class="op">(</span>I ifirst, iter_difference_t<span class="op">&lt;</span>I<span class="op">&gt;</span> n, O ofirst, S olast<span class="op">)</span>;</span>
-<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb37"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; n <span class="op">&gt;</span> <span class="dv">0</span>; <span class="op">++</span>result, <span class="op">(</span><span class="dt">void</span><span class="op">)++</span>first, <span class="op">--</span>n<span class="op">)</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">::</span><span class="kw">new</span> <span class="op">(</span>voidify<span class="op">(*</span>result<span class="op">))</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>      <span class="kw">typename</span> iterator_traits<span class="op">&lt;</span>NoThrowForwardIterator<span class="op">&gt;::</span>value_type<span class="op">(</span><em>deref-move</em><span class="op">(</span>first<span class="op">))</span>;</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="op">{</span>first, result<span class="op">}</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb38"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ranges <span class="op">{</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span>input_iterator I, <em>nothrow-forward-iterator</em> O, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>O<span class="op">&gt;</span> S<span class="op">&gt;</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> constructible_from<span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>O<span class="op">&gt;</span>, iter_rvalue_reference_t<span class="op">&lt;</span>I<span class="op">&gt;&gt;</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">constexpr</span> uninitialized_move_n_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>      uninitialized_move_n<span class="op">(</span>I ifirst, iter_difference_t<span class="op">&lt;</span>I<span class="op">&gt;</span> n, O ofirst, S olast<span class="op">)</span>;</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <p><span class="marginalizedparent"><a class="marginalized">8</a></span>
 <em>Preconditions</em>: [<code class="sourceCode cpp">ofirst</code>,
 <code class="sourceCode cpp">olast</code>) does not overlap with
@@ -905,17 +926,17 @@ unspecified state.<span> — <em>end note</em> ]</span></span></p>
 <code class="sourceCode cpp">n</code>).</p>
 <p><span class="marginalizedparent"><a class="marginalized">9</a></span>
 <em>Effects</em>: Equivalent to:</p>
-<div class="sourceCode" id="cb38"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>  <span class="kw">auto</span> t <span class="op">=</span> uninitialized_move<span class="op">(</span>counted_iterator<span class="op">(</span>std<span class="op">::</span>move<span class="op">(</span>ifirst<span class="op">)</span>, n<span class="op">)</span>,</span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>                              default_sentinel, ofirst, olast<span class="op">)</span>;</span>
-<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="op">{</span>std<span class="op">::</span>move<span class="op">(</span>t<span class="op">.</span>in<span class="op">).</span>base<span class="op">()</span>, t<span class="op">.</span>out<span class="op">}</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb39"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>  <span class="kw">auto</span> t <span class="op">=</span> uninitialized_move<span class="op">(</span>counted_iterator<span class="op">(</span>std<span class="op">::</span>move<span class="op">(</span>ifirst<span class="op">)</span>, n<span class="op">)</span>,</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>                              default_sentinel, ofirst, olast<span class="op">)</span>;</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="op">{</span>std<span class="op">::</span>move<span class="op">(</span>t<span class="op">.</span>in<span class="op">).</span>base<span class="op">()</span>, t<span class="op">.</span>out<span class="op">}</span>;</span></code></pre></div>
 <div class="add" style="color: #006e28">
 
-<div class="sourceCode" id="cb39"><pre class="sourceCode default default"><code class="sourceCode default"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, random_access_iterator I,</span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>    <em>nothrow-random-access-iterator</em> O, <em>nothrow-sized-sentinel-for</em>&lt;O&gt; S&gt;</span>
-<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>  requires constructible_from&lt;iter_value_t&lt;O&gt;, iter_rvalue_reference_t&lt;I&gt;&gt;</span>
-<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>    uninitialized_move_n_result&lt;I, O&gt;</span>
-<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>      uninitialized_move_n(Ep&amp;&amp; exec, I ifirst, iter_difference_t&lt;I&gt; n,</span>
-<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>                           O ofirst, S olast);</span></code></pre></div>
+<div class="sourceCode" id="cb40"><pre class="sourceCode default default"><code class="sourceCode default"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, random_access_iterator I,</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>    <em>nothrow-random-access-iterator</em> O, <em>nothrow-sized-sentinel-for</em>&lt;O&gt; S&gt;</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  requires constructible_from&lt;iter_value_t&lt;O&gt;, iter_rvalue_reference_t&lt;I&gt;&gt;</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>    uninitialized_move_n_result&lt;I, O&gt;</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>      uninitialized_move_n(Ep&amp;&amp; exec, I ifirst, iter_difference_t&lt;I&gt; n,</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>                           O ofirst, S olast);</span></code></pre></div>
 <p><span class="marginalizedparent"><a class="marginalized">x</a></span>
 <em>Preconditions</em>: [<code class="sourceCode default">ofirst</code>,
 <code class="sourceCode default">olast</code>) does not overlap with
@@ -923,98 +944,98 @@ unspecified state.<span> — <em>end note</em> ]</span></span></p>
 <code class="sourceCode default">n</code>).</p>
 <p><span class="marginalizedparent"><a class="marginalized">x</a></span>
 <em>Effects</em>: Equivalent to:</p>
-<div class="sourceCode" id="cb40"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>  auto t = uninitialized_move(std::forward&lt;Ep&gt;(exec), counted_iterator(std::move(ifirst), n),</span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>                              default_sentinel, ofirst, olast);</span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  return {t.in.base(), t.out};</span></code></pre></div>
+<div class="sourceCode" id="cb41"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>  auto t = uninitialized_move(std::forward&lt;Ep&gt;(exec), counted_iterator(std::move(ifirst), n),</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>                              default_sentinel, ofirst, olast);</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  return {t.in.base(), t.out};</span></code></pre></div>
 
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">10</a></span> <span class="note"><span>[ <em>Note:</em> </span>If an exception is thrown,
 some objects in the range <code class="sourceCode cpp">ifirst</code> +
 [0, <code class="sourceCode cpp">n</code>) are left in a valid but
 unspecified state.<span> — <em>end note</em> ]</span></span></p>
-<h2 data-number="2.5" id="modify-uninitialized.fill"><span class="header-section-number">2.5</span> Modify <span><a href="https://wg21.link/uninitialized.fill">[uninitialized.fill]</a></span><a href="#modify-uninitialized.fill" class="self-link"></a></h2>
+<h2 data-number="2.6" id="modify-uninitialized.fill"><span class="header-section-number">2.6</span> Modify <span><a href="https://wg21.link/uninitialized.fill">[uninitialized.fill]</a></span><a href="#modify-uninitialized.fill" class="self-link"></a></h2>
 <div>
-<div class="sourceCode" id="cb41"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>template&lt;class NoThrowForwardIterator, class T&gt;</span>
-<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  constexpr void uninitialized_fill(NoThrowForwardIterator first,</span>
-<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>                                    NoThrowForwardIterator last, const T&amp; x);</span>
-<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class ExecutionPolicy, class NoThrowForwardIterator, class T&gt;</span></span>
-<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a><span class="va">+   void uninitialized_fill(ExecutionPolicy&amp;&amp; exec,</span></span>
-<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a><span class="va">+                           NoThrowForwardIterator first,</span></span>
-<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a><span class="va">+                           NoThrowForwardIterator last,</span></span>
-<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a><span class="va">+                           const T&amp; x);</span></span></code></pre></div>
+<div class="sourceCode" id="cb42"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>template&lt;class NoThrowForwardIterator, class T&gt;</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  constexpr void uninitialized_fill(NoThrowForwardIterator first,</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>                                    NoThrowForwardIterator last, const T&amp; x);</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class ExecutionPolicy, class NoThrowForwardIterator, class T&gt;</span></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a><span class="va">+   void uninitialized_fill(ExecutionPolicy&amp;&amp; exec,</span></span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a><span class="va">+                           NoThrowForwardIterator first,</span></span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a><span class="va">+                           NoThrowForwardIterator last,</span></span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a><span class="va">+                           const T&amp; x);</span></span></code></pre></div>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
 <em>Effects</em>: Equivalent to:</p>
-<div class="sourceCode" id="cb42"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; first <span class="op">!=</span> last; <span class="op">++</span>first<span class="op">)</span></span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">::</span><span class="kw">new</span> <span class="op">(</span>voidify<span class="op">(*</span>first<span class="op">))</span></span>
-<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>      <span class="kw">typename</span> iterator_traits<span class="op">&lt;</span>NoThrowForwardIterator<span class="op">&gt;::</span>value_type<span class="op">(</span>x<span class="op">)</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb43"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; first <span class="op">!=</span> last; <span class="op">++</span>first<span class="op">)</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">::</span><span class="kw">new</span> <span class="op">(</span>voidify<span class="op">(*</span>first<span class="op">))</span></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>      <span class="kw">typename</span> iterator_traits<span class="op">&lt;</span>NoThrowForwardIterator<span class="op">&gt;::</span>value_type<span class="op">(</span>x<span class="op">)</span>;</span></code></pre></div>
 <div>
-<div class="sourceCode" id="cb43"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>namespace ranges {</span>
-<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>nothrow-forward-iterator</em> I, <em>nothrow-sentinel-for</em>&lt;I&gt; S, class T&gt;</span>
-<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>    requires constructible_from&lt;iter_value_t&lt;I&gt;, const T&amp;&gt;</span>
-<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>    constexpr I uninitialized_fill(I first, S last, const T&amp; x);</span>
-<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>nothrow-forward-range</em> R, class T&gt;</span>
-<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>    requires constructible_from&lt;range_value_t&lt;R&gt;, const T&amp;&gt;</span>
-<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>    constexpr borrowed_iterator_t&lt;R&gt; uninitialized_fill(R&amp;&amp; r, const T&amp; x);</span>
-<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, <em>nothrow-random-access-iterator</em> I, <em>nothrow-sized-sentinel-for</em>&lt;I&gt; S, class T&gt;</span></span>
-<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires constructible_from&lt;iter_value_t&lt;I&gt;, const T&amp;&gt;</span></span>
-<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a><span class="va">+      I uninitialized_fill(Ep&amp;&amp; exec, I first, S last,</span></span>
-<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a><span class="va">+                           const T&amp; x);</span></span>
-<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, <em>nothrow-sized-random-access-range</em> R, class T&gt;</span></span>
-<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires constructible_from&lt;range_value_t&lt;R&gt;, const T&amp;&gt;</span></span>
-<span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a><span class="va">+      borrowed_iterator_t&lt;R&gt; uninitialized_fill(Ep&amp;&amp; exec, R&amp;&amp; r,</span></span>
-<span id="cb43-16"><a href="#cb43-16" aria-hidden="true" tabindex="-1"></a><span class="va">+                                                const T&amp; x);</span></span>
-<span id="cb43-17"><a href="#cb43-17" aria-hidden="true" tabindex="-1"></a><span class="va">+</span></span>
-<span id="cb43-18"><a href="#cb43-18" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb44"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>namespace ranges {</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>nothrow-forward-iterator</em> I, <em>nothrow-sentinel-for</em>&lt;I&gt; S, class T&gt;</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>    requires constructible_from&lt;iter_value_t&lt;I&gt;, const T&amp;&gt;</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>    constexpr I uninitialized_fill(I first, S last, const T&amp; x);</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>nothrow-forward-range</em> R, class T&gt;</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>    requires constructible_from&lt;range_value_t&lt;R&gt;, const T&amp;&gt;</span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>    constexpr borrowed_iterator_t&lt;R&gt; uninitialized_fill(R&amp;&amp; r, const T&amp; x);</span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, <em>nothrow-random-access-iterator</em> I, <em>nothrow-sized-sentinel-for</em>&lt;I&gt; S, class T&gt;</span></span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires constructible_from&lt;iter_value_t&lt;I&gt;, const T&amp;&gt;</span></span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a><span class="va">+      I uninitialized_fill(Ep&amp;&amp; exec, I first, S last,</span></span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a><span class="va">+                           const T&amp; x);</span></span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, <em>nothrow-sized-random-access-range</em> R, class T&gt;</span></span>
+<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires constructible_from&lt;range_value_t&lt;R&gt;, const T&amp;&gt;</span></span>
+<span id="cb44-15"><a href="#cb44-15" aria-hidden="true" tabindex="-1"></a><span class="va">+      borrowed_iterator_t&lt;R&gt; uninitialized_fill(Ep&amp;&amp; exec, R&amp;&amp; r,</span></span>
+<span id="cb44-16"><a href="#cb44-16" aria-hidden="true" tabindex="-1"></a><span class="va">+                                                const T&amp; x);</span></span>
+<span id="cb44-17"><a href="#cb44-17" aria-hidden="true" tabindex="-1"></a><span class="va">+</span></span>
+<span id="cb44-18"><a href="#cb44-18" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">2</a></span>
 <em>Effects</em>: Equivalent to:</p>
-<div class="sourceCode" id="cb44"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; first <span class="op">!=</span> last; <span class="op">++</span>first<span class="op">)</span></span>
-<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">::</span><span class="kw">new</span> <span class="op">(</span>voidify<span class="op">(*</span>first<span class="op">))</span> remove_reference_t<span class="op">&lt;</span>iter_reference_t<span class="op">&lt;</span>I<span class="op">&gt;&gt;(</span>x<span class="op">)</span>;</span>
-<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> first;</span></code></pre></div>
+<div class="sourceCode" id="cb45"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; first <span class="op">!=</span> last; <span class="op">++</span>first<span class="op">)</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">::</span><span class="kw">new</span> <span class="op">(</span>voidify<span class="op">(*</span>first<span class="op">))</span> remove_reference_t<span class="op">&lt;</span>iter_reference_t<span class="op">&lt;</span>I<span class="op">&gt;&gt;(</span>x<span class="op">)</span>;</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> first;</span></code></pre></div>
 <div>
-<div class="sourceCode" id="cb45"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>template&lt;class NoThrowForwardIterator, class Size, class T&gt;</span>
-<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>  constexpr NoThrowForwardIterator</span>
-<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>    uninitialized_fill_n(NoThrowForwardIterator first, Size n, const T&amp; x);</span>
-<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class ExecutionPolicy, class NoThrowForwardIterator, class Size, class T&gt;</span></span>
-<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a><span class="va">+   NoThrowForwardIterator</span></span>
-<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a><span class="va">+     uninitialized_fill_n(ExecutionPolicy&amp;&amp; exec,</span></span>
-<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a><span class="va">+                          NoThrowForwardIterator first,</span></span>
-<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a><span class="va">+                          Size n, const T&amp; x);</span></span></code></pre></div>
+<div class="sourceCode" id="cb46"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>template&lt;class NoThrowForwardIterator, class Size, class T&gt;</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>  constexpr NoThrowForwardIterator</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>    uninitialized_fill_n(NoThrowForwardIterator first, Size n, const T&amp; x);</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class ExecutionPolicy, class NoThrowForwardIterator, class Size, class T&gt;</span></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a><span class="va">+   NoThrowForwardIterator</span></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a><span class="va">+     uninitialized_fill_n(ExecutionPolicy&amp;&amp; exec,</span></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a><span class="va">+                          NoThrowForwardIterator first,</span></span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a><span class="va">+                          Size n, const T&amp; x);</span></span></code></pre></div>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">3</a></span>
 <em>Effects</em>: Equivalent to:</p>
-<div class="sourceCode" id="cb46"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; n<span class="op">--</span>; <span class="op">++</span>first<span class="op">)</span></span>
-<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">::</span><span class="kw">new</span> <span class="op">(</span>voidify<span class="op">(*</span>first<span class="op">))</span></span>
-<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>      <span class="kw">typename</span> iterator_traits<span class="op">&lt;</span>NoThrowForwardIterator<span class="op">&gt;::</span>value_type<span class="op">(</span>x<span class="op">)</span>;</span>
-<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> first;</span></code></pre></div>
-<div class="sourceCode" id="cb47"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ranges <span class="op">{</span></span>
-<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-forward-iterator</em> I, <span class="kw">class</span> T<span class="op">&gt;</span></span>
-<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> constructible_from<span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>I<span class="op">&gt;</span>, <span class="kw">const</span> T<span class="op">&amp;&gt;</span></span>
-<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">constexpr</span> I uninitialized_fill_n<span class="op">(</span>I first, iter_difference_t<span class="op">&lt;</span>I<span class="op">&gt;</span> n, <span class="kw">const</span> T<span class="op">&amp;</span> x<span class="op">)</span>;</span>
-<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb47"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; n<span class="op">--</span>; <span class="op">++</span>first<span class="op">)</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">::</span><span class="kw">new</span> <span class="op">(</span>voidify<span class="op">(*</span>first<span class="op">))</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>      <span class="kw">typename</span> iterator_traits<span class="op">&lt;</span>NoThrowForwardIterator<span class="op">&gt;::</span>value_type<span class="op">(</span>x<span class="op">)</span>;</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> first;</span></code></pre></div>
+<div class="sourceCode" id="cb48"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ranges <span class="op">{</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-forward-iterator</em> I, <span class="kw">class</span> T<span class="op">&gt;</span></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> constructible_from<span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>I<span class="op">&gt;</span>, <span class="kw">const</span> T<span class="op">&amp;&gt;</span></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">constexpr</span> I uninitialized_fill_n<span class="op">(</span>I first, iter_difference_t<span class="op">&lt;</span>I<span class="op">&gt;</span> n, <span class="kw">const</span> T<span class="op">&amp;</span> x<span class="op">)</span>;</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <p><span class="marginalizedparent"><a class="marginalized">4</a></span>
 <em>Effects</em>: Equivalent to:</p>
-<div class="sourceCode" id="cb48"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> uninitialized_fill<span class="op">(</span>counted_iterator<span class="op">(</span>first, n<span class="op">)</span>, default_sentinel, x<span class="op">).</span>base<span class="op">()</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb49"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> uninitialized_fill<span class="op">(</span>counted_iterator<span class="op">(</span>first, n<span class="op">)</span>, default_sentinel, x<span class="op">).</span>base<span class="op">()</span>;</span></code></pre></div>
 <div class="add" style="color: #006e28">
 
-<div class="sourceCode" id="cb49"><pre class="sourceCode default default"><code class="sourceCode default"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, <em>nothrow-random-access-iterator</em> I, class T&gt;</span>
-<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>  requires constructible_from&lt;iter_value_t&lt;I&gt;, const T&amp;&gt;</span>
-<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>    I uninitialized_fill_n(Ep&amp;&amp; exec, I first,</span>
-<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>                           iter_difference_t&lt;I&gt; n, const T&amp; x);</span></code></pre></div>
+<div class="sourceCode" id="cb50"><pre class="sourceCode default default"><code class="sourceCode default"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, <em>nothrow-random-access-iterator</em> I, class T&gt;</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>  requires constructible_from&lt;iter_value_t&lt;I&gt;, const T&amp;&gt;</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>    I uninitialized_fill_n(Ep&amp;&amp; exec, I first,</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>                           iter_difference_t&lt;I&gt; n, const T&amp; x);</span></code></pre></div>
 <p><span class="marginalizedparent"><a class="marginalized">x</a></span>
 <em>Effects</em>: Equivalent to:</p>
-<div class="sourceCode" id="cb50"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>  return uninitialized_fill(std::forward&lt;Ep&gt;(exec), counted_iterator(first, n), default_sentinel, x).base();</span></code></pre></div>
+<div class="sourceCode" id="cb51"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>  return uninitialized_fill(std::forward&lt;Ep&gt;(exec), counted_iterator(first, n), default_sentinel, x).base();</span></code></pre></div>
 
 </div>
-<h2 data-number="2.6" id="modify-specialized.destroy"><span class="header-section-number">2.6</span> Modify <span><a href="https://wg21.link/specialized.destroy">[specialized.destroy]</a></span><a href="#modify-specialized.destroy" class="self-link"></a></h2>
-<div class="sourceCode" id="cb51"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span></span>
-<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> <span class="dt">void</span> destroy_at<span class="op">(</span>T<span class="op">*</span> location<span class="op">)</span>;</span>
-<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ranges <span class="op">{</span></span>
-<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span>destructible T<span class="op">&gt;</span></span>
-<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">constexpr</span> <span class="dt">void</span> destroy_at<span class="op">(</span>T<span class="op">*</span> location<span class="op">)</span> <span class="kw">noexcept</span>;</span>
-<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 data-number="2.7" id="modify-specialized.destroy"><span class="header-section-number">2.7</span> Modify <span><a href="https://wg21.link/specialized.destroy">[specialized.destroy]</a></span><a href="#modify-specialized.destroy" class="self-link"></a></h2>
+<div class="sourceCode" id="cb52"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> <span class="dt">void</span> destroy_at<span class="op">(</span>T<span class="op">*</span> location<span class="op">)</span>;</span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ranges <span class="op">{</span></span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span>destructible T<span class="op">&gt;</span></span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">constexpr</span> <span class="dt">void</span> destroy_at<span class="op">(</span>T<span class="op">*</span> location<span class="op">)</span> <span class="kw">noexcept</span>;</span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
 <em>Effects</em>:</p>
 <ul>
@@ -1025,69 +1046,69 @@ unspecified state.<span> — <em>end note</em> ]</span></span></p>
 Otherwise, equivalent to <code class="sourceCode cpp">location<span class="op">-&gt;~</span>T<span class="op">()</span></code>.</li>
 </ul>
 <div>
-<div class="sourceCode" id="cb52"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>template&lt;class NoThrowForwardIterator&gt;</span>
-<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>  constexpr void destroy(NoThrowForwardIterator first, NoThrowForwardIterator last);</span>
-<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class ExecutionPolicy, class NoThrowForwardIterator&gt;</span></span>
-<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a><span class="va">+     void destroy(ExecutionPolicy&amp;&amp; exec,</span></span>
-<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a><span class="va">+                  NoThrowForwardIterator first,</span></span>
-<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a><span class="va">+                  NoThrowForwardIterator last);</span></span></code></pre></div>
+<div class="sourceCode" id="cb53"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>template&lt;class NoThrowForwardIterator&gt;</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>  constexpr void destroy(NoThrowForwardIterator first, NoThrowForwardIterator last);</span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class ExecutionPolicy, class NoThrowForwardIterator&gt;</span></span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a><span class="va">+     void destroy(ExecutionPolicy&amp;&amp; exec,</span></span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a><span class="va">+                  NoThrowForwardIterator first,</span></span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a><span class="va">+                  NoThrowForwardIterator last);</span></span></code></pre></div>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">2</a></span>
 <em>Effects</em>: Equivalent to:</p>
-<div class="sourceCode" id="cb53"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; first <span class="op">!=</span> last; <span class="op">++</span>first<span class="op">)</span></span>
-<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>    destroy_at<span class="op">(</span>addressof<span class="op">(*</span>first<span class="op">))</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb54"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; first <span class="op">!=</span> last; <span class="op">++</span>first<span class="op">)</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>    destroy_at<span class="op">(</span>addressof<span class="op">(*</span>first<span class="op">))</span>;</span></code></pre></div>
 <div>
-<div class="sourceCode" id="cb54"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>namespace ranges {</span>
-<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>nothrow-input-iterator</em> I, <em>nothrow-sentinel-for</em>&lt;I&gt; S&gt;</span>
-<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>    requires destructible&lt;iter_value_t&lt;I&gt;&gt;</span>
-<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>    constexpr I destroy(I first, S last) noexcept;</span>
-<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>nothrow-input-range</em> R&gt;</span>
-<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>    requires destructible&lt;range_value_t&lt;R&gt;&gt;</span>
-<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a>    constexpr borrowed_iterator_t&lt;R&gt; destroy(R&amp;&amp; r) noexcept;</span>
-<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, <em>nothrow-random-access-iterator</em> I,</span></span>
-<span id="cb54-10"><a href="#cb54-10" aria-hidden="true" tabindex="-1"></a><span class="va">+           <em>nothrow-sized-sentinel-for</em>&lt;I&gt; S&gt;</span></span>
-<span id="cb54-11"><a href="#cb54-11" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires destructible&lt;iter_value_t&lt;I&gt;&gt;</span></span>
-<span id="cb54-12"><a href="#cb54-12" aria-hidden="true" tabindex="-1"></a><span class="va">+      I destroy(Ep&amp;&amp; exec, I first, S last) noexcept;</span></span>
-<span id="cb54-13"><a href="#cb54-13" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, <em>nothrow-sized-random-access-range</em> R&gt;</span></span>
-<span id="cb54-14"><a href="#cb54-14" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires destructible&lt;range_value_t&lt;R&gt;&gt;</span></span>
-<span id="cb54-15"><a href="#cb54-15" aria-hidden="true" tabindex="-1"></a><span class="va">+      borrowed_iterator_t&lt;R&gt; destroy(Ep&amp;&amp; exec, R&amp;&amp; r) noexcept;</span></span>
-<span id="cb54-16"><a href="#cb54-16" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb55"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>namespace ranges {</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>nothrow-input-iterator</em> I, <em>nothrow-sentinel-for</em>&lt;I&gt; S&gt;</span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>    requires destructible&lt;iter_value_t&lt;I&gt;&gt;</span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>    constexpr I destroy(I first, S last) noexcept;</span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a>  template&lt;<em>nothrow-input-range</em> R&gt;</span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a>    requires destructible&lt;range_value_t&lt;R&gt;&gt;</span>
+<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a>    constexpr borrowed_iterator_t&lt;R&gt; destroy(R&amp;&amp; r) noexcept;</span>
+<span id="cb55-8"><a href="#cb55-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-9"><a href="#cb55-9" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, <em>nothrow-random-access-iterator</em> I,</span></span>
+<span id="cb55-10"><a href="#cb55-10" aria-hidden="true" tabindex="-1"></a><span class="va">+           <em>nothrow-sized-sentinel-for</em>&lt;I&gt; S&gt;</span></span>
+<span id="cb55-11"><a href="#cb55-11" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires destructible&lt;iter_value_t&lt;I&gt;&gt;</span></span>
+<span id="cb55-12"><a href="#cb55-12" aria-hidden="true" tabindex="-1"></a><span class="va">+      I destroy(Ep&amp;&amp; exec, I first, S last) noexcept;</span></span>
+<span id="cb55-13"><a href="#cb55-13" aria-hidden="true" tabindex="-1"></a><span class="va">+  template&lt;<em>execution-policy</em> Ep, <em>nothrow-sized-random-access-range</em> R&gt;</span></span>
+<span id="cb55-14"><a href="#cb55-14" aria-hidden="true" tabindex="-1"></a><span class="va">+    requires destructible&lt;range_value_t&lt;R&gt;&gt;</span></span>
+<span id="cb55-15"><a href="#cb55-15" aria-hidden="true" tabindex="-1"></a><span class="va">+      borrowed_iterator_t&lt;R&gt; destroy(Ep&amp;&amp; exec, R&amp;&amp; r) noexcept;</span></span>
+<span id="cb55-16"><a href="#cb55-16" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">3</a></span>
 <em>Effects</em>: Equivalent to:</p>
-<div class="sourceCode" id="cb55"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; first <span class="op">!=</span> last; <span class="op">++</span>first<span class="op">)</span></span>
-<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>    destroy_at<span class="op">(</span>addressof<span class="op">(*</span>first<span class="op">))</span>;</span>
-<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> first;</span></code></pre></div>
+<div class="sourceCode" id="cb56"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; first <span class="op">!=</span> last; <span class="op">++</span>first<span class="op">)</span></span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>    destroy_at<span class="op">(</span>addressof<span class="op">(*</span>first<span class="op">))</span>;</span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> first;</span></code></pre></div>
 <div>
-<div class="sourceCode" id="cb56"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>template&lt;class NoThrowForwardIterator, class Size&gt;</span>
-<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>  constexpr NoThrowForwardIterator destroy_n(NoThrowForwardIterator first, Size n);</span>
-<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class ExecutionPolicy, class NoThrowForwardIterator, class Size&gt;</span></span>
-<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a><span class="va">+   NoThrowForwardIterator destroy_n(ExecutionPolicy&amp;&amp; exec,</span></span>
-<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a><span class="va">+                                    NoThrowForwardIterator first, Size n);</span></span></code></pre></div>
+<div class="sourceCode" id="cb57"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>template&lt;class NoThrowForwardIterator, class Size&gt;</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>  constexpr NoThrowForwardIterator destroy_n(NoThrowForwardIterator first, Size n);</span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class ExecutionPolicy, class NoThrowForwardIterator, class Size&gt;</span></span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a><span class="va">+   NoThrowForwardIterator destroy_n(ExecutionPolicy&amp;&amp; exec,</span></span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a><span class="va">+                                    NoThrowForwardIterator first, Size n);</span></span></code></pre></div>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">4</a></span>
 <em>Effects</em>: Equivalent to:</p>
-<div class="sourceCode" id="cb57"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; n <span class="op">&gt;</span> <span class="dv">0</span>; <span class="op">(</span><span class="dt">void</span><span class="op">)++</span>first, <span class="op">--</span>n<span class="op">)</span></span>
-<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>    destroy_at<span class="op">(</span>addressof<span class="op">(*</span>first<span class="op">))</span>;</span>
-<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> first;</span></code></pre></div>
-<div class="sourceCode" id="cb58"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ranges <span class="op">{</span></span>
-<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-input-iterator</em> I<span class="op">&gt;</span></span>
-<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> destructible<span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>I<span class="op">&gt;&gt;</span></span>
-<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">constexpr</span> I destroy_n<span class="op">(</span>I first, iter_difference_t<span class="op">&lt;</span>I<span class="op">&gt;</span> n<span class="op">)</span> <span class="kw">noexcept</span>;</span>
-<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb58"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; n <span class="op">&gt;</span> <span class="dv">0</span>; <span class="op">(</span><span class="dt">void</span><span class="op">)++</span>first, <span class="op">--</span>n<span class="op">)</span></span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>    destroy_at<span class="op">(</span>addressof<span class="op">(*</span>first<span class="op">))</span>;</span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> first;</span></code></pre></div>
+<div class="sourceCode" id="cb59"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ranges <span class="op">{</span></span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-input-iterator</em> I<span class="op">&gt;</span></span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> destructible<span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>I<span class="op">&gt;&gt;</span></span>
+<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">constexpr</span> I destroy_n<span class="op">(</span>I first, iter_difference_t<span class="op">&lt;</span>I<span class="op">&gt;</span> n<span class="op">)</span> <span class="kw">noexcept</span>;</span>
+<span id="cb59-5"><a href="#cb59-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <p><span class="marginalizedparent"><a class="marginalized">5</a></span>
 <em>Effects</em>: Equivalent to:</p>
-<div class="sourceCode" id="cb59"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> destroy<span class="op">(</span>counted_iterator<span class="op">(</span>std<span class="op">::</span>move<span class="op">(</span>first<span class="op">)</span>, n<span class="op">)</span>, default_sentinel<span class="op">).</span>base<span class="op">()</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb60"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> destroy<span class="op">(</span>counted_iterator<span class="op">(</span>std<span class="op">::</span>move<span class="op">(</span>first<span class="op">)</span>, n<span class="op">)</span>, default_sentinel<span class="op">).</span>base<span class="op">()</span>;</span></code></pre></div>
 <div class="add" style="color: #006e28">
 
-<div class="sourceCode" id="cb60"><pre class="sourceCode default default"><code class="sourceCode default"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, <em>nothrow-random-access-iterator</em> I&gt;</span>
-<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>  requires destructible&lt;iter_value_t&lt;I&gt;&gt;</span>
-<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>    I destroy_n(Ep&amp;&amp; exec, I first,</span>
-<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>                iter_difference_t&lt;I&gt; n) noexcept;</span></code></pre></div>
+<div class="sourceCode" id="cb61"><pre class="sourceCode default default"><code class="sourceCode default"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>template&lt;<em>execution-policy</em> Ep, <em>nothrow-random-access-iterator</em> I&gt;</span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>  requires destructible&lt;iter_value_t&lt;I&gt;&gt;</span>
+<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a>    I destroy_n(Ep&amp;&amp; exec, I first,</span>
+<span id="cb61-4"><a href="#cb61-4" aria-hidden="true" tabindex="-1"></a>                iter_difference_t&lt;I&gt; n) noexcept;</span></code></pre></div>
 <p><span class="marginalizedparent"><a class="marginalized">6</a></span>
 <em>Effects</em>: Equivalent to:</p>
-<div class="sourceCode" id="cb61"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>  return destroy(std::forward&lt;Ep&gt;(exec), counted_iterator(std::move(first), n), default_sentinel).base();</span></code></pre></div>
+<div class="sourceCode" id="cb62"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>  return destroy(std::forward&lt;Ep&gt;(exec), counted_iterator(std::move(first), n), default_sentinel).base();</span></code></pre></div>
 
 </div>
 <h1 data-number="3" id="bibliography"><span class="header-section-number">3</span> References<a href="#bibliography" class="self-link"></a></h1>
