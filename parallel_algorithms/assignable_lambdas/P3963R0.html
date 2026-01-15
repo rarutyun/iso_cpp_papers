@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2026-01-13" />
-  <title>Making lambdas with capture assignable</title>
+  <meta name="dcterms.date" content="2026-01-14" />
+  <title>Assignable lambdas with capture</title>
   <style>
       code{white-space: pre-wrap;}
       span.smallcaps{font-variant: small-caps;}
@@ -423,20 +423,20 @@ code.sourceCode > span { display: inline; }
 <body>
 <div class="wrapper">
 <header id="title-block-header">
-<h1 class="title" style="text-align:center">Making lambdas with capture
-assignable</h1>
+<h1 class="title" style="text-align:center">Assignable lambdas with
+capture</h1>
 <table style="border:none;float:right">
   <tr>
     <td>Document #:</td>
     <td>
-      P0000R0
-      [<a href="https://wg21.link/P0000">Latest</a>]
-      [<a href="https://wg21.link/P0000/status">Status</a>]
+      P3963R0
+      [<a href="https://wg21.link/P3963">Latest</a>]
+      [<a href="https://wg21.link/P3963/status">Status</a>]
     </td>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2026-01-13</td>
+    <td>2026-01-14</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -475,6 +475,8 @@ semantics<span></span></a></li>
 types<span></span></a></li>
 <li><a href="#backward-compatibility" id="toc-backward-compatibility"><span class="toc-section-number">3.3</span> Backward
 compatibility<span></span></a></li>
+<li><a href="#other-parallel-algorithms-vendors" id="toc-other-parallel-algorithms-vendors"><span class="toc-section-number">3.4</span> Other parallel algorithms
+vendors<span></span></a></li>
 </ul></li>
 <li><a href="#implementation-experience" id="toc-implementation-experience"><span class="toc-section-number">4</span> Implementation
 experience<span></span></a></li>
@@ -559,7 +561,7 @@ does not belong to the C++ standard; however, the implementations are
 allowed to have implementation-defined execution policies, so the code
 above could be standard conformant.</p>
 <h1 data-number="2" id="proposal"><span class="header-section-number">2</span> Proposal<a href="#proposal" class="self-link"></a></h1>
-<p>We propose that the assignment operators of a lambda closure type
+<p>I propose that the assignment operators of a lambda closure type
 should follow the same rules as the hand-written callable objects: they
 should behave as if they are not explicitly written (compiler-generated)
 and then choose the proper behavior based on closure type layout.</p>
@@ -613,7 +615,7 @@ It is a valid question and we even could potentially say something along
 those lines: “<em>if all the captured members are default constructible
 then the lambda is default constructible or it has a deleted default
 constructor otherwise</em>”. However, it would require more exploration
-and we don’t see the immediate use-case for that.</p>
+and I don’t see the immediate use-case for that.</p>
 <h2 data-number="3.2" id="move-only-types"><span class="header-section-number">3.2</span> Move-only types<a href="#move-only-types" class="self-link"></a></h2>
 <p>It could be that move-only types are captured in a lambda. It is also
 hard to imagine how it would be possible to create a copy of such an
@@ -623,7 +625,7 @@ unlikely:</p>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> f2 <span class="op">=</span> std<span class="op">::</span>move<span class="op">(</span>f1<span class="op">)</span>;</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>f1 <span class="op">=</span> std<span class="op">::</span>move<span class="op">(</span>f2<span class="op">)</span>;</span></code></pre></div>
 <p>Nevertheless, if one adds <code class="sourceCode cpp"><span class="kw">static_assert</span><span class="op">(</span>std<span class="op">::</span>is_move_assignable_v<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span>f1<span class="op">)&gt;)</span>;</code>
-it would pass with this proposal. We do not see any particular problems
+it would pass with this proposal. I do not see any particular problems
 with that; it’s just worth noting.</p>
 <h2 data-number="3.3" id="backward-compatibility"><span class="header-section-number">3.3</span> Backward compatibility<a href="#backward-compatibility" class="self-link"></a></h2>
 <p>This is a pure language extension. Code that previously failed to
@@ -636,12 +638,20 @@ does not sound realistic because it would work with regular callables
 with some non-static data members compared to lambdas with captures.
 Furthermore, such an example did not prevent us from adopting <span class="citation" data-cites="P0624R2"><a href="https://wg21.link/p0624r2" role="doc-biblioref">[P0624R2]</a></span>, thus making captureless
 lambdas assignable in C++20.</p>
+<h2 data-number="3.4" id="other-parallel-algorithms-vendors"><span class="header-section-number">3.4</span> Other parallel algorithms
+vendors<a href="#other-parallel-algorithms-vendors" class="self-link"></a></h2>
+<p>I talked to NVIDIA representatives as a parallel algorithms vendor.
+They also consider the problem in the <a href="#motivation">Motivation</a> section important and believe that we
+need to solve it. They don’t have objection to this proposal.</p>
+<p>It’s worth mentioning that there is <span class="citation" data-cites="P3960R0"><a href="https://isocpp.org/files/papers/P3960R0.html" role="doc-biblioref">[P3960R0]</a></span> proposal that is authored by
+both Intel and NVIDIA. It approaches the similar problem but covers
+broader scope, thus it is complementary to this proposal. It’s still
+worth adding lambdas assignability to not pessimize the cases like with
+<code class="sourceCode cpp">ranges<span class="op">::</span>transform_view</code>
+and make them more consistent with other class types.</p>
 <h1 data-number="4" id="implementation-experience"><span class="header-section-number">4</span> Implementation experience<a href="#implementation-experience" class="self-link"></a></h1>
 <p>The implementation is not done yet but is not expected to cause
-problems according to the compiler implementors we talked with.</p>
-<p>Also, we talked to NVIDIA representatives as a parallel algorithms
-vendor. They also consider the problem in the <a href="#motivation">Motivation</a> section important and believe that we
-need to solve it. They are on board with this proposal.</p>
+problems according to the compiler implementors I talked with.</p>
 <h1 data-number="5" id="proposed-wording"><span class="header-section-number">5</span> Proposed Wording<a href="#proposed-wording" class="self-link"></a></h1>
 <h2 data-number="5.1" id="modify-expr.prim.lambda.closure"><span class="header-section-number">5.1</span> Modify <span><a href="https://wg21.link/expr.prim.lambda.closure">[expr.prim.lambda.closure]</a></span><a href="#modify-expr.prim.lambda.closure" class="self-link"></a></h2>
 <p><span class="marginalizedparent"><a class="marginalized">17</a></span> The
@@ -666,6 +676,10 @@ stateless lambdas. <a href="https://wg21.link/p0624r2"><div class="csl-block">ht
 <div id="ref-P3179R9" class="csl-entry" role="doc-biblioentry">
 [P3179R9] Ruslan Arutyunyan, Alexey Kukanov, Bryce Adelstein Lelbach.
 2025-05-29. C++ parallel range algorithms. <a href="https://wg21.link/p3179r9"><div class="csl-block">https://wg21.link/p3179r9</div></a>
+</div>
+<div id="ref-P3960R0" class="csl-entry" role="doc-biblioentry">
+[P3960R0] Mark Hoemmen and Ruslan Arutyunyan. Fix or Remove Sender
+Algorithm Customization. <a href="https://isocpp.org/files/papers/P3960R0.html"><div class="csl-block">https://isocpp.org/files/papers/P3960R0.html</div></a>
 </div>
 </div>
 </div>
