@@ -13,7 +13,7 @@ The proposal was then approved by the C++ committee to be added to the C++ stand
 
 ### Revisions
 
-- R9: https://isocpp.org/files/papers/P3179R9.html
+- R9: https://wg21.link/p3179r9
 - R8: https://wg21.link/p3179r8
 - R7: https://wg21.link/p3179r7
 - R6: https://wg21.link/p3179r6
@@ -45,8 +45,8 @@ The proposal was approved by the C++ committee to be added (on top of P3179) to 
 
 [Source code](P3709/P3709.md) (for mpark/wg21)
 
-- R2: https://isocpp.org/files/papers/P3709R2.html
-- R1: https://isocpp.org/files/papers/P3709R1.html
+- R2: https://wg21.link/p3709r2
+- R1: https://wg21.link/p3709r1
 - R0: https://wg21.link/p3709r0
 
 ## P3732
@@ -56,5 +56,5 @@ The paper proposes `std::ranges` algorithm overloads (both parallel and non-para
 
 [Source code](P3732/numeric_ranges_algorithms.md) (for mpark/wg21)
 
-- R1: https://isocpp.org/files/papers/P3732R1.html
+- R1: https://wg21.link/p3732r1
 - R0: https://wg21.link/p3732r0
