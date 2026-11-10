@@ -108,7 +108,7 @@ proposal, such an implementation would need to do the same when `<exec_policy>` 
 the new header would include the parallel algorithm implementation details, but not the `std::execution` senders/receivers
 framework.
 
-## What about the `execution-policy` exposition-only concept? {#concept}
+## What about the _`execution-policy`_ exposition-only concept? {#concept}
 
 [@P3179R9] introduced the exposition-only `@_execution-policy_@` concept ([algorithms.parallel.defns]{- .sref}) that is
 used to constrain parallel range algorithms. It is exposition-only, so it does not need to be declared in any header. It is
@@ -127,11 +127,9 @@ library additions, we propose a new feature-test macro `__cpp_lib_execution_poli
 
 # Wording {#wording}
 
-[The wording is relative to the C++ working draft.]{.ednote}
-
 ## Modify [headers]{- .sref}
 
-Add `<exec_policy>` to the table "C++ library headers" (in alphabetical order, after `<execution>`).
+Add `<exec_policy>` to the table "C++ library headers" (in alphabetical order).
 
 ## Modify [algorithms.general]{- .sref}
 

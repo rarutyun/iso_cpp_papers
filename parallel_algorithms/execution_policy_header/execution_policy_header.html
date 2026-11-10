@@ -1620,7 +1620,7 @@ provide execution policies instead?</a></li>
 implementing parallel algorithms in
 <code class="sourceCode cpp"><span class="op">&lt;</span>execution<span class="op">&gt;</span></code></a></li>
 <li><a href="#concept" id="toc-concept"><span class="toc-section-number">3.4</span> What about the
-<code class="sourceCode cpp">execution<span class="op">-</span>policy</code>
+<em><code class="sourceCode cpp">execution<span class="op">-</span>policy</code></em>
 exposition-only concept?</a></li>
 <li><a href="#impl_defined_policies" id="toc-impl_defined_policies"><span class="toc-section-number">3.5</span> Implementation-defined execution
 policies</a></li>
@@ -1794,7 +1794,7 @@ parallel algorithm implementation details, but not the
 <code class="sourceCode cpp">std<span class="op">::</span>execution</code>
 senders/receivers framework.</p>
 <h2 data-number="3.4" id="concept"><span class="header-section-number">3.4</span> What about the
-<code class="sourceCode cpp">execution<span class="op">-</span>policy</code>
+<em><code class="sourceCode cpp">execution<span class="op">-</span>policy</code></em>
 exposition-only concept?<a href="#concept" class="self-link"></a></h2>
 <p><span class="citation" data-cites="P3179R9"><a href="https://wg21.link/p3179r9">[P3179R9]</a></span> introduced the
 exposition-only
@@ -1823,13 +1823,10 @@ defined in
 and
 <code class="sourceCode cpp"><span class="op">&lt;</span>execution<span class="op">&gt;</span></code>.</p>
 <h1 data-number="4" id="wording"><span class="header-section-number">4</span> Wording<a href="#wording" class="self-link"></a></h1>
-<p><span class="ednote">[ Editor&#39;s note: The wording is relative to the
-C++ working draft. ]</span></p>
 <h2 data-number="4.1" id="modify-headers"><span class="header-section-number">4.1</span> Modify <span>Headers <a href="https://eel.is/c++draft/headers" title="16.4.2.3 Headers">[headers]</a></span><a href="#modify-headers" class="self-link"></a></h2>
 <p>Add
 <code class="sourceCode cpp"><span class="op">&lt;</span>exec_policy<span class="op">&gt;</span></code>
-to the table “C++ library headers” (in alphabetical order, after
-<code class="sourceCode cpp"><span class="op">&lt;</span>execution<span class="op">&gt;</span></code>).</p>
+to the table “C++ library headers” (in alphabetical order).</p>
 <h2 data-number="4.2" id="modify-algorithms.general"><span class="header-section-number">4.2</span> Modify <span>General <a href="https://eel.is/c++draft/algorithms.general" title="26.1 General">[algorithms.general]</a></span><a href="#modify-algorithms.general" class="self-link"></a></h2>
 <p>In the table “Algorithms library summary”, change the header for
 <span>Parallel algorithms <a href="https://eel.is/c++draft/algorithms.parallel" title="26.3 Parallel algorithms">[algorithms.parallel]</a></span>:</p>
