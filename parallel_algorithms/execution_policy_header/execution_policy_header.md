@@ -1,8 +1,8 @@
 ---
 title: "A dedicated header for execution policies"
-document: P0000R0
+document: P4470R0
 date: today
-audience: LEWG
+audience: LEWG, LWG
 author:
   - name: Ruslan Arutyunyan (Intel)
     email: <ruslan.arutyunyan@intel.com>
