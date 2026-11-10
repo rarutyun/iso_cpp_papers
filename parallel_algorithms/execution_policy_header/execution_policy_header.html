@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2026-11-08" />
+  <meta name="dcterms.date" content="2026-11-09" />
   <title>A dedicated header for execution policies</title>
   <style>
 
@@ -1578,7 +1578,7 @@ execution policies</h1>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2026-11-08</td>
+    <td>2026-11-09</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -1650,8 +1650,9 @@ and the <code class="sourceCode cpp">is_execution_policy</code> type
 trait.</p>
 <h1 data-number="1" id="motivation"><span class="header-section-number">1</span> Motivation<a href="#motivation" class="self-link"></a></h1>
 <p>Execution policies were introduced in C++17 together with parallel
-algorithms (<span class="citation" data-cites="N4659"><a href="https://wg21.link/n4659">[N4659]</a></span>, <a href="https://eel.is/c++draft/execpol" title="26.3.6 Execution policies">[execpol]</a>). To use a parallel
-algorithm, a user has to include
+algorithms (<span class="citation" data-cites="N4659"><a href="https://wg21.link/n4659">[N4659]</a></span>, <span>Execution
+policies <a href="https://eel.is/c++draft/execpol" title="26.3.6 Execution policies">[execpol]</a></span>). To use a
+parallel algorithm, a user has to include
 <code class="sourceCode cpp"><span class="op">&lt;</span>execution<span class="op">&gt;</span></code>,
 because it is the only header that declares
 <code class="sourceCode cpp">std<span class="op">::</span>execution<span class="op">::</span>seq</code>,
@@ -1669,20 +1670,14 @@ and
 <p>When execution policies were added,
 <code class="sourceCode cpp"><span class="op">&lt;</span>execution<span class="op">&gt;</span></code>
 contained nothing else, so the cost of including it was small.</p>
-<p>framework, which could impact the complication time of the programs
-who only want to use parallel algorithms. The motivation of this
-proposal is to give the users the ability to access execution policies
-without the necessity to include the whole
-<code class="sourceCode cpp">std<span class="op">::</span>execution</code>.</p>
-<p>However, with C++26 the
-<code class="sourceCode cpp"><span class="op">&lt;</span>execution<span class="op">&gt;</span></code>
-header also has the whole Senders/Receivers (or
+<p>However, with C++26 the whole Senders/Receivers (or
 <code class="sourceCode cpp">std<span class="op">::</span>execution</code>,
 <span class="citation" data-cites="P2300R10"><a href="https://wg21.link/p2300r10">[P2300R10]</a></span>) and the
 follow-up papers
 (<code class="sourceCode cpp">parallel_scheduler</code>,
 <code class="sourceCode cpp">task</code>,
-<code class="sourceCode cpp">async_scope</code>, etc.) into the same
+<code class="sourceCode cpp">async_scope</code>, etc.) landed into the
+same
 <code class="sourceCode cpp"><span class="op">&lt;</span>execution<span class="op">&gt;</span></code>
 header. The header now contains a lot of heavy template machinery:
 concepts, customization point objects, sender adaptors, completion
@@ -1692,6 +1687,10 @@ None of this is needed to call
 <p>The result is that every translation unit that uses a parallel
 algorithm pays the compile-time cost of all of
 <code class="sourceCode cpp">std<span class="op">::</span>execution</code>.</p>
+<p>The motivation of this proposal is to give the users the ability to
+access execution policies without the necessity to include the whole
+<code class="sourceCode cpp">std<span class="op">::</span>execution</code>
+if the only thing that they need is to use parallel algorithms.</p>
 <h1 data-number="2" id="proposal"><span class="header-section-number">2</span> Proposal<a href="#proposal" class="self-link"></a></h1>
 <ul>
 <li>Add a new header
@@ -1718,9 +1717,9 @@ and
 <code class="sourceCode cpp">std<span class="op">::</span>execution<span class="op">::</span>unseq</code>
 (<span>Execution policy objects <a href="https://eel.is/c++draft/execpol.objects" title="26.3.6.7 Execution policy objects">[execpol.objects]</a></span>).</li>
 </ul></li>
-<li>Keep
+<li>Keep the
 <code class="sourceCode cpp"><span class="op">&lt;</span>execution<span class="op">&gt;</span></code>
-header providing all the listed above names.</li>
+header providing all the names listed above.</li>
 <li>Add a feature-test macro.</li>
 </ul>
 <p>With this proposal, the example from <a href="#motivation">Motivation</a> becomes:</p>
@@ -1752,34 +1751,35 @@ plural, as the header provides several policies (compare with
 matches the stable name of the corresponding subclause. Too cryptic for
 users.</li>
 </ul>
-<p>We can always debate on the name in LEWG, although this is not a
-group preference.</p>
+<p>We can always debate the name in LEWG, although this is not what the
+group prefers to spend time on.</p>
 <h2 data-number="3.2" id="include_from_algorithms"><span class="header-section-number">3.2</span> Should
 <code class="sourceCode cpp"><span class="op">&lt;</span>algorithm<span class="op">&gt;</span></code>
 provide execution policies instead?<a href="#include_from_algorithms" class="self-link"></a></h2>
-<p>An alternative approach would be to require
+<p>An alternative approach would be to require the
 <code class="sourceCode cpp"><span class="op">&lt;</span>algorithm<span class="op">&gt;</span></code>
-headers to make execution policies available, so that no extra include
-is needed at all.</p>
+header to make execution policies available, so that no extra include is
+needed at all.</p>
 <p>However, in my opinion, this option is not that viable. We also have
 <code class="sourceCode cpp"><span class="op">&lt;</span>numeric<span class="op">&gt;</span></code>
 and
 <code class="sourceCode cpp"><span class="op">&lt;</span>memory<span class="op">&gt;</span></code>
 headers with parallel algorithms, which would require us to provide
 execution policies when any of those headers is included. While,
-technically, we could do that this is still not a good idea because of
-the following reason.</p>
+technically, we could do that, it is still not a good idea, for the
+following reason.</p>
 <p>If users only need serial algorithms (meaning that only the
 <code class="sourceCode cpp"><span class="op">&lt;</span>algorithm<span class="op">&gt;</span></code>
 header is included and not
-<code class="sourceCode cpp"><span class="op">&lt;</span>execution<span class="op">&gt;</span></code>)
+<code class="sourceCode cpp"><span class="op">&lt;</span>execution<span class="op">&gt;</span></code>),
 some implementations (for example libstdc++) do not make parallel
-algorithms overloads available at all meaning that the compilation time
-is reduced. With the approach of
+algorithm overloads available at all, meaning that the compilation time
+is reduced. If
 <code class="sourceCode cpp"><span class="op">&lt;</span>algorithm<span class="op">&gt;</span></code>
-(and other) header providing execution policies the implementation would
-have to include both parallel and non-parallel algorithms, which would
-make compilation time for existing users of serial algorithms worse.</p>
+(and the other headers) provided execution policies, the implementation
+would have to include both parallel and non-parallel algorithms, which
+would make compilation time for existing users of serial algorithms
+worse.</p>
 <h2 data-number="3.3" id="impl_details"><span class="header-section-number">3.3</span> Interaction with libraries
 implementing parallel algorithms in
 <code class="sourceCode cpp"><span class="op">&lt;</span>execution<span class="op">&gt;</span></code><a href="#impl_details" class="self-link"></a></h2>
@@ -1917,16 +1917,10 @@ to the table “C++ library headers” (in alphabetical order, after
 <span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>   template&lt;class T&gt;</span>
 <span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>     concept queryable = destructible&lt;T&gt;;</span>
 <span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>   ...</span></code></pre></div>
-<p><span class="ednote">[ Editor&#39;s note: Double check the exact content
-of <a href="https://eel.is/c++draft/execution.syn" title="33.4 Header &lt;execution&gt; synopsis">[execution.syn]</a>
-against the latest working draft before publishing. ]</span></p>
 <h2 data-number="4.5" id="modify-version.syn"><span class="header-section-number">4.5</span> Modify <span>Header
 &lt;version&gt; synopsis <a href="https://eel.is/c++draft/version.syn" title="17.3.2 Header &lt;version&gt; synopsis">[version.syn]</a></span><a href="#modify-version.syn" class="self-link"></a></h2>
 <div class="sourceCode" id="cb5"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a> #define __cpp_lib_execution                         <em>see below</em> // also in &lt;execution&gt;</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="va">+#define __cpp_lib_execution_policy_header           20XXXXL // also in &lt;execution&gt;, &lt;exec_policy&gt;</span></span></code></pre></div>
-<p><span class="ednote">[ Editor&#39;s note: Replace
-<code class="sourceCode default cpp">20XXXXL</code> with the date of the
-adoption. ]</span></p>
 <h1 data-number="5" id="bibliography"><span class="header-section-number">5</span> References<a href="#bibliography" class="self-link"></a></h1>
 <div id="refs" class="references csl-bib-body" data-entry-spacing="0" role="list">
 <div id="ref-N4659" class="csl-entry" role="listitem">

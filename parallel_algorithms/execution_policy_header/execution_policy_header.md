@@ -17,7 +17,7 @@ the execution policy types, the execution policy objects, and the `is_execution_
 
 # Motivation {#motivation}
 
-Execution policies were introduced in C++17 together with parallel algorithms ([@N4659], [execpol]). To use a
+Execution policies were introduced in C++17 together with parallel algorithms ([@N4659], [execpol]{- .sref}). To use a
 parallel algorithm, a user has to include `<execution>`, because it is the only header that declares
 `std::execution::seq`, `std::execution::par`, `std::execution::par_unseq`, and `std::execution::unseq`.
 
@@ -34,19 +34,17 @@ void f(std::vector<int>& v) {
 
 When execution policies were added, `<execution>` contained nothing else, so the cost of including it was small.
 
-
-framework, which could impact the complication time of the programs who only want to use parallel algorithms.
-The motivation of this proposal is to give the users the ability to access execution policies without the necessity
-to include the whole `std::execution`.
-
-However, with C++26 the `<execution>` header also has the whole Senders/Receivers (or `std::execution`, [@P2300R10])
-and the follow-up papers (`parallel_scheduler`, `task`, `async_scope`, etc.) into the same `<execution>` header.
+However, with C++26 the whole Senders/Receivers (or `std::execution`, [@P2300R10]) and the follow-up
+papers (`parallel_scheduler`, `task`, `async_scope`, etc.) landed into the same `<execution>` header.
 The header now contains a lot of heavy template machinery: concepts, customization point objects, sender adaptors,
 completion signatures metaprogramming, environments, queries, schedulers, and more.
 None of this is needed to call `std::sort(std::execution::par, ...)`.
 
 The result is that every translation unit that uses a parallel algorithm pays the compile-time cost of all of
 `std::execution`.
+
+The motivation of this proposal is to give the users the ability to access execution policies without the necessity
+to include the whole `std::execution` if the only thing that they need is to use parallel algorithms.
 
 # Proposal {#proposal}
 
@@ -57,7 +55,7 @@ The result is that every translation unit that uses a parallel algorithm pays th
       ([execpol.seq]{- .sref}, [execpol.par]{- .sref}, [execpol.parunseq]{- .sref}, [execpol.unseq]{- .sref});
     - `std::execution::seq`, `std::execution::par`, `std::execution::par_unseq`, and `std::execution::unseq`
       ([execpol.objects]{- .sref}).
-- Keep `<execution>` header providing  all the listed above names.
+- Keep the `<execution>` header providing all the names listed above.
 - Add a feature-test macro.
 
 With this proposal, the example from [](#motivation) becomes:
@@ -72,7 +70,7 @@ void f(std::vector<int>& v) {
 }
 ```
 
-As stated, including `<execution>`  instead remains valid and has the same meaning as before.
+As stated, including `<execution>` instead remains valid and has the same meaning as before.
 
 # Design considerations {#design}
 
@@ -85,22 +83,23 @@ The name `<exec_policy>` is a working name. Possible alternatives:
   `<numbers>`).
 - `<execpol>`: matches the stable name of the corresponding subclause. Too cryptic for users.
 
-We can always debate on the name in LEWG, although this is not a group preference.
+We can always debate the name in LEWG, although this is not what the group prefers
+to spend time on.
 
 ## Should `<algorithm>` provide execution policies instead? {#include_from_algorithms}
 
-An alternative approach would be to require `<algorithm>` headers to make execution policies available,
+An alternative approach would be to require the `<algorithm>` header to make execution policies available,
 so that no extra include is needed at all.
 
 However, in my opinion, this option is not that viable. We also have `<numeric>` and `<memory>` headers with parallel
 algorithms, which would require us to provide execution policies when any of those headers is included. While, technically,
-we could do that this is still not a good idea because of the following reason.
+we could do that, it is still not a good idea, for the following reason.
 
-If users only need serial algorithms (meaning that only the `<algorithm>` header is included and not `<execution>`) some
-implementations (for example libstdc++) do not make parallel algorithms overloads available at all meaning that the
-compilation time is reduced. With the approach of `<algorithm>` (and other) header providing execution policies the implementation
+If users only need serial algorithms (meaning that only the `<algorithm>` header is included and not `<execution>`), some
+implementations (for example libstdc++) do not make parallel algorithm overloads available at all, meaning that the
+compilation time is reduced. If `<algorithm>` (and the other headers) provided execution policies, the implementation
 would have to include both parallel and non-parallel algorithms, which would make compilation time for existing users of serial
-algorithms worse. 
+algorithms worse.
 
 ## Interaction with libraries implementing parallel algorithms in `<execution>` {#impl_details}
 
@@ -214,14 +213,9 @@ namespace std::execution {
    ...
 ```
 
-[Double check the exact content of [execution.syn] against the latest working draft before publishing.]{.ednote}
-
 ## Modify [version.syn]{- .sref}
 
 ```diff
  #define __cpp_lib_execution                         @_see below_@ // also in <execution>
 +#define __cpp_lib_execution_policy_header           20XXXXL // also in <execution>, <exec_policy>
 ```
-
-[Replace `20XXXXL` with the date of the adoption.]{.ednote}
-
