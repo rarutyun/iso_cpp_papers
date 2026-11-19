@@ -1,8 +1,8 @@
 ---
 title: "A dedicated header for execution policies"
-document: P4470R0
+document: P4470R1
 date: today
-audience: LEWG, LWG
+audience: LWG
 author:
   - name: Ruslan Arutyunyan (Intel)
     email: <ruslan.arutyunyan@intel.com>
@@ -12,8 +12,16 @@ toc-depth: 2
 
 # Abstract {- .unlisted}
 
-This paper proposes a new standard library header, named `<exec_policy>`, that provides
+This paper proposes a new standard library header, named `<execution_policy>`, that provides
 the execution policy types, the execution policy objects, and the `is_execution_policy` type trait.
+
+# Revision history {#revision_history}
+
+## R1 {#r1}
+
+- Rename `<exec_policy>` header to `<execution_policy>`
+- Rename `__cpp_lib_execution_policy_header` feature-test macro to `__cpp_lib_execution_policy`
+- Add missing wording
 
 # Motivation {#motivation}
 
@@ -48,7 +56,7 @@ to include the whole `std::execution` if the only thing that they need is to use
 
 # Proposal {#proposal}
 
-- Add a new header `<exec_policy>` that declares:
+- Add a new header `<execution_policy>` that declares:
     - `std::is_execution_policy` and `std::is_execution_policy_v` ([execpol.type]{- .sref});
     - `std::execution::sequenced_policy`, `std::execution::parallel_policy`,
       `std::execution::parallel_unsequenced_policy`, and `std::execution::unsequenced_policy`
@@ -58,11 +66,11 @@ to include the whole `std::execution` if the only thing that they need is to use
 - Keep the `<execution>` header providing all the names listed above.
 - Add a feature-test macro.
 
-With this proposal, the example from [](#motivation) becomes:
+With this proposal, the example from [](#motivation) can be written as:
 
 ```cpp
 #include <algorithm>
-#include <exec_policy> // just execution policies, no std::execution
+#include <execution_policy> // just execution policies, no std::execution
 #include <vector>
 
 void f(std::vector<int>& v) {
@@ -76,15 +84,14 @@ As stated, including `<execution>` instead remains valid and has the same meanin
 
 ## Header name {#header_name}
 
-The name `<exec_policy>` is a working name. Possible alternatives:
+The naming was discussed in LEWG. Instead of `<exec_policy>` the chosen name is `<execution_policy>`.
 
-- `<execution_policy>`: matches the "execution policy" term used by the standard and the `is_execution_policy` trait.
+Considered names:
+
+- `<exec_policy>`: initially proposed, dropped by LEWG.
 - `<execution_policies>`: plural, as the header provides several policies (compare with `<concepts>`, `<ranges>`,
   `<numbers>`).
 - `<execpol>`: matches the stable name of the corresponding subclause. Too cryptic for users.
-
-We can always debate the name in LEWG, although this is not what the group prefers
-to spend time on.
 
 ## Should `<algorithm>` provide execution policies instead? {#include_from_algorithms}
 
@@ -104,7 +111,7 @@ algorithms worse.
 ## Interaction with libraries implementing parallel algorithms in `<execution>` {#impl_details}
 
 As mentioned above, libstdc++ pulls the parallel algorithms implementation in when `<execution>` is included. With this
-proposal, such an implementation would need to do the same when `<exec_policy>` is included, which is straightforward:
+proposal, such an implementation would need to do the same when `<execution_policy>` is included, which is straightforward:
 the new header would include the parallel algorithm implementation details, but not the `std::execution` senders/receivers
 framework.
 
@@ -117,32 +124,32 @@ defined in terms of `is_execution_policy_v`, which is provided by the new header
 ## Implementation-defined execution policies {#impl_defined_policies}
 
 [execpol.general]{- .sref} allows implementations to provide additional execution policies. This paper requires
-implementation-defined policies to be available via `<exec_policy>`, as well.
+implementation-defined policies to be available via `<execution_policy>`, as well.
 
 ## Feature-test macro {#ftm}
 
-Users can detect the new header with `__has_include(<exec_policy>)`. Nevertheless, for consistency with other
-library additions, we propose a new feature-test macro `__cpp_lib_execution_policy_header`, defined in `<version>`,
-`<exec_policy>`, and `<execution>`.
+Users can detect the new header with `__has_include(<execution_policy>)`. Nevertheless, for consistency with other
+library additions, I propose a new feature-test macro `__cpp_lib_execution_policy`, defined in `<version>`,
+`<execution_policy>`, and `<execution>`.
 
 # Wording {#wording}
 
 ## Modify [headers]{- .sref}
 
-Add `<exec_policy>` to the table "C++ library headers" (in alphabetical order).
+Add `<execution_policy>` to the table "C++ library headers" (in alphabetical order).
 
 ## Modify [algorithms.general]{- .sref}
 
 In the table "Algorithms library summary", change the header for [algorithms.parallel]{- .sref}:
 
-|                       |                     |                                              |
-|-----------------------|---------------------|----------------------------------------------|
-| [algorithms.parallel] | Parallel algorithms | [`<execution>`]{.rm} [`<exec_policy>`]{.add} |
+|                       |                     |                                                   |
+|-----------------------|---------------------|---------------------------------------------------|
+| [algorithms.parallel] | Parallel algorithms | [`<execution>`]{.rm} [`<execution_policy>`]{.add} |
 
 ## Add a new subclause [execpol.syn] before [execpol.type]{- .sref}
 
 ::: add
-**Header `<exec_policy>` synopsis [execpol.syn]**
+**Header `<execution_policy>` synopsis [execpol.syn]**
 
 ```cpp
 namespace std {
@@ -176,7 +183,7 @@ namespace std::execution {
 ## Modify [execution.syn]{- .sref}
 
 ```diff
-+#include <exec_policy> @_// see [execpol.syn]_@
++#include <execution_policy> @_// see [execpol.syn]_@
 +
 -namespace std {
 -  @_// [execpol.type], execution policy type trait_@
@@ -211,9 +218,28 @@ namespace std::execution {
    ...
 ```
 
+## Modify [execpol.general]{- .sref}
+
+[1]{.pnum} Subclause 26.3.6 describes classes that are execution policy types. An object of an execution policy type
+indicates the kinds of parallelism allowed in the execution of an algorithm and expresses the consequent
+requirements on the element access functions. Execution policy types are declared in header [`<execution>`]{.rm}
+[`<execution_policy>`]{.add}
+(33.4).
+
+## Modify [execpol.objects]{- .sref}
+
+```cpp
+inline constexpr execution::sequenced_policy execution::seq{ unspecified };
+inline constexpr execution::parallel_policy execution::par{ unspecified };
+inline constexpr execution::parallel_unsequenced_policy execution::par_unseq{ unspecified };
+inline constexpr execution::unsequenced_policy execution::unseq{ unspecified };
+```
+
+The header [`<execution>`]{.rm}[`<execution_policy>`]{.add} (33.4) declares global objects associated with each type of execution policy.
+
 ## Modify [version.syn]{- .sref}
 
 ```diff
  #define __cpp_lib_execution                         @_see below_@ // also in <execution>
-+#define __cpp_lib_execution_policy_header           20XXXXL // also in <execution>, <exec_policy>
++#define __cpp_lib_execution_policy                  20XXXXL // also in <execution>, <execution_policy>
 ```
